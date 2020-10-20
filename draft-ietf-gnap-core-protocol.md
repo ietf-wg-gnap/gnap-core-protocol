@@ -1039,8 +1039,8 @@ split_token
     in response to any [single token request](#request-resource-single), or 
     receiving a different number of tokens than specified in the
     [multiple token request](#request-resource-multiple). The labels of the
-    returned additional tokens are chosen by the AS. The client MUST be able
-    to tell from the token response where and how it can use the each
+    returned additional tokens are chosen by the AS. The RC MUST be able
+    to tell from the token response where and how it can use each of the
     access tokens. [[ Editor's note: This functionality is controversial at
     best as it requires significantly more complexity on the client in order
     to solve one class of AS/RS deployment choices. ]]
@@ -1420,7 +1420,7 @@ The presentation of a key allows the AS to strongly associate multiple
 successive requests from the same RC with each other. This
 is true when the AS knows the key ahead of time and can use the key to
 authenticate the RC software, but also if the key is
-ephemeral and created just for this request. As such the
+ephemeral and created just for this series of requests. As such the
 AS MAY allow for RCs to make requests with unknown keys. This pattern allows
 for ephemeral RCs, such as single-page applications, and RCs with many individual instances,
 such as mobile applications, to generate their own key pairs and use them within
@@ -1583,7 +1583,7 @@ a browser request.
 ~~~
 
 In this non-normative example, the RC is indicating that it can 
-display a [use code](#request-interact-usercode) and direct the RQ
+display a [user code](#request-interact-usercode) and direct the RQ
 to an [arbitrary URL of maximum length](#request-interact-short) 255
 characters, but it cannot accept a callback.
 
@@ -1856,7 +1856,7 @@ Requests to the callback URI MUST be processed by the RC as described in
 
 Since the incoming request to the callback URL is from the AS and
 not from the RO's browser, the RC MUST NOT require the RQ to
-be present on incoming HTTP the request.
+be present on the incoming HTTP request.
 
 [[ Editor's note: This post-interaction method can be used in
 advanced use cases like asynchronous authorization, or simply to
@@ -2084,7 +2084,7 @@ contains a JSON object with the following properties.
 
 uri
 : REQUIRED. The URI at which the RC can make
-            continuation requests. This URI MAY vary
+            continuation requests. This URI MAY vary per
             request, or MAY be stable at the AS if the AS includes
             an access token. The RC MUST use this
             value exactly as given when making a [continuation request](#continue-request).
@@ -2186,7 +2186,7 @@ manage
 resources
 : RECOMMENDED. A description of the rights
               associated with this access token, as defined in 
-              {{response-token-single}}. If included, this MUST reflect the rights
+              {{request-resource-single}}. If included, this MUST reflect the rights
               associated with the issued access token. These rights MAY vary
               from what was requested by the RC.
 
@@ -4557,7 +4557,8 @@ core protocol. ]]
 
 If the RC calls an RS without an access token, or with an
 invalid access token, the RS MAY respond to the RC with an
-authentication header indicating that GNAP. The address of the GNAP
+authentication header indicating that GNAP needs to be used
+to access the resource. The address of the GNAP
 endpoint MUST be sent in the "as_uri" parameter. The RS MAY
 additionally return a resource reference that the RC MAY use in
 its [resource request](#request-resource). This
