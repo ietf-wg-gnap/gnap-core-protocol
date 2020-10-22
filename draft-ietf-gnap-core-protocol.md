@@ -204,7 +204,7 @@ and verified by the RS, and issued to and carried by the RC. The contents
 and format of the access token are opaque to the RC.
 
 Grant
-: The process by which a the RC requests and is given delegated
+: The process by which the RC requests and is given delegated
 access to the RS by the AS through the authority of the RO.
 
 Key
