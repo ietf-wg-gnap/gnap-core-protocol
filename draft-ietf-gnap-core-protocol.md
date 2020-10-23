@@ -207,8 +207,8 @@ Grant
 : The process by which a the RC requests and is given delegated
 access to the RS by the AS through the authority of the RO.
 
-Key
-: A cryptographic element binding a request to the
+Cryptographic Key
+: A cryptographic element binding a request to a
 holder of the key. Access tokens and RC instances can be associated with
 specific keys.
 
@@ -2518,7 +2518,7 @@ assertions
             user anyway? ]]
 
 updated_at
-: Timestamp in integer seconds indicating
+: Timestamp as an ISO8610 date string, indicating
             when the identified account was last updated. The RC MAY use
             this value to determine if it needs to request updated profile
             information through an identity API. The definition of such an
@@ -4644,7 +4644,7 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - -01
-    -
+    - "updated_at" subject info timestamp now in ISO 8601 string format.
 
 - -00 
     - Initial working group draft.
