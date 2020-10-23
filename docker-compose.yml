@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  md2rfc:
+    build: .
+    volumes:
+       - .:/opt/source
+    command: ./build.sh
+    working_dir: /opt/source

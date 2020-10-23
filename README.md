@@ -8,3 +8,17 @@ are subject to the [IETF Note Well](https://www.ietf.org/about/note-well/).
 This document is published at <https://datatracker.ietf.org/doc/draft-ietf-gnap-core-protocol/>.
 
 Discussion takes place on the [IETF GNAP mailing list (txauth)](https://www.ietf.org/mailman/listinfo/txauth).
+
+## Building Instructions
+
+This document is written using the `kramdown-rfc2629` variant of Markdown. To build using the included Docker image,
+run the command:
+
+```
+docker-compose up
+```
+
+If successful, this will create both `xml` and `html` versions of the document. 
+
+To run without Docker, install the `kramdown-rfc2629` and `xml2rfc` tools locally and run them directly using 
+the simple `build.sh` script provided.
