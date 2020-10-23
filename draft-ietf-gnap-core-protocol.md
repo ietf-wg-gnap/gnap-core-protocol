@@ -23,7 +23,14 @@ normative:
     BCP195:
        target: 'http://www.rfc-editor.org/info/bcp195'
        title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
-       date: 2015
+       date: May 2015
+       author:
+         - 
+           ins: Y. Sheffer
+         - 
+           ins: R. Holz
+         -
+           ins: P. Saint-Andre
     RFC2119:
     RFC3230:
     RFC5646:
