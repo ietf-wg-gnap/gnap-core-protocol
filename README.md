@@ -1,5 +1,7 @@
 # Grant Negotiation and Authorization Protocol
 
+![Latest Draft](https://img.shields.io/endpoint?url=https://a15hpmw3nd.execute-api.us-east-1.amazonaws.com/dev/draft_latest/draft-ietf-gnap-core-protocol)
+
 This repository contains the core protocol specification of the
 [Grant Negotiation and Authorization Protocol (GNAP) working group](https://datatracker.ietf.org/wg/gnap/about/)
 of the Internet Engineering Task Force (IETF). All contributions
