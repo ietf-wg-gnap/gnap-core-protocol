@@ -3895,34 +3895,101 @@ POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/jose
  
-eyJiNjQiOmZhbHNlLCJhbGciOiJSUzI1NiIsImtpZCI6Inh5ei0xIn0.ewogICAgIm
-NsaWVudCI6IHsKICAgICAgICAibmFtZSI6ICJNeSBDbGllbnQgRGlzcGxheSBOYW1l
-IiwKICAgICAgICAidXJpIjogImh0dHBzOi8vZXhhbXBsZS5uZXQvY2xpZW50IgogIC
-AgfSwKICAgICJyZXNvdXJjZXMiOiBbCiAgICAgICAgImRvbHBoaW4tbWV0YWRhdGEi
-CiAgICBdLAogICAgImludGVyYWN0IjogewogICAgICAgICJyZWRpcmVjdCI6IHRydW
-UsCiAgICAgICAgImNhbGxiYWNrIjogewogICAgCQkidXJpIjogImh0dHBzOi8vY2xp
-ZW50LmZvbyIsCiAgICAJCSJub25jZSI6ICJWSkxPNkE0Q0FZTEJYSFRSMEtSTyIKIC
-AgIAl9CiAgICB9LAogICAgImtleXMiOiB7CgkJInByb29mIjogImp3c2QiLAogICAg
-ICAgICJqd2tzIjogewogICAgICAgICAgICAia2V5cyI6IFsKICAgICAgICAgICAgIC
-AgIHsKICAgICAgICAgICAgICAgICAgICAia3R5IjogIlJTQSIsCiAgICAgICAgICAg
-ICAgICAgICAgImUiOiAiQVFBQiIsCiAgICAgICAgICAgICAgICAgICAgImtpZCI6IC
-J4eXotMSIsCiAgICAgICAgICAgICAgICAgICAgImFsZyI6ICJSUzI1NiIsCiAgICAg
-ICAgICAgICAgICAgICAgIm4iOiAia09CNXJSNEp2MEdNZUxhWTZfSXRfcjNPUndkZj
-hjaV9KdGZmWHlhU3g4eFlKQ0NOYU9LTkpuX096MFloZEhiWFRlV081QW95c3BEV0pi
-TjV3XzdiZFdEeGdwRC15NmpuRDF1OVloQk9DV09iTlBGdnBrVE04TEM3U2RYR1JLeD
-JrOE1lMnJfR3NzWWx5UnBxdnBCbFk1LWVqQ3l3S1JCZmN0UmNuaFRUR056dGJiREJV
-eURTV21GTVZDSGU1bVhUNGNMMEJ3clpDNlMtdXUtTEF4MDZhS3dRT1B3WU9HT3NsSz
-hXUG0xeUdka2FBMXVGX0ZwUzZMUzYzV1lQSGlfQXAyQjdfOFdidzR0dHpiTVNfZG9K
-dnVEYWdXOEExSXAzZlhGQUh0UkFjS3c3cmRJNF9YbG42NmhKeEZla3BkZldkaVBRZG
-RRNlkxY0syVTNvYnZVZzd3IgogICAgICAgICAgICAgICAgfQogICAgICAgICAgICBd
-CiAgICAgICAgfQogICAgfQp9.Y287HMtaY0EegEjoTd_04a4GC6qV48GgVbGKOhHdJ
-nDtD0VuUlVjLfwne8AuUY3U7e89zUWwXLnAYK_BiS84M8EsrFvmv8yDLWzqveeIpcN
-5_ysveQnYt9Dqi32w6IOtAywkNUDZeJEdc3z5s9Ei8qrYFN2fxcu28YS4e8e_cHTK5
-7003WJu-wFn2TJUmAbHuqvUsyTb-nzYOKxuCKlqQItJF7E-cwSb_xULu-3f77BEU_v
-GbNYo5ZBa2B7UHO-kWNMSgbW2yeNNLbLC18Kv80GF22Y7SbZt0e2TwnR2Aa2zksuUb
-ntQ5c7a1-gxtnXzuIKa34OekrnyqE1hmVWpeQ
+eyJhbGciOiJSUzI1NiIsImtpZCI6IktBZ05wV2JSeXk5T
+WYycmlrbDQ5OExUaE1ydmtiWldIVlNRT0JDNFZIVTQiLC
+JodG0iOiJwb3N0IiwiaHR1IjoiL3R4IiwidHMiOjE2MDM
+4MDA3ODN9.eyJjYXBhYmlsaXRpZXMiOltdLCJjbGllbnQ
+iOnsia2V5Ijp7Imp3ayI6eyJrdHkiOiJSU0EiLCJlIjoi
+QVFBQiIsImtpZCI6IktBZ05wV2JSeXk5TWYycmlrbDQ5O
+ExUaE1ydmtiWldIVlNRT0JDNFZIVTQiLCJuIjoibGxXbU
+hGOFhBMktOTGRteE9QM2t4RDlPWTc2cDBTcjM3amZoejk
+0YTkzeG0yRk5xb1NQY1JaQVBkMGxxRFM4TjNVaWE1M2RC
+MjNaNTlPd1k0YnBNX1ZmOEdKdnZwdExXbnhvMVB5aG1Qc
+i1lY2RTQ1JRZFRjX1pjTUY0aFJWNDhxcWx2dUQwbXF0Y0
+RiSWtTQkR2Y2NKbVpId2ZUcERIaW5UOHR0dmNWUDhWa0F
+NQXE0a1ZhenhPcE1vSVJzb3lFcF9lQ2U1cFN3cUhvMGRh
+Q1dOS1ItRXBLbTZOaU90ZWRGNE91bXQ4TkxLVFZqZllnR
+khlQkRkQ2JyckVUZDR2Qk13RHRBbmpQcjNDVkN3d3gyYk
+FRVDZTbHhGSjNmajJoaHlJcHE3cGM4clppYjVqTnlYS3d
+mQnVrVFZZWm96a3NodC1Mb2h5QVNhS3BZVHA4THROWi13
+In0sInByb29mIjoiandzIn0sIm5hbWUiOiJNeSBGaXN0I
+ENsaWVudCIsInVyaSI6Imh0dHA6Ly9sb2NhbGhvc3QvY2
+xpZW50L2NsaWVudElEIn0sImludGVyYWN0Ijp7ImNhbGx
+iYWNrIjp7Im1ldGhvZCI6InJlZGlyZWN0Iiwibm9uY2Ui
+OiJkOTAyMTM4ODRiODQwOTIwNTM4YjVjNTEiLCJ1cmkiO
+iJodHRwOi8vbG9jYWxob3N0L2NsaWVudC9yZXF1ZXN0LW
+RvbmUifSwicmVkaXJlY3QiOnRydWV9LCJyZXNvdXJjZXM
+iOnsiYWN0aW9ucyI6WyJyZWFkIiwicHJpbnQiXSwibG9j
+YXRpb25zIjpbImh0dHA6Ly9sb2NhbGhvc3QvcGhvdG9zI
+l0sInR5cGUiOiJwaG90by1hcGkifSwic3ViamVjdCI6ey
+JzdWJfaWRzIjpbImlzcy1zdWIiLCJlbWFpbCJdfX0.LUy
+Z8_fERmxbYARq8kBYMwzcd8GnCAKAlo2ZSYLRRNAYWPrp
+2XGLJOvg97WK1idf_LB08OJmLVsCXxCvn9mgaAkYNL_Zj
+HcusBvY1mNo0E1sdTEr31CVKfC-6WrZCscb8YqE4Ayhh0
+Te8kzSng3OkLdy7xN4xeKuHzpF7yGsM52JZ0cBcTo6WrY
+EfGdr08AWQJ59ht72n3jTsmYNy9A6I4Wrvfgj3TNxmwYo
+jpBAicfjnzA1UVcNm9F_xiSz1_y2tdH7j5rVqBMQife-k
+9Ewk95vr3lurthenliYSNiUinVfoW1ybnaIBcTtP1_YCx
+g_h1y-B5uZEvYNGCuoCqa6IQ
+~~~
+
+This example's JWS header decodes to:
 
 ~~~
+{
+  "alg": "RS256",
+  "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
+  "htm": "post",
+  "htu": "/tx",
+  "ts": 1603800783
+}
+~~~
+
+And the JWS body decodes to:
+
+~~~
+{
+  "capabilities": [],
+  "client": {
+    "key": {
+      "jwk": {
+        "kty": "RSA",
+        "e": "AQAB",
+        "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
+        "n": "llWmHF8XA2KNLdmxOP3kxD9OY76p0Sr37jfhz94a93xm2FNqoSPcRZAPd0lqDS8N3Uia53dB23Z59OwY4bpM_Vf8GJvvptLWnxo1PyhmPr-ecdSCRQdTc_ZcMF4hRV48qqlvuD0mqtcDbIkSBDvccJmZHwfTpDHinT8ttvcVP8VkAMAq4kVazxOpMoIRsoyEp_eCe5pSwqHo0daCWNKR-EpKm6NiOtedF4Oumt8NLKTVjfYgFHeBDdCbrrETd4vBMwDtAnjPr3CVCwwx2bAQT6SlxFJ3fj2hhyIpq7pc8rZib5jNyXKwfBukTVYZozksht-LohyASaKpYTp8LtNZ-w"
+      },
+      "proof": "jws"
+    },
+    "name": "My Fist Client",
+    "uri": "http://localhost/client/clientID"
+  },
+  "interact": {
+    "callback": {
+      "method": "redirect",
+      "nonce": "d90213884b840920538b5c51",
+      "uri": "http://localhost/client/request-done"
+    },
+    "redirect": true
+  },
+  "resources": {
+    "actions": [
+      "read",
+      "print"
+    ],
+    "locations": [
+      "http://localhost/photos"
+    ],
+    "type": "photo-api"
+  },
+  "subject": {
+    "sub_ids": [
+      "iss-sub",
+      "email"
+    ]
+  }
+}
+~~~
+
 
 If the request being made does not have a message body, such as
 an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
