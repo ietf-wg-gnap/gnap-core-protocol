@@ -5365,3 +5365,693 @@ justification for the data type representing the same basic kind of thing it ext
 For example, an extension declaring an "array" representation for a field would need
 to explain how the array represents something akin to the non-array element that it
 is replacing. 
+
+# JSON Schema
+
+The following JSON Schemas are provided as a tool to help developers validate requests and
+responses within the GNAP protocol.
+
+Requesting access as in {{request}}:
+
+~~~
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "name": "Request",
+  "definitions": {
+    "resource": {
+      "type": [
+        "string",
+        "object"
+      ],
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "datatypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "identifier": {
+          "type": "string"
+        }
+      }
+    },
+    "key": {
+      "type": [
+        "object"
+      ],
+      "required": [
+        "proof"
+      ],
+      "properties": {
+        "jwk": {
+          "type": "object"
+        }/* this should have a JWK-specific subschema*/,
+        "cert": {
+          "type": "string"
+        },
+        "cert#S256": {
+          "type": "string"
+        },
+        "proof": {
+          "type": "string",
+          "enum": [
+            "jwsd",
+            "jws",
+            "mtls",
+            "dpop",
+            "pop",
+            "httpsig"
+          ]/* can be expanded by extensions*/
+        }
+      }
+    },
+    "subject_id_types": {
+      "type": "string",
+      "enum": [
+        "iss-sub",
+        "email",
+        "account",
+        "phone-number"
+      ]/* more added by extensions*/
+    },
+    "assertion_types": {
+      "type": "string",
+      "enum": [
+        "id_token",
+        "saml2"
+      ]/* more added by extensions*/
+    },
+    "subject_id_structures": {
+      "type": "object",
+      "required": [
+        "subject_type"
+      ],
+      "properties": {
+        "subject_type": {
+          "$ref": "#/definitions/subject_id_types"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "subject_type": {
+                "const": "account"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "uri": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "uri"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "subject_type": {
+                "const": "email"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "email": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "email"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "subject_type": {
+                "const": "phone-number"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "phone_number": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "phone_number"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "subject_type": {
+                "const": "iss-sub"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "iss": {
+                "type": "string"
+              },
+              "sub": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "uri",
+              "sub"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "resources": {
+      "type": [
+        "array",
+        "object"
+      ],
+      "items": {
+        "$ref": "#/definitions/resource"
+      },
+      "additionalProperties": {/* if it's an object for multiple tokens, each field's value is a resource object*/
+        "type": [
+          "array"
+        ],
+        "items": {
+          "$ref": "#/definitions/resource"
+        }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "properties": {
+        "sub_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/subject_id_types"
+          }
+        },
+        "assertions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/assertion_types"
+          }
+        }
+      }
+    },
+    "client": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "instance_id": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": [
+            "object",
+            "string"
+          ],
+          "properties": {
+            "key": {
+              "$ref": "#/definitions/key"
+            },
+            "class_id": {
+              "type": "string"
+            },
+            "display": {
+              "type": [
+                "object",
+                "string"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "uri": {
+                  "type": "string"
+                },
+                "logo_uri": {
+                  "type": "string"
+                }
+              }
+            },
+            "instance_id": false
+          }
+        }
+      ]
+    },
+    "user": {
+      "type": [
+        "object",
+        "string"
+      ],
+      "properties": {
+        "sub_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/subject_id_structures"
+          }
+        },
+        "assertions": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/definitions/assertion_types"
+          }/* no constraints on values right now*/
+        }
+      }
+    },
+    "interact": {
+      "type": "object",
+      "properties": {
+        "redirect": {
+          "type": [
+            "boolean",
+            "integer"
+          ]
+        },
+        "callback": {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "enum": [
+                "redirect",
+                "push"
+              ]
+            },
+            "uri": {
+              "type": "string"
+            },
+            "nonce": {
+              "type": "string"
+            },
+            "hash_method": {
+              "type": "string",
+              "enum": [
+                "sha3",
+                "sha2"
+              ],
+              "default": "sha3"
+            }
+          }
+        },
+        "user_code": {
+          "type": "boolean"
+        },
+        "app": {
+          "type": "boolean"
+        },
+        "ui_locales": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]{2,}-[A-Z]{2,}$"/* will need a better pattern for language tags*/
+          }
+        }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "existing_grant": {
+      "type": "string"
+    },
+    "claims": {
+      "type": "object"/* should do additional validation based on OIDC schema*/
+    }
+  }
+}
+~~~
+
+Continuing a request, as in {{continue-after-interaction}} [[ Editor's note: it's an open question
+whether this should also allow additional fields, such as those used in the initial request]]:
+
+~~~
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "name": "RequestContinue",
+  "type": "object",
+  "properties": {
+    "interact_ref": {
+      "type": "string"
+    }
+  }
+}
+~~~
+
+A response from the AS as in {{response}}:
+
+~~~
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "name": "Response",
+  "definitions": {
+    "resource": {
+      "type": [
+        "string",
+        "object"
+      ],
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "locations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "datatypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "identifier": {
+          "type": "string"
+        }
+      }
+    },
+    "key": {
+      "type": [
+        "object"
+      ],
+      "required": [
+        "proof"
+      ],
+      "properties": {
+        "jwk": {
+          "type": "object"
+        }/* this should have a JWK-specific subschema*/,
+        "cert": {
+          "type": "string"
+        },
+        "cert#S256": {
+          "type": "string"
+        },
+        "proof": {
+          "type": "string",
+          "enum": [
+            "jwsd",
+            "jws",
+            "mtls",
+            "dpop",
+            "pop",
+            "httpsig"
+          ]/* can be expanded by extensions*/
+        }
+      }
+    },
+    "subject_id_types": {
+      "type": "string",
+      "enum": [
+        "iss-sub",
+        "email",
+        "account",
+        "phone-number"
+      ]/* more added by extensions*/
+    },
+    "assertion_types": {
+      "type": "string",
+      "enum": [
+        "id_token",
+        "saml2"
+      ]/* more added by extensions*/
+    },
+    "subject_id_structures": {
+      "type": "object",
+      "required": [
+        "subject_type"
+      ],
+      "properties": {
+        "subject_type": {
+          "$ref": "#/definitions/subject_id_types"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "subject_type": {
+                "const": "account"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "uri": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "uri"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "subject_type": {
+                "const": "email"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "email": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "email"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "subject_type": {
+                "const": "phone-number"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "phone_number": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "phone_number"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "subject_type": {
+                "const": "iss-sub"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "iss": {
+                "type": "string"
+              },
+              "sub": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "uri",
+              "sub"
+            ]
+          }
+        }
+      ]
+    },
+    "access_token": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "manage": {
+          "type": "string"
+        },
+        "resources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/resource"
+          }
+        },
+        "expires_in": {
+          "type": "integer"
+        },
+        "key": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/definitions/key"
+            }
+          ]
+        }
+      },
+      "required": [
+        "value",
+        "key"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "continue": {
+      "type": "object",
+      "properties": {
+        "uri": {
+          "type": "string"
+        },
+        "wait": {
+          "type": "integer"
+        },
+        "access_token": {
+          "$ref": "#/definitions/access_token",
+          "properties": {
+            "manage": false
+          }
+        }
+      },
+      "required": [
+        "uri"
+      ]
+    },
+    "access_token": {
+      "$ref": "#/definitions/access_token"
+    },
+    "multiple_access_tokens": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/access_token"
+      }
+    },
+    "interact": {
+      "type": "object",
+      "properties": {
+	    "redirect": {
+    	  "type": "string"
+      	},
+        "app": {
+          "type": "string"
+        },
+        "callback": {
+          "type": "string"
+        },
+        "user_code": {
+          "type": "object",
+          "properties": {
+            "code": { "type": "string" },
+            "url": { "type": "string" }
+          }
+        }
+      }
+    },
+    "subject": {
+      "type": [
+        "object",
+        "string"
+      ],
+      "properties": {
+        "sub_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/subject_id_structures"
+          }
+        },
+        "assertions": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/definitions/assertion_types"
+          }/* no constraints on values right now*/
+        },
+        "updated_at": {
+          "type": "string",
+          "pattern": "([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2})\\:([0-9]{2})\\:([0-9]{2})"
+        }
+      }
+    },
+    "instance_id": {
+      "type": "string",
+    },
+    "user_handle": {
+      "type": "string"
+    },
+    "error": { /* TODO: this should be mutually exclusive of the rest of the properties, probably -- but this is an open question */
+      "type": "string",
+      "enum": [
+        "user_denied",
+        "too_fast",
+        "unknown_request" /* To be extended */
+      ]
+    }
+  },
+  "not": {
+    "anyOf": [
+      {
+        "required": [
+          "access_token",
+          "multiple_access_tokens"
+        ]
+      }
+    ]
+  },
+}
+~~~
