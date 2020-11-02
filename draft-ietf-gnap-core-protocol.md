@@ -14,10 +14,22 @@ pi: [toc, tocindent, sortrefs, symrefs, strict, compact, comments, inline, docma
 author:
   - ins: J. Richer
     name: Justin Richer
-    org: Bespoke Engineering
+    organization: Bespoke Engineering
     email: ietf@justin.richer.org
     uri: https://bspk.io/
     role: editor
+
+  - ins: A. Parecki
+    name: Aaron Parecki
+    email: aaron@parecki.com
+    organization: Okta
+    uri: https://aaronparecki.com
+
+  - ins: F. Imbault
+    name: Fabien Imbault
+    organization: acert.io
+    email: fabien.imbault@acert.io
+    uri: https://acert.io/
 
 normative:
     BCP195:
@@ -86,11 +98,9 @@ features in this proposed protocol can be accomplished in a number of
 ways. Where possible, the editor has included notes and discussion
 from the design team regarding the options as understood.
 
-{::boilerplate bcp14}
-
 --- middle
 
-# Protocol
+# Introduction
 
 This protocol allows a piece of software, the resource client, to request delegated
 authorization to resource servers and direct information. This delegation is
@@ -112,6 +122,10 @@ or cleanly address. Even so, GNAP and OAuth 2.0 will exist in parallel
 for many deployments, and considerations have been taken to facilitate
 the mapping and transition from legacy systems to GNAP. Some examples
 of these can be found in {{example-oauth2}}. 
+
+## Terminology
+
+{::boilerplate bcp14}
 
 ## Roles
 
@@ -4719,6 +4733,8 @@ sure that it has the permission to do so.
 
 - -01
     - "updated_at" subject info timestamp now in ISO 8601 string format.
+    - Editorial fixes.
+    - Added Aaron and Fabien as document authors.
 
 - -00 
     - Initial working group draft.
