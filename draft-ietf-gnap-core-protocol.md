@@ -1239,7 +1239,7 @@ MAY be a symmetric key known to the AS. The RC MUST NOT send a
 symmetric key by value in the request, as doing so would expose
 the key directly instead of proving possession of it. 
 
-\[\[ [See issue #](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/) \]\]
+\[\[ [See issue #46](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/46) \]\]
 
 ### Identifying the RC Key {#request-key}
 
