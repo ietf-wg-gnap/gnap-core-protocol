@@ -3749,7 +3749,7 @@ ongoing request for each call within that request.
 [[ Editor's note: We are going to need a way for a client to rotate its keys
 securely, even while an ongoing grant is in effect. ]]
 
-When used to bind to an access token, the 
+When used to bind to an access token, the access token MUST be covered by the signature method.
 
 ## Detached JWS {#detached-jws}
 
@@ -4646,7 +4646,7 @@ Also, this borrows heavily from UMA 2's "distributed authorization"
 model and, like UMA, might be better suited to an extension than the
 core protocol. ]]
 
-## Requesting a Resources With Insufficient Access {#rs-request-without-token}
+## Requesting Resources With Insufficient Access {#rs-request-without-token}
 
 If the RC calls an RS without an access token, or with an
 invalid access token, the RS MAY respond to the RC with an
