@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-01
+docname: draft-ietf-gnap-core-protocol-latest
 category: std
 
 ipr: trust200902
@@ -199,19 +199,9 @@ another system that deals with security rights. From the perspective of
 GNAP, all of these are pieces of the AS and together fulfill the
 role of the AS as defined by the protocol.
 
-[[ Editor's note: The names for the roles are an area of ongoing
-discussion within the working group, as is the appropriate precision
-of what activities and expectations a particular role covers. In particular,
-the AS might be formally decomposed into delegation components, that the
-client talks to, and interaction components, that the user talks to. Several
-alternative names have been proposed for different roles and components, 
-including:
+\[\[ [See issue #29](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/29) \]\]
 
-- Grant Server (for Authorization Server)
-- Grant Client (for Resource Client)
-- Operator (for Requesting Party)
-
-]]
+\[\[ [See issue #32](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/32) \]\]
 
 ## Elements {#elements}
 
@@ -242,10 +232,7 @@ Subject Information
 without the RC making a separate call to an RS. Access to this information
 is delegated by the RO as part of the grant process.
 
-[[ Editor's note: What other core elements need an introduction 
-here? These aren't roles to be taken on by different parties, nor
-are they descriptions of the possible configurations of parties, but
-these are still important moving parts within the protocol. ]]
+\[\[ [See issue #33](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/33) \]\]
 
 ## Sequences {#sequence}
 
@@ -843,10 +830,7 @@ SHOULD NOT re-use these fields with different semantics or syntax. The
 available values for these properties are determined by the API
 being protected at the RS.
 
-[[ Editor's note: this will align with OAuth 2 RAR, but the details
-of exactly how it aligns are TBD. Since RAR needs to work in the confines
-of OAuth 2, RAR has to define how to interact with "scope", "resource",
-and other existing OAuth 2 mechanisms that don't exist in GNAP. ]].
+\[\[ [See issue #34](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/34) \]\]
 
 actions
 : The types of actions the RC will take at the RS as an array of strings.
@@ -912,11 +896,7 @@ the AS or RS representing the access being requested. Each string
 SHOULD correspond to a specific expanded object representation at
 the AS. 
 
-[[ Editor's note: we could describe more about how the
-expansion would work. For example, expand into an object where the
-value of the "type" field is the value of the string. Or we could
-leave it open and flexible, since it's really up to the AS/RS to
-interpret. ]] 
+\[\[ [See issue #35](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/35) \]\]
 
 ~~~
     "resources": [
@@ -973,12 +953,7 @@ string-type resource items.
     ]
 ~~~
 
-[[ Editor's note: passing resource requests by reference really is akin to a "scope", 
-and we have many years of experience showing us that the simplicity of giving a developer
-a set of strings to send is a simple and powerful pattern. We could always require objects
-and just use the "type" field as a scope value, but that's a lot of complexity to pay for
-the simple case. Client developers will always know which kind they need to send, because
-they're picking from the API's documentation. ]]
+\[\[ [See issue #36](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/36) \]\]
 
 ### Requesting Multiple Access Tokens {#request-resource-multiple}
 
@@ -1062,18 +1037,15 @@ split_token
     [multiple token request](#request-resource-multiple). The labels of the
     returned additional tokens are chosen by the AS. The RC MUST be able
     to tell from the token response where and how it can use each of the
-    access tokens. [[ Editor's note: This functionality is controversial at
-    best as it requires significantly more complexity on the client in order
-    to solve one class of AS/RS deployment choices. ]]
+    access tokens. 
+    \[\[ [See issue #37](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/37) \]\]
 
 bind_token
 : The RC wants the issued access token to be bound to the [key the RC used](#request-key)
     to make the request. The resulting access token MUST be bound using the same
     `proof` mechanism used by the client with a `key` value of `true`, indicating
     the client's presented key is to be used for binding.
-    [[ Editor's note: should there be a different flag and mechanism for the client
-    to explicitly indicate which binding method it wants to use, especially if
-    the client wants to use a different method at the AS than the RS? ]]
+    \[\[ [See issue #38](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/38) \]\]
 
 The AS MUST respond with any applied flags in the [token response](#response-token)
 `resources` section.
@@ -1107,45 +1079,7 @@ the client's key and should be kept during rotation.
 
 Additional flags can be registered in [a registry TBD](#IANA).
 
-[[ Editor's note: while these reference values are "reserved", the ultimate decider
-for what a reference means is the AS, which means an AS could arguably decide
-that one of these values means something else. Also, this kind of reservation
-potentially steps on API namespaces, which OAuth 2 is careful not to do but common
-extensions like OIDC do with their own scope definitions. However, in OIDC, several
-"scope" values have behavior similar to what's defined here, particularly "openid" turns
-on ID tokens in the response and "offline_access" signals for the return of a
-refresh token, and these can be used outside of OpenID Connect itself. However, to keep
-these flags out of the general API namespace, we could use a different syntax for
-sending them. In particular, they could be defined under a GNAP-specific "type" object,
-where all the flags are fields on the object. 
-
-~~~
-resources: [
-    {
-        type: "gnap-flags",
-        flag1: true,
-        flag2: false,
-        flag3: true ...
-    }, 
-    "reference1", 
-    "scope2", ...
-]
-~~~
-
-Alternatively, all the flags could be 
-sent in an array separate from the rest of the request. 
-
-~~~
-resources: [
-    "reference1",
-    "scope2", 
-    ["flag1", "flag2", "flag3"] ...
-]
-~~~
-
-This whole thing might also belong in an extension, as it's advanced behavior signaling
-for very specific cases. However, it seems other extensions would be likely to extend
-this kind of thing, like OIDC did with "offline_access". ]]
+\[\[ [See issue #39](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/39) \]\]
 
 ## Requesting User Information {#request-subject}
 
@@ -1162,8 +1096,7 @@ assertions
 : An array of requested assertion formats. Possible values include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
     assertion values are defined by [a registry TBD](#IANA).
-    [[ Editor's note: These values are lifted from {{RFC8693}}'s "token type
-    identifiers" list, but is there a better source?]]
+    \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
 ~~~
 "subject": {
@@ -1186,23 +1119,13 @@ in {{request-oidc-claims}}.
 
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
-[[ Editor's Note: What we're really saying here is that "even if the AS
-gives you an email address to identify the user, that isn't a claim that this
-is a valid email address for that current user, so don't try to email them."
-In order to get a workable email address, or anything that you can use to
-contact them, you'd need a full identity protocol and not just this.
-Also, subject identifiers are asserted by the AS and therefore naturally
-scoped to the AS. Would changing the name to "as_sub_ids" or "local_sub_ids" help 
-convey that point? ]]
+\[\[ [See issue #42](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/42) \]\]
 
 Note: the "sub_ids" and "assertions" request fields are independent of
 each other, and a returned assertion MAY omit a requested subject
 identifier. 
 
-[[ Editor's note: we're potentially conflating these two
-types in the same structure, so perhaps these should be split. 
-There's also a difference between user information and 
-authentication event information. ]]
+\[\[ [See issue #43](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/43) \]\]
 
 ## Identifying the RC {#request-client}
 
@@ -1270,10 +1193,7 @@ If the AS does not know the RC's public key ahead of time, the AS
 MAY accept or reject the request based on AS policy, attestations
 within the client request, and other mechanisms.
 
-[[ Editor's note: additional client attestation frameworks will eventually need to be addressed
-here. For example, the organization the client represents,
-or a family of client software deployed in a cluster, or the posture of the device the client
-is installed on. These all need to be separable from the client's key and potentially the instance identifier. ]]
+\[\[ [See issue #44](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/44) \]\]
 
 ### Identifying the RC Instance {#request-instance}
 
@@ -1309,13 +1229,7 @@ If the `instance_id` field is sent, it MUST NOT be accompanied by other fields u
 fields are explicitly marked safe for inclusion alongside the instance
 identifier. 
 
-[[ Editor's note: It seems clear that an instance identifier is mutually exclusive
-with most of the fields in the request (eg, we don't want an attacker being able to
-swap out a client's registered key just by accessing the identifier). However,
-some proposed concepts might fit alongside an instance identifier that change 
-at runtime, such as device posture or another dynamic attestation. Should these
-be sent in the "client" block alongside the instance identifier, should there be
-a separate top-level block for runtime attestations, or some other mechanism? ]]
+\[\[ [See issue #45](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/45) \]\]
 
 If the AS does not recognize the instance identifier, the request MUST be rejected
 with an error.
@@ -1325,12 +1239,7 @@ MAY be a symmetric key known to the AS. The RC MUST NOT send a
 symmetric key by value in the request, as doing so would expose
 the key directly instead of proving possession of it. 
 
-[[ Editor's note: In many ways, passing an instance identifier
-is analogous to OAuth 2's "client_id" parameter {{RFC6749}}, especially when
-coupled with a confidential client's registration and authentication process. See
-{{example-oauth2}} for an example. Something like this is required to make things
-easier for client developers in the common case where the AS already knows
-the client's key, and to allow symmetric keys. ]]
+\[\[ [See issue #46](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/46) \]\]
 
 ### Identifying the RC Key {#request-key}
 
@@ -1363,9 +1272,7 @@ cert#256
 
 Additional key types are defined in [a registry TBD](#IANA).
 
-[[ Editor's note: we will eventually want to
-have fetchable keys, I would guess. Things like DID for key
-identification are going to be important. ]]
+\[\[ [See issue #47](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/47) \]\]
 
 This non-normative example shows a single key presented in multiple
 formats using a single proofing mechanism.
@@ -1413,11 +1320,7 @@ logo_uri
     }
 ~~~
 
-[[ Editor's note: would we want to support pushing a display logo by value?
-On the upside it allows for more dynamic detached clients and doesn't
-require the AS to fetch information. On the downside, 
-this is harder for the AS to enforce a policy about and could
-lead to potential exploits caused by sending binary image files. ]]
+\[\[ [See issue #48](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/48) \]\]
 
 Additional display fields are defined by [a registry TBD](#IANA).
 
@@ -1467,12 +1370,7 @@ assertions
     type defined by [a registry TBD](#IANA). Possible keys include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
     assertion values are defined by [a registry TBD](#IANA).
-    [[ Editor's note: These keys are lifted from {{RFC8693}}'s "token type
-    identifiers" list, but is there a better source?
-    Additionally: should this be an array of objects with internal
-    typing like the sub_ids? Do we expect more than one assertion per
-    user anyway? ]] 
-
+    \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
 ~~~
 "user": {
@@ -1491,17 +1389,13 @@ assertions
 Subject identifiers are hints to the AS in determining the
 RO and MUST NOT be taken as declarative statements that a particular
 RO is present at the RC and acting as the RQ. Assertions SHOULD be validated by the
-AS. [[ editor's note: is this a MUST? Assertion validation is extremely specific to
-the kind of assertion in place, what other guidance and requirements
-can we put in place here? ]]
+AS. 
+\[\[ [See issue #49](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/49) \]\]
 
 If the identified RQ does not match the RO present at the AS
 during an interaction step, the AS SHOULD reject the request with an error.
 
-[[ Editor's note: we're potentially conflating identification (sub_ids)
-and provable presence (assertions and a trusted reference handle) in
-the same structure, so perhaps these should be split. The security parameters
-are pretty different here. ]]
+\[\[ [See issue #50](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/50) \]\]
 
 If the AS trusts the RC to present verifiable assertions, the AS MAY
 decide, based on its policy, to skip interaction with the RO, even
@@ -1526,12 +1420,7 @@ User reference identifiers are not intended to be human-readable
 user identifiers or structured assertions. For the RC to send
 either of these, use the full [user request object](#request-user) instead.
 
-[[ Editor's note: we might be able to fold this function into an 
-unstructured user assertion reference issued by the AS to the RC.
-We could put it in as an assertion type of "gnap_reference" or
-something like that. Downside: it's more verbose and potentially
-confusing to the client developer to have an assertion-like thing that's
-internal to the AS and not an assertion. ]]
+\[\[ [See issue #51](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/51) \]\]
 
 If the AS does not recognize the user reference, it MUST 
 return an error.
@@ -1583,10 +1472,7 @@ The following sections detail requests for interaction
 modes. Additional interaction modes are defined in 
 [a registry TBD](#IANA).
 
-[[ Editor's note: there need to be [more examples](#examples) that knit together the interaction modes into
-common flows, like an authz-code equivalent. But it's important for
-the protocol design that these are separate pieces to allow such
-knitting to take place. ]]
+\[\[ [See issue #52](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/52) \]\]
 
 In this non-normative example, the RC is indicating that it can [redirect](#request-interact-redirect)
 the RQ to an arbitrary URL and can receive a [callback](#request-interact-callback) through
@@ -1653,8 +1539,8 @@ field with an integer indicating the maximum character length of
 the returned URL. The AS MAY use this value to decide whether to 
 return a shortened form of the response URL. If the AS cannot shorten
 its response URL enough to fit in the requested size, the AS 
-SHOULD return an error. [[ Editor's note: Or maybe just ignore this part 
-of the interaction request? ]]
+SHOULD return an error. 
+\[\[ [See issue #53](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/53) \]\]
 
 ~~~
 "interact": {
@@ -1686,12 +1572,7 @@ If this interaction mode is supported for this RC and
 request, the AS returns an app interaction response with an app URL
 payload {{response-interact-app}}.
 
-[[ Editor's note: this is similar to the "redirect" above
-today as most apps use captured URLs, but there seems to be a desire
-for splitting the web-based interaction and app-based interaction
-into different URIs. There's also the possibility of wanting more in
-the payload than can be reasonably put into the URL, or at least
-having separate payloads. ]]
+\[\[ [See issue #54](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/54) \]\]
 
 ### Receive a Callback After Interaction {#request-interact-callback}
 
@@ -1713,11 +1594,8 @@ uri
               that ongoing state. The allowable URIs and URI patterns MAY be restricted by the AS
               based on the RC's presented key information. The callback URI
               SHOULD be presented to the RO during the interaction phase
-              before redirect. [[ Editor's note: should we enforce the
-              callback URI to be unique per request? That helps with some fixation
-              attacks, but not with others, and it would be problematic for an
-              AS that wants to lock down each client instance to a single callback
-              instead of a family/pattern of callbacks. ]]
+              before redirect. 
+              \[\[ [See issue #55](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/55) \]\]
 
 nonce
 : REQUIRED. Unique value to be used in the
@@ -1735,12 +1613,8 @@ method
 hash_method
 : OPTIONAL. The hash calculation
               mechanism to be used for the callback hash in {{interaction-hash}}. Can be one of `sha3` or `sha2`. If
-              absent, the default value is `sha3`. 
-              [[ Editor's note: This should
-              be expandable via a registry of cryptographic options, and it
-              would be good if we didn't define our own identifiers here.
-              See also note about cryptographic functions in {{interaction-hash}}.
-              ]]
+              absent, the default value is `sha3`.
+              \[\[ [See issue #56](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/56) \]\] 
 
 
 ~~~
@@ -1761,76 +1635,9 @@ Requests to the callback URI MUST be processed as described in
 presentation of an interaction callback reference as described in
 {{continue-after-interaction}}.
 
-[[ Editor's note: There has been some call for a post-interaction redirect
-that is not tied to the underlying security model -- specifically, sending the
-user over to a client-hosted page with client-specific instructions on how
-to continue. This would be something hosted externally to the client instance,
-so the client instance would never see this incoming call. We could accomplish
-that using this "callback" post-redirect mechanism but with "method": "static" or 
-"nonce": false or some other signal to indicate that the client won't see the
-incoming request. ]]
+\[\[ [See issue #58](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/58) \]\]
 
-[[ Editor's note: The callback information could alternatively be combined
-with other methods like "redirect", essentially putting everything in the "callback"
-object into the field for the other objects. However, this would require each method to
-define its own set of rules about how callbacks can be used, and we would want them
-all to be consistent with each other with clear information about how the AS is
-supposed to respond to all of these. 
-
-~~~
-"interact" {
-    "redirect": {
-       "method": "redirect",
-       "uri": "https://client.example.net/return/123455",
-       "nonce": "LKLTI25DK82FX4T4QFZC"
-    }
-}
-~~~
-
-So if the object is there, you do the redirect on completion, if the object
-isn't there (it's a boolean, like today), you don't redirect when you're done.
-Previous versions of this specification used this structure, but it was abandoned
-in favor of the current setup to allow for different combinations of user interaction
-methods at the same time while still keeping a consistent security model. OAuth 2's
-"grant_type" model has proved to be limiting in unanticipated ways since it requires an
-entirely new grant type to be invented any time there is a new combination of aspects, or
-it requires each grant type to have many of the same optionalities.
-Combining these fields back into one, in this way, would
-allow a client to declare that it expects a callback in response to
-one kind of interaction method but not others, and include multiple combinations
-at once. For example, if a client wants to allow a user to redirect to the AS
-and back on the same device, or to use a usercode on a secondary device without a 
-callback, and the client wants to offer both modes simultaneously.
-This could alternately be accomplished by allowing the client to "bundle" interaction
-parameters together, if desirable -- for example, if "interact" were an array, the 
-client would accept any combination represented by one object. This example binds
-the "callback" only to the first "redirect" method, and second (short) "redirect"
-and  "user_code" method do not use a callback.
-
-~~~
-"interact": [
-  {
-    "redirect": true,
-    "callback": {
-       "method": "redirect",
-       "uri": "https://client.example.net/return/123455",
-       "nonce": "LKLTI25DK82FX4T4QFZC"
-    }
-  },
-  {
-    "redirect": 255,
-    "user_code": true
-  }
-]
-~~~
-
-It's not clear what a response to such an array would be. Would the AS
-pick one of these bundles? Would it be allowed to respond to any or all of them? 
-Could an AS use different URIs for each bundle? (This seems likely, at least.)
-Would there be a security problem if the AS used the same URI for both bundles, since
-one requires a front channel redirect and the other does not?
-
-]]
+\[\[ [See issue #59](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/59) \]\]
 
 #### Receive an HTTP Callback Through the Browser {#request-interact-callback-redirect}
 
@@ -1879,15 +1686,7 @@ Since the incoming request to the callback URL is from the AS and
 not from the RO's browser, the RC MUST NOT require the RQ to
 be present on the incoming HTTP request.
 
-[[ Editor's note: This post-interaction method can be used in
-advanced use cases like asynchronous authorization, or simply to
-signal the client that it should move to the next part of the
-protocol, even when there is no user present at the client. 
-As such it can feel a little odd being inside the "interact" block
-of the protocol, but it does align with the redirect-based "callback"
-method and it seems they really should be mutually-exclusive.
-Additionally, should there be a method for simply pushing the updated
-response directly to the client, instead? ]]
+\[\[ [See issue #60](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/60) \]\]
 
 ### Display a Short User Code {#request-interact-usercode}
 
@@ -1927,11 +1726,7 @@ of the given locales are supported, the AS MAY use a default locale.
 
 Additional interaction modes are defined in [a registry TBD](#IANA).
 
-[[ Editor's note: we should have guidance in here about how to
-define other interaction modes. There's already interest in
-defining message-based protocols like DIDCOMM and challenge-response 
-protocols like FIDO, for example. ]]
-
+\[\[ [See issue #61](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/61) \]\]
 
 ## Declaring RC Capabilities {#request-capabilities}
 
@@ -1959,11 +1754,7 @@ The AS MUST dereference the grant associated with the reference and
 process this request in the context of the referenced one. The AS 
 MUST NOT alter the existing grant associated with the reference.
 
-[[ Editor's note: this basic capability is to allow for both
-step-up authorization and downscoped authorization, but by explicitly
-creating a new request and not modifying an existing one. What's the
-best guidance for how an AS should process this? What are the use cases
-that help differentiate this from modification of an existing request? ]]
+\[\[ [See issue #62](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/62) \]\]
 
 ## Requesting OpenID Connect Claims {#request-oidc-claims}
 
@@ -1996,18 +1787,9 @@ the fields in the top level of the object to indicate the target for any request
 UserInfo Endpoint, while the `id_token` target indicates that the claims would be returned in an
 ID Token as described in {{response-subject}}. 
 
-[[ Editor's note: in order to use the "claims"  parameter as defined in OIDC, we
-have to violate the principle of orthogonality in {{request-extending}}. 
-An alternative approach would be to split up the portions of the claims request, so that "id_token" claims
-would go into the "subject" field and "userinfo" claims would go into the "resources" request, but this violates
-the original field definition from OIDC  and gets into the territory of defining an identity schema request. 
-This approach would also invalidate extensions to the "claims" standard as each "target" would need to
-have its own separate mapping to some part of the GNAP protocol. ]]
+\[\[ [See issue #63](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/63) \]\]
 
-[[ Editor's note: I'm not a fan of GNAP defining how OIDC would work at all and would rather that
-work be done by the OIDF in an extension. However, I think it is important for discussion to see this kind
-of thing in context with the rest of the protocol, for now. In the future, I would anticipate
-this would be defined by the OIDF as a relatively small but robust identity layer on top of GNAP. ]]
+\[\[ [See issue #64](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/64) \]\]
 
 ## Extending The Grant Request {#request-extending}
 
@@ -2016,10 +1798,7 @@ The request object MAY be extended by registering new items in
 Extensions MUST document any aspects where the extension item affects or influences
 the values or behavior of other request and response objects. 
 
-[[ Editor's note: we should have more guidance and examples on what
-possible top-level extensions would look like. ]]
-
-
+\[\[ [See issue #65](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/65) \]\]
 
 # Grant Response {#response}
 
@@ -2120,10 +1899,10 @@ access_token
             in {{response-token-single}}. This access token MUST be bound to the
             RC's key used in the request and MUST NOT be a `bearer` token. 
             This access token MUST NOT be usable at resources outside of the AS.
-            [[ Editor's note: Is this a restriction we want to enforce? ]]
             If the AS includes an access token, the RC MUST present the access 
             token in all requests to the continuation URI as 
             described in {{use-access-token}}.
+            \[\[ [See issue #66](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/66) \]\]
 
 ~~~
 {
@@ -2150,23 +1929,7 @@ This field SHOULD be returned when interaction is expected, to
 allow the RC to follow up after interaction has been
 concluded.
 
-[[ Editor's note: The AS can use the optional "access_token"
-as a credential for the client to manage the grant request
-itself over time. This is in parallel with access token management
-as well as RS access in general. If the AS uses the access token,
-the continuation URL can be static, and potentially even the
-same as the initial request URL. If the AS does not use an access
-token here, it needs to use unique URLs in its response and bind the
-client's key to requests to those URLs -- or potentially only allow
-one request per client at a time. The optionality adds a layer 
-of complexity, but the client behavior is deterministic in all
-possible cases and it re-uses existing functions and structures
-instead of inventing something special just to talk to the AS. 
-The optional access token represents a design compromise, but the
-working group can decide to either require the access token on
-all requests or to remove the access token functionality and
-require the security of the continuation requests be based on
-unique URLs. ]]
+\[\[ [See issue #67](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/67) \]\]
 
 ## Access Tokens {#response-token}
 
@@ -2175,10 +1938,7 @@ the AS responds with either the `access_token` or the `multiple_access_token`
 field. The AS MUST NOT respond with both
 the `access_token` and `multiple_access_token` fields.
 
-[[ Editor's note: I really don't like the dichotomy between
-"access_token" and "multiple_access_tokens" and their being mutually
-exclusive, and I think we should design away from this pattern toward
-something less error-prone. ]]
+\[\[ [See issue #68](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/68) \]\]
 
 ### Single Access Token {#response-token-single}
 
@@ -2276,10 +2036,7 @@ was presented using the [detached JWS](#detached-jws) binding method.
 If the RC [requested multiple access tokens](#request-resource-multiple), the AS MUST NOT respond with a
 single access token structure unless the RC sends the `split_token` flag as described in {{request-resource-flag}}.
 
-[[ Editor's note: There has been interest in describing a way for the AS to tell the
-client both how and where to use the token. This kind of directed access token could
-allow for some interesting deployment patterns where the client doesn't know
-much]]
+\[\[ [See issue #69](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/69) \]\]
 
 ### Multiple Access Tokens {#response-token-multiple}
 
@@ -2327,9 +2084,7 @@ access token structure unless the RC sends the `split_token` flag as described i
 Each access token MAY have different proofing mechanisms. If
 management is allowed, each access token SHOULD have different management URIs.
 
-[[ Editor's note: Do we need to specify that the management URIs are different
-if we require the token to be presented? ]]
-
+\[\[ [See issue #70](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/70) \]\]
 
 ## Interaction Modes {#response-interact}
 
@@ -2381,9 +2136,7 @@ distinct from the URL the RC uses to [request access](#request), allowing an
 AS to separate its user-interactive functionality from its back-end security
 functionality.
 
-[[ Editor's note: This is one aspect where the AS might actually be
-two separate roles. Namely, a delegation server (back end) and interaction
-server (user-facing).]]
+\[\[ [See issue #72](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/72) \]\]
 
 The RC sends the RQ to the URL to interact with the AS. The
 RC MUST NOT alter the URL in any way. The means for the RC
@@ -2415,10 +2168,7 @@ RC MAY attempt to detect if an installed application will
 service the URL being sent before attempting to launch the
 application URL.
 
-[[ Editor's note: This will probably need to be expanded to an
-object to account for other parameters needed in app2app use cases,
-like addresses for distributed storage systems, server keys, and the
-like. Details TBD as people build this out. ]]
+\[\[ [See issue #71](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/71) \]\]
 
 ### Post-interaction Callback to an RC URL {#response-interact-callback}
 
@@ -2433,8 +2183,7 @@ that the RC will use in validating the callback as defined in
     }
 ~~~
 
-[[ Editor's note: This is fairly parallel to the request but it kinda
-hides the fact that this is a nonce from the AS, not the client. ]]
+\[\[ [See issue #73](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/73) \]\]
 
 When the RO completes interaction at the AS, the AS MUST call the
 RC's callback URL using the method indicated in the
@@ -2504,9 +2253,7 @@ distinct from the URL the RC uses to [request access](#request), allowing an
 AS to separate its user-interactive functionality from its back-end security
 functionality.
 
-[[ Editor's note: This is one aspect where the AS might actually be
-two separate roles. Namely, a delegation server (back end) and interaction
-server (user-facing).]]
+\[\[ [See issue #72](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/72) \]\]
 
 ### Extending Interaction Mode Responses {#response-interact-extend}
 
@@ -2527,16 +2274,13 @@ with the following OPTIONAL properties.
 sub_ids
 : An array of subject identifiers for the
             RO, as defined by 
-            {{I-D.ietf-secevent-subject-identifiers}}. [[ Editor's
-            note: privacy considerations are needed around returning
-            identifiers. ]]
+            {{I-D.ietf-secevent-subject-identifiers}}.
+            \[\[ [See issue #74](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/74) \]\]
 
 assertions
 : An object containing assertions as values
             keyed on the assertion type defined by [a registry TBD](#IANA). 
-            [[ Editor's note: should this be an array of objects with internal
-            typing like the sub_ids? Do we expect more than one assertion per
-            user anyway? ]]
+            \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
 updated_at
 : Timestamp as an ISO8610 date string, indicating
@@ -2577,20 +2321,9 @@ other identity protocols could also be used on top of GNAP to convey
 this information and the details of an identity protocol and associated schema 
 are outside the scope of this specification.
 
-[[ Editor's note: subject identifiers here are naturally scoped to the AS; even though
-using an external identifier like an email address or phone number implies a global
-namespace in use, the association of that identifier to the current user is still
-under the view of the AS. Would changing the name to "as_sub_ids" or "local_sub_ids" help 
-convey that point? Would it also be desirable to have an identifier that's globally
-unique by design? The "iss_sub" type almost gets us there by explicitly calling out
-the issuer URL, but tuples are hard to deal with in practice and so tend to get ignored
-in practice in the OIDC space. ]]
+\[\[ [See issue #75](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/75) \]\]
 
-[[ Editor's note: This will need substantial privacy considerations, as this is
-releasing information about the current user that could be tied to other
-information at the RC or elsewhere. To facilitate this, should we have another
-form of identifier that's a globally unique identifier of some form? DIDs could
-facilitate that kind of namespace. ]]
+\[\[ [See issue #74](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/74) \]\]
 
 Extensions to this specification MAY define additional response
 properties in [a registry TBD](#IANA).
@@ -2618,11 +2351,7 @@ protected by the RC as secrets. Handle values MUST be unguessable
 and MUST NOT contain any sensitive information. Handle values are
 opaque to the RC. 
 
-[[ Editor's note: these constructs used to be objects to
-allow for expansion to future fields, like a management URI or
-different presentation types or expiration, but those weren't used in
-practice. Is that desirable anymore or is collapsing them like this
-the right direction? ]]
+\[\[ [See issue #76](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/76) \]\]
 
 All dynamically generated handles are returned as fields in the
 root JSON object of the response. This specification defines the
@@ -2655,43 +2384,9 @@ access token.
 }
 ~~~
 
-[[ Editor's note: the ability to dynamically return reference handles
-allows for an inline version of dynamic registration without needing 
-to go through a discrete registration step, for clients where that
-makes sense. Currently this is entirely up to the AS to decide when
-to issue these, but maybe the client should signal that it can receive
-these handles as part of the request? The new "token flags" construct
-in {{request-resource-flag}} almost gets at that, but for a different part
-of the  request structure. Since the client is the component
-that will know if it's in a position to make use of such reference handles
-in the future (like a mobile app) or if it's just going to evaporate
-at the end of a session (like an SPA). Ultimately we need to deal with
-a range of dynamism, not just the "pre-registered" vs. "non-registered"
-use cases that OAuth forces us in to. ]]
+\[\[ [See issue #77](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/77) \]\]
 
-[[ Editor's note: The client-bound "instance_id" could serve as the hook
-we would need for RFC7592 style dynamic client management, including additional
-components like key rotation. If the AS returns an object instead of a string
-here, that could include everything that the client would need in order to
-make REST-style management calls, similar to token management. 
-
-~~~
-{
-    "client": {
-        "instance_id": "7C7C4AZ9KHRS6X63AJAO",
-        "manage": "https://example.server.com/client/7C7C4AZ9KHRS6X63AJAO",
-        "access_token": {
-            "value": "4TB8N6BW7OZB8CDFONP219RP1LT0OS9M2PMHKUR6",
-            "key": true
-        }
-    }
-}
-~~~
-
-The client would sign all requests with its key and use the presented access token.
-A "POST" or "PATCH" request would update client information, including having a 
-method for key rotation using nested signatures. A "DELETE" request would
-un-register the client, etc. ]]
+\[\[ [See issue #78](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/78) \]\]
 
 ## Error Response {#response-error}
 
@@ -2727,21 +2422,14 @@ too_fast
 unknown_request
 : The request referenced an unknown ongoing access request.
 
-[[ Editor's note: I think we will need a more robust error
-mechanism, and we need to be more clear about what error states are
-allowed in what circumstances. Additionally, is the "error" parameter
-exclusive with others in the return? ]]
-
+\[\[ [See issue #79](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/79) \]\]
 
 ## Extending the Response {#response-extend}
 
 Extensions to this specification MAY define additional fields for
 the grant response in [a registry TBD](#IANA).
 
-[[ Editor's note: what guidance should we give to designers on
-this? ]]
-
-
+\[\[ [See issue #80](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/80) \]\]
 
 # Interaction at the AS {#user-interaction}
 
@@ -2766,9 +2454,7 @@ actions it sees fit, including but not limited to:
 - provide warnings to the RO about potential attacks or negative
     effects of the requested information
 
-[[ Editor's note: there are some privacy and security considerations
-here but for the most part we don't want to be overly prescriptive about
-the UX, I think. ]]
+\[\[ [See issue #81](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/81) \]\]
 
 ## Interaction at a Redirected URI {#interaction-redirect}
 
@@ -2819,9 +2505,7 @@ interacts with the RO through that application to authenticate the
 user as the RO and gather their consent. The details of this
 interaction are out of scope for this specification.
 
-[[ Editor's note: Should we have anything to say about an app
-sending information to a back-end to get details on the pending
-request? ]]
+\[\[ [See issue #82](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/82) \]\]
 
 ## Post-Interaction Completion {#interaction-finalize}
 
@@ -2835,17 +2519,7 @@ access. This pattern allows the RC to potentially recover from the error
 state without restarting the request from scratch by modifying its
 request or providing additional information directly to the AS.
 
-[[ Editor's note: there might be some other kind of push-based
-notification or callback that the client can use, or an out-of-band
-non-HTTP protocol. The AS would know about this if supported and used,
-but the guidance here should be written in such a way as to not be too
-restrictive in the next steps that it can take. Still, it's important
-that the AS not expect or even allow clients to poll if the client has
-stated it can take a callback of some form, otherwise that sets up a
-potential session fixation attack vector that the client is trying to
-and able to avoid. There has also been a call for post-interaction 
-that doesn't tie into the security of the protocol, like redirecting to
-a static webpage hosted by the client's company. Would this fit here? ]]
+\[\[ [See issue #83](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/83) \]\]
 
 The AS MUST create an interaction reference and associate that
 reference with the current interaction and the underlying pending
@@ -2951,10 +2625,7 @@ known only to the parties involved. This security mechanism allows the RC to pro
 several kinds of session fixation and injection attacks. The AS MUST
 always provide this hash, and the RC MUST validate the hash when received.
 
-[[ Editor's note: If the client uses a unique callback URL per request, that prevents some of
-the same attacks, but without the same cryptographic binding between the interaction and delegation
-channels. A unique URI would allow the client to differentiate inputs, but it would not 
-prevent an attacker from injecting an unrelated interaction reference into this channel. ]]
+\[\[ [See issue #84](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/84) \]\]
 
 To calculate the "hash" value, the party doing the calculation
 first takes the "nonce" value sent by the RC in the 
@@ -2977,14 +2648,7 @@ based on the "hash_method" parameter of the "callback".
 If the "hash_method" value is not present in the RC's
 request, the algorithm defaults to "sha3". 
 
-[[ Editor's note: these
-hash algorithms should be pluggable, and ideally we shouldn't
-redefine yet another crypto registry for this purpose, but I'm not
-convinced an appropriate one already exists. Furthermore, we should
-be following best practices here whether it's a plain hash, a
-keyed MAC, an HMAC, or some other form of cryptographic function.
-I'm not sure what the defaults and options ought to be, but SHA512
-and SHA3 were picked based on what was available to early developers. ]]
+\[\[ [See issue #56](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/56) \]\]
 
 #### SHA3-512 {#hash-sha3}
 
@@ -3033,11 +2697,8 @@ When the RC makes any calls to the continuation URL, the RC MUST present
 proof of the most recent key associated with this ongoing request
 by signing the request as described in {{binding-keys}}. The key in use will
 be either the key from [the initial request](#request-key) or its most recent
-rotation. [[ Editor's note: we need to have a secure way to rotate the key
-used for the continuation here. In most cases this will be a rotation for
-the client instance, since a client without an instance record would likely just
-present a new key for a new request. In that case it could go with the client
-management, above -- but it doesn't necessarily have to be. ]]
+rotation. 
+\[\[ [See issue #85](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/85) \]\]
 
 For example, here the RC makes a POST request and signs with detached
 JWS:
@@ -3082,9 +2743,9 @@ modifying the initial request, and getting the current state of the request.
 If a "wait" parameter was included in the [continuation response](#response-continue), the
 RC MUST NOT call the continuation URI prior to waiting the number of
 seconds indicated. If no "wait" period is indicated, the RC SHOULD
-wait at least 5 seconds [[ Editor's note: what's a reasonable amount of
-time so as not to DOS the server?? ]]. If the RC does not respect the
+wait at least 5 seconds If the RC does not respect the
 given wait period, the AS MUST return an error.
+\[\[ [See issue #86](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/86) \]\]
 
 The response from the AS is a JSON object and MAY contain any of the
 fields described in {{response}}, as described in more detail in the
@@ -3095,11 +2756,11 @@ make a further continuation request, the AS MUST include a new
 ["continue" response](#response-continue). 
 If the continuation was previously bound to an access token, the
 new `continue` response MUST include a bound access token as well, and
-this token SHOULD be a new access token. [[ Editor's note: this used to be a MUST,
-but is it safe to back off that requirement? ]]
+this token SHOULD be a new access token. 
 If the AS does not return a new `continue` response, the RC
 MUST NOT make an additional continuation request. If a RC does so,
 the AS MUST return an error.
+\[\[ [See issue #87](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/87) \]\]
 
 For continuation functions that require the RC to send a message body, the body MUST be
 a JSON object. 
@@ -3130,9 +2791,8 @@ the ongoing request.
 The [response](#response) MAY contain any newly-created [access tokens](#response-token) or
 newly-released [subject claims](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. The response
-SHOULD NOT contain any [interaction responses](#response-interact). [[ Editor's note: This last
-one might be overly restrictive, since some kinds of interaction could require multiple
-round trips. We need more examples and experience beyond redirect-based interaction here. ]]
+SHOULD NOT contain any [interaction responses](#response-interact).
+\[\[ [See issue #89](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/89) \]\]
 
 For example, if the request is successful in causing the AS to issue access tokens and
 release subject claims, the response could look like this:
@@ -3156,9 +2816,7 @@ release subject claims, the response could look like this:
 With this example, the RC can not make an additional continuation request because
 a `continue` field is not included.
 
-[[ Editor's note: other interaction methods, such as a challenge-response cryptographic
-protocol, would use a similar construct as here, but have different rules. Would it be reasonable
-to allow them to be combined? Could this be combined further with the "update" method in {{continue-modify}}? ]]
+\[\[ [See issue #88](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/88) \]\]
 
 ## Continuing During Pending Interaction {#continue-poll}
 
@@ -3199,15 +2857,9 @@ next continuation request.
 }
 ~~~
 
-[[ Editor's note: Do we want to be more precise about what's expected inside the "continue" 
-object? I think that at least the URI is required, access token required IF used, etc. This is
-even if they haven't changed since last time, and the client will use whatever value comes back. ]]
+\[\[ [See issue #90](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/90) \]\]
 
-[[ Editor's note: extensions to this might need to communicate to the client what the current
-state of the user interaction is. This has been done in similar proprietary protocols, but the
-details of that information tend to be highly application specific. Like "user hasn't logged in yet",
-"user has logged in but is still sitting at the page", or "user seems to have wandered off". We might
-be able to provide a decent framework for hanging this kind of stuff on. ]]
+\[\[ [See issue #91](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/91) \]\]
 
 If the request is successful in causing the AS to issue access tokens and
 release subject claims, the response could look like this example:
@@ -3241,10 +2893,7 @@ which MAY trigger additional requirements and policies by the AS. For example, i
 more access, the AS could require additional interaction with the RO to gather additional consent.
 If the RC is asking for more limited access, the AS could determine that sufficient authorization
 has been granted to the RC and return the more limited access rights immediately. 
-[[ Editor's note: We could state something like "resources and subject MUST NOT be the same as in
-the initial or previous request" to enforce that this really is a change, but is there value in
-calling that out here? Somehow we do probably want to tell the AS to not let a client simply
-post the same request here to rotate access tokens now that we've got an explicit function for that, right? ]]
+\[\[ [See issue #92](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/92) \]\]
 
 The RC MAY include the `interact` field as described in {{request-interact}}. Inclusion of
 this field indicates that the RC is capable of driving interaction with the RO, and this field
@@ -3252,35 +2901,19 @@ replaces any values from a previous request. The AS MAY respond to any of the in
 responses as described in {{response-interact}}, just like it would to a new request.
 
 The RC MAY include the `user` field as described in {{request-user}} to present new assertions
-or information about the RQ. [[ Editor's note: This would allow the client to do things like
-gather the user's identifiers post-request, or gather an assertion from an on-device element
-that the AS can verify. It opens up potential avenues for trouble if the user here is
-different from the RO that's already showed up at the AS or race conditions if the RQ's identity changes 
-mid-stream. But that said, this seems important for multi-log-in cases and the like, probably. ]]
+or information about the RQ. 
+\[\[ [See issue #93](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/93) \]\]
 
-The RC MUST NOT include the `client` section of the request. [[ Editor's note: We do not want
-the client to be able to get swapped out from underneath the user, especially post-consent. 
-However, including this field in a PATCH update request might be the place to 
-define key rotation for the grant request itself, but we'd need to be very careful of how that works.
-And it feels like it might have consequences outside of the request, such as rotating the
-key for all ongoing grants for a given client instance, which isn't really desirable here. 
-We need a lot more discussion and engineering on this before including it. ]]
+The RC MUST NOT include the `client` section of the request.
+\[\[ [See issue #94](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/94) \]\]
 
 The RC MAY include post-interaction responses such as described in {{continue-after-interaction}}.
-[[ Editor's note: it seems a little odd to include this in a request but I can't see a reason to
-not allow it. ]]
+\[\[ [See issue #95](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/95) \]\]
 
 Modification requests MUST NOT alter previously-issued access tokens. Instead, any access
 tokens issued from a continuation are considered new, separate access tokens. The AS 
-MAY revoke existing access tokens after a modification has occurred. [[ Editor's note: 
-this might be subject to the "multi_token" flag, but since we're creating a NEW access
-token and not rotating an existing one, this seems to be a different use case. ]]
-
-Modification requests MAY result in previously-issued access tokens being revoked. [[ Editor's
-note: there is a solid argument to be made for always revoking old access tokens here, but
-we need more discussion on the boundaries for such a requirement. If they stick around, it
-does make a "read" request weird because now we've got multiple access tokens sticking around
-associated with a grant request and no good place to put them. ]]
+MAY revoke existing access tokens after a modification has occurred. 
+\[\[ [See issue #96](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/96) \]\]
 
 If the modified request can be granted immediately by the AS, 
 the [response](#response) MAY contain any newly-created [access tokens](#response-token) or
@@ -3418,9 +3051,7 @@ nonce and callback are different from the initial request. Since the original ca
 already used in the initial exchange, and the callback is intended for one-time-use, a new one
 needs to be included in order to use the callback again.
 
-[[ Editor's note: the net result of this is that interaction requests are really only meant
-to be responded to exactly once by the AS. This isn't spelled out explicitly, but could
-be included in {{request-interact}} and/or {{response-interact}}. ]]
+\[\[ [See issue #97](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/97) \]\]
 
 ~~~
 PATCH /continue HTTP/1.1
@@ -3475,16 +3106,7 @@ ongoing request, including the most recently issued access tokens, any released 
 claims, and any currently active interaction modes. The response MAY contain a 
 new ["continue" response](#response-continue) as described above.
 
-[[ Editor's note: I'm a little dubious about the need for this particular function in
-reality, but including it for completeness sake. There are a lot of questions we need
-to answer, such as whether it's safe to include access tokens and claims in the response
-of this kind of "read" at all, and whether it makes sense to include items like interaction
-nonces in the response. This discussion should be driven by the use cases calling for
-this "read" functionality. There have been similar functions within proprietary protocols
-where the client calls an endpoint at the AS to figure out where the user is in the 
-interaction process at the AS, letting the client provide a smarter UI. It doesn't seem
-like we could do that in depth here since it would be highly application specific, but that
-might be a good example of how to extend a response and give a client extra information. ]]
+\[\[ [See issue #98](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/98) \]\]
 
 ## Canceling a Grant Request {#continue-delete}
 
@@ -3524,19 +3146,7 @@ The AS MUST validate the proof and assure that it is associated with
 either the token itself or the RC the token was issued to, as
 appropriate for the token's presentation type.
 
-[[ Editor's note: Should we allow for "update" to an access token
-by the client posting new information from a "request"? It seems this might
-make things weird since an access token is generally considered
-an unchanging thing, and the client could always request a new
-access token if they're allowed to continue the grant request post-issuance
-as in {{continue-modify}}. There's also a possibility of
-being able to "read" a token's state with a GET, much like token introspection
-but using the token's/client's key instead of the RS key. But
-would a client need to "read" a token state after issuance? Is there
-a security risk to offering that functionality? Introspection is
-nearly always relegated to RS calls in practice since the client
-is focused on using the token at the RS. The client can always read
-the state of the grant itself, separately. ]]
+\[\[ [See issue #99](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/99) \]\]
 
 ## Rotating the Access Token {#rotate-access-token}
 
@@ -3551,11 +3161,7 @@ Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 Detached-JWS: eyj0....
 ~~~
 
-[[ Editor's note: This could alternatively be an HTTP PUT verb, 
-since we are telling the AS that we want to replace the token. However,
-we are not providing the information we want to replace the token with,
-and in fact that's up to the AS entirely, not the client. For that reason,
-I think a POST still makes the most sense. ]]
+\[\[ [See issue #100](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/100) \]\]
 
 The AS validates that the token presented is associated with the management
 URL, that the AS issued the token to the given RC, and that
@@ -3572,18 +3178,14 @@ If the token is validated and the key is appropriate for the
 request, the AS MUST invalidate the current access token associated
 with this URL, if possible, and return a new access token response as
 described in {{response-token-single}}, unless the `multi_token` flag
-is specified in the request. [[ Editor's note: We could also use different
-verbs to signal whether or not the old token should be kept around
-or not, instead of using a token flag to do this. ]] The value of the
+is specified in the request. The value of the
 access token MUST NOT be the same as the current value of the access
 token used to access the management API. The response MAY include an
 updated access token management URL as well, and if so, the RC
 MUST use this new URL to manage the new access token.
+\[\[ [See issue #101](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/101) \]\]
 
-[[ Editor's note: the net result is that the client's always going
-to use the management URL that comes back. But should we let the server
-omit it from the response if it doesn't change? That seems like an
-odd optimization that doesn't help the client. ]]
+\[\[ [See issue #102](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/102) \]\]
 
 ~~~
 {
@@ -3614,12 +3216,7 @@ odd optimization that doesn't help the client. ]]
 }
 ~~~
 
-
-[[ Editor's note: If the client is using its own key as the proof, like
-with a bearer access token, the AS is going to need to know if the client's
-key has been rotated. We don't have a mechanism for rotating the token's key
-or the client's key yet either -- so that could occur through this management 
-function as well. ]]
+\[\[ [See issue #103](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/103) \]\]
 
 ## Revoking the Access Token {#revoke-access-token}
 
@@ -3688,15 +3285,7 @@ Detached-JWS: eyj0....
 ~~~
 
 
-
-[[ Editor's note: I don't actually like the idea of using only one
-header type for differently-bound access tokens. Perhaps instead these
-values should somehow reflect the key binding types. Maybe there can be
-multiple fields after the "GNAP" keyword using structured headers? Or a
-set of derived headers like GNAP-mtls? This might also be better as a
-separate specification, like it was in OAuth 2. However, access tokens
-should be able to use any key binding mechanisms here, plus bearer. ]]
-
+\[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
 
 # Binding Keys {#binding-keys}
 
@@ -3746,8 +3335,7 @@ rotations on those keys over time that the AS knows about. The AS MUST validate 
 [presented by the RC](#request-key) or referenced in an
 ongoing request for each call within that request.
 
-[[ Editor's note: We are going to need a way for a client to rotate its keys
-securely, even while an ongoing grant is in effect. ]]
+\[\[ [See issue #105](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/105) \]\]
 
 When used to bind to an access token, the 
 
@@ -3781,18 +3369,14 @@ at_hash
     header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
     value with SHA-256, then take the left-most 128 bits and base64url encode them. 
 
-[[ Editor's note: It's not the usual practice to put additional information
-into the header of a JWS, but this keeps us from having to normalize the body
-serialization. Alternatively, we could add all these fields to the body
-of the request, but then it gets awkward for non-body requests like
-GET/DELETE. ]]
+\[\[ [See issue #106](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/106) \]\]
 
 The payload of the JWS object is the serialized body of the request, and
 the object is signed according to detached JWS {{RFC7797}}. 
 
 The RC presents the signature in the Detached-JWS HTTP Header
-field. [[ Editor's Note: this is a custom header field, do we need
-this? It seems like the best place to put this. ]]
+field. 
+\[\[ [See issue #107](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/107) \]\]
 
 ~~~
 POST /tx HTTP/1.1
@@ -3851,15 +3435,7 @@ contents as a detached JWS object. The HTTP Body is used as the
 payload for purposes of validating the JWS, with no
 transformations.
 
-[[ Editor's note: this is a potentially fragile signature mechanism.
-It doesn't protect arbitrary headers or other specific aspects of the request,
-but it's simple to calculate and useful for body-driven requests, like
-the client to the AS. Additionally it is potentially
-fragile since a multi-tier system could parse the
-payload and pass the parsed payload downstream with potential
-transformations, making downstream signature validation impossible.
-We might want to remove this in favor of
-general-purpose HTTP signing, or at least provide guidance on its use. ]]
+\[\[ [See issue #108](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/108) \]\]
 
 ## Attached JWS {#attached-jws}
 
@@ -3890,11 +3466,7 @@ at_hash
     header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
     value with SHA-256, then take the left-most 128 bits and base64url encode them. 
 
-[[ Editor's note: It's not the usual practice to put additional information
-into the header of a JWS, but this keeps us from having to modify the body
-to use this signature method.  Alternatively, we could add all these fields to the body
-of the request, but then it gets awkward for non-body requests like
-GET/DELETE. ]]
+\[\[ [See issue #107](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/107) \]\]
 
 The payload of the JWS object is the JSON serialized body of the request, and
 the object is signed according to JWS and serialized into compact form {{RFC7515}}. 
@@ -4015,17 +3587,7 @@ an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
 calculated over an empty payload and passed in the `Detached-JWS`
 header as described in {{detached-jws}}.
 
-[[ Editor's note: A downside to this method is that it requires the
-content type to be something other than application/json, and it
-doesn't work against an RS without additional profiling since it
-takes over the request body -- plus we have to specify
-different delivery locations for a GET vs. a POST, for example.
-Additionally it is potentially
-fragile like a detached JWS since a multi-tier system could parse the
-payload and pass the parsed payload downstream with potential
-transformations. We might want to remove this in favor of
-general-purpose HTTP signing, or at least provide guidance on its use. ]]
-
+\[\[ [See issue #109](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/109) \]\]
 
 ## Mutual TLS {#mtls}
 
@@ -4110,11 +3672,7 @@ fHI6kqm3NCyCCTihe2ck5RmCc5l2KBO/vAHF0ihhFOOOby1v6qbPHQcxAU6rEb907
 
 ~~~
 
-
-[[ Editor's note: This method requires no changes to the HTTP message
-itself, since the security relies on the TLS layer. However, the application
-level will need to validate that the certificate key used in the request
-is the one expected for the specific request. ]]
+\[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
 
 ## Demonstration of Proof-of-Possession (DPoP) {#dpop-binding}
 
@@ -4186,12 +3744,7 @@ B7_8Wbw4ttzbMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFekpdfWdiPQddQ6Y
 }
 ~~~
 
-
-
-[[ Editor's note: this method requires duplication of the key in
-the header and the request body, which is redundant and potentially
-awkward. The signature also doesn't protect the body of the request. ]]
-
+\[\[ [See issue #111](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/111) \]\]
 
 ## HTTP Signing {#httpsig-binding}
 
@@ -4267,8 +3820,7 @@ following additional requirements:
 - The at (access token) field MUST be omitted
             unless this method is being used in conjunction with
             an access token as in {{use-access-token}}.
-            [[ Editor's note: this is in contradiction to the referenced
-            spec which makes this field mandatory. ]]
+            \[\[ [See issue #112](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/112) \]\]
 
 - The b (body hash) field MUST be calculated and supplied,
     unless there is no entity body (such as a GET, OPTIONS, or
@@ -4342,12 +3894,7 @@ Y1cK2U3obvUg7w"
 }
 ~~~
 
-
-
-[[ Editor's note: This is a stale draft from the OAuth working group, but
-it does at least provide some basic functionality for protecting HTTP messages
-with a signature. This work is likely to be subsumed by the general-purpose 
-HTTP message signature mechanism in {{httpsig-binding}}. ]]
+\[\[ [See issue #113](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/113) \]\]
 
 # Discovery {#discovery}
 
@@ -4410,23 +3957,13 @@ mechanism.
 In some deployments, a resource server will need to be able to call
 the AS for a number of functions.
 
-[[ Editor's note: This section is for discussion of possible advanced
-functionality. It seems like it should be a separate document or set of
-documents, and it's not even close to being well-baked. This also adds
-additional endpoints to the AS, as this is separate from the token
-request process, and therefore would require RS-facing discovery or
-configuration information to make it work. Also-also, it does presume
-the RS can sign requests in the same way that a client does, but
-hopefully we can be more consistent with this than RFC7662 was able to
-do. ]]
+\[\[ [See issue #114](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/114) \]\]
 
 ## Introspecting a Token {#introspection}
 
 When the RS receives an access token, it can call the introspection
-endpoint at the AS to get token information. [[ Editor's note: this
-isn't super different from the token management URIs, but the RS has
-no way to get that URI, and it's bound to the RS's keys instead of the
-RC's or token's keys. ]]
+endpoint at the AS to get token information. 
+\[\[ [See issue #115](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/115) \]\]
 
 ~~~
 +------+       +------+       +------+
@@ -4540,10 +4077,7 @@ value in the "existing_access_token" field.
 The RS MUST identify itself with its own key and sign the
 request.
 
-[[ Editor's note: this is similar to {{request-existing}} but based on the access token
-and not the grant. We might be able to re-use that function: the fact that the keys presented are not the ones
-used for the access token should indicate that it's a different party
-and a different kind of request, but there might be some subtle security issues there. ]]
+\[\[ [See issue #116](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/116) \]\]
 
 ~~~
 POST /tx HTTP/1.1
@@ -4574,8 +4108,6 @@ Detached-JWS: ejy0...
     "existing_access_token": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0"
 }
 ~~~
-
-
 
 The AS responds with a token as described in 
 {{response}}. 
@@ -4638,13 +4170,7 @@ The RS MAY make this handle available as part of a
 [response](#rs-request-without-token) or as
 documentation to developers.
 
-[[ Editor's note: It's not an exact match here because the
-"resource_handle" returned now represents a collection of objects
-instead of a single one. Perhaps we should let this return a list of
-strings instead? Or use a different syntax than the resource request?
-Also, this borrows heavily from UMA 2's "distributed authorization"
-model and, like UMA, might be better suited to an extension than the
-core protocol. ]]
+\[\[ [See issue #117](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/117) \]\]
 
 ## Requesting a Resources With Insufficient Access {#rs-request-without-token}
 
@@ -4664,19 +4190,13 @@ content of this handle is opaque to the RS and the RC.
 WWW-Authenticate: GNAP as_uri=http://server.example/tx,resource=FWWIKYBQ6U56NL1
 ~~~
 
-
-
 The RC then makes a call to the "as_uri" as described in 
 {{request}}, with the value of "resource" as one of the members
 of a "resources" array {{request-resource-single}}. The
 RC MAY request additional resources and other information, and MAY
 request multiple access tokens.
 
-[[ Editor's note: this borrows heavily from UMA 2's "distributed
-authorization" model and, like UMA, might be better suited to an
-extension than the core protocol. ]]
-
-
+\[\[ [See issue #118](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/118) \]\]
 
 # Acknowledgements {#Acknowledgements}
 
@@ -4709,13 +4229,13 @@ for feedback and development of early versions of the XYZ protocol that fed into
 
 # IANA Considerations {#IANA}
 
-[[ TBD: There are a lot of items in the document that are expandable
-through the use of value registries. ]]
+\[\[ TBD: There are a lot of items in the document that are expandable
+through the use of value registries. \]\]
 
 
 # Security Considerations {#Security}
 
-[[ TBD: There are a lot of security considerations to add. ]]
+\[\[ TBD: There are a lot of security considerations to add. \]\]
 
 All requests have to be over TLS or equivalent as per {{BCP195}}. Many handles act as
 shared secrets, though they can be combined with a requirement to
@@ -4724,7 +4244,7 @@ provide proof of a key as well.
 
 # Privacy Considerations {#Privacy}
 
-[[ TBD: There are a lot of privacy considerations to add. ]]
+\[\[ TBD: There are a lot of privacy considerations to add. \]\]
 
 Handles are passed between parties and therefore should not contain
 any private data.
@@ -4735,6 +4255,9 @@ sure that it has the permission to do so.
 --- back
    
 # Document History {#history}
+
+- -02
+    - Moved all "editor's note" items to GitHub Issues.
 
 - -01
     - "updated_at" subject info timestamp now in ISO 8601 string format.
