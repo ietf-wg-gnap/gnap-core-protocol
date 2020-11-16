@@ -3337,7 +3337,7 @@ ongoing request for each call within that request.
 
 \[\[ [See issue #105](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/105) \]\]
 
-When used to bind to an access token, the 
+When used to bind to an access token, the access token MUST be covered by the signature method.
 
 ## Detached JWS {#detached-jws}
 
@@ -4172,7 +4172,7 @@ documentation to developers.
 
 \[\[ [See issue #117](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/117) \]\]
 
-## Requesting a Resources With Insufficient Access {#rs-request-without-token}
+## Requesting Resources With Insufficient Access {#rs-request-without-token}
 
 If the RC calls an RS without an access token, or with an
 invalid access token, the RS MAY respond to the RC with an
