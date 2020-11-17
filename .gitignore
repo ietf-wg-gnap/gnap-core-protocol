@@ -1,4 +1,5 @@
-draft-ietf-gnap-core-protocol.html
-draft-ietf-gnap-core-protocol.xml
-metadata.min.js
+*.html
+*.xml
+*.js
 .refcache
+*.txt
