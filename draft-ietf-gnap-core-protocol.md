@@ -110,7 +110,7 @@ with the authorization server to authenticate, provide consent, and
 authorize the request.
 
 The process by which the delegation happens is known as a grant, and
-the GNAP protocol allows for the negotiation of the grant process
+GNAP allows for the negotiation of the grant process
 over time by multiple parties acting in distinct roles. 
 
 This protocol solves many of the same use cases as OAuth 2.0 {{RFC6749}},
@@ -129,7 +129,7 @@ of these can be found in {{example-oauth2}}.
 
 ## Roles
 
-The parties in the GNAP protocol perform actions under different roles. 
+The parties in GNAP perform actions under different roles. 
 Roles are defined by the actions taken and the expectations leveraged
 on the role by the overall protocol. 
 
@@ -161,7 +161,7 @@ Requesting Party (RQ, aka "user")
 : Operates and interacts with the RC.
 
 
-The GNAP protocol design does not assume any one deployment architecture,
+The design of GNAP does not assume any one deployment architecture,
 but instead attempts to define roles that can be fulfilled in a number
 of different ways for different use cases. As long as a given role fulfills
 all of its obligations and behaviors as defined by the protocol, GNAP does
@@ -236,7 +236,7 @@ is delegated by the RO as part of the grant process.
 
 ## Sequences {#sequence}
 
-The GNAP protocol can be used in a variety of ways to allow the core
+GNAP can be used in a variety of ways to allow the core
 delegation process to take place. Many portions of this process are
 conditionally present depending on the context of the deployments,
 and not every step in this overview will happen in all circumstances.
@@ -348,8 +348,8 @@ protocol flow.
 - (13) The RC [disposes of the token](#revoke-access-token) once the RC
     has completed its access of the RS and no longer needs the token.
 
-The following sections and {{examples}} contain specific guidance on how to use the 
-GNAP protocol in different situations and deployments.
+The following sections and {{examples}} contain specific guidance on how to use
+GNAP in different situations and deployments.
 
 ### Redirect-based Interaction {#sequence-redirect}
 
@@ -3326,7 +3326,7 @@ MUST validate all components of the signed message to ensure that nothing
 has been tampered with or substituted in a way that would change the nature of
 the request.
 
-When used in the GNAP delegation protocol, these key binding mechanisms allow
+When used for delegation in GNAP, these key binding mechanisms allow
 the AS to ensure that the keys presented by the RC in the initial request are in 
 control of the party calling any follow-up or continuation requests. To facilitate 
 this requirement, all keys in the initial request {{request-key}} MUST be proved in all continuation requests
@@ -4805,9 +4805,9 @@ Content-type: application/json
 
 ## Applying OAuth 2 Scopes and Client IDs {#example-oauth2}
 
-While the GNAP protocol is not designed to be directly compatible with
+While GNAP is not designed to be directly compatible with
 OAuth 2 {{RFC6749}}, considerations have been made to enable the use of
-OAuth 2 concepts and constructs more smoothly within the GNAP protocol.
+OAuth 2 concepts and constructs more smoothly within GNAP.
 
 In this scenario, the client developer has a `client_id` and set of
 `scope` values from their OAuth 2 system and wants to apply them to the
@@ -4867,7 +4867,7 @@ From here, the protocol continues as above.
 
 # JSON Structures and Polymorphism {#polymorphism}
 
-The GNAP protocol makes use of polymorphism within the [JSON](#RFC8259) structures used for
+GNAP makes use of polymorphism within the [JSON](#RFC8259) structures used for
 the protocol. Each portion of this protocol is defined in terms of the JSON data type
 that its values can take, whether it's a string, object, array, boolean, or number. For some
 fields, different data types offer different descriptive capabilities and are used in different
