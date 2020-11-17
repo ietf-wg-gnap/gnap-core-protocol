@@ -4260,6 +4260,7 @@ sure that it has the permission to do so.
     - Moved all "editor's note" items to GitHub Issues.
     - Added JSON types to fields.
     - Changed "GNAP Protocol" to "GNAP".
+    - Editorial fixes.
 
 - -01
     - "updated_at" subject info timestamp now in ISO 8601 string format.
