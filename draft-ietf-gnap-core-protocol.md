@@ -693,36 +693,36 @@ To start a request, the RC sends [JSON](#RFC8259) document with an object as its
 member of the request object represents a different aspect of the
 RC's request. Each field is described in detail in a section below.
 
-resources
+resources (object / array of objects/strings)
 : Describes the rights that the RC is requesting for one or more access tokens to be
     used at RS's. {{request-resource}}
    
-subject
+subject (object)
 : Describes the information about the RO that the RC is requesting to be returned
     directly in the response from the AS. {{request-subject}}
 
-client
+client (object / string)
 : Describes the RC that is making this request, including 
     the key that the RC will use to protect this request and any continuation
     requests at the AS and any user-facing information about the RC used in 
     interactions at the AS. {{request-client}}
 
-user
+user (object / string)
 : Identifies the RQ to the AS in a manner that the AS can verify, either directly or
     by interacting with the RQ to determine their status as the RO. {{request-user}}
 
-interact
+interact (object)
 : Describes the modes that the RC has for allowing the RO to interact with the
     AS and modes for the RC to receive updates when interaction is complete. {{request-interact}}
 
-capabilities
+capabilities (array of strings)
 : Identifies named extension capabilities that the RC can use, signaling to the AS
     which extensions it can use. {{request-capabilities}}
 
-existing_grant
+existing_grant (string)
 : Identifies a previously-existing grant that the RC is extending with this request. {{request-existing}}
 
-claims
+claims (object)
 : Identifies the identity claims to be returned as part of an OpenID Connect claims request. {{request-oidc-claims}}
 
 Additional members of this request object can be defined by extensions to this protocol
@@ -810,7 +810,7 @@ resulting access token using objects that describe multiple
 dimensions of access. Each object contains a `type`
 property that determines the type of API that the RC is calling.
 
-type
+type (string)
 : The type of resource request as a string. This field MAY
       define which other fields are allowed in the request object. 
       This field is REQUIRED.
@@ -832,21 +832,21 @@ being protected at the RS.
 
 \[\[ [See issue #34](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/34) \]\]
 
-actions
+actions (array of strings)
 : The types of actions the RC will take at the RS as an array of strings.
     For example, an RC asking for a combination of "read" and "write" access.
 
-locations
+locations (array of strings)
 : The location of the RS as an array of
     strings. These strings are typically URIs identifying the
     location of the RS.
 
-datatypes
+datatypes (array of strings)
 : The kinds of data available to the RC at the RS's API as an
     array of strings. For example, an RC asking for access to
     raw "image" data and "metadata" at a photograph API.
 
-identifier
+identifier (string)
 : A string identifier indicating a specific resource at the RS.
     For example, a patient identifier for a medical API or
     a bank account number for a financial API.
@@ -1088,11 +1088,11 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in 
 [a registry TBD](#IANA)).
 
-sub_ids
+sub_ids (array of strings)
 : An array of subject identifier subject types
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
-assertions
+assertions (array of strings)
 : An array of requested assertion formats. Possible values include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
     assertion values are defined by [a registry TBD](#IANA).
@@ -1140,17 +1140,17 @@ When RC information is sent
 by value, the `client` field of the request consists of a JSON
 object with the following fields.
 
-key
+key (object / string)
 : The public key of the RC to be used in this request as 
     described in {{request-key}}. This field is REQUIRED.
 
-class_id
+class_id (string)
 : An identifier string that the AS can use to identify the
     software comprising this instance of the RC. The contents
     and format of this field are up to the AS. This field
     is OPTIONAL.
 
-display
+display (object)
 : An object containing additional information that the AS 
     MAY display to the RO during interaction, authorization,
     and management. This field is OPTIONAL.
@@ -1203,7 +1203,7 @@ field. The instance identifier MAY be assigned to an RC instance at runtime
 through the {{response-dynamic-handles}} or MAY be obtained in another fashion,
 such as a static registration process at the AS.
 
-instance_id
+instance_id (string)
 : An identifier string that the AS can use to identify the
     particular instance of this RC. The content and structure of
     this identifier is opaque to the RC.
@@ -1249,23 +1249,23 @@ proofing mechanism used in the request. If the key is sent in multiple
 formats, all the keys MUST be the same. The key presented in this
 field MUST be the key used to sign the request.
 
-proof
+proof (string)
 : The form of proof that the RC will use when
     presenting the key to the AS. The valid values of this field and
     the processing requirements for each are detailed in 
     {{binding-keys}}. This field is REQUIRED.
 
-jwk
+jwk (object)
 : Value of the public key as a JSON Web Key. MUST
             contain an "alg" field which is used to validate the signature.
             MUST contain the "kid" field to identify the key in the signed
             object.
 
-cert
+cert (string)
 : PEM serialized value of the certificate used to
             sign the request, with optional internal whitespace.
 
-cert#256
+cert#S256 (string)
 : The certificate thumbprint calculated as
             per [OAuth-MTLS](#RFC8705) in base64 URL
             encoding.
@@ -1302,13 +1302,13 @@ during any interactions at the AS, it MAY send that information in the
 to present to the RO during any interactive sequences.
 
 
-name
+name (string)
 : Display name of the RC software
 
-uri
+uri (string)
 : User-facing web page of the RC software
 
-logo_uri
+logo_uri (string)
 : Display image to represent the RC
             software
 
@@ -1361,11 +1361,11 @@ identifiers or assertions, the RC MAY send that information to the
 AS in the "user" field. The RC MAY pass this information by value
 or by reference.
 
-sub_ids
+sub_ids (array of strings)
 : An array of subject identifiers for the
             RQ, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
-assertions
+assertions (object)
 : An object containing assertions as values keyed on the assertion 
     type defined by [a registry TBD](#IANA). Possible keys include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
@@ -1447,23 +1447,23 @@ There is no preference order specified in this request. An AS MAY
 its capabilities and what is allowed to fulfill the request. This specification
 defines the following interaction modes:
 
-redirect
+redirect (boolean)
 : Indicates that the RC can direct the RQ to an arbitrary URL
     at the AS for interaction. {{request-interact-redirect}}
 
-app
+app (boolean)
 : Indicates that the RC can launch an application on the RQ's
     device for interaction. {{request-interact-app}}
 
-callback
+callback (object)
 : Indicates that the RC can receive a callback from the AS
     after interaction with the RO has concluded. {{request-interact-callback}}
 
-user_code
+user_code (boolean)
 : Indicates that the RC can communicate a human-readable short
     code to the RQ for use with a stable URL at the AS. {{request-interact-usercode}}
 
-ui_locales
+ui_locales (array of strings)
 : Indicates the RQ's preferred locales that the AS can use
     during interaction, particularly before the RO has 
     authenticated. {{request-interact-locale}}
@@ -1582,7 +1582,7 @@ indicates this by sending the "callback" field. The value of this
 field is an object containing the following members.
 
 
-uri
+uri (string)
 : REQUIRED. Indicates the URI to send the RO to
               after interaction. This URI MAY be unique per request and MUST
               be hosted by or accessible by the RC. This URI MUST NOT contain
@@ -1597,20 +1597,20 @@ uri
               before redirect. 
               \[\[ [See issue #55](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/55) \]\]
 
-nonce
+nonce (string)
 : REQUIRED. Unique value to be used in the
               calculation of the "hash" query parameter sent to the callback URL,
               must be sufficiently random to be unguessable by an attacker.
               MUST be generated by the RC as a unique value for this
               request.
 
-method
+method (string)
 : REQUIRED. The callback method that the AS will use to contact the RC.
               Valid values include `redirect` {{request-interact-callback-redirect}}
               and `push` {{request-interact-callback-push}}, with other values
               defined by [a registry TBD](#IANA).
 
-hash_method
+hash_method (string)
 : OPTIONAL. The hash calculation
               mechanism to be used for the callback hash in {{interaction-hash}}. Can be one of `sha3` or `sha2`. If
               absent, the default value is `sha3`.
@@ -1806,34 +1806,34 @@ In response to a RC's request, the AS responds with a JSON object
 as the HTTP entity body. Each possible field is detailed in the sections below
 
 
-continue
+continue (object)
 : Indicates that the RC can continue the request by making an
     additional request using these parameters. {{response-continue}}
 
-access_token
+access_token (object)
 : A single access token that the RC can use to call the RS on
     behalf of the RO. {{response-token-single}}
 
-multiple_access_token
+multiple_access_token (object)
 : Multiple named access tokens that the RC can use to call the
     RS on behalf of the RO. {{response-token-multiple}}
 
-interact
+interact (object)
 : Indicates that interaction through some set of defined mechanisms
     needs to take place. {{response-interact}}
 
-subject
+subject (object)
 : Claims about the RO as known and declared by the AS. {{response-subject}}
 
-instance_id
+instance_id (string)
 : An identifier this RC instance can use to identify itself when making 
     future requests. {{response-dynamic-handles}}
 
-user_handle
+user_handle (string)
 : An identifier this RC instance can use to identify its current RQ when
     making future requests. {{response-dynamic-handles}}
 
-error
+error (object)
 : An error code indicating that something has gone wrong. {{response-error}}
 
 In this example, the AS is returning an [interaction URL](#response-interact-redirect),
@@ -1882,19 +1882,19 @@ additional requests, it responds with the "continue" field. This field
 contains a JSON object with the following properties.
 
 
-uri
+uri (string)
 : REQUIRED. The URI at which the RC can make
             continuation requests. This URI MAY vary per
             request, or MAY be stable at the AS if the AS includes
             an access token. The RC MUST use this
             value exactly as given when making a [continuation request](#continue-request).
 
-wait
+wait (integer)
 : RECOMMENDED. The amount of time in integer
             seconds the RC SHOULD wait after receiving this continuation
             handle and calling the URI.
 
-access_token
+access_token (object)
 : RECOMMENDED. A unique access token for continuing the request, in the format specified
             in {{response-token-single}}. This access token MUST be bound to the
             RC's key used in the request and MUST NOT be a `bearer` token. 
@@ -1948,13 +1948,13 @@ field. The value of this field is an object with the following
 properties.
 
 
-value
+value (string)
 : REQUIRED. The value of the access token as a
               string. The value is opaque to the RC. The value SHOULD be
               limited to ASCII characters to facilitate transmission over HTTP
               headers within other protocols without requiring additional encoding.
 
-manage
+manage (string)
 : OPTIONAL. The management URI for this
               access token. If provided, the RC MAY manage its access
               token as described in {{token-management}}. This management
@@ -1964,21 +1964,21 @@ manage
               access token value and SHOULD be different for each access
               token issued in a request.
 
-resources
+resources (array of objects/strings)
 : RECOMMENDED. A description of the rights
               associated with this access token, as defined in 
               {{request-resource-single}}. If included, this MUST reflect the rights
               associated with the issued access token. These rights MAY vary
               from what was requested by the RC.
 
-expires_in
+expires_in (integer)
 : OPTIONAL. The number of seconds in
               which the access will expire. The RC MUST NOT use the access
               token past this time. An RS MUST NOT accept an access token
               past this time. Note that the access token MAY be revoked by the
               AS or RS at any point prior to its expiration.
 
-key
+key (object / string / boolean)
 : REQUIRED. The key that the token is bound to. If the boolean value `true` is used,
               the token is bound to the [key used by the RC](#request-key) in its request 
               for access. If the boolean value `false` is used,
@@ -2096,16 +2096,16 @@ no preference order for interaction modes in the response,
 and it is up to the RC to determine which ones to use. All supported
 interaction methods are included in the same `interact` object.
 
-redirect
+redirect (string)
 : Redirect to an arbitrary URL. {{response-interact-redirect}}
 
-app
+app (string)
 : Launch of an application URL. {{response-interact-app}}
 
-callback
+callback (string)
 : Callback to an RC URL after interaction is completed. {{response-interact-callback}}
 
-user_code
+user_code (object)
 : Display a short user code. {{response-interact-usercode}}
 
 Additional interaction mode responses can be defined in [a registry TBD](#IANA).
@@ -2202,7 +2202,7 @@ request, the AS responds with a "user_code" field. This field is an
 object that contains the following members.
 
 
-code
+code (string)
 : REQUIRED. A unique short code that the user
               can type into an authorization server. This string MUST be
               case-insensitive, MUST consist of only easily typeable
@@ -2211,7 +2211,7 @@ code
               minutes. It is RECOMMENDED that this code be no more than eight
               characters in length.
 
-url
+url (string)
 : RECOMMENDED. The interaction URL that the RC
               will direct the RO to. This URL MUST be stable at the AS such
               that RCs can be statically configured with it.
@@ -2271,18 +2271,18 @@ information in the "subject" response field. This field is an object
 with the following OPTIONAL properties.
 
 
-sub_ids
+sub_ids (array of strings)
 : An array of subject identifiers for the
             RO, as defined by 
             {{I-D.ietf-secevent-subject-identifiers}}.
             \[\[ [See issue #74](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/74) \]\]
 
-assertions
+assertions (object)
 : An object containing assertions as values
             keyed on the assertion type defined by [a registry TBD](#IANA). 
             \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
-updated_at
+updated_at (string)
 : Timestamp as an ISO8610 date string, indicating
             when the identified account was last updated. The RC MAY use
             this value to determine if it needs to request updated profile
@@ -2359,12 +2359,12 @@ following dynamic handle returns, additional handles can be defined in
 [a registry TBD](#IANA).
 
 
-instance_id
+instance_id (string)
 : A string value used to represent the information
             in the `client` object that the RC can use in a future request, as
             described in {{request-instance}}.
 
-user_handle
+user_handle (string)
 : A string value used to represent the current
             user. The RC can use in a future request, as described in
             {{request-user-reference}}.
@@ -2394,7 +2394,7 @@ If the AS determines that the request cannot be issued for any
 reason, it responds to the RC with an error message.
 
 
-error
+error (string)
 : The error code.
 
 
@@ -2588,11 +2588,11 @@ The entity message body is a JSON object consisting of the
 following two fields:
 
 
-hash
+hash (string)
 : REQUIRED. The interaction hash value as
               described in {{interaction-hash}}.
 
-interact_ref
+interact_ref (string)
 : REQUIRED. The interaction reference
               generated for this interaction.
 
@@ -3353,16 +3353,16 @@ and MUST NOT be `none`.  The `b64` field MUST be set to `false` and the
 To protect the request, the JWS header MUST contain the following
 additional fields.
 
-htm
+htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
 
-htu
+htu (string)
 : The HTTP URI used for this request, including all path and query components.
 
-ts
+ts (integer)
 : A timestamp of the request in integer seconds
 
-at_hash
+at_hash (string)
 : When to bind a request to an access token, the access token hash value. Its value is the 
     base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
     `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
@@ -3450,16 +3450,16 @@ and MUST NOT be `none`.
 To protect the request, the JWS header MUST contain the following
 additional fields.
 
-htm
+htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
 
-htu
+htu (string)
 : The HTTP URI used for this request, including all path and query components.
 
-ts
+ts (integer)
 : A timestamp of the request in integer seconds
 
-at_hash
+at_hash (string)
 : When to bind a request to an access token, the access token hash value. Its value is the 
     base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
     `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
@@ -3682,7 +3682,7 @@ signature header as described in {{I-D.ietf-oauth-dpop}}
 section 2. In addition to the required fields, the DPoP body MUST also
 contain a digest of the request body:
 
-digest
+digest (string)
 : Digest of the request body as the value of the Digest 
     header defined in {{RFC3230}}.
 
@@ -3910,34 +3910,34 @@ server's discovery information. The AS MUST respond with a JSON document
 containing the following information:
 
 
-grant_request_endpoint
+grant_request_endpoint (string)
 : REQUIRED. The full URL of the
           AS's grant request endpoint. This MUST match the URL the RC used to
           make the discovery request.
 
-capabilities
+capabilities (array of strings)
 : OPTIONAL. A list of the AS's
           capabilities. The values of this result MAY be used by the RC in the
           [capabilities section](#request-capabilities) of
           the request.
 
-interaction_methods
+interaction_methods (array of strings)
 : OPTIONAL. A list of the AS's
           interaction methods. The values of this list correspond to the
           possible fields in the [interaction section](#request-interact) of the request.
 
-key_proofs
+key_proofs (array strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
           [key section](#request-key) of the request.
 
-sub_ids
+sub_ids (array of strings)
 : OPTIONAL. A list of the AS's supported
           identifiers. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
-assertions
+assertions (array of strings)
 : OPTIONAL. A list of the AS's supported
           assertion formats. The values of this list correspond to possible
           values of the [subject assertion section](#request-subject) of the request.
