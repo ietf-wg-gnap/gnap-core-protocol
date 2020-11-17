@@ -103,7 +103,7 @@ from the design team regarding the options as understood.
 # Introduction
 
 This protocol allows a piece of software, the resource client, to request delegated
-authorization to resource servers and direct information. This delegation is
+authorization to resource servers and to request direct information. This delegation is
 facilitated by an authorization server usually on
 behalf of a resource owner. The requesting party operating the software may interact
 with the authorization server to authenticate, provide consent, and
@@ -249,8 +249,8 @@ in only getting subject information directly, and not calling an RS,
 all steps involving the RS below do not apply. 
 
 In some circumstances,
-the information needed at a given stage is communicated out-of-band
-or is pre-configured between the components or entities performing
+the information needed at a given stage is communicated out of band
+or is preconfigured between the components or entities performing
 the roles. For example, one entity can fulfil multiple roles, and so
 explicit communication between the roles is not necessary within the
 protocol flow.
@@ -777,7 +777,7 @@ A non-normative example of a grant request is below:
     },
     "capabilities": ["ext1", "ext2"],
     "subject": {
-        "sub_ids": ["iss-sub", "email"],
+        "sub_ids": ["iss_sub", "email"],
         "assertions": ["id_token"]
     }
 }
@@ -1100,7 +1100,7 @@ assertions (array of strings)
 
 ~~~
 "subject": {
-   "sub_ids": [ "iss-sub", "email" ],
+   "sub_ids": [ "iss_sub", "email" ],
    "assertions": [ "id_token", "saml2" ]
 }
 ~~~
@@ -3574,7 +3574,7 @@ And the JWS body decodes to:
   },
   "subject": {
     "sub_ids": [
-      "iss-sub",
+      "iss_sub",
       "email"
     ]
   }
@@ -3817,12 +3817,12 @@ the `proof` field. The RC creates an HTTP
 Authorization PoP header as described in {{I-D.ietf-oauth-signed-http-request}} section 4, with the
 following additional requirements:
 
-- The at (access token) field MUST be omitted
+- The `at` (access token) field MUST be omitted
             unless this method is being used in conjunction with
             an access token as in {{use-access-token}}.
             \[\[ [See issue #112](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/112) \]\]
 
-- The b (body hash) field MUST be calculated and supplied,
+- The `b` (body hash) field MUST be calculated and supplied,
     unless there is no entity body (such as a GET, OPTIONS, or
     DELETE request).
 
