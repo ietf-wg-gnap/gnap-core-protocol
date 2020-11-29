@@ -2714,10 +2714,9 @@ Detached-JWS: ejy0...
 ~~~
 
 The AS MUST be able to tell from the RC's request which specific ongoing request
-is being accessed. Common methods for facilitating this include using a unique, unguessable URL
-for each continuation response, associating the request with the provided access
-token, or allowing only a single ongoing grant request for a given RC instance
-at a time. If the AS cannot determine a single active grant request to map the
+is being accessed, using a combination of the continuation URL,
+the provided access token, and the RC instance identified by the key signature.
+If the AS cannot determine a single active grant request to map the
 continuation request to, the AS MUST return an error.
 
 The ability to continue an already-started request allows the RC to perform several 
