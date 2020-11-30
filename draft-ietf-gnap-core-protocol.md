@@ -915,7 +915,7 @@ This value is opaque to the CI and MAY be any
 valid JSON string, and therefore could include spaces, unicode
 characters, and properly escaped string sequences. However, in some
 situations the value is intended to be 
-seen and understood be the client software's developer. In such cases, the
+seen and understood by the client software's developer. In such cases, the
 API designer choosing any such human-readable strings SHOULD take steps
 to ensure the string values are not easily confused by a developer
 
