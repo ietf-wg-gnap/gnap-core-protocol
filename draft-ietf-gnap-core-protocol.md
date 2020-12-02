@@ -803,7 +803,7 @@ When requesting an access token, the RC MUST send a
 `resources` field containing a JSON array. The elements of the JSON
 array represent rights of access that the RC is requesting in
 the access token. The requested access is the sum of all elements
-within the array. 
+within the array.
 
 The RC declares what access it wants to associated with the
 resulting access token using objects that describe multiple
@@ -851,9 +851,9 @@ identifier (string)
     For example, a patient identifier for a medical API or
     a bank account number for a financial API.
 
-The following non-normative example shows the use of both common
-and API-specific fields as part of two different access `type` 
-values. 
+The following non-normative example is asking for two kinds of access to each of
+two different locations and two different data types for a single access token 
+using the fictitious `photo-api` type definition.
 
 ~~~
     "resources": [
@@ -861,8 +861,7 @@ values.
             "type": "photo-api",
             "actions": [
                 "read",
-                "write",
-                "dolphin"
+                "write"
             ],
             "locations": [
                 "https://server.example.net/",
@@ -871,6 +870,86 @@ values.
             "datatypes": [
                 "metadata",
                 "images"
+            ]
+        }
+    ]
+~~~
+
+The access requested for a given object when using these fields 
+is the cross-product of all fields of the object. That is to 
+say, the object represents a request for all `action` values listed within the object
+to be used at all `locations` values listed within the object for all `datatype`
+values listed within the object. In the example above,
+the RC is requesting both `read` and `write` access to two RS locations for
+both `metadata` and `images` within the API.
+
+To request a different combination of access, 
+such requesting one `action` against one `location` 
+and a different `action` against a different `location`, the 
+RC can include multiple separate objects in the `resources` array.
+The following non-normative example uses the same fictitious `photo-api`
+type definition to request a single access token with more specifically
+targeted access rights by using two discrete objects within the request.
+
+~~~
+    "resources": [
+        {
+            "type": "photo-api",
+            "actions": [
+                "read"
+            ],
+            "locations": [
+                "https://server.example.net/"
+            ],
+            "datatypes": [
+                "images"
+            ]
+        },
+        {
+            "type": "photo-api",
+            "actions": [
+                "write"
+            ],
+            "locations": [
+                "https://resource.local/other"
+            ],
+            "datatypes": [
+                "metadata"
+            ]
+        }
+    ]
+~~~
+
+The access requested here is for `read` access to `images` on one server
+while simultaneously requesting `write` access for `metadata` on a different
+server, but importantly without requesting `write` access to `images` on the
+first server.
+
+It is anticipated that API designers will use a combination
+of common fields defined in this specification as well as
+fields specific to the API itself. The following non-normative 
+example shows the use of both common and API-specific fields as 
+part of two different access `type` values. 
+
+~~~
+    "resources": [
+        {
+            "type": "photo-api",
+            "actions": [
+                "read",
+                "write"
+            ],
+            "locations": [
+                "https://server.example.net/",
+                "https://resource.local/other"
+            ],
+            "datatypes": [
+                "metadata",
+                "images"
+            ],
+            "geolocation": [
+                { lat: -32.364, lng: 153.207 }, // north west
+                { lat: -35.364, lng: 158.207 }
             ]
         },
         {
@@ -886,7 +965,7 @@ values.
 
 If this request is approved,
 the [resulting access token](#response-token-single) will include
-the sum of both of the requested types of access.
+the sum of both of the requested types of access for both APIs.
 
 ### Requesting Resources By Reference {#request-resource-reference}
 
