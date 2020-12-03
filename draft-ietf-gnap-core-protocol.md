@@ -1490,13 +1490,10 @@ a browser request.
 ~~~
 
 In this non-normative example, the RC is indicating that it can 
-display a [user code](#request-interact-usercode) and direct the RQ
-to an [arbitrary URL of maximum length](#request-interact-short) 255
-characters, but it cannot accept a callback.
+display a [user code](#request-interact-usercode), but it cannot accept a callback.
 
 ~~~
     "interact": {
-        "redirect": 255,
         "user_code": true
     }
 ~~~
@@ -1530,27 +1527,6 @@ console.
 
 If this interaction mode is supported for this RC and
 request, the AS returns a redirect interaction response {{response-interact-redirect}}.
-
-#### Redirect to an Arbitrary Shortened URL {#request-interact-short}
-
-If the RC would prefer to redirect to a shortened URL defined by the AS
-at runtime, the RC indicates this by sending the "redirect"
-field with an integer indicating the maximum character length of
-the returned URL. The AS MAY use this value to decide whether to 
-return a shortened form of the response URL. If the AS cannot shorten
-its response URL enough to fit in the requested size, the AS 
-SHOULD return an error. 
-\[\[ [See issue #53](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/53) \]\]
-
-~~~
-"interact": {
-   "redirect": 255
-}
-~~~
-
-If this interaction mode is supported for this RC and
-request, the AS returns a redirect interaction response with short
-URL {{response-interact-redirect}}.
 
 ### Open an Application-specific URL {#request-interact-app}
 
