@@ -73,15 +73,6 @@ normative:
           ins: B. de Medeiros
         -
           ins: C. Mortimore
-    OIDC4IA:
-      title: OpenID Connect for Identity Assurance 1.0
-      target: https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html
-      date: October 15, 2019
-      author:
-        -
-          ins: T. Lodderstedt
-        -
-          ins: D. Fett
 
 --- abstract
 
@@ -722,9 +713,6 @@ capabilities (array of strings)
 existing_grant (string)
 : Identifies a previously-existing grant that the RC is extending with this request. {{request-existing}}
 
-claims (object)
-: Identifies the identity claims to be returned as part of an OpenID Connect claims request. {{request-oidc-claims}}
-
 Additional members of this request object can be defined by extensions to this protocol
 as described in {{request-extending}}
 
@@ -1113,9 +1101,7 @@ as requested.
 
 Subject identifiers requested by the RC serve only to identify 
 the RO in the context of the AS and can't be used as communication
-channels by the RC, as discussed in {{response-subject}}. One method of 
-requesting communication channels and other identity claims are discussed
-in {{request-oidc-claims}}.  
+channels by the RC, as discussed in {{response-subject}}.
 
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
@@ -1756,41 +1742,6 @@ MUST NOT alter the existing grant associated with the reference.
 
 \[\[ [See issue #62](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/62) \]\]
 
-## Requesting OpenID Connect Claims {#request-oidc-claims}
-
-If the RC and AS both support OpenID Connect's claims query language as defined in {{OIDC}} Section 5.5,
-the RC sends the value of the OpenID Connect `claims` authorization request parameter as a JSON object
-under the name `claims` in the root of the request.
-
-~~~
-        "claims": {
-                "id_token" : {
-                    "email"          : { "essential" : true },
-                    "email_verified" : { "essential" : true }
-                },
-                "userinfo" : {
-                    "name"           : { "essential" : true },
-                    "picture"        : null
-                }
-        }
-~~~
-
-The contents of the `claims` parameter have the same semantics as they do in OpenID Connect's
-`claims` authorization request parameter,
-including all extensions such as {{OIDC4IA}}. The AS MUST process the claims object in the same
-way that it would with an OAuth 2 based authorization request.
-
-Note that because this is an independent query object, the `claims` value can augment or alter
-other portions of the request, namely the `resources` and `subject` fields. This query language uses
-the fields in the top level of the object to indicate the target for any requested claims. For instance, the
-`userinfo` target indicates that a returned access token would grant access to the given claims at the
-UserInfo Endpoint, while the `id_token` target indicates that the claims would be returned in an
-ID Token as described in {{response-subject}}. 
-
-\[\[ [See issue #63](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/63) \]\]
-
-\[\[ [See issue #64](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/64) \]\]
-
 ## Extending The Grant Request {#request-extending}
 
 The request object MAY be extended by registering new items in 
@@ -2316,9 +2267,7 @@ a phone number only identifies the RO to the AS and does not indicate that the
 AS has validated that the represented email address or phone number in the identifier
 is suitable for communication with the current user. To get such information,
 the RC MUST use an identity protocol to request and receive additional identity
-claims. While {{request-oidc-claims}} specifies one such method, 
-other identity protocols could also be used on top of GNAP to convey
-this information and the details of an identity protocol and associated schema 
+claims. The details of an identity protocol and associated schema 
 are outside the scope of this specification.
 
 \[\[ [See issue #75](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/75) \]\]
