@@ -1496,6 +1496,7 @@ device, but it cannot accept a callback.
 
 ~~~
     "interact": {
+        "redirect": true,
         "user_code": true
     }
 ~~~
