@@ -1490,7 +1490,9 @@ a browser request.
 ~~~
 
 In this non-normative example, the RC is indicating that it can 
-display a [user code](#request-interact-usercode), but it cannot accept a callback.
+display a [user code](#request-interact-usercode) and direct the RQ
+to an [arbitrary URL](#request-interact-redirect) on a secondary
+device, but it cannot accept a callback.
 
 ~~~
     "interact": {
