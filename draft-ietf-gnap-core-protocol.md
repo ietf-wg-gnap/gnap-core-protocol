@@ -135,22 +135,23 @@ on the role by the overall protocol.
 
 Authorization Server (AS)
 : Manages the requested delegations for the RO. 
-    The AS issues tokens and directly delegated information to the client instance.
+    The AS issues tokens and directly delegated information to an instance of the client.
     The AS is defined by its grant endpoint, a single URL that accepts a POST
     request with a JSON payload. The AS could also have other endpoints,
     including interaction endpoints and user code endpoints, and these are
     introduced to the RC as needed during the delegation process. 
 
 Client
-: Requests tokens from the AS and uses tokens at the RS.
+: Requests tokens and directly delegated information from the AS, and uses tokens at the RS.
+    For some kinds of client software, there could be many instances
+    of a single piece of client software. This specification
+    differentiates between a specific instance (the client instance) and the 
+    software running the instance (the client software).
     A client instance is identified by its unique key, which can
     be known to the AS prior to the first request or introduced
     to the AS as part of the protocol. The AS determines
     which policies apply to a given client instance, including what it can
-    request and on whose behalf. For some kinds of client software, there could be many instances
-    of a single piece of client software, and this specification
-    differentiates between a specific instance, the client instance, and the 
-    software running the instance, the client software.
+    request and on whose behalf. 
 
 Resource Server (RS, aka "API")
 : Accepts tokens from the client instance issued by the AS and serves delegated resources
@@ -218,7 +219,7 @@ Access Token
 : A credential representing a set of access rights
 delegated to the client instance. The access token is created by the AS, consumed
 and verified by the RS, and issued to and carried by the client instance. The contents
-and format of the access token are opaque to the client instance.
+and format of the access token are opaque to the client.
 
 Grant
 : The process by which the client instance requests and is given delegated
@@ -337,7 +338,7 @@ protocol flow.
     execute a policy engine request, or any number of alternative methods for
     validating the token and its fitness for the request.
     
-- (8) The client instance to [call the RS](#use-access-token) using the access token
+- (8) The client instance [calls the RS](#use-access-token) using the access token
     until the RS or client instance determine that the token is no longer valid.
     
 - (9) When the token no longer works, the client instance fetches an 
@@ -1309,13 +1310,13 @@ to present to the RO during any interactive sequences.
 
 
 name (string)
-: Display name of the client instance or client software
+: Display name of the client software
 
 uri (string)
-: User-facing web page of the client instance or client software
+: User-facing web page of the client software
 
 logo_uri (string)
-: Display image to represent the client instance or client
+: Display image to represent the client
             software
 
 
@@ -1734,9 +1735,9 @@ Additional interaction modes are defined in [a registry TBD](#IANA).
 
 \[\[ [See issue #61](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/61) \]\]
 
-## Declaring Client Instance Capabilities {#request-capabilities}
+## Declaring Client Capabilities {#request-capabilities}
 
-If the client instance supports extension capabilities, it MAY present them
+If the client software supports extension capabilities, the client instance MAY present them
 to the AS in the "capabilities" field. This field is an array of
 strings representing specific extensions and capabilities, as defined
 by [a registry TBD](#IANA).
