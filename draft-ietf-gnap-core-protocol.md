@@ -805,7 +805,7 @@ array represent rights of access that the RC is requesting in
 the access token. The requested access is the union of all elements
 within the array.
 
-The RC declares what access it wants to associated with the
+The RC declares what access it wants to associate with the
 resulting access token using objects that describe multiple
 dimensions of access. Each object contains a `type`
 property that determines the type of API that the RC is calling.
