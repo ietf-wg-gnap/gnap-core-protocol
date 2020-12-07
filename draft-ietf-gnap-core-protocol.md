@@ -802,7 +802,7 @@ sections.
 When requesting an access token, the RC MUST send a
 `resources` field containing a JSON array. The elements of the JSON
 array represent rights of access that the RC is requesting in
-the access token. The requested access is the sum of all elements
+the access token. The requested access is the union of all elements
 within the array.
 
 The RC declares what access it wants to associated with the
@@ -880,14 +880,14 @@ The access requested for a given object when using these fields
 is the cross-product of all fields of the object. That is to 
 say, the object represents a request for all `action` values listed within the object
 to be used at all `locations` values listed within the object for all `datatype`
-values listed within the object. In the example above,
+values listed within the object. Assuming the request above was granted,
 the RC could assume that it
 would be able to do a `read` action against the `images` on the first server
 as well as a `delete` action on the `metadata` of the second server, or any other
-combination of these fields, using the same access token.
+combination of these fields, using the same access token. 
 
 To request a different combination of access, 
-such requesting one `action` against one `location` 
+such as requesting one `action` against one `location` 
 and a different `action` against a different `location`, the 
 RC can include multiple separate objects in the `resources` array.
 The following non-normative example uses the same fictitious `photo-api`
@@ -973,8 +973,8 @@ field. The second access request includes the `actions` and
 ~~~
 
 If this request is approved,
-the [resulting access token](#response-token-single) will include
-the sum of both of the requested types of access for both APIs, just as above.
+the [resulting access token](#response-token-single)'s access rights will be
+the union the requested types of access for each of the two APIs, just as above.
 
 ### Requesting Resources By Reference {#request-resource-reference}
 
@@ -1044,7 +1044,7 @@ as well as the reference values of `read`, `dolphin-metadata`, and `some other t
     ]
 ~~~
 
-The requested access is the sum of all elements of the array, including both objects and 
+The requested access is the union of all elements of the array, including both objects and 
 reference strings.
 
 \[\[ [See issue #36](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/36) \]\]
