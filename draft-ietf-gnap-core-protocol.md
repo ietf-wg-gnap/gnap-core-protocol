@@ -3122,7 +3122,7 @@ Detached-JWS: ejy0...
 ~~~
 
 If the request is successfully cancelled, the AS responds with an HTTP 202.
-The AS MUST revoke all associated access tokens, if possible.
+The AS SHOULD revoke all associated access tokens.
 
 # Token Management {#token-management}
 
