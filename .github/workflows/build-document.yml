@@ -1,0 +1,23 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the artifacts with the docker image
+      run: docker-compose
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v2
+      with:
+        name: rendered-html
+        path: draft-ietf-gnap-core-protocol.html
