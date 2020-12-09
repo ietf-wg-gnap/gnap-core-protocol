@@ -974,7 +974,7 @@ field. The second access request includes the `actions` and
 
 If this request is approved,
 the [resulting access token](#response-token-single)'s access rights will be
-the union the requested types of access for each of the two APIs, just as above.
+the union of the requested types of access for each of the two APIs, just as above.
 
 ### Requesting Resources By Reference {#request-resource-reference}
 
