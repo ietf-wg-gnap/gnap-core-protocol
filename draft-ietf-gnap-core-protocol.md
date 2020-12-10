@@ -1900,7 +1900,7 @@ access_token (object)
             RC's key used in the request and MUST NOT be a bearer token. As a consequence,
             the `key` field of this access token is always the boolean value `true`.
             This access token MUST NOT be usable at resources outside of the AS.
-            The RC MUST present the access  token in all requests to the continuation URI as 
+            The RC MUST present the access token in all requests to the continuation URI as 
             described in {{use-access-token}}.
             \[\[ [See issue #66](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/66) \]\]
 
