@@ -16,16 +16,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build the artifacts with the docker image
       run: docker-compose up
-    - name: Archive code coverage results
-      uses: actions/upload-artifact@v2
-      with:
-        name: rendered-html
-        path: draft-ietf-gnap-core-protocol.html
-    - name: Download math result for job 1
-      uses: actions/download-artifact@v2
-      with:
-        name: rendered-html
-        path: build
+    - name: Package built file
+      run: |
+        mkdir -p build
+        cp draft-ietf-gnap-core-protocol.html build/index.html
     - name: Deploy draft to Netlify
       uses: South-Paw/action-netlify-deploy@v1.0.4
       with:
