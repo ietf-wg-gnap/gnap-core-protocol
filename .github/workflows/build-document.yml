@@ -35,3 +35,4 @@ jobs:
         build-dir: './build'
         draft: true
         comment-on-commit: true
+        commont-on-pull-request: true
