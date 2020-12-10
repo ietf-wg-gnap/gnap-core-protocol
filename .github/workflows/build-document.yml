@@ -21,3 +21,17 @@ jobs:
       with:
         name: rendered-html
         path: draft-ietf-gnap-core-protocol.html
+    - name: Download math result for job 1
+      uses: actions/download-artifact@v2
+      with:
+        name: rendered-html
+        path: build
+    - name: Deploy draft to Netlify
+      uses: South-Paw/action-netlify-deploy@v1.0.4
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        netlify-auth-token: ${{ secrets.NETLIFY_TOKEN }}
+        netlify-site-id: ${{ secrets.NETLIFY_ID }}
+        build-dir: './build'
+        draft: true
+        comment-on-commit: true
