@@ -4455,9 +4455,8 @@ Content-type: application/json
 
 In this scenario, the user does not have access to a web browser on
 the device and must use a secondary device to interact with the AS.
-The client can display a user code or a printable QR code. The client
-prefers a short URL if one is available, with a maximum of 255 characters
-in length. The is not able to accept callbacks from the AS and needs to poll
+The client can display a user code or a printable QR code.
+The client is not able to accept callbacks from the AS and needs to poll
 for updates while waiting for the user to authorize the request.
 
 The client initiates the request to the AS.
@@ -4474,7 +4473,7 @@ Detached-JWS: ejy0...
     ],
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
-        "redirect": 255,
+        "redirect": true,
         "user_code": true
     }
 }
@@ -4483,7 +4482,7 @@ Detached-JWS: ejy0...
 
 
 The AS processes this and determines that the RO needs to interact.
-The AS supports both long and short redirect URIs for interaction, so
+The AS supports both redirect URIs and user codes for interaction, so
 it includes both. Since there is no "callback" the AS does not include
 a nonce, but does include a "wait" parameter on the continuation
 section because it expects the client to poll for results.
