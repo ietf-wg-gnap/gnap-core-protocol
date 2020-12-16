@@ -73,15 +73,6 @@ normative:
           ins: B. de Medeiros
         -
           ins: C. Mortimore
-    OIDC4IA:
-      title: OpenID Connect for Identity Assurance 1.0
-      target: https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html
-      date: October 15, 2019
-      author:
-        -
-          ins: T. Lodderstedt
-        -
-          ins: D. Fett
 
 --- abstract
 
@@ -729,9 +720,6 @@ capabilities (array of strings)
 existing_grant (string)
 : Identifies a previously-existing grant that the client instance is extending with this request. {{request-existing}}
 
-claims (object)
-: Identifies the identity claims to be returned as part of an OpenID Connect claims request. {{request-oidc-claims}}
-
 Additional members of this request object can be defined by extensions to this protocol
 as described in {{request-extending}}
 
@@ -1120,9 +1108,7 @@ as requested.
 
 Subject identifiers requested by the client instance serve only to identify 
 the RO in the context of the AS and can't be used as communication
-channels by the client instance, as discussed in {{response-subject}}. One method of 
-requesting communication channels and other identity claims are discussed
-in {{request-oidc-claims}}.  
+channels by the client instance, as discussed in {{response-subject}}.
 
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
@@ -1763,41 +1749,6 @@ MUST NOT alter the existing grant associated with the reference.
 
 \[\[ [See issue #62](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/62) \]\]
 
-## Requesting OpenID Connect Claims {#request-oidc-claims}
-
-If the client instance and AS both support OpenID Connect's claims query language as defined in {{OIDC}} Section 5.5,
-the client instance sends the value of the OpenID Connect `claims` authorization request parameter as a JSON object
-under the name `claims` in the root of the request.
-
-~~~
-        "claims": {
-                "id_token" : {
-                    "email"          : { "essential" : true },
-                    "email_verified" : { "essential" : true }
-                },
-                "userinfo" : {
-                    "name"           : { "essential" : true },
-                    "picture"        : null
-                }
-        }
-~~~
-
-The contents of the `claims` parameter have the same semantics as they do in OpenID Connect's
-`claims` authorization request parameter,
-including all extensions such as {{OIDC4IA}}. The AS MUST process the claims object in the same
-way that it would with an OAuth 2 based authorization request.
-
-Note that because this is an independent query object, the `claims` value can augment or alter
-other portions of the request, namely the `resources` and `subject` fields. This query language uses
-the fields in the top level of the object to indicate the target for any requested claims. For instance, the
-`userinfo` target indicates that a returned access token would grant access to the given claims at the
-UserInfo Endpoint, while the `id_token` target indicates that the claims would be returned in an
-ID Token as described in {{response-subject}}. 
-
-\[\[ [See issue #63](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/63) \]\]
-
-\[\[ [See issue #64](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/64) \]\]
-
 ## Extending The Grant Request {#request-extending}
 
 The request object MAY be extended by registering new items in 
@@ -1814,8 +1765,8 @@ as the HTTP entity body. Each possible field is detailed in the sections below
 
 
 continue (object)
-: Indicates that the client instance can continue the request by making an
-    additional request using these parameters. {{response-continue}}
+: Indicates that the client instance can continue the request by making one or
+    more continuation requests. {{response-continue}}
 
 access_token (object)
 : A single access token that the client instance can use to call the RS on
@@ -1844,7 +1795,7 @@ error (object)
 : An error code indicating that something has gone wrong. {{response-error}}
 
 In this example, the AS is returning an [interaction URL](#response-interact-redirect),
-a [callback nonce](#response-interact-callback), and a [continuation handle](#response-continue).
+a [callback nonce](#response-interact-callback), and a [continuation response](#response-continue).
 
 ~~~
 {
@@ -1902,12 +1853,12 @@ wait (integer)
             handle and calling the URI.
 
 access_token (object)
-: RECOMMENDED. A unique access token for continuing the request, in the format specified
+: REQUIRED. A unique access token for continuing the request, in the format specified
             in {{response-token-single}}. This access token MUST be bound to the
-            client instance's key used in the request and MUST NOT be a `bearer` token. 
+            client instance's key used in the request and MUST NOT be a `bearer` token. As a consequence,
+            the `key` field of this access token is always the boolean value `true`.
             This access token MUST NOT be usable at resources outside of the AS.
-            If the AS includes an access token, the client instance MUST present the access 
-            token in all requests to the continuation URI as 
+            The client instance MUST present the access token in all requests to the continuation URI as 
             described in {{use-access-token}}.
             \[\[ [See issue #66](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/66) \]\]
 
@@ -1929,7 +1880,7 @@ access_token (object)
 The client instance can use the values of this field to continue the
 request as described in {{continue-request}}. Note that the
 client instance MUST sign all continuation requests with its key as described
-in {{binding-keys}}. If the AS includes an `access_token`, the client instance
+in {{binding-keys}} and
 MUST present the access token in its continuation request.
 
 This field SHOULD be returned when interaction is expected, to
@@ -2323,9 +2274,7 @@ a phone number only identifies the RO to the AS and does not indicate that the
 AS has validated that the represented email address or phone number in the identifier
 is suitable for communication with the current user. To get such information,
 the client instance MUST use an identity protocol to request and receive additional identity
-claims. While {{request-oidc-claims}} specifies one such method, 
-other identity protocols could also be used on top of GNAP to convey
-this information and the details of an identity protocol and associated schema 
+claims. The details of an identity protocol and associated schema 
 are outside the scope of this specification.
 
 \[\[ [See issue #75](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/75) \]\]
@@ -2695,33 +2644,44 @@ This is often part of facilitating [interaction](#user-interaction), but it coul
 also be used to allow the AS and client instance to continue negotiating the parameters of
 the [original grant request](#request). 
 
-To enable this ongoing negotiation, the AS returns a `continue` field 
+To enable this ongoing negotiation, the AS provides a continuation API to the client software.
+The AS returns a `continue` field 
 [in the response](#response-continue) that contains information the client instance needs to
-continue this process with another request, including a URI to access
-as well as an optional access token to use during the continued requests.
+access this API, including a URI to access
+as well as an access token to use during the continued requests. 
 
-When the client instance makes any calls to the continuation URL, the client instance MUST present
-proof of the most recent key associated with this ongoing request
-by signing the request as described in {{binding-keys}}. The key in use will
-be either the key from [the initial request](#request-key) or its most recent
-rotation. 
+The access token is initially bound to the same key and method the client instance used to make 
+the initial request. As a consequence,
+when the client instance makes any calls to the continuation URL, the client instance MUST present
+the access token as described in {{use-access-token}} and present
+proof of the client instance's key (or its most recent rotation)
+by signing the request as described in {{binding-keys}}.
+
 \[\[ [See issue #85](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/85) \]\]
 
-For example, here the client instance makes a POST request and signs with detached
-JWS:
+For example, here the client instance makes a POST request to a unique URI and signs 
+the request with detached JWS:
 
 ~~~
-POST /continue/80UPRY5NM33OMUKMKSKU HTTP/1.1
+POST /continue/KSKUOMUKM HTTP/1.1
+Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Host: server.example.com
 Detached-JWS: ejy0...
 ~~~
 
-If the AS includes an `access_token` in the `continue`
-response in {{response-continue}}, the client instance MUST include the access token the
-request as described in {{use-access-token}}. Note that the access token
-is always bound to the client instance's presented key (or its most recent rotation).
+The AS MUST be able to tell from the client instance's request which specific ongoing request
+is being accessed, using a combination of the continuation URL,
+the provided access token, and the client instance identified by the key signature.
+If the AS cannot determine a single active grant request to map the
+continuation request to, the AS MUST return an error.
 
-For example, here the client instance makes a POST request with the interaction reference, 
+The ability to continue an already-started request allows the client instance to perform several 
+important functions, including presenting additional information from interaction, 
+modifying the initial request, and getting the current state of the request.
+
+All requests to the continuation API are protected by this bound access token. 
+For example, here the client instance makes a POST request to a stable continuation endpoint
+URL with the [interaction reference](#continue-after-interaction), 
 includes the access token, and signs with detached JWS:
 
 ~~~
@@ -2735,17 +2695,6 @@ Detached-JWS: ejy0...
   "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
 }
 ~~~
-
-The AS MUST be able to tell from the client instance's request which specific ongoing request
-is being accessed. Common methods for doing so include using a unique, unguessable URL
-for each continuation response, associating the request with the provided access
-token, or allowing only a single ongoing grant request for a given client instance instance
-at a time. If the AS cannot determine a single active grant request to map the
-continuation request to, the AS MUST return an error.
-
-The ability to continue an already-started request allows the client instance to perform several 
-important functions, including presenting additional information from interaction, 
-modifying the initial request, and getting the current state of the request.
 
 If a "wait" parameter was included in the [continuation response](#response-continue), the
 client instance MUST NOT call the continuation URI prior to waiting the number of
@@ -2761,9 +2710,8 @@ sections below.
 If the AS determines that the client instance can 
 make a further continuation request, the AS MUST include a new 
 ["continue" response](#response-continue). 
-If the continuation was previously bound to an access token, the
-new `continue` response MUST include a bound access token as well, and
-this token SHOULD be a new access token. 
+The new `continue` response MUST include a bound access token as well, and
+this token SHOULD be a new access token, invalidating the previous access token.
 If the AS does not return a new `continue` response, the client instance
 MUST NOT make an additional continuation request. If a client instance does so,
 the AS MUST return an error.
@@ -2779,9 +2727,10 @@ response includes an interaction reference. The client instance MUST include tha
 `interact_ref` in a POST request to the continuation URI.
 
 ~~~
-POST /continue/80UPRY5NM33OMUKMKSKU HTTP/1.1
+POST /continue HTTP/1.1
 Host: server.example.com
 Content-type: application/json
+Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
 {
@@ -2953,7 +2902,8 @@ Detached-JWS: ejy0...
 ~~~
 
 Access is granted by the RO, and a token is issued by the AS. 
-In its final response, the AS includes a `continue` field:
+In its final response, the AS includes a `continue` field, which includes
+a separate access token for accessing the continuation API:
 
 ~~~
 {
@@ -2965,11 +2915,18 @@ In its final response, the AS includes a `continue` field:
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
-    "access_token": ...
+    "access_token": {
+        "value": "RP1LT0-OS9M2P_R64TB",
+        "key": false,
+        "resources": [
+            "read", "write"
+        ]
+    }
 }
 ~~~
 
-This allows the client instance to make an eventual continuation call. The client instance realizes that it no longer needs
+This `continue` field allows the client instance to make an eventual continuation call. In the future, 
+the client instance realizes that it no longer needs
 "write" access and therefore modifies its ongoing request, here asking for just "read" access
 instead of both "read" and "write" as before.
 
@@ -3004,7 +2961,13 @@ that had the greater access rights associated with them.
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
-    "access_token": ...
+    "access_token": {
+        "value": "0EVKC7-2ZKwZM_6N760",
+        "key": false,
+        "resources": [
+            "read"
+        ]
+    }
 }
 ~~~
 
@@ -3046,7 +3009,13 @@ In its final response, the AS includes a `continue` field:
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
-    "access_token": ...
+    "access_token": {
+        "value": "RP1LT0-OS9M2P_R64TB",
+        "key": false,
+        "resources": [
+            "read"
+        ]
+    }
 }
 ~~~
 
@@ -3336,10 +3305,12 @@ the request.
 When used for delegation in GNAP, these key binding mechanisms allow
 the AS to ensure that the keys presented by the client instance in the initial request are in 
 control of the party calling any follow-up or continuation requests. To facilitate 
-this requirement, all keys in the initial request {{request-key}} MUST be proved in all continuation requests
-{{continue-request}} and token management requests {{token-management}}, modulo any 
-rotations on those keys over time that the AS knows about. The AS MUST validate all keys
-[presented by the client instance](#request-key) or referenced in an
+this requirement, the [continuation response](#response-continue) includes
+an access token bound to the [client instance's key](#request-key), and that key (or its most recent rotation)
+MUST be proved in all continuation requests
+{{continue-request}}. Token management requests {{token-management}} are similarly bound
+to either the access token's own key or, in the case of bearer tokens, the client instance's key.
+The AS MUST validate all keys [presented by the client instance](#request-key) or referenced in an
 ongoing request for each call within that request.
 
 \[\[ [See issue #105](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/105) \]\]
@@ -4531,7 +4502,11 @@ Content-type: application/json
         }
     },
     "continue": {
-        "uri": "https://server.example.com/continue/80UPRY5NM33OMUKMKSKU",
+        "access_token": {
+            "value": "80UPRY5NM33OMUKMKSKU",
+            "key": true
+        },
+        "uri": "https://server.example.com/continue/VGJKPTKC50",
         "wait": 60
     }
 }
@@ -4557,8 +4532,9 @@ the continuation URL. The client instance signs the request using the
 same key and method that it did in the first request.
 
 ~~~
-POST /continue/80UPRY5NM33OMUKMKSKU HTTP/1.1
+POST /continue/VGJKPTKC50 HTTP/1.1
 Host: server.example.com
+Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 ~~~
 
@@ -4574,30 +4550,33 @@ Content-type: application/json
 
 {
     "continue": {
-        "uri": "https://server.example.com/continue/BI9QNW6V9W3XFJK4R02D",
+        "access_token": {
+            "value": "G7YQT4KQQ5TZY9SLSS5E",
+            "key": true
+        },
+        "uri": "https://server.example.com/continue/ATWHO4Q1WV",
         "wait": 60
     }
 }
 ~~~
 
 
-
-Note that the continuation URL has been rotated since it was
+Note that the continuation URL and access token have been rotated since they were
 used by the client instance to make this call. The client instance polls the
-continuation URL after a 60 second timeout using the new handle.
+continuation URL after a 60 second timeout using this new information.
 
 ~~~
-POST /continue/BI9QNW6V9W3XFJK4R02D HTTP/1.1
+POST /continue/ATWHO4Q1WV HTTP/1.1
 Host: server.example.com
-Authorization: GNAP 
+Authorization: GNAP G7YQT4KQQ5TZY9SLSS5E
 Detached-JWS: ejy0...
 ~~~
 
 
 
-The AS retrieves the pending request based on the URL,
+The AS retrieves the pending request based on the URL and access token,
 determines that it has been approved, and issues an access
-token.
+token for the client to use at the RS.
 
 ~~~
 Content-type: application/json
