@@ -199,8 +199,6 @@ role of the AS as defined by the protocol.
 
 \[\[ [See issue #29](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/29) \]\]
 
-\[\[ [See issue #32](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/32) \]\]
-
 ## Elements {#elements}
 
 In addition to the roles above, the protocol also involves several 
@@ -229,8 +227,6 @@ Subject Information
 : Information about the RO that is returned directly to the client instance from the AS
 without the client instance making a separate call to an RS. Access to this information
 is delegated by the RO as part of the grant process.
-
-\[\[ [See issue #33](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/33) \]\]
 
 ## Sequences {#sequence}
 
@@ -825,8 +821,6 @@ SHOULD NOT re-use these fields with different semantics or syntax. The
 available values for these properties are determined by the API
 being protected at the RS.
 
-\[\[ [See issue #34](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/34) \]\]
-
 actions (array of strings)
 : The types of actions the client instance will take at the RS as an array of strings.
     For example, a client instance asking for a combination of "read" and "write" access.
@@ -891,8 +885,6 @@ the AS or RS representing the access being requested. Each string
 SHOULD correspond to a specific expanded object representation at
 the AS. 
 
-\[\[ [See issue #35](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/35) \]\]
-
 ~~~
     "resources": [
         "read", "dolphin-metadata", "some other thing"
@@ -947,8 +939,6 @@ string-type resource items.
         "some other thing"
     ]
 ~~~
-
-\[\[ [See issue #36](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/36) \]\]
 
 ### Requesting Multiple Access Tokens {#request-resource-multiple}
 
@@ -1232,8 +1222,6 @@ MAY be a symmetric key known to the AS. The client instance MUST NOT send a
 symmetric key by value in the request, as doing so would expose
 the key directly instead of proving possession of it. 
 
-\[\[ [See issue #46](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/46) \]\]
-
 ### Identifying the Client Instance Key {#request-key}
 
 The client instance key MUST be a public key in at least one
@@ -1264,8 +1252,6 @@ cert#S256 (string)
             encoding.
 
 Additional key types are defined in [a registry TBD](#IANA).
-
-\[\[ [See issue #47](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/47) \]\]
 
 This non-normative example shows a single key presented in multiple
 formats using a single proofing mechanism.
@@ -1464,8 +1450,6 @@ ui_locales (array of strings)
 The following sections detail requests for interaction
 modes. Additional interaction modes are defined in 
 [a registry TBD](#IANA).
-
-\[\[ [See issue #52](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/52) \]\]
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
 the RQ to an arbitrary URL and can receive a [callback](#request-interact-callback) through
@@ -1719,8 +1703,6 @@ of the given locales are supported, the AS MAY use a default locale.
 
 Additional interaction modes are defined in [a registry TBD](#IANA).
 
-\[\[ [See issue #61](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/61) \]\]
-
 ## Declaring Client Capabilities {#request-capabilities}
 
 If the client software supports extension capabilities, the client instance MAY present them
@@ -1755,8 +1737,6 @@ The request object MAY be extended by registering new items in
 [a registry TBD](#IANA). Extensions SHOULD be orthogonal to other parameters.
 Extensions MUST document any aspects where the extension item affects or influences
 the values or behavior of other request and response objects. 
-
-\[\[ [See issue #65](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/65) \]\]
 
 # Grant Response {#response}
 
@@ -1886,8 +1866,6 @@ MUST present the access token in its continuation request.
 This field SHOULD be returned when interaction is expected, to
 allow the client instance to follow up after interaction has been
 concluded.
-
-\[\[ [See issue #67](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/67) \]\]
 
 ## Access Tokens {#response-token}
 
@@ -2141,8 +2119,6 @@ that the client instance will use in validating the callback as defined in
     }
 ~~~
 
-\[\[ [See issue #73](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/73) \]\]
-
 When the RO completes interaction at the AS, the AS MUST call the
 client instance's callback URL using the method indicated in the
 [callback request](#request-interact-callback) as described in {{interaction-callback}}.
@@ -2233,7 +2209,6 @@ sub_ids (array of strings)
 : An array of subject identifiers for the
             RO, as defined by 
             {{I-D.ietf-secevent-subject-identifiers}}.
-            \[\[ [See issue #74](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/74) \]\]
 
 assertions (object)
 : An object containing assertions as values
@@ -2279,8 +2254,6 @@ are outside the scope of this specification.
 
 \[\[ [See issue #75](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/75) \]\]
 
-\[\[ [See issue #74](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/74) \]\]
-
 Extensions to this specification MAY define additional response
 properties in [a registry TBD](#IANA).
 
@@ -2306,8 +2279,6 @@ Dynamically generated handles are string values that MUST be
 protected by the client instance as secrets. Handle values MUST be unguessable
 and MUST NOT contain any sensitive information. Handle values are
 opaque to the client instance. 
-
-\[\[ [See issue #76](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/76) \]\]
 
 All dynamically generated handles are returned as fields in the
 root JSON object of the response. This specification defines the
@@ -2385,8 +2356,6 @@ unknown_request
 Extensions to this specification MAY define additional fields for
 the grant response in [a registry TBD](#IANA).
 
-\[\[ [See issue #80](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/80) \]\]
-
 # Interaction at the AS {#user-interaction}
 
 If the client instance [indicates that it is capable of driving interaction with the RO in its request](#request-interact), and
@@ -2409,8 +2378,6 @@ actions it sees fit, including but not limited to:
 
 - provide warnings to the RO about potential attacks or negative
     effects of the requested information
-
-\[\[ [See issue #81](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/81) \]\]
 
 ## Interaction at a Redirected URI {#interaction-redirect}
 
@@ -2461,8 +2428,6 @@ interacts with the RO through that application to authenticate the
 user as the RO and gather their consent. The details of this
 interaction are out of scope for this specification.
 
-\[\[ [See issue #82](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/82) \]\]
-
 ## Post-Interaction Completion {#interaction-finalize}
 
 Upon completing an interaction with the RO, if a ["callback"](#response-interact-callback) mode is
@@ -2474,8 +2439,6 @@ still take place in most error cases, such as when the RO has denied
 access. This pattern allows the client instance to potentially recover from the error
 state without restarting the request from scratch by modifying its
 request or providing additional information directly to the AS.
-
-\[\[ [See issue #83](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/83) \]\]
 
 The AS MUST create an interaction reference and associate that
 reference with the current interaction and the underlying pending
@@ -2580,8 +2543,6 @@ the front channel response to an ongoing request by using values
 known only to the parties involved. This security mechanism allows the client instance to protect itself against
 several kinds of session fixation and injection attacks. The AS MUST
 always provide this hash, and the client instance MUST validate the hash when received.
-
-\[\[ [See issue #84](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/84) \]\]
 
 To calculate the "hash" value, the party doing the calculation
 first takes the "nonce" value sent by the client instance in the 
@@ -3137,8 +3098,6 @@ Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 Detached-JWS: eyj0....
 ~~~
 
-\[\[ [See issue #100](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/100) \]\]
-
 The AS validates that the token presented is associated with the management
 URL, that the AS issued the token to the given client instance, and that
 the presented key is appropriate to the token. 
@@ -3354,7 +3313,6 @@ the object is signed according to detached JWS {{RFC7797}}.
 
 The client instance presents the signature in the Detached-JWS HTTP Header
 field. 
-\[\[ [See issue #107](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/107) \]\]
 
 ~~~
 POST /tx HTTP/1.1
@@ -3413,8 +3371,6 @@ contents as a detached JWS object. The HTTP Body is used as the
 payload for purposes of validating the JWS, with no
 transformations.
 
-\[\[ [See issue #108](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/108) \]\]
-
 ## Attached JWS {#attached-jws}
 
 This method is indicated by `jws` in the
@@ -3443,8 +3399,6 @@ at_hash (string)
     `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
     header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
     value with SHA-256, then take the left-most 128 bits and base64url encode them. 
-
-\[\[ [See issue #107](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/107) \]\]
 
 The payload of the JWS object is the JSON serialized body of the request, and
 the object is signed according to JWS and serialized into compact form {{RFC7515}}. 
@@ -3721,8 +3675,6 @@ B7_8Wbw4ttzbMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFekpdfWdiPQddQ6Y
     }
 }
 ~~~
-
-\[\[ [See issue #111](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/111) \]\]
 
 ## HTTP Signing {#httpsig-binding}
 
