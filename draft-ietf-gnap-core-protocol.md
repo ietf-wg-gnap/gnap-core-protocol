@@ -793,10 +793,10 @@ sections.
 When requesting an access token, the client instance MUST send a
 `resources` field containing a JSON array. The elements of the JSON
 array represent rights of access that the client instance is requesting in
-the access token. The requested access is the sum of all elements
-within the array. 
+the access token. The requested access is the union of all elements
+within the array.
 
-The client instance declares what access it wants to associated with the
+The client instance declares what access it wants to associate with the
 resulting access token using objects that describe multiple
 dimensions of access. Each object contains a `type`
 property that determines the type of API that the client instance is calling.
@@ -840,9 +840,9 @@ identifier (string)
     For example, a patient identifier for a medical API or
     a bank account number for a financial API.
 
-The following non-normative example shows the use of both common
-and API-specific fields as part of two different access `type` 
-values. 
+The following non-normative example is asking for three kinds of access (read, write, delete) to each of
+two different locations and two different data types (metadata, images) for a single access token 
+using the fictitious `photo-api` type definition.
 
 ~~~
     "resources": [
@@ -851,7 +851,7 @@ values.
             "actions": [
                 "read",
                 "write",
-                "dolphin"
+                "delete"
             ],
             "locations": [
                 "https://server.example.net/",
@@ -860,6 +860,94 @@ values.
             "datatypes": [
                 "metadata",
                 "images"
+            ]
+        }
+    ]
+~~~
+
+The access requested for a given object when using these fields 
+is the cross-product of all fields of the object. That is to 
+say, the object represents a request for all `action` values listed within the object
+to be used at all `locations` values listed within the object for all `datatype`
+values listed within the object. Assuming the request above was granted,
+the RC could assume that it
+would be able to do a `read` action against the `images` on the first server
+as well as a `delete` action on the `metadata` of the second server, or any other
+combination of these fields, using the same access token. 
+
+To request a different combination of access, 
+such as requesting one `action` against one `location` 
+and a different `action` against a different `location`, the 
+RC can include multiple separate objects in the `resources` array.
+The following non-normative example uses the same fictitious `photo-api`
+type definition to request a single access token with more specifically
+targeted access rights by using two discrete objects within the request.
+
+~~~
+    "resources": [
+        {
+            "type": "photo-api",
+            "actions": [
+                "read"
+            ],
+            "locations": [
+                "https://server.example.net/"
+            ],
+            "datatypes": [
+                "images"
+            ]
+        },
+        {
+            "type": "photo-api",
+            "actions": [
+                "write",
+                "delete"
+            ],
+            "locations": [
+                "https://resource.local/other"
+            ],
+            "datatypes": [
+                "metadata"
+            ]
+        }
+    ]
+~~~
+
+The access requested here is for `read` access to `images` on one server
+while simultaneously requesting `write` and `delete` access for `metadata` on a different
+server, but importantly without requesting `write` or `delete` access to `images` on the
+first server.
+
+It is anticipated that API designers will use a combination
+of common fields defined in this specification as well as
+fields specific to the API itself. The following non-normative 
+example shows the use of both common and API-specific fields as 
+part of two different fictitious API `type` values. The first
+access request includes the `actions`, `locations`, and `datatypes` 
+fields specified here as well as the API-specific `geolocation`
+field. The second access request includes the `actions` and
+`identifier` fields specified here as well as the API-specific
+`currency` field.
+
+~~~
+    "resources": [
+        {
+            "type": "photo-api",
+            "actions": [
+                "read",
+                "write"
+            ],
+            "locations": [
+                "https://server.example.net/",
+                "https://resource.local/other"
+            ],
+            "datatypes": [
+                "metadata",
+                "images"
+            ],
+            "geolocation": [
+                { lat: -32.364, lng: 153.207 },
+                { lat: -35.364, lng: 158.207 }
             ]
         },
         {
@@ -874,8 +962,8 @@ values.
 ~~~
 
 If this request is approved,
-the [resulting access token](#response-token-single) will include
-the sum of both of the requested types of access.
+the [resulting access token](#response-token-single)'s access rights will be
+the union of the requested types of access for each of the two APIs, just as above.
 
 ### Requesting Resources By Reference {#request-resource-reference}
 
@@ -898,7 +986,8 @@ characters, and properly escaped string sequences. However, in some
 situations the value is intended to be 
 seen and understood by the client software's developer. In such cases, the
 API designer choosing any such human-readable strings SHOULD take steps
-to ensure the string values are not easily confused by a developer
+to ensure the string values are not easily confused by a developer,
+such as by limiting the strings to easily disambiguated characters.
 
 This functionality is similar in practice to OAuth 2's `scope` parameter {{RFC6749}}, where a single string
 represents the set of access rights requested by the client instance. As such, the reference
@@ -906,7 +995,9 @@ string could contain any valid OAuth 2 scope value as in {{example-oauth2}}. Not
 string here is not bound to the same character restrictions as in OAuth 2's `scope` definition.
 
 A single "resources" array MAY include both object-type and
-string-type resource items.
+string-type resource items. In this non-normative example,
+the RC is requesting access to a `photo-api` and `financial-transaction` API type
+as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
 
 ~~~
     "resources": [
@@ -915,7 +1006,7 @@ string-type resource items.
             "actions": [
                 "read",
                 "write",
-                "dolphin"
+                "delete"
             ],
             "locations": [
                 "https://server.example.net/",
@@ -939,6 +1030,9 @@ string-type resource items.
         "some other thing"
     ]
 ~~~
+
+The requested access is the union of all elements of the array, including both objects and 
+reference strings.
 
 ### Requesting Multiple Access Tokens {#request-resource-multiple}
 
