@@ -130,7 +130,7 @@ Authorization Server (AS)
     The AS is defined by its grant endpoint, a single URL that accepts a POST
     request with a JSON payload. The AS could also have other endpoints,
     including interaction endpoints and user code endpoints, and these are
-    introduced to the RC as needed during the delegation process. 
+    introduced to the client instance as needed during the delegation process. 
 
 Client
 : Requests tokens and directly delegated information from the AS, and uses tokens at the RS.
@@ -870,7 +870,7 @@ is the cross-product of all fields of the object. That is to
 say, the object represents a request for all `action` values listed within the object
 to be used at all `locations` values listed within the object for all `datatype`
 values listed within the object. Assuming the request above was granted,
-the RC could assume that it
+the client instance could assume that it
 would be able to do a `read` action against the `images` on the first server
 as well as a `delete` action on the `metadata` of the second server, or any other
 combination of these fields, using the same access token. 
@@ -878,7 +878,7 @@ combination of these fields, using the same access token.
 To request a different combination of access, 
 such as requesting one `action` against one `location` 
 and a different `action` against a different `location`, the 
-RC can include multiple separate objects in the `resources` array.
+client instance can include multiple separate objects in the `resources` array.
 The following non-normative example uses the same fictitious `photo-api`
 type definition to request a single access token with more specifically
 targeted access rights by using two discrete objects within the request.
@@ -996,7 +996,7 @@ string here is not bound to the same character restrictions as in OAuth 2's `sco
 
 A single "resources" array MAY include both object-type and
 string-type resource items. In this non-normative example,
-the RC is requesting access to a `photo-api` and `financial-transaction` API type
+the client instance is requesting access to a `photo-api` and `financial-transaction` API type
 as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
 
 ~~~
@@ -3212,8 +3212,8 @@ not being usable.
 
 # Securing Requests from the Client Instance {#secure-requests}
 
-In GNAP, the RC secures its requests to the AS and RS by presenting an access
-token, presenting proof of a key bound to the requester, or both an access token and
+In GNAP, the client instance secures its requests to the AS and RS by presenting an access
+token, presenting proof of a key that is possesses, or both an access token and
 key proof together.
 
 - When an access token is used with a key proof, this is a bound token request. This type of
@@ -3241,7 +3241,7 @@ supported format. If the key is sent in multiple
 formats, all the keys MUST be the same. 
 
 proof (string)
-: The form of proof that the RC will use when
+: The form of proof that the client instance will use when
     presenting the key. The valid values of this field and
     the processing requirements for each are detailed in 
     {{binding-keys}}. This field is REQUIRED.
@@ -4938,7 +4938,7 @@ dimensional components, or the aspect can be requested using a string. In both c
 request is being described in a way that the AS needs to interpret, but with different
 levels of specificity and complexity for the client instance to deal with. An API designer
 can provide a set of common access scopes as simple strings but still allow
-RC developers to specify custom access when needed for more complex APIs.
+client software developers to specify custom access when needed for more complex APIs.
 
 Extensions to this specification can use different data types for defined fields, but
 each extension needs to not only declare what the data type means, but also provide
