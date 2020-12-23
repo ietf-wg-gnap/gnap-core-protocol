@@ -1562,12 +1562,12 @@ a browser request.
 
 In this non-normative example, the client instance is indicating that it can 
 display a [user code](#request-interact-usercode) and direct the RQ
-to an [arbitrary URL of maximum length](#request-interact-short) 255
-characters, but it cannot accept a callback.
+to an [arbitrary URL](#request-interact-redirect) on a secondary
+device, but it cannot accept a callback.
 
 ~~~
     "interact": {
-        "redirect": 255,
+        "redirect": true,
         "user_code": true
     }
 ~~~
@@ -1601,27 +1601,6 @@ console.
 
 If this interaction mode is supported for this client instance and
 request, the AS returns a redirect interaction response {{response-interact-redirect}}.
-
-#### Redirect to an Arbitrary Shortened URL {#request-interact-short}
-
-If the client instance would prefer to redirect to a shortened URL defined by the AS
-at runtime, the client instance indicates this by sending the "redirect"
-field with an integer indicating the maximum character length of
-the returned URL. The AS MAY use this value to decide whether to 
-return a shortened form of the response URL. If the AS cannot shorten
-its response URL enough to fit in the requested size, the AS 
-SHOULD return an error. 
-\[\[ [See issue #53](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/53) \]\]
-
-~~~
-"interact": {
-   "redirect": 255
-}
-~~~
-
-If this interaction mode is supported for this client instance and
-request, the AS returns a redirect interaction response with short
-URL {{response-interact-redirect}}.
 
 ### Open an Application-specific URL {#request-interact-app}
 
@@ -4503,9 +4482,8 @@ Content-type: application/json
 
 In this scenario, the user does not have access to a web browser on
 the device and must use a secondary device to interact with the AS.
-The client instance can display a user code or a printable QR code. The client instance
-prefers a short URL if one is available, with a maximum of 255 characters
-in length. The is not able to accept callbacks from the AS and needs to poll
+The client instance can display a user code or a printable QR code.
+The client instance is not able to accept callbacks from the AS and needs to poll
 for updates while waiting for the user to authorize the request.
 
 The client instance initiates the request to the AS.
@@ -4522,7 +4500,7 @@ Detached-JWS: ejy0...
     ],
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
-        "redirect": 255,
+        "redirect": true,
         "user_code": true
     }
 }
@@ -4531,7 +4509,7 @@ Detached-JWS: ejy0...
 
 
 The AS processes this and determines that the RO needs to interact.
-The AS supports both long and short redirect URIs for interaction, so
+The AS supports both redirect URIs and user codes for interaction, so
 it includes both. Since there is no "callback" the AS does not include
 a nonce, but does include a "wait" parameter on the continuation
 section because it expects the client instance to poll for results.
