@@ -1120,7 +1120,7 @@ split_token
     \[\[ [See issue #37](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/37) \]\]
 
 bind_token
-: The client instance wants the issued access token to be bound to the [key the client instance used](#request-key)
+: The client instance wants the issued access token to be bound to the [key the client instance used](#request-client)
     to make the request. The resulting access token MUST be bound using the same
     `proof` mechanism used by the client instance with a `key` value of `true`, indicating
     the client instance's presented key is to be used for binding.
@@ -1219,7 +1219,8 @@ object with the following fields.
 
 key (object / string)
 : The public key of the client instance to be used in this request as 
-    described in {{request-key}}. This field is REQUIRED.
+    described in {{key-format}} or a reference to a key as
+    described in {{key-reference}}. This field is REQUIRED.
 
 class_id (string)
 : An identifier string that the AS can use to identify the
@@ -1272,7 +1273,7 @@ within the `client` request, and other mechanisms.
 
 \[\[ [See issue #44](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/44) \]\]
 
-### Identifying the Client Instance {#request-instance}
+### Identifying the Client Instance by Reference {#request-instance}
 
 If the client instance has an instance identifier that the AS can use to determine
 appropriate key information, the client instance can send this value in the `instance_id`
@@ -1938,11 +1939,11 @@ expires_in (integer)
 
 key (object / string / boolean)
 : REQUIRED. The key that the token is bound to. If the boolean value `true` is used,
-              the token is bound to the [key used by the client instance](#request-key) in its request 
+              the token is bound to the [key used by the client instance](#request-client) in its request 
               for access. If the boolean value `false` is used,
               the token is a bearer token with no key bound to it.
               Otherwise, the key MUST be an object or string in a format
-              described in {{request-key}}, describing a public key to which the
+              described in {{key-format}}, describing a public key to which the
               client instance can use the associated private key. The client instance MUST be able to
               dereference or process the key information in order to be able
               to sign the request.
@@ -2639,6 +2640,8 @@ when the client instance makes any calls to the continuation URL, the client ins
 the access token as described in {{use-access-token}} and present
 proof of the client instance's key (or its most recent rotation)
 by signing the request as described in {{binding-keys}}.
+The AS MUST validate all keys presented by the client instance or referenced in an
+ongoing request for each call within that request.
 
 \[\[ [See issue #85](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/85) \]\]
 
@@ -3099,7 +3102,7 @@ If the token is sender-constrained (i.e., not a bearer token), it
 MUST be sent [with the appropriate binding for the access token](#use-access-token). 
 
 If the token is a bearer token, the client instance MUST present proof of the
-same [key identified in the initial request](#request-key) as described in {{binding-keys}}.
+same [key identified in the initial request](#request-client) as described in {{binding-keys}}.
 
 The AS MUST validate the proof and assure that it is associated with
 either the token itself or the client instance the token was issued to, as
@@ -3226,7 +3229,7 @@ key proof together.
     type of used only for calls the RS during a discovery phase as
     described in {{rs-request-without-token}}.
 
-## Key Formats {#keys}
+## Key Formats {#key-format}
 
 Several different places in GNAP require the presentation of key material 
 by value. Proof of this key material MUST be bound to a request, the nature of which varies with
@@ -3280,6 +3283,21 @@ formats using a single proofing mechanism.
     }
 ~~~
 
+### Key References {#key-reference}
+
+Keys in GNAP can also be passed by reference such that the party receiving
+the reference will be able to determine the appropriate keying material for
+use in that part of the protocol. 
+
+~~~
+    "key": "S-P4XJQ_RYJCRTSU1.63N3E"
+~~~
+
+Keys referenced in this manner MAY be shared keys. The key reference
+MUST NOT contain any unencrypted private or shared key information.
+
+The means of dereferencing this value are out of scope for this specification.
+
 ## Presenting Access Tokens {#use-access-token}
 
 The method the client instance uses to send an access token depends on whether
@@ -3301,7 +3319,7 @@ If the `key` value is the boolean `true`, the access token MUST be sent
 using the same key and proofing mechanism that the client instance used
 in its initial request.
 
-If the `key` value is an object as described in {{keys}}, the value of the `proof` field within
+If the `key` value is an object as described in {{key-format}}, the value of the `proof` field within
 the key indicates the particular proofing mechanism to use.
 The access token is sent using the HTTP authorization scheme "GNAP" along with 
 a key proof as described in {{binding-keys}} for the key bound to the
@@ -3320,9 +3338,8 @@ Detached-JWS: eyj0....
 
 Any keys presented by the client instance to the AS or RS MUST be validated as
 part of the request in which they are presented. The type of binding
-used is indicated by the proof parameter of the key section in the
-initial request {{request-key}}. Values defined by this
-specification are as follows:
+used is indicated by the proof parameter of the key object in {{key-format}}. 
+Values defined by this specification are as follows:
 
 
 jwsd
@@ -3355,20 +3372,19 @@ MUST validate all components of the signed message to ensure that nothing
 has been tampered with or substituted in a way that would change the nature of
 the request.
 
+When a keep proofing mechanism is bound to an access token, the access token MUST be covered 
+by the signature method of the proofing mechanism.
+
 When used for delegation in GNAP, these key binding mechanisms allow
 the AS to ensure that the keys presented by the client instance in the initial request are in 
 control of the party calling any follow-up or continuation requests. To facilitate 
 this requirement, the [continuation response](#response-continue) includes
-an access token bound to the [client instance's key](#request-key), and that key (or its most recent rotation)
+an access token bound to the [client instance's key](#request-client), and that key (or its most recent rotation)
 MUST be proved in all continuation requests
 {{continue-request}}. Token management requests {{token-management}} are similarly bound
 to either the access token's own key or, in the case of bearer tokens, the client instance's key.
-The AS MUST validate all keys [presented by the client instance](#request-key) or referenced in an
-ongoing request for each call within that request.
 
 \[\[ [See issue #105](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/105) \]\]
-
-When used to bind to an access token, the access token MUST be covered by the signature method.
 
 ### Detached JWS {#detached-jws}
 
@@ -3954,7 +3970,7 @@ key_proofs (array strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
-          [key section](#request-key) of the request.
+          [key section](#key-format) of the request.
 
 sub_ids (array of strings)
 : OPTIONAL. A list of the AS's supported
