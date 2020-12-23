@@ -1316,57 +1316,6 @@ MAY be a symmetric key known to the AS. The client instance MUST NOT send a
 symmetric key by value in the request, as doing so would expose
 the key directly instead of proving possession of it. 
 
-### Identifying the Client Instance Key {#request-key}
-
-The client instance key MUST be a public key in at least one
-supported format and MUST be applicable to the
-proofing mechanism used in the request. If the key is sent in multiple
-formats, all the keys MUST be the same. The key presented in this
-field MUST be the key used to sign the request.
-
-proof (string)
-: The form of proof that the client instance will use when
-    presenting the key to the AS. The valid values of this field and
-    the processing requirements for each are detailed in 
-    {{binding-keys}}. This field is REQUIRED.
-
-jwk (object)
-: Value of the public key as a JSON Web Key. MUST
-            contain an "alg" field which is used to validate the signature.
-            MUST contain the "kid" field to identify the key in the signed
-            object.
-
-cert (string)
-: PEM serialized value of the certificate used to
-            sign the request, with optional internal whitespace.
-
-cert#S256 (string)
-: The certificate thumbprint calculated as
-            per [OAuth-MTLS](#RFC8705) in base64 URL
-            encoding.
-
-Additional key types are defined in [a registry TBD](#IANA).
-
-This non-normative example shows a single key presented in multiple
-formats using a single proofing mechanism.
-
-~~~
-    "key": {
-        "proof": "jwsd",
-        "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
-        },
-        "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
-    }
-~~~
-
-[Continuation requests](#continue-request)
-MUST use the same key (or its most recent rotation) and proof method as the initial request.
-
 ### Providing Displayable Client Instance Information {#request-display}
 
 If the client instance has additional information to display to the RO
@@ -3261,12 +3210,84 @@ the token management URL as valid, since the end result is still the token
 not being usable.
 
 
-# Using Access Tokens {#use-access-token}
+# Securing Requests from the Client Instance {#secure-requests}
 
-The method the client instance uses to send an access token to the RS depends on the value of the
-"key" and "proof" parameters in [the access token response](#response-token-single).
+In GNAP, the RC secures its requests to the AS and RS by presenting an access
+token, presenting proof of a key bound to the requester, or both an access token and
+key proof together.
 
-If the key value is the boolean `false`, the access token is a bearer token
+- When an access token is used with a key proof, this is a bound token request. This type of
+    request is used for calls to the RS as well as the AS during negotiation.
+- When a key proof is used with no access token, this is a non-authorized signed request. This
+    type of request is used for calls to the AS to initiate a negotiation.
+- When an access token is used with no key proof, this is a bearer token request. This type of
+    request is used only for calls to the RS.
+- When neither an access token nor key proof are used, this is an unsecured request. This 
+    type of used only for calls the RS during a discovery phase as
+    described in {{rs-request-without-token}}.
+
+## Key Formats {#keys}
+
+Several different places in GNAP require the presentation of key material 
+by value. Proof of this key material MUST be bound to a request, the nature of which varies with
+the location in the protocol the key is used. For a key used as part of a client instance's initial request
+in {{request-client}}, the key value is the client instance's public key, and
+proof of that key MUST be presented in that request. For a key used as part of an
+access token response in {{response-token-single}}, the proof of that key MUST
+be used when presenting the access token.
+
+A key presented by value MUST be a public key in at least one
+supported format. If the key is sent in multiple
+formats, all the keys MUST be the same. 
+
+proof (string)
+: The form of proof that the RC will use when
+    presenting the key. The valid values of this field and
+    the processing requirements for each are detailed in 
+    {{binding-keys}}. This field is REQUIRED.
+
+jwk (object)
+: Value of the public key as a JSON Web Key. MUST
+            contain an "alg" field which is used to validate the signature.
+            MUST contain the "kid" field to identify the key in the signed
+            object.
+
+cert (string)
+: PEM serialized value of the certificate used to
+            sign the request, with optional internal whitespace.
+
+cert#S256 (string)
+: The certificate thumbprint calculated as
+            per [OAuth-MTLS](#RFC8705) in base64 URL
+            encoding.
+
+Additional key types are defined in [a registry TBD](#IANA).
+
+This non-normative example shows a single key presented in multiple
+formats using a single proofing mechanism.
+
+~~~
+    "key": {
+        "proof": "jwsd",
+        "jwk": {
+                    "kty": "RSA",
+                    "e": "AQAB",
+                    "kid": "xyz-1",
+                    "alg": "RS256",
+                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+        },
+        "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
+    }
+~~~
+
+## Presenting Access Tokens {#use-access-token}
+
+The method the client instance uses to send an access token depends on whether
+the token is bound to a key, and if so which proofing method is associated
+with the key. This information is conveyed in the
+`key` and `proof` parameters in [the access token response](#response-token-single).
+
+If the `key` value is the boolean `false`, the access token is a bearer token
 sent using the HTTP Header method defined in {{RFC6750}}.
 
 ~~~
@@ -3276,11 +3297,11 @@ Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 The form parameter and query parameter methods of {{RFC6750}} MUST NOT
 be used.
 
-If the "key" value is the boolean `true`, the access token MUST be sent
-to the RS using the same key and proofing mechanism that the client instance used
+If the `key` value is the boolean `true`, the access token MUST be sent
+using the same key and proofing mechanism that the client instance used
 in its initial request.
 
-If the "key" value is an object, the value of the "proof" field within
+If the `key` value is an object as described in {{keys}}, the value of the `proof` field within
 the key indicates the particular proofing mechanism to use.
 The access token is sent using the HTTP authorization scheme "GNAP" along with 
 a key proof as described in {{binding-keys}} for the key bound to the
@@ -3295,7 +3316,7 @@ Detached-JWS: eyj0....
 
 \[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
 
-# Binding Keys {#binding-keys}
+## Proving Possession of a Key with a Request {#binding-keys}
 
 Any keys presented by the client instance to the AS or RS MUST be validated as
 part of the request in which they are presented. The type of binding
@@ -3349,7 +3370,7 @@ ongoing request for each call within that request.
 
 When used to bind to an access token, the access token MUST be covered by the signature method.
 
-## Detached JWS {#detached-jws}
+### Detached JWS {#detached-jws}
 
 This method is indicated by `jwsd` in the
 `proof` field. A JWS {{RFC7515}} signature object is created as follows:
@@ -3444,7 +3465,7 @@ contents as a detached JWS object. The HTTP Body is used as the
 payload for purposes of validating the JWS, with no
 transformations.
 
-## Attached JWS {#attached-jws}
+### Attached JWS {#attached-jws}
 
 This method is indicated by `jws` in the
 `proof` field. A JWS {{RFC7515}} signature object is created as follows:
@@ -3594,7 +3615,7 @@ header as described in {{detached-jws}}.
 
 \[\[ [See issue #109](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/109) \]\]
 
-## Mutual TLS {#mtls}
+### Mutual TLS {#mtls}
 
 This method is indicated by `mtls` in the
 `proof` field. The client instance presents its TLS client
@@ -3679,7 +3700,7 @@ fHI6kqm3NCyCCTihe2ck5RmCc5l2KBO/vAHF0ihhFOOOby1v6qbPHQcxAU6rEb907
 
 \[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
 
-## Demonstration of Proof-of-Possession (DPoP) {#dpop-binding}
+### Demonstration of Proof-of-Possession (DPoP) {#dpop-binding}
 
 This method is indicated by `dpop` in the
 `proof` field. The client instance creates a Demonstration of Proof-of-Possession
@@ -3749,7 +3770,7 @@ B7_8Wbw4ttzbMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFekpdfWdiPQddQ6Y
 }
 ~~~
 
-## HTTP Signing {#httpsig-binding}
+### HTTP Message Signing {#httpsig-binding}
 
 This method is indicated by `httpsig` in
 the `proof` field. The client instance creates an HTTP
@@ -3813,7 +3834,7 @@ Y1cK2U3obvUg7w"
 When used to present an access token as in {{use-access-token}},
 the Authorization header MUST be included in the signature.
 
-## OAuth Proof of Possession (PoP) {#oauth-pop-binding}
+### OAuth Proof of Possession (PoP) {#oauth-pop-binding}
 
 This method is indicated by `oauthpop` in
 the `proof` field. The client instance creates an HTTP
