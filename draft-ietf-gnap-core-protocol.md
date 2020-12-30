@@ -46,7 +46,9 @@ normative:
     RFC2119:
     RFC3230:
     RFC5646:
+    RFC7468:
     RFC7515:
+    RFC7517:
     RFC6749:
     RFC6750:
     RFC7797:
@@ -3216,7 +3218,7 @@ not being usable.
 # Securing Requests from the Client Instance {#secure-requests}
 
 In GNAP, the client instance secures its requests to the AS and RS by presenting an access
-token, presenting proof of a key that is possesses, or both an access token and
+token, presenting proof of a key that it possesses, or both an access token and
 key proof together.
 
 - When an access token is used with a key proof, this is a bound token request. This type of
@@ -3224,9 +3226,10 @@ key proof together.
 - When a key proof is used with no access token, this is a non-authorized signed request. This
     type of request is used for calls to the AS to initiate a negotiation.
 - When an access token is used with no key proof, this is a bearer token request. This type of
-    request is used only for calls to the RS.
+    request is used only for calls to the RS, and only with access tokens that are
+    not bound to any key as described in {{response-token-single}}.
 - When neither an access token nor key proof are used, this is an unsecured request. This 
-    type of used only for calls the RS during a discovery phase as
+    type of used only for calls to the RS during a discovery phase as
     described in {{rs-request-without-token}}.
 
 ## Key Formats {#key-format}
@@ -3247,17 +3250,17 @@ proof (string)
 : The form of proof that the client instance will use when
     presenting the key. The valid values of this field and
     the processing requirements for each are detailed in 
-    {{binding-keys}}. This field is REQUIRED.
+    {{binding-keys}}. The `proof` field is REQUIRED.
 
 jwk (object)
-: Value of the public key as a JSON Web Key. MUST
+: Value of the public key as a JSON Web Key {{RFC7517}}. The object MUST
             contain an "alg" field which is used to validate the signature.
-            MUST contain the "kid" field to identify the key in the signed
-            object.
+            The object MUST contain the "kid" field to identify the key.
 
 cert (string)
 : PEM serialized value of the certificate used to
-            sign the request, with optional internal whitespace.
+            sign the request, with optional internal whitespace per {{RFC7468}}. The 
+            PEM header and footer are optionally removed. 
 
 cert#S256 (string)
 : The certificate thumbprint calculated as
@@ -3267,7 +3270,8 @@ cert#S256 (string)
 Additional key types are defined in [a registry TBD](#IANA).
 
 This non-normative example shows a single key presented in multiple
-formats using a single proofing mechanism.
+formats. This key is intended to be used with the [detached JWS](#detached-jws)
+proofing mechanism, as indicated by the `proof` field.
 
 ~~~
     "key": {
@@ -3293,8 +3297,10 @@ use in that part of the protocol.
     "key": "S-P4XJQ_RYJCRTSU1.63N3E"
 ~~~
 
-Keys referenced in this manner MAY be shared keys. The key reference
-MUST NOT contain any unencrypted private or shared key information.
+Keys referenced in this manner MAY be shared symmetric keys. The key reference
+MUST NOT contain any unencrypted private or shared symmetric key information.
+
+Keys referenced in this manner MUST be bound to a single proofing mechanism.
 
 The means of dereferencing this value are out of scope for this specification.
 
@@ -3372,7 +3378,7 @@ MUST validate all components of the signed message to ensure that nothing
 has been tampered with or substituted in a way that would change the nature of
 the request.
 
-When a keep proofing mechanism is bound to an access token, the access token MUST be covered 
+When a key proofing mechanism is bound to an access token, the access token MUST be covered 
 by the signature method of the proofing mechanism.
 
 When used for delegation in GNAP, these key binding mechanisms allow
