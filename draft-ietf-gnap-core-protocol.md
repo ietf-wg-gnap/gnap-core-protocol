@@ -3243,8 +3243,10 @@ access token response in {{response-token-single}}, the proof of that key MUST
 be used when presenting the access token.
 
 A key presented by value MUST be a public key in at least one
-supported format. If the key is sent in multiple
-formats, all the keys MUST be the same. 
+supported format. If a key is sent in multiple
+formats, all the key format values MUST be equivalent. Note that
+while most formats present the full value of the public key, some
+formats present a value cryptographically derived from the public key.
 
 proof (string)
 : The form of proof that the client instance will use when
@@ -3265,9 +3267,10 @@ cert (string)
 cert#S256 (string)
 : The certificate thumbprint calculated as
             per [OAuth-MTLS](#RFC8705) in base64 URL
-            encoding.
+            encoding. Note that this format does not include
+            the full public key.
 
-Additional key types are defined in [a registry TBD](#IANA).
+Additional key formats are defined in [a registry TBD](#IANA).
 
 This non-normative example shows a single key presented in multiple
 formats. This key is intended to be used with the [detached JWS](#detached-jws)
