@@ -2278,7 +2278,7 @@ information in the "subject" response field. This field is an object
 with the following OPTIONAL properties.
 
 
-sub_ids (array of strings)
+sub_ids (array of objects)
 : An array of subject identifiers for the
             RO, as defined by 
             {{I-D.ietf-secevent-subject-identifiers}}.
