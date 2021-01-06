@@ -76,18 +76,11 @@ normative:
 
 --- abstract
 
-This document defines a mechanism for delegating authorization to a
+GNAP defines a mechanism for delegating authorization to a
 piece of software, and conveying that delegation to the software. This
 delegation can include access to a set of APIs as well as information
 passed directly to the software.
 
-This document has been prepared by the GNAP working group design team of
-Kathleen Moriarty, Fabien Imbault, Dick Hardt, Mike Jones, and Justin Richer. This document
-is intended as a starting point for the working group and includes decision points for discussion
-and agreement. Many of the
-features in this proposed protocol can be accomplished in a number of
-ways. Where possible, the editor has included notes and discussion
-from the design team regarding the options as understood.
 
 --- middle
 
@@ -4203,7 +4196,7 @@ request multiple access tokens.
 
 # Acknowledgements {#Acknowledgements}
 
-The author would like to thank the feedback of the following individuals for their reviews, 
+The editors would like to thank the feedback of the following individuals for their reviews,
 implementations, and contributions:
 Aaron Parecki,
 Annabelle Backman,
@@ -4217,6 +4210,7 @@ Haardik Haardik,
 Hamid Massaoud,
 Jacky Yuan,
 Joseph Heenan,
+Justin Richer,
 Kathleen Moriarty,
 Mike Jones,
 Mike Varley,
@@ -4224,10 +4218,14 @@ Nat Sakimura,
 Takahiko Kawasaki,
 Takahiro Tsuchiya.
 
-In particular, the author would like to thank Aaron Parecki and Mike Jones for insights into how
-to integrate identity and authentication systems into the core protocol, and to Dick Hardt for 
-the use cases, diagrams, and insights provided in the XAuth proposal that have been 
-incorporated here. The author would like to especially thank Mike Varley and the team at SecureKey
+The editors would also like to thank the GNAP working group design team of
+Kathleen Moriarty, Fabien Imbault, Dick Hardt, Mike Jones, and Justin Richer, who incorporated
+elements from the XAuth and XYZ proposals to create the first version of this document.
+
+In addition, the editors would like to thank Aaron Parecki and Mike Jones for insights into how
+to integrate identity and authentication systems into the core protocol, and Justin Richer and Dick Hardt for
+the use cases, diagrams, and insights provided in the XYZ and XAuth proposals that have been
+incorporated here. The editors would like to especially thank Mike Varley and the team at SecureKey
 for feedback and development of early versions of the XYZ protocol that fed into this standards work.
 
 # IANA Considerations {#IANA}
