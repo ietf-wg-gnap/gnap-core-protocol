@@ -8,5 +8,5 @@ print(os.environ)
 urlbase = 'https://api.github.com/repos/jricher/gnap-core-protocol/actions/artifacts'
 
 with urllib.request.urlopen(urlbase) as url:
-    data = json.load(url)
+    data = json.loads(url.read().decode())
     print(data)
