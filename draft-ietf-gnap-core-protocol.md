@@ -125,17 +125,17 @@ Roles are defined by the actions taken and the expectations leveraged
 on the role by the overall protocol. 
 
 Authorization Server (AS)
-: server that grants privileges to a particular end-user and that provides them to a client in the form of an access token. 
+: server that grants delegated privileges to a particular instance of client software in the form of an access token and other information (such as subject information). 
 
 Client
 : application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. 
 
-    Note: this specification differentiates between a specific instance (the Client instance, identified by its public key) and the software running the instance (the Client software). For some kinds of Client software, there could be many instances of a single piece of Client software.
+    Example: a client can be a mobile application, a web application, etc.
 
-    Example: a Client can be a mobile application, a web application, etc.
+    Note: this specification differentiates between a specific instance (the client instance, identified by its unique key) and the software running the instance (the client software). For some kinds of client software, there could be many instances of that software, each instance with a different key.
 
 Resource Server (RS)
-: server that provides operations on resources where protected operations require that the client provides one or more valid access tokens issued by one or more ASs.
+: server that provides operations on protected resources, where operations require a valid access token issued by an AS. 
 
 Resource Owner (RO)
 : subject entity that may grant or deny operations on resources it has authority upon.
@@ -143,7 +143,7 @@ Resource Owner (RO)
     Note: the act of granting or denying an operation may be manual (i.e. through an interaction with a physical person) or automatic (i.e. through predefined organizational rules).
 
 End-user 
-: natural person that operates with the client software.
+: natural person that operates the client instance.
 
     Note: that natural person may or may not be the same entity as the RO. When it is explicit that the end-user and the RO are the same entity, the generic term user may be used. 
 
@@ -195,36 +195,34 @@ In addition to the roles above, the protocol also involves several
 elements that are acted upon by the roles throughout the process.
 
 Attribute
-: characteristics related to an end-user.
+: characteristics related to a subject.
 
 Access Token
-: digitally signed data that contains specific rights and/or attributes.
+: a data artifact representing a set of rights and/or attributes.
 
-    Note: an access token can be first issued to an end-user (usually requiring his authentication) and subsequently refreshed.
-
-Claim
-: statement about a subject.
+    Note: an access token can be first issued to an client instance (requiring authorization by the RO) and subsequently rotated.
 
 Grant
-: (verb): to permit an end-user to exercise some rights and/or to assert some attributes at a specific time and during a specific duration. (noun): the act of granting.
+: (verb): to permit an instance of client software to exercise some set of delegated rights to access a protected resource and/or to receive some attributes at a specific time and during a specific duration. (noun): the act of granting.
 
 Privilege
-: right or attribute associated with an end-user.
+: right or attribute associated with a subject.
 
-Resource
-: public or protected resource from a RS.
+    Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end-user. This process is refered to as privilege delegation. 
 
 Protected Resource
 : protected API (Application Programming Interface) served by a RS and that can be accessed by a client, if and only if a valid access token is provided.
 
-Right
-: ability given to an end-user to perform a given operation on a resource under the control of a RS.
+    Note: to avoid complex sentences, the specification document may simply refer to resource instead of protected resource.   
 
-Subject Entity
+Right
+: ability given to a subject to perform a given operation on a resource under the control of a RS.
+
+Subject
 : person, organization or device.
 
 Subject Information
-: claim asserted locally by an AS about a subject entity.
+: statement asserted locally by an AS about a subject.
 
 ## Sequences {#sequence}
 
@@ -283,10 +281,10 @@ protocol flow.
     ~ ~ ~ indicates a potential equivalence or out-of-band communication between roles
 ~~~
 
-- (A) The End-user interacts with the client instance to indicate a need for resources on
+- (A) The end-user interacts with the client instance to indicate a need for resources on
     behalf of the RO. This could identify the RS the client instance needs to call,
     the resources needed, or the RO that is needed to approve the 
-    request. Note that the RO and End-user are often
+    request. Note that the RO and end-user are often
     the same entity in practice.
     
 - (1) The client instance [attempts to call the RS](#rs-request-without-token) to determine 
@@ -306,7 +304,7 @@ protocol flow.
     using a variety of possible mechanisms including web page
     redirects, applications, challenge/response protocols, or 
     other methods. The RO approves the request for the client instance
-    being operated by the End-user. Note that the RO and end-user are often
+    being operated by the end-user. Note that the RO and end-user are often
     the same entity in practice.
 
 - (4) The client instance [continues the grant at the AS](#continue-request).
