@@ -3326,7 +3326,7 @@ be used.
 
 If the `key` value is the boolean `true`, the access token MUST be sent
 using the same key and proofing mechanism that the client instance used
-in its initial request.
+in its initial request (or its most recent rotation).
 
 If the `key` value is an object as described in {{key-format}}, the value of the `proof` field within
 the key indicates the particular proofing mechanism to use.
