@@ -16,17 +16,14 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build the artifacts with the docker image
       run: docker-compose up
-    - name: Package built file
+    - name: Create a random container variable
       run: |
-        mkdir -p build
-        cp draft-ietf-gnap-core-protocol.html build/index.html
-    - name: Deploy draft to Netlify
-      uses: South-Paw/action-netlify-deploy@v1.0.4
+        echo "artifact_tag=`openssl rand -hex 12`" >> $GITHUB_ENV
+    - name: Archive rendered site
+      uses: actions/upload-artifact@v2
       with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        netlify-auth-token: ${{ secrets.NETLIFY_TOKEN }}
-        netlify-site-id: ${{ secrets.NETLIFY_ID }}
-        build-dir: './build'
-        draft: true
-        comment-on-commit: true
-        comment-on-pull-request: true
+        name: ${{ artifact_tag }}
+        path: draft-ietf-gnap-core-protocol.html
+    - name: Call Netlify Deploy
+      run: |
+        curl -X POST -d ${{ artifact_tag }} "https://api.netlify.com/build_hooks/5ff5d01dbf0689110ba61737"
