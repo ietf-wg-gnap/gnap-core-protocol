@@ -1,5 +1,2 @@
-*.html
-*.xml
-*.js
 .refcache
-*.txt
+publish
