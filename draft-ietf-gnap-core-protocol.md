@@ -143,9 +143,9 @@ Resource Owner (RO)
     Note: the act of granting or denying an operation may be manual (i.e. through an interaction with a physical person) or automatic (i.e. through predefined organizational rules).
 
 End-user 
-: natural person that operates the client instance.
+: natural person that operates a client instance.
 
-    Note: that natural person may or may not be the same entity as the RO. When it is explicit that the end-user and the RO are the same entity, the generic term user may be used. 
+    Note: that natural person may or may not be the same entity as the RO. 
 
 The design of GNAP does not assume any one deployment architecture,
 but instead attempts to define roles that can be fulfilled in a number
@@ -203,7 +203,7 @@ Access Token
     Note: an access token can be first issued to an client instance (requiring authorization by the RO) and subsequently rotated.
 
 Grant
-: (verb): to permit an instance of client software to exercise some set of delegated rights to access a protected resource and/or to receive some attributes at a specific time and during a specific duration. (noun): the act of granting.
+: (verb): to receive some attributes at a specific time and valid for a specific duration and/or to permit an instance of client software to exercise some set of delegated rights to access a protected resource (noun): the act of granting.
 
 Privilege
 : right or attribute associated with a subject.
