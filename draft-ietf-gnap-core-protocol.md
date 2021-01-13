@@ -203,7 +203,7 @@ Access Token
     Note: an access token can be first issued to an client instance (requiring authorization by the RO) and subsequently rotated.
 
 Grant
-: (verb): to receive some attributes at a specific time and valid for a specific duration and/or to permit an instance of client software to exercise some set of delegated rights to access a protected resource (noun): the act of granting.
+: (verb): to permit an instance of client software to receive some attributes at a specific time and valid for a specific duration and/or to exercise some set of delegated rights to access a protected resource (noun): the act of granting. (noun): the act of granting.
 
 Privilege
 : right or attribute associated with a subject.
