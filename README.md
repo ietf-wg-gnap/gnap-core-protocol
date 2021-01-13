@@ -22,7 +22,7 @@ run the command:
 docker-compose up
 ```
 
-If successful, this will create both `xml` and `html` versions of the document. 
+If successful, this will create the `xml`, `txt`, and `html` versions of the document in the `publish` directory.
 
-To build the draft without Docker, install the `kramdown-rfc2629` and `xml2rfc` tools locally and run them directly using 
-the simple `build.sh` script provided.
+To build the draft without Docker, install the `kramdown-rfc2629` and `xml2rfc` tools locally and run them directly 
+or by using the simple `build.sh` script provided.
