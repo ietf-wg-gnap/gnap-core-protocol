@@ -4298,8 +4298,17 @@ sure that it has the permission to do so.
    
 # Document History {#history}
 
+- -04
+    - Updated terminology.
+    - Refactored key presentation and binding.
+
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
+    - Removed OpenID Connect "claims" parameter.
+    - Dropped "short URI" redirect.
+    - Access token is mandatory for continuation.
+    - Removed closed issue links.
+    - Editorial fixes.
 
 - -02
     - Moved all "editor's note" items to GitHub Issues.
