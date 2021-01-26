@@ -829,7 +829,7 @@ Additional flags can be defined by extensions using [a registry TBD](#IANA).
 In the following example, the client instance is requesting access to a complex resource
 described by a pair of access request object. 
 
-```
+~~~
 "access_token": {
     "access": [
         {
@@ -867,7 +867,7 @@ described by a pair of access request object.
     "label": "token1-23",
     "flags": [ "split" ]
 }
-```
+~~~
 
 If access is approved, the resulting access token is valid for the described resource 
 and is bound to the client instance's key (or its most recent rotation). The token 
