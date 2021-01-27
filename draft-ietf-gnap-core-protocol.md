@@ -750,11 +750,13 @@ A non-normative example of a grant request is below:
       }
     },
     "interact": {
-        "redirect": true,
-        "callback": {
-            "method": "redirect",
-            "uri": "https://client.example.net/return/123455",
-            "nonce": "LKLTI25DK82FX4T4QFZC"
+        "start": ["redirect"],
+        "finish": {
+            "callback": {
+                "method": "redirect",
+                "uri": "https://client.example.net/return/123455",
+                "nonce": "LKLTI25DK82FX4T4QFZC"
+            }
         }
     },
     "capabilities": ["ext1", "ext2"],
@@ -1451,30 +1453,44 @@ The client instance could also be signaled that interaction has completed by the
 callbacks. To facilitate all of these modes, the client instance declares the means that it 
 can interact using the `interact` field. 
 
-The `interact` field is a JSON object with keys that declare
-different interaction modes. A client instance MUST NOT declare an
-interaction mode it does not support.
+The `interact` field is a JSON object with three keys whose values declare how the client can initiate
+and complete the request, as well as provide hints to the AS about user preferences such as locale. 
+A client instance MUST NOT declare an interaction mode it does not support.
 The client instance MAY send multiple modes in the same request.
 There is no preference order specified in this request. An AS MAY
 [respond to any, all, or none of the presented interaction modes](#response-interact) in a request, depending on
-its capabilities and what is allowed to fulfill the request. This specification
-defines the following interaction modes:
+its capabilities and what is allowed to fulfill the request. 
 
-redirect (boolean)
+The `interact` field MUST contain the `start` key, and MAY contain the `finish` and `hints` keys. The value
+of each key is an array which contains strings or JSON objects as defined below.
+
+#### Start Mode Definitions
+
+This specification defines the following interaction start modes as string values under the `start` key:
+
+"redirect"
 : Indicates that the client instance can direct the end-user to an arbitrary URL
     at the AS for interaction. {{request-interact-redirect}}
 
-app (boolean)
+"app"
 : Indicates that the client instance can launch an application on the end-user's
     device for interaction. {{request-interact-app}}
+
+"user_code"
+: Indicates that the client instance can communicate a human-readable short
+    code to the end-user for use with a stable URL at the AS. {{request-interact-usercode}}
+
+#### Finish Mode Definitions
+
+This specification defines the following interaction completion modes as objects under the `finish` key:
 
 callback (object)
 : Indicates that the client instance can receive a callback from the AS
     after interaction with the RO has concluded. {{request-interact-callback}}
 
-user_code (boolean)
-: Indicates that the client instance can communicate a human-readable short
-    code to the end-user for use with a stable URL at the AS. {{request-interact-usercode}}
+#### Hint Definitions
+
+This specification defines the following hints as objects under the `hints` key:
 
 ui_locales (array of strings)
 : Indicates the end-user's preferred locales that the AS can use
@@ -1485,18 +1501,22 @@ The following sections detail requests for interaction
 modes. Additional interaction modes are defined in 
 [a registry TBD](#IANA).
 
+#### Examples
+
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
 the end-user to an arbitrary URL and can receive a [callback](#request-interact-callback) through
 a browser request.
 
 ~~~
     "interact": {
-        "redirect": true,
-        "callback": {
-            "method": "redirect",
-            "uri": "https://client.example.net/return/123455",
-            "nonce": "LKLTI25DK82FX4T4QFZC"
-        }
+        "start": ["redirect"],
+        "finish": [{
+            "callback": {
+                "method": "redirect",
+                "uri": "https://client.example.net/return/123455",
+                "nonce": "LKLTI25DK82FX4T4QFZC"
+            }
+        }]
     }
 ~~~
 
@@ -1507,8 +1527,7 @@ device, but it cannot accept a callback.
 
 ~~~
     "interact": {
-        "redirect": true,
-        "user_code": true
+        "start": ["redirect", "user_code"]
     }
 ~~~
 
@@ -1522,7 +1541,9 @@ The AS SHOULD apply suitable timeouts to any interaction mechanisms
 provided, including user codes and redirection URLs. The client instance SHOULD
 apply suitable timeouts to any callback URLs.
 
-### Redirect to an Arbitrary URL {#request-interact-redirect}
+### Start Interaction Modes
+
+#### Redirect to an Arbitrary URL {#request-interact-redirect}
 
 If the client instance is capable of directing the end-user to a URL defined
 by the AS at runtime, the client instance indicates this by sending the
@@ -1535,14 +1556,14 @@ console.
 
 ~~~
 "interact": {
-   "redirect": true
+  "start": ["redirect"]
 }
 ~~~
 
 If this interaction mode is supported for this client instance and
 request, the AS returns a redirect interaction response {{response-interact-redirect}}.
 
-### Open an Application-specific URL {#request-interact-app}
+#### Open an Application-specific URL {#request-interact-app}
 
 If the client instance can open a URL associated with an application on
 the end-user's device, the client instance indicates this by sending the "app"
@@ -1552,11 +1573,9 @@ this specification.
 
 ~~~
 "interact": {
-   "app": true
+   "start": ["app"]
 }
 ~~~
-
-
 
 If this interaction mode is supported for this client instance and
 request, the AS returns an app interaction response with an app URL
@@ -1564,13 +1583,33 @@ payload {{response-interact-app}}.
 
 \[\[ [See issue #54](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/54) \]\]
 
-### Receive a Callback After Interaction {#request-interact-callback}
+#### Display a Short User Code {#request-interact-usercode}
+
+If the client instance is capable of displaying or otherwise communicating
+a short, human-entered code to the RO, the client instance indicates this
+by sending the "user_code" field with the boolean value "true". This
+code is to be entered at a static URL that does not change at
+runtime, as described in {{response-interact-usercode}}.
+
+~~~
+"interact": {
+    "start": ["user_code"]
+}
+~~~
+
+If this interaction mode is supported for this client instance and
+request, the AS returns a user code and interaction URL as specified
+in {{interaction-usercode}}.
+
+
+### Finish Interaction Modes
+
+#### Receive a Callback After Interaction {#request-interact-callback}
 
 If the client instance is capable of receiving a message from the AS indicating
 that the RO has completed their interaction, the client instance
-indicates this by sending the "callback" field. The value of this
+indicates this by sending the `callback` field in the `finish` key. The value of this
 field is an object containing the following members.
-
 
 uri (string)
 : REQUIRED. Indicates the URI to send the RO to
@@ -1609,11 +1648,13 @@ hash_method (string)
 
 ~~~
 "interact": {
-    "callback": {
-       "method": "redirect",
-       "uri": "https://client.example.net/return/123455",
-       "nonce": "LKLTI25DK82FX4T4QFZC"
-    }
+    "finish": [{
+        "callback": {
+           "method": "redirect",
+           "uri": "https://client.example.net/return/123455",
+           "nonce": "LKLTI25DK82FX4T4QFZC"
+        }
+    }]
 }
 ~~~
 
@@ -1637,11 +1678,13 @@ GET as described in {{interaction-callback}}.
 
 ~~~
 "interact": {
-    "callback": {
-       "method": "redirect",
-       "uri": "https://client.example.net/return/123455",
-       "nonce": "LKLTI25DK82FX4T4QFZC"
-    }
+    "finish": [{
+        "callback": {
+            "method": "redirect",
+            "uri": "https://client.example.net/return/123455",
+            "nonce": "LKLTI25DK82FX4T4QFZC"
+        }
+    }]
 }
 ~~~
 
@@ -1661,11 +1704,13 @@ as described in {{interaction-pushback}}.
 
 ~~~
 "interact": {
-    "callback": {
-       "method": "push",
-       "uri": "https://client.example.net/return/123455",
-       "nonce": "LKLTI25DK82FX4T4QFZC"
-    }
+    "finish": [{
+        "callback": {
+            "method": "push",
+            "uri": "https://client.example.net/return/123455",
+            "nonce": "LKLTI25DK82FX4T4QFZC"
+        }
+    }]
 }
 ~~~
 
@@ -1678,25 +1723,9 @@ be present on the incoming HTTP request.
 
 \[\[ [See issue #60](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/60) \]\]
 
-### Display a Short User Code {#request-interact-usercode}
+### Hints
 
-If the client instance is capable of displaying or otherwise communicating
-a short, human-entered code to the RO, the client instance indicates this
-by sending the "user_code" field with the boolean value "true". This
-code is to be entered at a static URL that does not change at
-runtime, as described in {{response-interact-usercode}}.
-
-~~~
-"interact": {
-    "user_code": true
-}
-~~~
-
-If this interaction mode is supported for this client instance and
-request, the AS returns a user code and interaction URL as specified
-in {{interaction-usercode}}.
-
-### Indicate Desired Interaction Locales {#request-interact-locale}
+#### Indicate Desired Interaction Locales {#request-interact-locale}
 
 If the client instance knows the end-user's locale and language preferences, the
 client instance can send this information to the AS using the `ui_locales` field
@@ -1704,7 +1733,9 @@ with an array of locale strings as defined by {{RFC5646}}.
 
 ~~~
 "interact": {
-    "ui_locales": ["en-US", "fr-CA"]
+    "hints": [{
+        "ui_locales": ["en-US", "fr-CA"]
+    }]
 }
 ~~~
 
