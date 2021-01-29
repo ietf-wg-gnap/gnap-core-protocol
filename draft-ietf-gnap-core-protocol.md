@@ -377,13 +377,13 @@ that returns from the interaction.
 
 2. The client instance [requests access to the resource](#request). The client instance indicates that
     it can [redirect to an arbitrary URL](#request-interact-redirect) and
-    [receive a callback from the browser](#request-interact-callback). The client instance
-    stores verification information for its callback in the session created
+    [receive a redirect from the browser](#request-interact-callback-redirect). The client instance
+    stores verification information for its redirect in the session created
     in (1).
 
 3. The AS determines that interaction is needed and [responds](#response) with
     a [URL to send the user to](#response-interact-redirect) and
-    [information needed to verify the callback](#response-interact-callback) in (7).
+    [information needed to verify the redirect](#response-interact-callback) in (7).
     The AS also includes information the client instance will need to 
     [continue the request](#response-continue) in (8). The AS associates this
     continuation information with an ongoing request that will be referenced in (4), (6), and (8).
@@ -399,9 +399,9 @@ that returns from the interaction.
 
 7. When the AS is done interacting with the user, the AS 
     [redirects the user back](#interaction-callback) to the
-    client instance using the callback URL provided in (2). The callback URL is augmented with
+    client instance using the redirect URL provided in (2). The redirect URL is augmented with
     an interaction reference that the AS associates with the ongoing 
-    request created in (2) and referenced in (4). The callback URL is also
+    request created in (2) and referenced in (4). The redirect URL is also
     augmented with a hash of the security information provided
     in (2) and (3). The client instance loads the verification information from (2) and (3) from 
     the session created in (1). The client instance [calculates a hash](#interaction-hash)
@@ -752,11 +752,9 @@ A non-normative example of a grant request is below:
     "interact": {
         "start": ["redirect"],
         "finish": {
-            "callback": {
-                "method": "redirect",
-                "uri": "https://client.example.net/return/123455",
-                "nonce": "LKLTI25DK82FX4T4QFZC"
-            }
+            "method": "redirect",
+            "uri": "https://client.example.net/return/123455",
+            "nonce": "LKLTI25DK82FX4T4QFZC"
         }
     },
     "capabilities": ["ext1", "ext2"],
@@ -1464,9 +1462,9 @@ its capabilities and what is allowed to fulfill the request.
 The `interact` field MUST contain the `start` key, and MAY contain the `finish` and `hints` keys. The value
 of each key is an array which contains strings or JSON objects as defined below.
 
-#### Start Mode Definitions
+### Start Mode Definitions
 
-This specification defines the following interaction start modes as string values under the `start` key:
+This specification defines the following interaction start modes as an array of string values under the `start` key:
 
 "redirect"
 : Indicates that the client instance can direct the end-user to an arbitrary URL
@@ -1480,15 +1478,19 @@ This specification defines the following interaction start modes as string value
 : Indicates that the client instance can communicate a human-readable short
     code to the end-user for use with a stable URL at the AS. {{request-interact-usercode}}
 
-#### Finish Mode Definitions
+### Finish Mode Definitions
 
-This specification defines the following interaction completion modes as objects under the `finish` key:
+This specification defines the following interaction completion methods:
 
-callback (object)
-: Indicates that the client instance can receive a callback from the AS
-    after interaction with the RO has concluded. {{request-interact-callback}}
+"redirect"
+: Indicates that the client instance can receive a redirect from the end-user's device
+    after interaction with the RO has concluded. {{request-interact-callback-redirect}}
 
-#### Hint Definitions
+"push"
+: Indicates that the client instance can receive an HTTP POST request from the AS
+    after interaction with the RO has concluded. {{request-interact-callback-push}}
+
+### Hint Definitions
 
 This specification defines the following hints as objects under the `hints` key:
 
@@ -1501,29 +1503,27 @@ The following sections detail requests for interaction
 modes. Additional interaction modes are defined in 
 [a registry TBD](#IANA).
 
-#### Example Interactions
+### Example Interactions
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
-the end-user to an arbitrary URL and can receive a [callback](#request-interact-callback) through
+the end-user to an arbitrary URL and can receive a [redirect](#request-interact-callback-redirect) through
 a browser request.
 
 ~~~
     "interact": {
         "start": ["redirect"],
-        "finish": [{
-            "callback": {
-                "method": "redirect",
-                "uri": "https://client.example.net/return/123455",
-                "nonce": "LKLTI25DK82FX4T4QFZC"
-            }
-        }]
+        "finish": {
+            "method": "redirect",
+            "uri": "https://client.example.net/return/123455",
+            "nonce": "LKLTI25DK82FX4T4QFZC"
+        }
     }
 ~~~
 
 In this non-normative example, the client instance is indicating that it can 
 display a [user code](#request-interact-usercode) and direct the end-user
 to an [arbitrary URL](#request-interact-redirect) on a secondary
-device, but it cannot accept a callback.
+device, but it cannot accept a redirect or push callback.
 
 ~~~
     "interact": {
@@ -1602,18 +1602,21 @@ request, the AS returns a user code and interaction URL as specified
 in {{interaction-usercode}}.
 
 
-### Finish Interaction Modes
-
-#### Receive a Callback After Interaction {#request-interact-callback}
+### Finish Interaction Modes {#finish-interaction-modes}
 
 If the client instance is capable of receiving a message from the AS indicating
 that the RO has completed their interaction, the client instance
-indicates this by sending the `callback` field in the `finish` key. The value of this
-field is an object containing the following members.
+indicates this by sending the following members of an object under the `finish` key.
+
+method (string)
+: REQUIRED. The callback method that the AS will use to contact the client instance.
+              Valid values include `redirect` {{request-interact-callback-redirect}}
+              and `push` {{request-interact-callback-push}}, with other values
+              defined by [a registry TBD](#IANA).
 
 uri (string)
-: REQUIRED. Indicates the URI to send the RO to
-              after interaction. This URI MAY be unique per request and MUST
+: REQUIRED. Indicates the URI that the AS will either send the RO to
+              after interaction or send an HTTP POST request. This URI MAY be unique per request and MUST
               be hosted by or accessible by the client instance. This URI MUST NOT contain
               any fragment component. This URI MUST be protected by HTTPS, be
               hosted on a server local to the RO's browser ("localhost"), or
@@ -1633,30 +1636,11 @@ nonce (string)
               MUST be generated by the client instance as a unique value for this
               request.
 
-method (string)
-: REQUIRED. The callback method that the AS will use to contact the client instance.
-              Valid values include `redirect` {{request-interact-callback-redirect}}
-              and `push` {{request-interact-callback-push}}, with other values
-              defined by [a registry TBD](#IANA).
-
 hash_method (string)
 : OPTIONAL. The hash calculation
               mechanism to be used for the callback hash in {{interaction-hash}}. Can be one of `sha3` or `sha2`. If
               absent, the default value is `sha3`.
               \[\[ [See issue #56](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/56) \]\] 
-
-
-~~~
-"interact": {
-    "finish": [{
-        "callback": {
-           "method": "redirect",
-           "uri": "https://client.example.net/return/123455",
-           "nonce": "LKLTI25DK82FX4T4QFZC"
-        }
-    }]
-}
-~~~
 
 If this interaction mode is supported for this client instance and
 request, the AS returns a nonce for use in validating 
@@ -1672,19 +1656,17 @@ presentation of an interaction callback reference as described in
 
 #### Receive an HTTP Callback Through the Browser {#request-interact-callback-redirect}
 
-A callback `method` value of `redirect` indicates that the client instance
-will expect a call from the RO's browser using the HTTP method
+A finish `method` value of `redirect` indicates that the client instance
+will expect a request from the RO's browser using the HTTP method
 GET as described in {{interaction-callback}}.
 
 ~~~
 "interact": {
-    "finish": [{
-        "callback": {
-            "method": "redirect",
-            "uri": "https://client.example.net/return/123455",
-            "nonce": "LKLTI25DK82FX4T4QFZC"
-        }
-    }]
+    "finish": {
+        "method": "redirect",
+        "uri": "https://client.example.net/return/123455",
+        "nonce": "LKLTI25DK82FX4T4QFZC"
+    }
 }
 ~~~
 
@@ -1698,19 +1680,17 @@ prevent substitution attacks.
 
 #### Receive an HTTP Direct Callback {#request-interact-callback-push}
 
-A callback `method` value of `push` indicates that the client instance will
-expect a call from the AS directly using the HTTP method POST
+A finish `method` value of `push` indicates that the client instance will
+expect a request from the AS directly using the HTTP method POST
 as described in {{interaction-pushback}}.
 
 ~~~
 "interact": {
-    "finish": [{
-        "callback": {
-            "method": "push",
-            "uri": "https://client.example.net/return/123455",
-            "nonce": "LKLTI25DK82FX4T4QFZC"
-        }
-    }]
+    "finish": {
+        "method": "push",
+        "uri": "https://client.example.net/return/123455",
+        "nonce": "LKLTI25DK82FX4T4QFZC"
+    }
 }
 ~~~
 
@@ -1825,7 +1805,7 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
 {
     "interact": {
         "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
-        "callback": "MBDOFXG4Y5CVJCX821LH"
+        "finish": "MBDOFXG4Y5CVJCX821LH"
     },
     "continue": {
         "access_token": {
@@ -2082,8 +2062,8 @@ redirect (string)
 app (string)
 : Launch of an application URL. {{response-interact-app}}
 
-callback (string)
-: Callback to a client instance accessible URL after interaction is completed. {{response-interact-callback}}
+finish (string)
+: A nonce used by the client instance to verify the callback after interaction is completed. {{response-interact-callback}}
 
 user_code (object)
 : Display a short user code. {{response-interact-usercode}}
@@ -2152,22 +2132,23 @@ application URL.
 
 ### Post-interaction Callback to a Client Instance Accessible URL {#response-interact-callback}
 
-If the client instance indicates that it can [receive a post-interaction callback on a URL](#request-interact-callback) and the AS supports this mode for the
-client instance's request, the AS responds with a "callback" field containing a nonce
+If the client instance indicates that it can [receive a post-interaction redirect or push at a URL](#finish-interaction-modes) 
+and the AS supports this mode for the
+client instance's request, the AS responds with a `finish` field containing a nonce
 that the client instance will use in validating the callback as defined in
 {{interaction-callback}}.
 
 ~~~
     "interact": {
-        "callback": "MBDOFXG4Y5CVJCX821LH"
+        "finish": "MBDOFXG4Y5CVJCX821LH"
     }
 ~~~
 
 When the RO completes interaction at the AS, the AS MUST call the
 client instance's callback URL using the method indicated in the
-[callback request](#request-interact-callback) as described in {{interaction-callback}}.
+[interaction request](#finish-interaction-modes) as described in {{interaction-callback}}.
 
-If the AS returns a "callback" nonce, the client instance MUST NOT
+If the AS returns a nonce, the client instance MUST NOT
 continue a grant request before it receives the associated
 interaction reference on the callback URI.
 
@@ -2432,7 +2413,7 @@ Note that since the client instance does not add any parameters to the URL, the
 AS MUST determine the grant request being referenced from the URL
 value itself. If the URL cannot be associated with a currently active
 request, the AS MUST display an error to the RO and MUST NOT attempt
-to redirect the RO back to any client instance even if a [callback is supplied](#request-interact-callback).
+to redirect the RO back to any client instance even if a [redirect is supplied](#request-interact-callback-redirect).
 
 The interaction URL MUST be reachable from the RO's browser, though
 note that the RO MAY open the URL on a separate device from the client instance
@@ -2451,7 +2432,7 @@ Note that since the URL itself is static, the AS MUST determine the
 grant request being referenced from the user code value itself. If the
 user code cannot be associated with a currently active request, the AS
 MUST display an error to the RO and MUST NOT attempt to redirect the
-RO back to any client instance even if a [callback is supplied](#request-interact-callback).
+RO back to any client instance even if a [redirect is supplied](#request-interact-callback-redirect).
 
 The user code URL MUST be reachable from the RO's browser, though
 note that the RO MAY open the URL on a separate device from the client instance
@@ -2504,10 +2485,10 @@ sections.
 When using the ["callback" interaction mode](#response-interact-callback) with the `redirect` method,
 the AS signals to the client instance that interaction is
 complete and the request can be continued by directing the RO (in
-their browser) back to the client instance's callback URL sent in [the callback request](#request-interact-callback-redirect).
+their browser) back to the client instance's redirect URL sent in [the callback request](#request-interact-callback-redirect).
 
-The AS secures this callback by adding the hash and interaction
-reference as query parameters to the client instance's callback URL.
+The AS secures this redirect by adding the hash and interaction
+reference as query parameters to the client instance's redirect URL.
 
 
 hash
@@ -2590,7 +2571,7 @@ always provide this hash, and the client instance MUST validate the hash when re
 
 To calculate the "hash" value, the party doing the calculation
 first takes the "nonce" value sent by the client instance in the 
-[interaction section of the initial request](#request-interact-callback), the AS's nonce value
+[interaction section of the initial request](#finish-interaction-modes), the AS's nonce value
 from [the callback response](#response-interact-callback), and the "interact_ref"
 sent to the client instance's callback URL.
 These three values are concatenated to each other in this order
