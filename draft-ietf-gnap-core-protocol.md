@@ -1501,7 +1501,7 @@ The following sections detail requests for interaction
 modes. Additional interaction modes are defined in 
 [a registry TBD](#IANA).
 
-#### Examples
+#### Example Interactions
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
 the end-user to an arbitrary URL and can receive a [callback](#request-interact-callback) through
