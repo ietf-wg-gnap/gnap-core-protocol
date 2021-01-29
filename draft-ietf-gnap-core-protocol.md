@@ -4799,9 +4799,7 @@ Content-type: application/json
 ~~~
 
 
-
-
-# No User Involvement {#example-no-user}
+## No User Involvement {#example-no-user}
 
 In this scenario, the client instance is requesting access on its own
 behalf, with no user to interact with.
