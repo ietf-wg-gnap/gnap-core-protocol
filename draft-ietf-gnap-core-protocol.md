@@ -790,7 +790,8 @@ access (array of objects/strings)
     used at RS's. This field is REQUIRED. {{resource-access-rights}}
 
 label (string)
-: A unique name chosen by the client instance to refer to the resulting access token. If this field
+: A unique name chosen by the client instance to refer to the resulting access token. The value of this
+    field is opaque to the AS.  If this field
     is included in the request, the AS MUST include the same label in the [token response](#response-token).
     This field is REQUIRED if used as part of a [multiple access token request](#request-token-multiple),
     and is OPTIONAL otherwise.
@@ -1802,8 +1803,9 @@ with access to two described resources.
 ~~~
 
 
-If the client instance [requested multiple access tokens](#request-token-multiple), the AS MUST NOT respond with a
-single access token structure unless the client instance sends the `split` flag as described in {{request-token-single}}.
+If the client instance [requested a single access token](#request-token-single), the AS MUST NOT respond with the multiple
+access token structure unless the client instance sends the `split` flag as described in {{request-token-single}}.
+
 If the AS has split the access token response, the response MUST include the `split` flag set to `true`.
 
 \[\[ [See issue #69](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/69) \]\]
@@ -1815,7 +1817,7 @@ granted at least one of them, the AS responds with the
 "access_token" field. The value of this field is a JSON
 array, the members of which are distinct access
 tokens as described in {{response-token-single}}.
-Each object MUST have a unique `label` field, correspond to the token labels
+Each object MUST have a unique `label` field, corresponding to the token labels
 chosen by the client instance in the [multiple access token request](#request-token-multiple).
 
 In this non-normative example, two bearer tokens are issued under the
@@ -1850,8 +1852,10 @@ requested access tokens, for any reason. In such cases the refused token is omit
 from the response and all of the other issued access
 tokens are included in the response the requested names appropriate names.
 
-If the client instance [requested a single access token](#request-token-single), the AS MUST NOT respond with the multiple
-access token structure unless the client instance sends the `split` flag as described in {{request-token-single}}.
+If the client instance [requested multiple access tokens](#request-token-multiple), the AS MUST NOT respond with a
+single access token structure, even if only a single access token is granted. In such cases, the AS responds
+with a multiple access token structure containing one access token.
+
 If the AS has split the access token response, the response MUST include the `split` flag set to `true`.
 
 ~~~
