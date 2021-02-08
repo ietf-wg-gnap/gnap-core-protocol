@@ -182,8 +182,6 @@ another system that deals with security rights. From the perspective of
 GNAP, all of these are pieces of the AS and together fulfill the
 role of the AS as defined by the protocol.
 
-\[\[ [See issue #29](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/29) \]\]
-
 ## Elements {#elements}
 
 In addition to the roles above, the protocol also involves several 
@@ -1585,7 +1583,6 @@ uri (string)
               based on the client instance's presented key information. The callback URI
               SHOULD be presented to the RO during the interaction phase
               before redirect. 
-              \[\[ [See issue #55](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/55) \]\]
 
 nonce (string)
 : REQUIRED. Unique value to be used in the
@@ -3034,32 +3031,6 @@ Since the old access tokens are good for a subset of the rights requested here, 
 AS might decide to not revoke them. However, any access tokens granted after this update
 process are new access tokens and do not modify the rights of existing access tokens.
 
-## Getting the Current State of a Grant Request {#continue-state}
-
-If the client instance needs to get the current state of an ongoing grant request, it makes an
-HTTP GET request to the continuation URI. This request MUST NOT alter the grant
-request in any fashion, including causing the issuance of new access tokens or
-modification of interaction parameters. 
-
-The AS MAY include existing access tokens and previously-released subject claims in
-the response. The AS MUST NOT issue a new access token or release a new subject 
-claim in response to this request. 
-
-~~~
-GET /continue HTTP/1.1
-Host: server.example.com
-Content-type: application/json
-Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
-~~~
-
-The response MAY include any fields described {{response}} that are applicable to this
-ongoing request, including the most recently issued access tokens, any released subject
-claims, and any currently active interaction modes. The response MAY contain a 
-new ["continue" response](#response-continue) as described above.
-
-\[\[ [See issue #98](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/98) \]\]
-
 ## Canceling a Grant Request {#continue-delete}
 
 If the client instance wishes to cancel an ongoing grant request, it makes an
@@ -3097,8 +3068,6 @@ same [key identified in the initial request](#request-client) as described in {{
 The AS MUST validate the proof and assure that it is associated with
 either the token itself or the client instance the token was issued to, as
 appropriate for the token's presentation type.
-
-\[\[ [See issue #99](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/99) \]\]
 
 ## Rotating the Access Token {#rotate-access-token}
 
@@ -3412,8 +3381,6 @@ at_hash (string)
     `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
     header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
     value with SHA-256, then take the left-most 128 bits and base64url encode them. 
-
-\[\[ [See issue #106](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/106) \]\]
 
 The payload of the JWS object is the serialized body of the request, and
 the object is signed according to detached JWS {{RFC7797}}. 
@@ -4301,6 +4268,8 @@ sure that it has the permission to do so.
 - -04
     - Updated terminology.
     - Refactored key presentation and binding.
+    - Closed issues related to reading and updating access tokens
+    - Removed links to closed issues in the main text
 
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
