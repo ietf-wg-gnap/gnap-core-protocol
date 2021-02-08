@@ -1492,7 +1492,7 @@ This specification defines the following interaction completion methods:
 
 ### Hint Definitions
 
-This specification defines the following hints as objects under the `hints` key:
+This specification defines the following properties under the `hints` key:
 
 ui_locales (array of strings)
 : Indicates the end-user's preferred locales that the AS can use
@@ -1705,6 +1705,9 @@ be present on the incoming HTTP request.
 
 ### Hints
 
+The `hints` key is an object describing one or more suggestions from the client
+to the AS.
+
 #### Indicate Desired Interaction Locales {#request-interact-locale}
 
 If the client instance knows the end-user's locale and language preferences, the
@@ -1713,9 +1716,9 @@ with an array of locale strings as defined by {{RFC5646}}.
 
 ~~~
 "interact": {
-    "hints": [{
+    "hints": {
         "ui_locales": ["en-US", "fr-CA"]
-    }]
+    }
 }
 ~~~
 
@@ -1805,7 +1808,7 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
 {
     "interact": {
         "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
-        "finish": "MBDOFXG4Y5CVJCX821LH"
+        "push": "MBDOFXG4Y5CVJCX821LH"
     },
     "continue": {
         "access_token": {
@@ -2134,13 +2137,13 @@ application URL.
 
 If the client instance indicates that it can [receive a post-interaction redirect or push at a URL](#finish-interaction-modes) 
 and the AS supports this mode for the
-client instance's request, the AS responds with a `finish` field containing a nonce
+client instance's request, the AS responds with a `push` field containing a nonce
 that the client instance will use in validating the callback as defined in
 {{interaction-callback}}.
 
 ~~~
     "interact": {
-        "finish": "MBDOFXG4Y5CVJCX821LH"
+        "push": "MBDOFXG4Y5CVJCX821LH"
     }
 ~~~
 
@@ -2878,8 +2881,8 @@ Detached-JWS: ejy0...
         "read", "write"
     ],
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -2973,8 +2976,8 @@ Detached-JWS: ejy0...
         "read"
     ],
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -3029,8 +3032,8 @@ Detached-JWS: ejy0...
         "read", "write"
     ],
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/654321",
             "nonce": "K82FX4T4LKLTI25DQFZC"
@@ -3450,8 +3453,8 @@ Detached-JWS: eyJiNjQiOmZhbHNlLCJhbGciOiJSUzI1NiIsImtpZCI6Inh5ei0xIn0.
         "dolphin-metadata"
     ],
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3549,25 +3552,25 @@ Q1dOS1ItRXBLbTZOaU90ZWRGNE91bXQ4TkxLVFZqZllnR
 khlQkRkQ2JyckVUZDR2Qk13RHRBbmpQcjNDVkN3d3gyYk
 FRVDZTbHhGSjNmajJoaHlJcHE3cGM4clppYjVqTnlYS3d
 mQnVrVFZZWm96a3NodC1Mb2h5QVNhS3BZVHA4THROWi13
-In0sInByb29mIjoiandzIn0sIm5hbWUiOiJNeSBGaXN0I
-ENsaWVudCIsInVyaSI6Imh0dHA6Ly9sb2NhbGhvc3QvY2
-xpZW50L2NsaWVudElEIn0sImludGVyYWN0Ijp7ImNhbGx
-iYWNrIjp7Im1ldGhvZCI6InJlZGlyZWN0Iiwibm9uY2Ui
-OiJkOTAyMTM4ODRiODQwOTIwNTM4YjVjNTEiLCJ1cmkiO
-iJodHRwOi8vbG9jYWxob3N0L2NsaWVudC9yZXF1ZXN0LW
-RvbmUifSwicmVkaXJlY3QiOnRydWV9LCJyZXNvdXJjZXM
-iOnsiYWN0aW9ucyI6WyJyZWFkIiwicHJpbnQiXSwibG9j
-YXRpb25zIjpbImh0dHA6Ly9sb2NhbGhvc3QvcGhvdG9zI
-l0sInR5cGUiOiJwaG90by1hcGkifSwic3ViamVjdCI6ey
-JzdWJfaWRzIjpbImlzcy1zdWIiLCJlbWFpbCJdfX0.LUy
-Z8_fERmxbYARq8kBYMwzcd8GnCAKAlo2ZSYLRRNAYWPrp
-2XGLJOvg97WK1idf_LB08OJmLVsCXxCvn9mgaAkYNL_Zj
-HcusBvY1mNo0E1sdTEr31CVKfC-6WrZCscb8YqE4Ayhh0
-Te8kzSng3OkLdy7xN4xeKuHzpF7yGsM52JZ0cBcTo6WrY
-EfGdr08AWQJ59ht72n3jTsmYNy9A6I4Wrvfgj3TNxmwYo
-jpBAicfjnzA1UVcNm9F_xiSz1_y2tdH7j5rVqBMQife-k
-9Ewk95vr3lurthenliYSNiUinVfoW1ybnaIBcTtP1_YCx
-g_h1y-B5uZEvYNGCuoCqa6IQ
+In0sInByb29mIjoiandzIn0sIm5hbWUiOiJNeUZpc3RDb
+GllbnQiLCJ1cmkiOiJodHRwOi8vbG9jYWxob3N0L2NsaW
+VudC9jbGllbnRJRCJ9LCJpbnRlcmFjdCI6eyJzdGFydCI
+6WyJyZWRpcmVjdCJdLCJmaW5pc2giOnsibWV0aG9kIjoi
+cmVkaXJlY3QiLCJub25jZSI6ImQ5MDIxMzg4NGI4NDA5M
+jA1MzhiNWM1MSIsInVyaSI6Imh0dHA6Ly9sb2NhbGhvc3
+QvY2xpZW50L3JlcXVlc3QtZG9uZSJ9fSwicmVzb3VyY2V
+zIjp7ImFjdGlvbnMiOlsicmVhZCIsInByaW50Il0sImxv
+Y2F0aW9ucyI6WyJodHRwOi8vbG9jYWxob3N0L3Bob3Rvc
+yJdLCJ0eXBlIjoicGhvdG8tYXBpIn0sInN1YmplY3QiOn
+sic3ViX2lkcyI6WyJpc3Nfc3ViIiwiZW1haWwiXX19.LU
+yZ8_fERmxbYARq8kBYMwzcd8GnCAKAlo2ZSYLRRNAYWPr
+p2XGLJOvg97WK1idf_LB08OJmLVsCXxCvn9mgaAkYNL_Z
+jHcusBvY1mNo0E1sdTEr31CVKfC-6WrZCscb8YqE4Ayhh
+0Te8kzSng3OkLdy7xN4xeKuHzpF7yGsM52JZ0cBcTo6Wr
+YEfGdr08AWQJ59ht72n3jTsmYNy9A6I4Wrvfgj3TNxmwY
+ojpBAicfjnzA1UVcNm9F_xiSz1_y2tdH7j5rVqBMQife-
+k9Ewk95vr3lurthenliYSNiUinVfoW1ybnaIBcTtP1_YC
+xg_h1y-B5uZEvYNGCuoCqa6IQ
 ~~~
 
 This example's JWS header decodes to:
@@ -3606,12 +3609,12 @@ And the JWS body decodes to:
     "uri": "http://localhost/client/clientID"
   },
   "interact": {
-    "callback": {
+    "start": ["redirect"],
+    "finish": {
       "method": "redirect",
       "nonce": "d90213884b840920538b5c51",
       "uri": "http://localhost/client/request-done"
-    },
-    "redirect": true
+    }
   },
   "resources": {
     "actions": [
@@ -3682,8 +3685,8 @@ SSL_CLIENT_CERT: MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBmjE3MDUGA1UEAwwuQmV
         "dolphin-metadata"
     ],
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3764,8 +3767,8 @@ T9tyEYqGrTfm5uautELgMls9sgSyE929woZ59elg
         "dolphin-metadata"
     ],
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3824,8 +3827,8 @@ Digest: SHA=oZz2O3kg5SEFAhmr0xEBbc4jEfo=
         "dolphin-metadata"
     ],
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "push",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3911,8 +3914,8 @@ G0J4bPVnTI5St9hJYvvh7FE8JirIg
         "dolphin-metadata"
     ],
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -4313,6 +4316,7 @@ sure that it has the permission to do so.
 - -04
     - Updated terminology.
     - Refactored key presentation and binding.
+    - Refactored "interact" request to group start and end modes.
 
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
@@ -4410,8 +4414,8 @@ Detached-JWS: ejy0...
       }
     },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -4434,7 +4438,7 @@ Content-type: application/json
 {
     "interact": {
        "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
-       "callback": "MBDOFXG4Y5CVJCX821LH"
+       "push": "MBDOFXG4Y5CVJCX821LH"
     }
     "continue": {
         "access_token": {
@@ -4560,8 +4564,7 @@ Detached-JWS: ejy0...
     ],
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
-        "redirect": true,
-        "user_code": true
+        "start": ["redirect", "user_code"]
     }
 }
 ~~~
@@ -4920,8 +4923,8 @@ Detached-JWS: ejy0...
     ],
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return?state=123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
