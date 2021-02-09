@@ -4273,7 +4273,9 @@ sure that it has the permission to do so.
 - -04
     - Updated terminology.
     - Refactored key presentation and binding.
+    - Removed function to read state of grant request by client
     - Closed issues related to reading and updating access tokens
+
 
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
