@@ -564,7 +564,7 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 
 3. The AS determines which RO to contact based on the request in (1), through a
     combination of the [user request](#request-user), the 
-    [resources request](#request-resource), and other policy information. The AS
+    [resources request](#request-token), and other policy information. The AS
     contacts the RO and authenticates them.
 
 4. The RO authorizes the pending request from the client instance.
@@ -678,10 +678,9 @@ To start a request, the client instance sends [JSON](#RFC8259) document with an 
 member of the request object represents a different aspect of the
 client instance's request. Each field is described in detail in a section below.
 
-resources (object / array of objects/strings)
-: Describes the rights that the client instance is requesting for one or more access tokens to be
-    used at RS's. {{request-resource}}
-   
+access_token (object / array of objects)
+: Describes the rights and properties associated with the requested access token. {{request-token}}
+
 subject (object)
 : Describes the information about the RO that the client instance is requesting to be returned
     directly in the response from the AS. {{request-subject}}
@@ -714,25 +713,27 @@ A non-normative example of a grant request is below:
 
 ~~~
 {
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        },
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            {
+                "type": "photo-api",
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            },
+            "dolphin-metadata"
+        ]
+    },
     "client": {
       "display": {
         "name": "My Client Display Name",
@@ -771,227 +772,67 @@ The request MUST be sent as a JSON object in the body of the HTTP
 POST request with Content-Type `application/json`,
 unless otherwise specified by the signature mechanism.
 
-## Requesting Resources {#request-resource}
+## Requesting Access to Resources {#request-token}
 
 If the client instance is requesting one or more access tokens for the
-purpose of accessing an API, the client instance MUST include a `resources`
-field. This field MUST be an array (for a [single access token](#request-resource-single)) or
-an object (for [multiple access tokens](#request-resource-multiple)), as described in the following
-sections.
+purpose of accessing an API, the client instance MUST include an `access_token`
+field. This field MUST be an object (for a [single access token](#request-token-single)) or
+an array of these objects (for [multiple access tokens](#request-token-multiple)), 
+as described in the following sections.
 
-### Requesting a Single Access Token {#request-resource-single}
+### Requesting a Single Access Token {#request-token-single}
 
-When requesting an access token, the client instance MUST send a
-`resources` field containing a JSON array. The elements of the JSON
-array represent rights of access that the client instance is requesting in
-the access token. The requested access is the union of all elements
-within the array.
+To request a single access token, the client instance sends an `acccess_token` object
+composed of the following fields.
 
-The client instance declares what access it wants to associate with the
-resulting access token using objects that describe multiple
-dimensions of access. Each object contains a `type`
-property that determines the type of API that the client instance is calling.
+access (array of objects/strings)
+: Describes the rights that the client instance is requesting for one or more access tokens to be
+    used at RS's. This field is REQUIRED. {{resource-access-rights}}
 
-type (string)
-: The type of resource request as a string. This field MAY
-      define which other fields are allowed in the request object. 
-      This field is REQUIRED.
+label (string)
+: A unique name chosen by the client instance to refer to the resulting access token. The value of this
+    field is opaque to the AS.  If this field
+    is included in the request, the AS MUST include the same label in the [token response](#response-token).
+    This field is REQUIRED if used as part of a [multiple access token request](#request-token-multiple),
+    and is OPTIONAL otherwise.
 
-The value of this field is under the control of the AS. 
-This field MUST be compared using an exact byte match of the string
-value against known types by the AS.  The AS MUST ensure that there
-is no collision between different authorization data types that it
-supports.  The AS MUST NOT do any collation or normalization of data
-types during comparison. It is RECOMMENDED that designers of general-purpose
-APIs use a URI for this field to avoid collisions between multiple
-API types protected by a single AS.
+flags (array of strings)
+: A set of flags that indicate desired attributes or behavior to be attached to the access token by the
+    AS. This field is OPTIONAL.
 
-While it is expected that many APIs will have its own properties, a set of
-common properties are defined here. Specific API implementations
-SHOULD NOT re-use these fields with different semantics or syntax. The
-available values for these properties are determined by the API
-being protected at the RS.
+The values of the `flags` field defined by this specification are as follows:
 
-actions (array of strings)
-: The types of actions the client instance will take at the RS as an array of strings.
-    For example, a client instance asking for a combination of "read" and "write" access.
+bearer
+: If this flag is included, the access token being requested is a bearer token.
+    If this flag is omitted, the access token is bound to the key used
+    by the client instance in this request, or the key's most recent rotation. 
+    Methods for presenting bound and bearer access tokens are described
+    in {{use-access-token}}.
+    \[\[ [See issue #38](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/38) \]\]
 
-locations (array of strings)
-: The location of the RS as an array of
-    strings. These strings are typically URIs identifying the
-    location of the RS.
+split
+: If this flag is included, the client instance is capable of 
+    receiving a different number of tokens than specified in the
+    [token request](#request-token), including 
+    receiving [multiple access tokens](#response-token-multiple)
+    in response to any [single token request](#request-token-single) or a
+    different number of access tokens than requested in a [multiple access token request](#request-token-multiple).
+    The `label` fields of the returned additional tokens are chosen by the AS. 
+    The client instance MUST be able to tell from the token response where and 
+    how it can use each of the access tokens. 
+    \[\[ [See issue #37](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/37) \]\]
 
-datatypes (array of strings)
-: The kinds of data available to the client instance at the RS's API as an
-    array of strings. For example, a client instance asking for access to
-    raw "image" data and "metadata" at a photograph API.
+Flag values MUST NOT be included more than once.
 
-identifier (string)
-: A string identifier indicating a specific resource at the RS.
-    For example, a patient identifier for a medical API or
-    a bank account number for a financial API.
+Additional flags can be defined by extensions using [a registry TBD](#IANA).
 
-The following non-normative example is asking for three kinds of access (read, write, delete) to each of
-two different locations and two different data types (metadata, images) for a single access token 
-using the fictitious `photo-api` type definition.
+
+In the following example, the client instance is requesting access to a complex resource
+described by a pair of access request object. 
 
 ~~~
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write",
-                "delete"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        }
-    ]
-~~~
-
-The access requested for a given object when using these fields 
-is the cross-product of all fields of the object. That is to 
-say, the object represents a request for all `action` values listed within the object
-to be used at all `locations` values listed within the object for all `datatype`
-values listed within the object. Assuming the request above was granted,
-the client instance could assume that it
-would be able to do a `read` action against the `images` on the first server
-as well as a `delete` action on the `metadata` of the second server, or any other
-combination of these fields, using the same access token. 
-
-To request a different combination of access, 
-such as requesting one `action` against one `location` 
-and a different `action` against a different `location`, the 
-client instance can include multiple separate objects in the `resources` array.
-The following non-normative example uses the same fictitious `photo-api`
-type definition to request a single access token with more specifically
-targeted access rights by using two discrete objects within the request.
-
-~~~
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read"
-            ],
-            "locations": [
-                "https://server.example.net/"
-            ],
-            "datatypes": [
-                "images"
-            ]
-        },
-        {
-            "type": "photo-api",
-            "actions": [
-                "write",
-                "delete"
-            ],
-            "locations": [
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata"
-            ]
-        }
-    ]
-~~~
-
-The access requested here is for `read` access to `images` on one server
-while simultaneously requesting `write` and `delete` access for `metadata` on a different
-server, but importantly without requesting `write` or `delete` access to `images` on the
-first server.
-
-It is anticipated that API designers will use a combination
-of common fields defined in this specification as well as
-fields specific to the API itself. The following non-normative 
-example shows the use of both common and API-specific fields as 
-part of two different fictitious API `type` values. The first
-access request includes the `actions`, `locations`, and `datatypes` 
-fields specified here as well as the API-specific `geolocation`
-field. The second access request includes the `actions` and
-`identifier` fields specified here as well as the API-specific
-`currency` field.
-
-~~~
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ],
-            "geolocation": [
-                { lat: -32.364, lng: 153.207 },
-                { lat: -35.364, lng: 158.207 }
-            ]
-        },
-        {
-            "type": "financial-transaction",
-            "actions": [
-                "withdraw"
-            ],
-            "identifier": "account-14-32-32-3", 
-            "currency": "USD"
-        }
-    ]
-~~~
-
-If this request is approved,
-the [resulting access token](#response-token-single)'s access rights will be
-the union of the requested types of access for each of the two APIs, just as above.
-
-### Requesting Resources By Reference {#request-resource-reference}
-
-Instead of sending an [object describing the requested resource](#request-resource-single),
-a client instance MAY send a string known to
-the AS or RS representing the access being requested. Each string
-SHOULD correspond to a specific expanded object representation at
-the AS. 
-
-~~~
-    "resources": [
-        "read", "dolphin-metadata", "some other thing"
-    ]
-
-~~~
-
-This value is opaque to the client instance and MAY be any
-valid JSON string, and therefore could include spaces, unicode
-characters, and properly escaped string sequences. However, in some
-situations the value is intended to be 
-seen and understood by the client software's developer. In such cases, the
-API designer choosing any such human-readable strings SHOULD take steps
-to ensure the string values are not easily confused by a developer,
-such as by limiting the strings to easily disambiguated characters.
-
-This functionality is similar in practice to OAuth 2's `scope` parameter {{RFC6749}}, where a single string
-represents the set of access rights requested by the client instance. As such, the reference
-string could contain any valid OAuth 2 scope value as in {{example-oauth2}}. Note that the reference
-string here is not bound to the same character restrictions as in OAuth 2's `scope` definition.
-
-A single "resources" array MAY include both object-type and
-string-type resource items. In this non-normative example,
-the client instance is requesting access to a `photo-api` and `financial-transaction` API type
-as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
-
-~~~
-    "resources": [
+"access_token": {
+    "access": [
         {
             "type": "photo-api",
             "actions": [
@@ -1008,57 +849,75 @@ as well as the reference values of `read`, `dolphin-metadata`, and `some other t
                 "images"
             ]
         },
-        "read", 
-        "dolphin-metadata",
         {
-            "type": "financial-transaction",
+            "type": "walrus-access",
             "actions": [
-                "withdraw"
+                "foo",
+                "bar"
             ],
-            "identifier": "account-14-32-32-3", 
-            "currency": "USD"
-        },
-        "some other thing"
-    ]
+            "locations": [
+                "https://resource.other/"
+            ],
+            "datatypes": [
+                "data",
+                "pictures",
+                "walrus whiskers"
+            ]
+        }
+    ],
+    "label": "token1-23",
+    "flags": [ "split" ]
+}
 ~~~
 
-The requested access is the union of all elements of the array, including both objects and 
-reference strings.
+If access is approved, the resulting access token is valid for the described resource 
+and is bound to the client instance's key (or its most recent rotation). The token 
+is labeled "token1-23" and could be split into multiple access tokens by the AS, if the
+AS chooses. The token response structure is described in {{response-token-single}}.
 
-### Requesting Multiple Access Tokens {#request-resource-multiple}
+### Requesting Multiple Access Tokens {#request-token-multiple}
 
-When requesting multiple access tokens, the resources field is
-a JSON object. The names of the JSON object fields are token
-identifiers chosen by the client instance, and MAY be any valid string. The
-values of the JSON object fields are JSON arrays representing a single
+To request multiple access tokens to be returned in a single response, the
+client instance sends an array of objects as the value of the `access_token`
+parameter. Each object MUST conform to the request format for a single
 access token request, as specified in 
-[requesting a single access token](#request-resource-single).
+[requesting a single access token](#request-token-single).
+Additionally, each object in the array MUST include the `label` field, and
+all values of these fields MUST be unique within the request. If the
+client instance does not include a `label` value for any entry in the
+array, or the values of the `label` field are not unique within the array,
+the AS MUST return an error.
 
 The following non-normative example shows a request for two
 separate access tokens, `token1` and `token2`.
 
 ~~~
-    "resources": {
-        "token1": [
-          {
-              "type": "photo-api",
-              "actions": [
-                  "read",
-                  "write",
-                  "dolphin"
-              ],
-              "locations": [
-                  "https://server.example.net/",
-                  "https://resource.local/other"
-              ],
-              "datatypes": [
-                  "metadata",
-                  "images"
-              ]
-          },
-          "dolphin-metadata"
-      ],
-      "token2": [
+"access_token": [
+    {
+        "label": "token1",
+        "access": [
+            {
+                "type": "photo-api",
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            },
+            "dolphin-metadata"
+        ]
+    },
+    {
+        "label": "token2",
+        "access": [
             {
                 "type": "walrus-access",
                 "actions": [
@@ -1074,84 +933,17 @@ separate access tokens, `token1` and `token2`.
                     "walrus whiskers"
                 ]
             }
-        ]
+        ],
+        "flags": [ "bearer" ]
     }
+]
 ~~~
 
-Any approved access requests are returned in the 
+All approved access requests are returned in the 
 [multiple access token response](#response-token-multiple) structure using
-the token identifiers in the request.
+the values of the `label` fields in the request.
 
-### Signaling Token Behavior {#request-resource-flag}
-
-While the AS is ultimately in control of how tokens are returned and bound to the client instance, 
-sometimes the client instance has context about what it can support that can affect the AS's
-response. This specification defines several flags that are passed as
-[resource reference strings](#request-resource-reference). 
-
-Each flag applies only to the single resource request in which it appears.
-
-Support of all flags is optional, such as any other resource reference value.
-
-multi_token
-: The client instance wishes to support multiple simultaneous access tokens through the
-    token rotation process. When the client instance [rotates an access token](#rotate-access-token),
-    the AS does not invalidate the previous access token. The old access token
-    continues to remain valid until such time as it expires or is revoked
-    through other means.
-
-split_token
-: The client instance is capable of receiving [multiple access tokens](#response-token-multiple)
-    in response to any [single token request](#request-resource-single), or 
-    receiving a different number of tokens than specified in the
-    [multiple token request](#request-resource-multiple). The labels of the
-    returned additional tokens are chosen by the AS. The client instance MUST be able
-    to tell from the token response where and how it can use each of the
-    access tokens. 
-    \[\[ [See issue #37](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/37) \]\]
-
-bind_token
-: The client instance wants the issued access token to be bound to the [key the client instance used](#request-client)
-    to make the request. The resulting access token MUST be bound using the same
-    `proof` mechanism used by the client instance with a `key` value of `true`, indicating
-    the client instance's presented key is to be used for binding.
-    \[\[ [See issue #38](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/38) \]\]
-
-The AS MUST respond with any applied flags in the [token response](#response-token)
-`resources` section.
-
-In this non-normative example, the requested access token is to be bound to
-the client instance's key and should be kept during rotation.
-
-~~~
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        },
-        "read", 
-        "bind_token",
-        "multi_token"
-    ]
-~~~
-
-Additional flags can be registered in [a registry TBD](#IANA).
-
-\[\[ [See issue #39](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/39) \]\]
-
-## Requesting User Information {#request-subject}
+## Requesting Subject Information {#request-subject}
 
 If the client instance is requesting information about the RO from
 the AS, it sends a `subject` field as a JSON object. This object MAY
@@ -1441,8 +1233,8 @@ return an error.
 ## Interacting with the User {#request-interact}
 
 Many times, the AS will require interaction with the RO in order to
-approve a requested delegation to the client instance for both resources and direct
-claim information. Many times the end-user using the client instance is the same person as
+approve a requested delegation to the client instance for both access to resources and direct
+subject information. Many times the end-user using the client instance is the same person as
 the RO, and the client instance can directly drive interaction with the AS by redirecting
 the end-user on the same device, or by launching an application. Other times, the 
 client instance can provide information to start the RO's interaction on a secondary
@@ -1761,13 +1553,9 @@ continue (object)
 : Indicates that the client instance can continue the request by making one or
     more continuation requests. {{response-continue}}
 
-access_token (object)
-: A single access token that the client instance can use to call the RS on
+access_token (object / array of objects)
+: A single access token or set of access tokens that the client instance can use to call the RS on
     behalf of the RO. {{response-token-single}}
-
-multiple_access_token (object)
-: Multiple named access tokens that the client instance can use to call the
-    RS on behalf of the RO. {{response-token-multiple}}
 
 interact (object)
 : Indicates that interaction through some set of defined mechanisms
@@ -1799,7 +1587,7 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/tx"
     }
@@ -1814,7 +1602,7 @@ an email address.
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
+        "bound": false,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
@@ -1849,7 +1637,8 @@ access_token (object)
 : REQUIRED. A unique access token for continuing the request, in the format specified
             in {{response-token-single}}. This access token MUST be bound to the
             client instance's key used in the request and MUST NOT be a `bearer` token. As a consequence,
-            the `key` field of this access token is always the boolean value `true`.
+            the `bound` field of this access token is always the boolean value `true` and the
+            `key` field MUST be omitted.
             This access token MUST NOT be usable at resources outside of the AS.
             The client instance MUST present the access token in all requests to the continuation URI as 
             described in {{use-access-token}}.
@@ -1860,7 +1649,7 @@ access_token (object)
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -1883,11 +1672,12 @@ concluded.
 ## Access Tokens {#response-token}
 
 If the AS has successfully granted one or more access tokens to the client instance,
-the AS responds with either the `access_token` or the `multiple_access_token`
-field. The AS MUST NOT respond with both
-the `access_token` and `multiple_access_token` fields.
+the AS responds with the `access_token` field. This field contains either a single
+access token as described in {{response-token-single}} or an array of access tokens
+as described in {{response-token-multiple}}.
 
-\[\[ [See issue #68](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/68) \]\]
+The client instance uses any access tokens in this response to call the RS as
+described in {{use-access-token}}.
 
 ### Single Access Token {#response-token-single}
 
@@ -1899,54 +1689,85 @@ properties.
 
 value (string)
 : REQUIRED. The value of the access token as a
-              string. The value is opaque to the client instance. The value SHOULD be
-              limited to ASCII characters to facilitate transmission over HTTP
-              headers within other protocols without requiring additional encoding.
+    string. The value is opaque to the client instance. The value SHOULD be
+    limited to ASCII characters to facilitate transmission over HTTP
+    headers within other protocols without requiring additional encoding.
+
+bound (boolean)
+: RECOMMENDED. Flag indicating if the token is bound to the client instance's key.
+    If the boolean value is `true` or the field is omitted, and the `key` field is omitted,
+    the token is bound to the [key used by the client instance](#request-client) in its request 
+    for access. If the boolean value is `true` or the field is omitted, and the `key` field
+    is present, the token is bound to the key and proofing mechanism indicated in the
+    `key` field. If the boolean value is `false`, the token is a bearer token with no
+    key bound to it and the `key` field MUST be omitted.
+
+label (string)
+: REQUIRED for multiple access tokens, OPTIONAL for single access token. 
+    The value of the `label` the client instance provided in the associated
+    [token request](#request-token), if present. If the token has been split
+    by the AS, the value of the `label` field is chosen by the AS and the
+    `split` field is included and set to `true`.
 
 manage (string)
 : OPTIONAL. The management URI for this
-              access token. If provided, the client instance MAY manage its access
-              token as described in {{token-management}}. This management
-              URI is a function of the AS and is separate from the RS
-              the client instance is requesting access to.
-              This URI MUST NOT include the
-              access token value and SHOULD be different for each access
-              token issued in a request.
+    access token. If provided, the client instance MAY manage its access
+    token as described in {{token-management}}. This management
+    URI is a function of the AS and is separate from the RS
+    the client instance is requesting access to.
+    This URI MUST NOT include the
+    access token value and SHOULD be different for each access
+    token issued in a request.
 
-resources (array of objects/strings)
+access (array of objects/strings)
 : RECOMMENDED. A description of the rights
-              associated with this access token, as defined in 
-              {{request-resource-single}}. If included, this MUST reflect the rights
-              associated with the issued access token. These rights MAY vary
-              from what was requested by the client instance.
+    associated with this access token, as defined in 
+    {{resource-access-rights}}. If included, this MUST reflect the rights
+    associated with the issued access token. These rights MAY vary
+    from what was requested by the client instance.
 
 expires_in (integer)
 : OPTIONAL. The number of seconds in
-              which the access will expire. The client instance MUST NOT use the access
-              token past this time. An RS MUST NOT accept an access token
-              past this time. Note that the access token MAY be revoked by the
-              AS or RS at any point prior to its expiration.
+    which the access will expire. The client instance MUST NOT use the access
+    token past this time. An RS MUST NOT accept an access token
+    past this time. Note that the access token MAY be revoked by the
+    AS or RS at any point prior to its expiration.
 
-key (object / string / boolean)
-: REQUIRED. The key that the token is bound to. If the boolean value `true` is used,
-              the token is bound to the [key used by the client instance](#request-client) in its request 
-              for access. If the boolean value `false` is used,
-              the token is a bearer token with no key bound to it.
-              Otherwise, the key MUST be an object or string in a format
-              described in {{key-format}}, describing a public key to which the
-              client instance can use the associated private key. The client instance MUST be able to
-              dereference or process the key information in order to be able
-              to sign the request.
+key (object / string)
+: OPTIONAL. The key that the token is bound to, if different from the
+    client instance's presented key. The key MUST be an object or string in a format
+    described in {{key-format}}, describing a public key to which the
+    client instance can use the associated private key. The client instance MUST be able to
+    dereference or process the key information in order to be able
+    to sign the request.
 
-The following non-normative example shows a single bearer token with a management
-URL that has access to three described resources.
+durable (boolean)
+: OPTIONAL. Flag indicating a hint of AS behavior on token rotation.
+    If this flag is set to the value `true`, then the client instance can expect
+    a previously-issued access token to continue to work after it has been [rotated](#rotate-access-token)
+    or the underlying grant request has been [modified](#continue-modify), resulting
+    in the issuance of new access tokens. If this flag is set to the boolean value `false`
+    or is omitted, the client instance can anticipate a given access token
+    will stop working after token rotation or grant request modification.
+    Note that a token flagged as `durable` can still expire or be revoked through
+    any normal means.
+
+split (boolean)
+: OPTIONAL. Flag indicating that this token was generated by issuing multiple access tokens
+    in response to one of the client instance's [token request](#request-token) objects.
+    This behavior MUST NOT be used unless the client instance has specifically requested it
+    by use of the `split` flag.
+
+The following non-normative example shows a single access token  bound to the client instance's key
+used in the initial request, with a management URL, and that has access to three described resources 
+(one using an object and two described by reference strings).
 
 ~~~
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
+        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [
+        "access": [
             {
                 "type": "photo-api",
                 "actions": [
@@ -1968,22 +1789,24 @@ URL that has access to three described resources.
     }
 ~~~
 
-The following non-normative example shows a single access token bound to the client instance's key, which
-was presented using the [detached JWS](#detached-jws) binding method.
+The following non-normative example shows a single bearer access token
+with access to two described resources.
 
 ~~~
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": true,
-        "resources": [
+        "bound": true,
+        "access": [
             "finance", "medical"
         ]
     }
 ~~~
 
 
-If the client instance [requested multiple access tokens](#request-resource-multiple), the AS MUST NOT respond with a
-single access token structure unless the client instance sends the `split_token` flag as described in {{request-resource-flag}}.
+If the client instance [requested a single access token](#request-token-single), the AS MUST NOT respond with the multiple
+access token structure unless the client instance sends the `split` flag as described in {{request-token-single}}.
+
+If the AS has split the access token response, the response MUST include the `split` flag set to `true`.
 
 \[\[ [See issue #69](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/69) \]\]
 
@@ -1991,34 +1814,36 @@ single access token structure unless the client instance sends the `split_token`
 
 If the client instance has requested multiple access tokens and the AS has
 granted at least one of them, the AS responds with the
-"multiple_access_tokens" field. The value of this field is a JSON
-object, and the property names correspond to the token identifiers
-chosen by the client instance in the [multiple access token request](#request-resource-multiple).
-The values of the properties of this object are access
+"access_token" field. The value of this field is a JSON
+array, the members of which are distinct access
 tokens as described in {{response-token-single}}.
+Each object MUST have a unique `label` field, corresponding to the token labels
+chosen by the client instance in the [multiple access token request](#request-token-multiple).
 
 In this non-normative example, two bearer tokens are issued under the
 names `token1` and `token2`, and only the first token has a management
 URL associated with it.
 
 ~~~
-    "multiple_access_tokens": {
-        "token1": {
+    "access_token": [
+        {
+            "label": "token1",
             "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-            "key": false,
-            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
+            "bound": true,
+            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+            "access": [ "finance" ]
         },
-        "token2": {
+        {
+            "label": "token2",
             "value": "UFGLO2FDAFG7VGZZPJ3IZEMN21EVU71FHCARP4J1",
-            "key": false
+            "bound": true,
+            "access": [ "medical" ]
         }
     }
 ~~~
 
-
-
-Each access token corresponds to the named resources arrays in
-the client instance's [request](#request-resource-multiple). 
+Each access token corresponds to one of the objects in the `access_token` array of
+the client instance's [request](#request-token-multiple). 
 
 The multiple access token response MUST be used when multiple access tokens are
 requested, even if only one access token is issued as a result of the request.
@@ -2027,11 +1852,35 @@ requested access tokens, for any reason. In such cases the refused token is omit
 from the response and all of the other issued access
 tokens are included in the response the requested names appropriate names.
 
-If the client instance [requested a single access token](#request-resource-single), the AS MUST NOT respond with the multiple
-access token structure unless the client instance sends the `split_token` flag as described in {{request-resource-flag}}.
+If the client instance [requested multiple access tokens](#request-token-multiple), the AS MUST NOT respond with a
+single access token structure, even if only a single access token is granted. In such cases, the AS responds
+with a multiple access token structure containing one access token.
 
-Each access token MAY have different proofing mechanisms. If
-management is allowed, each access token SHOULD have different management URIs.
+If the AS has split the access token response, the response MUST include the `split` flag set to `true`.
+
+~~~
+    "access_token": [
+        {
+            "label": "split-1",
+            "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
+            "bound": true,
+            "split": true,
+            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+            "access": [ "fruits" ]
+        },
+        {
+            "label": "split-2",
+            "value": "FG7VGZZPJ3IZEMN21EVU71FHCAR-UFGLO2FDAP4J1",
+            "bound": true,
+            "split": true,
+            "access": [ "vegetables" ]
+        }
+    }
+~~~
+
+Each access token MAY be bound to different keys with different proofing mechanisms.
+
+If [token management](#token-management) is allowed, each access token SHOULD have different `manage` URIs.
 
 \[\[ [See issue #70](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/70) \]\]
 
@@ -2277,7 +2126,7 @@ or a reference. The use of a reference in place of a value allows
 for a client instance to optimize requests to the AS.
 
 Some references, such as for the [client instance's identity](#request-instance) 
-or the [requested resources](#request-resource-reference), can be managed statically through an
+or the [requested resources](#resource-access-reference), can be managed statically through an
 admin console or developer portal provided by the AS or RS. The developer
 of the client software can include these values in their code for a more
 efficient and compact request.
@@ -2319,7 +2168,7 @@ access token.
     "instance_id": "7C7C4AZ9KHRS6X63AJAO",
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false
+        "bound": true
     }
 }
 ~~~
@@ -2733,7 +2582,7 @@ release subject claims, the response could look like this:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
+        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
@@ -2781,7 +2630,7 @@ next continuation request.
     "continue": {
         "access_token": {
             "value": "33OMUKMKSKU80UPRY5NM",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
@@ -2800,7 +2649,7 @@ release subject claims, the response could look like this example:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
+        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
@@ -2819,7 +2668,7 @@ issued or claims have already been released. In such cases, the client instance 
 request to the continuation URI and includes any fields it needs to modify. Fields
 that aren't included in the request are considered unchanged from the original request.
 
-The client instance MAY include the `resources` and `subject` fields as described in {{request-resource}}
+The client instance MAY include the `access_token` and `subject` fields as described in {{request-token}}
 and {{request-subject}}. Inclusion of these fields override any values in the initial request,
 which MAY trigger additional requirements and policies by the AS. For example, if the client instance is asking for 
 more access, the AS could require additional interaction with the RO to gather additional consent.
@@ -2862,7 +2711,7 @@ Content-type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
+    "access": [
         "read", "write"
     ],
     "interact": {
@@ -2886,15 +2735,15 @@ a separate access token for accessing the continuation API:
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "RP1LT0-OS9M2P_R64TB",
-        "key": false,
-        "resources": [
+        "bound": true,
+        "access": [
             "read", "write"
         ]
     }
@@ -2914,33 +2763,36 @@ Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "read"
-    ]
+    "access_token": {
+        "access": [
+            "read"
+        ]
+    }
     ...
 }
 ~~~
 
-The AS replaces the previous `resources` from the first request, allowing the AS to
+The AS replaces the previous `access` from the first request, allowing the AS to
 determine if any previously-granted consent already applies. In this case, the AS would
 likely determine that reducing the breadth of the requested access means that new access
 tokens can be issued to the client instance. The AS would likely revoke previously-issued access tokens
-that had the greater access rights associated with them.
+that had the greater access rights associated with them, unless they had been issued
+with the `durable` flag.
 
 ~~~
 {
     "continue": {
         "access_token": {
             "value": "M33OMUK80UPRY5NMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "0EVKC7-2ZKwZM_6N760",
-        "key": false,
-        "resources": [
+        "bound": true,
+        "access": [
             "read"
         ]
     }
@@ -2957,9 +2809,11 @@ Content-type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "read"
-    ],
+    "access_token": {
+        "access": [
+            "read"
+        ]
+    },
     "interact": {
         "redirect": true,
         "callback": {
@@ -2980,15 +2834,15 @@ In its final response, the AS includes a `continue` field:
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "RP1LT0-OS9M2P_R64TB",
-        "key": false,
-        "resources": [
+        "bound": true,
+        "access": [
             "read"
         ]
     }
@@ -3013,9 +2867,11 @@ Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "read", "write"
-    ],
+    "access_token": {
+        "access": [
+            "read", "write"
+        ]
+    },
     "interact": {
         "redirect": true,
         "callback": {
@@ -3141,9 +2997,9 @@ MUST use this new URL to manage the new access token.
 {
     "access_token": {
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
-        "key": false,
+        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [
+        "access": [
             {
                 "type": "photo-api",
                 "actions": [
@@ -3434,9 +3290,11 @@ Detached-JWS: eyJiNjQiOmZhbHNlLCJhbGciOiJSUzI1NiIsImtpZCI6Inh5ei0xIn0.
   peQ
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
         "redirect": true,
         "callback": {
@@ -3485,7 +3343,7 @@ This method is indicated by `jws` in the
 
 The header of the JWS MUST contain the
 `kid` field of the key bound to this client instance for this request. The JWS header
-MUST contain an `alg` field appropriate for the key identified by kid
+MUST contain an `alg` field appropriate for the key identified by `kid`
 and MUST NOT be `none`.
 
 To protect the request, the JWS header MUST contain the following
@@ -3523,31 +3381,42 @@ Content-Type: application/jose
 eyJhbGciOiJSUzI1NiIsImtpZCI6IktBZ05wV2JSeXk5T
 WYycmlrbDQ5OExUaE1ydmtiWldIVlNRT0JDNFZIVTQiLC
 JodG0iOiJwb3N0IiwiaHR1IjoiL3R4IiwidHMiOjE2MDM
-4MDA3ODN9.eyJjYXBhYmlsaXRpZXMiOltdLCJjbGllbnQ
-iOnsia2V5Ijp7Imp3ayI6eyJrdHkiOiJSU0EiLCJlIjoi
-QVFBQiIsImtpZCI6IktBZ05wV2JSeXk5TWYycmlrbDQ5O
-ExUaE1ydmtiWldIVlNRT0JDNFZIVTQiLCJuIjoibGxXbU
-hGOFhBMktOTGRteE9QM2t4RDlPWTc2cDBTcjM3amZoejk
-0YTkzeG0yRk5xb1NQY1JaQVBkMGxxRFM4TjNVaWE1M2RC
-MjNaNTlPd1k0YnBNX1ZmOEdKdnZwdExXbnhvMVB5aG1Qc
-i1lY2RTQ1JRZFRjX1pjTUY0aFJWNDhxcWx2dUQwbXF0Y0
-RiSWtTQkR2Y2NKbVpId2ZUcERIaW5UOHR0dmNWUDhWa0F
-NQXE0a1ZhenhPcE1vSVJzb3lFcF9lQ2U1cFN3cUhvMGRh
-Q1dOS1ItRXBLbTZOaU90ZWRGNE91bXQ4TkxLVFZqZllnR
-khlQkRkQ2JyckVUZDR2Qk13RHRBbmpQcjNDVkN3d3gyYk
-FRVDZTbHhGSjNmajJoaHlJcHE3cGM4clppYjVqTnlYS3d
-mQnVrVFZZWm96a3NodC1Mb2h5QVNhS3BZVHA4THROWi13
-In0sInByb29mIjoiandzIn0sIm5hbWUiOiJNeSBGaXN0I
-ENsaWVudCIsInVyaSI6Imh0dHA6Ly9sb2NhbGhvc3QvY2
-xpZW50L2NsaWVudElEIn0sImludGVyYWN0Ijp7ImNhbGx
-iYWNrIjp7Im1ldGhvZCI6InJlZGlyZWN0Iiwibm9uY2Ui
-OiJkOTAyMTM4ODRiODQwOTIwNTM4YjVjNTEiLCJ1cmkiO
-iJodHRwOi8vbG9jYWxob3N0L2NsaWVudC9yZXF1ZXN0LW
-RvbmUifSwicmVkaXJlY3QiOnRydWV9LCJyZXNvdXJjZXM
-iOnsiYWN0aW9ucyI6WyJyZWFkIiwicHJpbnQiXSwibG9j
-YXRpb25zIjpbImh0dHA6Ly9sb2NhbGhvc3QvcGhvdG9zI
-l0sInR5cGUiOiJwaG90by1hcGkifSwic3ViamVjdCI6ey
-JzdWJfaWRzIjpbImlzcy1zdWIiLCJlbWFpbCJdfX0.LUy
+4MDA3ODN9.ewogICJjYXBhYmlsaXRpZXMiOiBbXSwKICA
+iY2xpZW50IjogewogICAgImtleSI6IHsKICAgICAgImp3
+ayI6IHsKICAgICAgICAia3R5IjogIlJTQSIsCiAgICAgI
+CAgImUiOiAiQVFBQiIsCiAgICAgICAgImtpZCI6ICJLQW
+dOcFdiUnl5OU1mMnJpa2w0OThMVGhNcnZrYlpXSFZTUU9
+CQzRWSFU0IiwKICAgICAgICAibiI6ICJsbFdtSEY4WEEy
+S05MZG14T1Aza3hEOU9ZNzZwMFNyMzdqZmh6OTRhOTN4b
+TJGTnFvU1BjCiAgICAgICAgUlpBUGQwbHFEUzhOM1VpYT
+UzZEIyM1o1OU93WTRicE1fVmY4R0p2dnB0TFdueG8xUHl
+obVByLWVjZAogICAgICAgIFNDUlFkVGNfWmNNRjRoUlY0
+OHFxbHZ1RDBtcXRjRGJJa1NCRHZjY0ptWkh3ZlRwREhpb
+lQ4dHR2Y1YKICAgICAgICBQOFZrQU1BcTRrVmF6eE9wTW
+9JUnNveUVwX2VDZTVwU3dxSG8wZGFDV05LUi1FcEttNk5
+pT3RlZEY0CiAgICAgICAgT3VtdDhOTEtUVmpmWWdGSGVC
+RGRDYnJyRVRkNHZCTXdEdEFualByM0NWQ3d3eDJiQVFUN
+lNseEZKMwogICAgICAgIGZqMmhoeUlwcTdwYzhyWmliNW
+pOeVhLd2ZCdWtUVllab3prc2h0LUxvaHlBU2FLcFlUcDh
+MdE5aLXciCiAgICAgIH0sCiAgICAgICJwcm9vZiI6ICJq
+d3MiCiAgICB9LAogICAgIm5hbWUiOiAiTXkgRmlzdCBDb
+GllbnQiLAogICAgInVyaSI6ICJodHRwOi8vbG9jYWxob3
+N0L2NsaWVudC9jbGllbnRJRCIKICB9LAogICJpbnRlcmF
+jdCI6IHsKICAgICJjYWxsYmFjayI6IHsKICAgICAgIm1l
+dGhvZCI6ICJyZWRpcmVjdCIsCiAgICAgICJub25jZSI6I
+CJkOTAyMTM4ODRiODQwOTIwNTM4YjVjNTEiLAogICAgIC
+AidXJpIjogImh0dHA6Ly9sb2NhbGhvc3QvY2xpZW50L3J
+lcXVlc3QtZG9uZSIKICAgIH0sCiAgICAicmVkaXJlY3Qi
+OiB0cnVlCiAgfSwKICAiYWNjZXNzX3Rva2VuIjogewogI
+CAgImFjY2VzcyI6IFsKICAgICAgewogICAgICAgICJhY3
+Rpb25zIjogWwogICAgICAgICAgInJlYWQiLAogICAgICA
+gICAgInByaW50IgogICAgICAgIF0sCiAgICAgICAgImxv
+Y2F0aW9ucyI6IFsKICAgICAgICAgICJodHRwOi8vbG9jY
+Wxob3N0L3Bob3RvcyIKICAgICAgICBdLAogICAgICAgIC
+J0eXBlIjogInBob3RvLWFwaSIKICAgICAgfQogICAgXQo
+gIH0KICAic3ViamVjdCI6IHsKICAgICJzdWJfaWRzIjog
+WwogICAgICAiaXNzX3N1YiIsCiAgICAgICJlbWFpbCIKI
+CAgIF0KICB9Cn0K.LUy
 Z8_fERmxbYARq8kBYMwzcd8GnCAKAlo2ZSYLRRNAYWPrp
 2XGLJOvg97WK1idf_LB08OJmLVsCXxCvn9mgaAkYNL_Zj
 HcusBvY1mNo0E1sdTEr31CVKfC-6WrZCscb8YqE4Ayhh0
@@ -3601,16 +3470,20 @@ And the JWS body decodes to:
     },
     "redirect": true
   },
-  "resources": {
-    "actions": [
-      "read",
-      "print"
-    ],
-    "locations": [
-      "http://localhost/photos"
-    ],
-    "type": "photo-api"
-  },
+  "access_token": {
+    "access": [
+      {
+        "actions": [
+          "read",
+          "print"
+        ],
+        "locations": [
+          "http://localhost/photos"
+        ],
+        "type": "photo-api"
+      }
+    ]
+  }
   "subject": {
     "sub_ids": [
       "iss_sub",
@@ -3666,9 +3539,11 @@ SSL_CLIENT_CERT: MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBmjE3MDUGA1UEAwwuQmV
  lwLW9b+Tfn/daUbIDctxeJneq2anQyU2znBgQl6KILDSF4eaOqlBut/KNZHHazJh
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
         "redirect": true,
         "callback": {
@@ -3748,9 +3623,11 @@ iKEO7vj1APv32dsux67gZYiUpjm0wEZprjlG0a07R984KLeK1XPjXgViEwEdlirUmpVy
 T9tyEYqGrTfm5uautELgMls9sgSyE929woZ59elg
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
         "redirect": true,
         "callback": {
@@ -3808,9 +3685,11 @@ Sa/Ue1yLEAMg=="]}
 Digest: SHA=oZz2O3kg5SEFAhmr0xEBbc4jEfo=
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
         "redirect": true,
         "callback": {
@@ -3895,9 +3774,11 @@ cWFkzBAr6oC4Qp7HnY_5UT6IWkRJt3efwYprWcYouOVjtRan3kEtWkaWr
 G0J4bPVnTI5St9hJYvvh7FE8JirIg
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
         "redirect": true,
         "callback": {
@@ -3932,6 +3813,255 @@ Y1cK2U3obvUg7w"
 ~~~
 
 \[\[ [See issue #113](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/113) \]\]
+
+# Resource Access Rights {#resource-access-rights}
+
+GNAP provides a rich structure for describing the protected resources
+hosted by RSs and accessed by client software. This structure is used when
+the client instance [requests an access token](#request-token) and when
+an [access token is returned](#response-token).
+
+The root of this structure is a JSON array. The elements of the JSON
+array represent rights of access that are associated with the
+the access token. The resulting access is the union of all elements
+within the array.
+
+The access associated with the access token is described
+using objects that each contain multiple
+dimensions of access. Each object contains a REQUIRED `type`
+property that determines the type of API that the token is used for.
+
+type (string)
+: The type of resource request as a string. This field MAY
+      define which other fields are allowed in the request object. 
+      This field is REQUIRED.
+
+The value of the `type` field is under the control of the AS. 
+This field MUST be compared using an exact byte match of the string
+value against known types by the AS.  The AS MUST ensure that there
+is no collision between different authorization data types that it
+supports.  The AS MUST NOT do any collation or normalization of data
+types during comparison. It is RECOMMENDED that designers of general-purpose
+APIs use a URI for this field to avoid collisions between multiple
+API types protected by a single AS.
+
+While it is expected that many APIs will have its own properties, a set of
+common properties are defined here. Specific API implementations
+SHOULD NOT re-use these fields with different semantics or syntax. The
+available values for these properties are determined by the API
+being protected at the RS.
+
+actions (array of strings)
+: The types of actions the client instance will take at the RS as an array of strings.
+    For example, a client instance asking for a combination of "read" and "write" access.
+
+locations (array of strings)
+: The location of the RS as an array of
+    strings. These strings are typically URIs identifying the
+    location of the RS.
+
+datatypes (array of strings)
+: The kinds of data available to the client instance at the RS's API as an
+    array of strings. For example, a client instance asking for access to
+    raw "image" data and "metadata" at a photograph API.
+
+identifier (string)
+: A string identifier indicating a specific resource at the RS.
+    For example, a patient identifier for a medical API or
+    a bank account number for a financial API.
+
+The following non-normative example is describing three kinds of access (read, write, delete) to each of
+two different locations and two different data types (metadata, images) for a single access token 
+using the fictitious `photo-api` type definition.
+
+~~~
+"access": [
+    {
+        "type": "photo-api",
+        "actions": [
+            "read",
+            "write",
+            "delete"
+        ],
+        "locations": [
+            "https://server.example.net/",
+            "https://resource.local/other"
+        ],
+        "datatypes": [
+            "metadata",
+            "images"
+        ]
+    }
+]
+~~~
+
+The access requested for a given object when using these fields 
+is the cross-product of all fields of the object. That is to 
+say, the object represents a request for all `action` values listed within the object
+to be used at all `locations` values listed within the object for all `datatype`
+values listed within the object. Assuming the request above was granted,
+the client instance could assume that it
+would be able to do a `read` action against the `images` on the first server
+as well as a `delete` action on the `metadata` of the second server, or any other
+combination of these fields, using the same access token. 
+
+To request a different combination of access, 
+such as requesting one `action` against one `location` 
+and a different `action` against a different `location`, the 
+client instance can include multiple separate objects in the `resources` array.
+The following non-normative example uses the same fictitious `photo-api`
+type definition to request a single access token with more specifically
+targeted access rights by using two discrete objects within the request.
+
+~~~
+"access": [
+    {
+        "type": "photo-api",
+        "actions": [
+            "read"
+        ],
+        "locations": [
+            "https://server.example.net/"
+        ],
+        "datatypes": [
+            "images"
+        ]
+    },
+    {
+        "type": "photo-api",
+        "actions": [
+            "write",
+            "delete"
+        ],
+        "locations": [
+            "https://resource.local/other"
+        ],
+        "datatypes": [
+            "metadata"
+        ]
+    }
+]
+~~~
+
+The access requested here is for `read` access to `images` on one server
+while simultaneously requesting `write` and `delete` access for `metadata` on a different
+server, but importantly without requesting `write` or `delete` access to `images` on the
+first server.
+
+It is anticipated that API designers will use a combination
+of common fields defined in this specification as well as
+fields specific to the API itself. The following non-normative 
+example shows the use of both common and API-specific fields as 
+part of two different fictitious API `type` values. The first
+access request includes the `actions`, `locations`, and `datatypes` 
+fields specified here as well as the API-specific `geolocation`
+field. The second access request includes the `actions` and
+`identifier` fields specified here as well as the API-specific
+`currency` field.
+
+~~~
+"access": [
+    {
+        "type": "photo-api",
+        "actions": [
+            "read",
+            "write"
+        ],
+        "locations": [
+            "https://server.example.net/",
+            "https://resource.local/other"
+        ],
+        "datatypes": [
+            "metadata",
+            "images"
+        ],
+        "geolocation": [
+            { lat: -32.364, lng: 153.207 },
+            { lat: -35.364, lng: 158.207 }
+        ]
+    },
+    {
+        "type": "financial-transaction",
+        "actions": [
+            "withdraw"
+        ],
+        "identifier": "account-14-32-32-3", 
+        "currency": "USD"
+    }
+]
+~~~
+
+If this request is approved,
+the [resulting access token](#response-token-single)'s access rights will be
+the union of the requested types of access for each of the two APIs, just as above.
+
+## Requesting Resources By Reference {#resource-access-reference}
+
+Instead of sending an [object describing the requested resource](#resource-access-rights),
+access rights MAY be communicated as a string known to
+the AS or RS representing the access being requested. Each string
+SHOULD correspond to a specific expanded object representation at
+the AS. 
+
+~~~
+"access": [
+    "read", "dolphin-metadata", "some other thing"
+]
+~~~
+
+This value is opaque to the client instance and MAY be any
+valid JSON string, and therefore could include spaces, unicode
+characters, and properly escaped string sequences. However, in some
+situations the value is intended to be 
+seen and understood by the client software's developer. In such cases, the
+API designer choosing any such human-readable strings SHOULD take steps
+to ensure the string values are not easily confused by a developer,
+such as by limiting the strings to easily disambiguated characters.
+
+This functionality is similar in practice to OAuth 2's `scope` parameter {{RFC6749}}, where a single string
+represents the set of access rights requested by the client instance. As such, the reference
+string could contain any valid OAuth 2 scope value as in {{example-oauth2}}. Note that the reference
+string here is not bound to the same character restrictions as in OAuth 2's `scope` definition.
+
+A single `access` array MAY include both object-type and
+string-type resource items. In this non-normative example,
+the client instance is requesting access to a `photo-api` and `financial-transaction` API type
+as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
+
+~~~
+"access": [
+    {
+        "type": "photo-api",
+        "actions": [
+            "read",
+            "write",
+            "delete"
+        ],
+        "locations": [
+            "https://server.example.net/",
+            "https://resource.local/other"
+        ],
+        "datatypes": [
+            "metadata",
+            "images"
+        ]
+    },
+    "read", 
+    "dolphin-metadata",
+    {
+        "type": "financial-transaction",
+        "actions": [
+            "withdraw"
+        ],
+        "identifier": "account-14-32-32-3", 
+        "currency": "USD"
+    },
+    "some other thing"
+]
+~~~
+
+The requested access is the union of all elements of the array, including both objects and 
+reference strings.
 
 # Discovery {#discovery}
 
@@ -4049,7 +4179,7 @@ Content-type: application/json
 
 {
     "active": true,
-    "resources": [
+    "access": [
         "dolphin-metadata", "some other thing"
     ],
     "client": {
@@ -4123,36 +4253,38 @@ Content-type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        {
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        },
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            {
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            },
+            "dolphin-metadata"
+        ]
+    },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "existing_access_token": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0"
 }
 ~~~
 
-The AS responds with a token as described in 
-{{response}}. 
+The AS responds with a token for the downstream RS2 as described in 
+{{response-token}}. 
 
 ## Registering a Resource Handle {#rs-register-resource-handle}
 
 If the RS needs to, it can post a set of resources as described in
-{{request-resource-single}} to the AS's resource
+{{resource-access-rights}} to the AS's resource
 registration endpoint.
 
 The RS MUST identify itself with its own key and sign the
@@ -4165,7 +4297,7 @@ Content-type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
+    "access": [
         {
             "actions": [
                 "read",
@@ -4217,7 +4349,7 @@ authentication header indicating that GNAP needs to be used
 to access the resource. The address of the GNAP
 endpoint MUST be sent in the "as_uri" parameter. The RS MAY
 additionally return a resource reference that the client instance MAY use in
-its [resource request](#request-resource). This
+its [access token request](#request-token). This
 resource reference handle SHOULD be sufficient for at least the action
 the client instance was attempting to take at the RS. The RS MAY use the [dynamic resource handle request](#rs-register-resource-handle) to register a new resource handle, or use a handle that
 has been pre-configured to represent what the AS is protecting. The
@@ -4229,7 +4361,7 @@ WWW-Authenticate: GNAP as_uri=http://server.example/tx,resource=FWWIKYBQ6U56NL1
 
 The client instance then makes a call to the "as_uri" as described in 
 {{request}}, with the value of "resource" as one of the members
-of a "resources" array {{request-resource-single}}. The
+of the `access` array {{request-token-single}}. The
 client instance MAY request additional resources and other information, and MAY
 request multiple access tokens.
 
@@ -4301,6 +4433,7 @@ sure that it has the permission to do so.
 - -04
     - Updated terminology.
     - Refactored key presentation and binding.
+    - Changed access token request and response syntax.
 
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
@@ -4368,23 +4501,25 @@ Content-type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        {
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        }
-    ],
+    "access_token": {
+        "access": [
+            {
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            }
+        ],
+    },
     "client": {
       "key": {
         "proof": "jwsd",
@@ -4427,7 +4562,7 @@ Content-type: application/json
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue"
     },
@@ -4495,9 +4630,9 @@ Content-type: application/json
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
+        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [{
+        "access": [{
             "actions": [
                 "read",
                 "write",
@@ -4516,7 +4651,7 @@ Content-type: application/json
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue"
     }
@@ -4543,9 +4678,11 @@ Content-type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "dolphin-metadata", "some other thing"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata", "some other thing"
+        ],
+    },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
         "redirect": true,
@@ -4576,7 +4713,7 @@ Content-type: application/json
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue/VGJKPTKC50",
         "wait": 60
@@ -4624,7 +4761,7 @@ Content-type: application/json
     "continue": {
         "access_token": {
             "value": "G7YQT4KQQ5TZY9SLSS5E",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue/ATWHO4Q1WV",
         "wait": 60
@@ -4656,9 +4793,9 @@ Content-type: application/json
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
+        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [
+        "access": [
             "dolphin-metadata", "some other thing"
         ]
     }
@@ -4666,9 +4803,7 @@ Content-type: application/json
 ~~~
 
 
-
-
-# No User Involvement {#example-no-user}
+## No User Involvement {#example-no-user}
 
 In this scenario, the client instance is requesting access on its own
 behalf, with no user to interact with.
@@ -4682,9 +4817,11 @@ Host: server.example.com
 Content-type: application/json
 
 {
-    "resources": [
-        "backend service", "nightly-routine-3"
-    ],
+    "access_token": {
+        "access": [
+            "backend service", "nightly-routine-3"
+        ],
+    },
     "client": {
       "key": {
         "proof": "mtls",
@@ -4705,9 +4842,9 @@ Content-type: application/json
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": true,
+        "bound": true,
         "manage": "https://server.example.com/token",
-        "resources": [
+        "access": [
             "backend service", "nightly-routine-3"
         ]
     }
@@ -4731,34 +4868,36 @@ Content-type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        },
-        "read", "dolphin-metadata",
-        {
-            "type": "financial-transaction",
-            "actions": [
-                "withdraw"
-            ],
-            "identifier": "account-14-32-32-3", 
-            "currency": "USD"
-        },
-        "some other thing"
-    ],
+    "access_token": {
+        "access": [
+            {
+                "type": "photo-api",
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            },
+            "read", "dolphin-metadata",
+            {
+                "type": "financial-transaction",
+                "actions": [
+                    "withdraw"
+                ],
+                "identifier": "account-14-32-32-3", 
+                "currency": "USD"
+            },
+            "some other thing"
+        ],
+    },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "user": {
         "sub_ids": [ {
@@ -4784,7 +4923,7 @@ Content-type: application/json
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -4822,7 +4961,7 @@ Content-type: application/json
     "continue": {
         "access_token": {
             "value": "BI9QNW6V9W3XFJK4R02D",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -4855,9 +4994,9 @@ Content-type: application/json
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
+        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [
+        "access": [
             "dolphin-metadata", "some other thing"
         ]
     }
@@ -4903,9 +5042,12 @@ Content-type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "read", "write", "dolphin"
-    ],
+    "access_token": {
+        "access": [
+            "read", "write", "dolphin"
+        ],
+        "flags": [ "bearer" ]
+    },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
         "redirect": true,
