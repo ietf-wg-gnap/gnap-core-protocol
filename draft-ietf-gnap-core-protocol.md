@@ -182,8 +182,6 @@ another system that deals with security rights. From the perspective of
 GNAP, all of these are pieces of the AS and together fulfill the
 role of the AS as defined by the protocol.
 
-\[\[ [See issue #29](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/29) \]\]
-
 ## Elements {#elements}
 
 In addition to the roles above, the protocol also involves several 
@@ -1377,7 +1375,6 @@ uri (string)
               based on the client instance's presented key information. The callback URI
               SHOULD be presented to the RO during the interaction phase
               before redirect. 
-              \[\[ [See issue #55](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/55) \]\]
 
 nonce (string)
 : REQUIRED. Unique value to be used in the
@@ -3269,8 +3266,6 @@ at_hash (string)
     header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
     value with SHA-256, then take the left-most 128 bits and base64url encode them. 
 
-\[\[ [See issue #106](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/106) \]\]
-
 The payload of the JWS object is the serialized body of the request, and
 the object is signed according to detached JWS {{RFC7797}}. 
 
@@ -4434,6 +4429,7 @@ sure that it has the permission to do so.
     - Updated terminology.
     - Refactored key presentation and binding.
     - Changed access token request and response syntax.
+    - Removed closed issue links.
 
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
