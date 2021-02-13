@@ -948,7 +948,7 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in 
 [a registry TBD](#IANA)).
 
-sub_ids (array of strings)
+sub_ids (array of objects)
 : An array of subject identifier subject types
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
