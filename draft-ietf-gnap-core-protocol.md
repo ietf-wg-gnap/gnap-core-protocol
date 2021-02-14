@@ -1626,7 +1626,7 @@ uri (string)
             value exactly as given when making a [continuation request](#continue-request).
 
 wait (integer)
-: RECOMMENDED. The amount of time in
+: RECOMMENDED. The amount of time in integer
             seconds the client instance SHOULD wait after receiving this continuation
             handle and calling the URI.
 
