@@ -407,7 +407,7 @@ that returns from the interaction.
     Note that the client instance needs to ensure that the parameters for the incoming
     request match those that it is expecting from the session created
     in (1). The client instance also needs to be prepared for the end-user never being returned
-    to the client instance and handle time outs appropriately.
+    to the client instance and handle timeouts appropriately.
     
 8. The client instance loads the continuation information from (3) and sends the 
     interaction reference from (7) in a request to
