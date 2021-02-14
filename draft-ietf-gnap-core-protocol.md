@@ -204,12 +204,12 @@ Privilege
     Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end-user. This process is refered to as privilege delegation. 
 
 Protected Resource
-: protected API (Application Programming Interface) served by a RS and that can be accessed by a client, if and only if a valid access token is provided.
+: protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid access token is provided.
 
     Note: to avoid complex sentences, the specification document may simply refer to resource instead of protected resource.   
 
 Right
-: ability given to a subject to perform a given operation on a resource under the control of a RS.
+: ability given to a subject to perform a given operation on a resource under the control of an RS.
 
 Subject
 : person, organization or device.
@@ -1562,11 +1562,11 @@ subject (object)
 : Claims about the RO as known and declared by the AS. {{response-subject}}
 
 instance_id (string)
-: An identifier this client instance instance can use to identify itself when making 
+: An identifier this client instance can use to identify itself when making 
     future requests. {{response-dynamic-handles}}
 
 user_handle (string)
-: An identifier this client instance instance can use to identify its current end-user when
+: An identifier this client instance can use to identify its current end-user when
     making future requests. {{response-dynamic-handles}}
 
 error (object)
@@ -1626,7 +1626,7 @@ uri (string)
             value exactly as given when making a [continuation request](#continue-request).
 
 wait (integer)
-: RECOMMENDED. The amount of time in integer
+: RECOMMENDED. The amount of time in
             seconds the client instance SHOULD wait after receiving this continuation
             handle and calling the URI.
 
@@ -4088,7 +4088,7 @@ interaction_methods (array of strings)
           interaction methods. The values of this list correspond to the
           possible fields in the [interaction section](#request-interact) of the request.
 
-key_proofs (array strings)
+key_proofs (array of strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
