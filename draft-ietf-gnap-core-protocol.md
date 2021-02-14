@@ -948,7 +948,7 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in 
 [a registry TBD](#IANA)).
 
-sub_ids (array of objects)
+sub_ids (array of strings)
 : An array of subject identifier subject types
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -1165,7 +1165,7 @@ identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
 or by reference.
 
-sub_ids (array of strings)
+sub_ids (array of objects)
 : An array of subject identifiers for the
             end-user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -2064,7 +2064,7 @@ information in the "subject" response field. This field is an object
 with the following OPTIONAL properties.
 
 
-sub_ids (array of objects)
+sub_ids (array of strings)
 : An array of subject identifiers for the
             RO, as defined by 
             {{I-D.ietf-secevent-subject-identifiers}}.
