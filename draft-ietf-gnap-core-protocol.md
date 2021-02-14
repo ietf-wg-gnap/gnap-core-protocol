@@ -33,7 +33,7 @@ author:
 
 normative:
     BCP195:
-       target: 'http://www.rfc-editor.org/info/bcp195'
+       target: 'https://www.rfc-editor.org/info/bcp195'
        title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
        date: May 2015
        author:
@@ -4351,7 +4351,7 @@ has been pre-configured to represent what the AS is protecting. The
 content of this handle is opaque to the RS and the client instance.
 
 ~~~
-WWW-Authenticate: GNAP as_uri=http://server.example/tx,resource=FWWIKYBQ6U56NL1
+WWW-Authenticate: GNAP as_uri=https://server.example/tx,resource=FWWIKYBQ6U56NL1
 ~~~
 
 The client instance then makes a call to the "as_uri" as described in 
