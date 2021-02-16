@@ -4039,7 +4039,7 @@ the client instance is requesting access to a `photo-api` and `financial-transac
 as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
 
 ~~~
-  "access": [
+"access": [
     {
         "type": "photo-api",
         "actions": [
