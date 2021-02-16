@@ -948,7 +948,7 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in 
 [a registry TBD](#IANA)).
 
-sub_ids (array of strings)
+subject_type_identifiers (array of strings)
 : An array of subject identifier subject types
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -4094,9 +4094,9 @@ key_proofs (array strings)
           values of the `proof` field of the 
           [key section](#key-format) of the request.
 
-sub_ids (array of strings)
+subject_type_identifiers (array of strings)
 : OPTIONAL. A list of the AS's supported
-          identifiers. The values of this list correspond to possible values
+          identifier types. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
 assertions (array of strings)
