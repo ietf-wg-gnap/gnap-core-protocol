@@ -1459,6 +1459,16 @@ There is no preference order specified in this request. An AS MAY
 [respond to any, all, or none of the presented interaction modes](#response-interact) in a request, depending on
 its capabilities and what is allowed to fulfill the request. 
 
+start (list of strings/objects)
+: Indicates how the client instance can start an interaction.
+
+finish (object)
+: Indicates how the client instance can receive an indication that interaction has finished at the AS.
+
+hints (object)
+: Provides additional information to inform the interaction process at the AS.
+
+
 The `interact` field MUST contain the `start` key, and MAY contain the `finish` and `hints` keys. The value
 of each key is an array which contains strings or JSON objects as defined below.
 
@@ -2137,13 +2147,13 @@ application URL.
 
 If the client instance indicates that it can [receive a post-interaction redirect or push at a URL](#finish-interaction-modes) 
 and the AS supports this mode for the
-client instance's request, the AS responds with a `push` field containing a nonce
+client instance's request, the AS responds with a `finish` field containing a nonce
 that the client instance will use in validating the callback as defined in
 {{interaction-callback}}.
 
 ~~~
     "interact": {
-        "push": "MBDOFXG4Y5CVJCX821LH"
+        "finish": "MBDOFXG4Y5CVJCX821LH"
     }
 ~~~
 
@@ -2485,7 +2495,7 @@ sections.
 
 ### Completing Interaction with a Browser Redirect to the Callback URI {#interaction-callback}
 
-When using the ["callback" interaction mode](#response-interact-callback) with the `redirect` method,
+When using the [interaction finish](#response-interact-callback) with the `redirect` method,
 the AS signals to the client instance that interaction is
 complete and the request can be continued by directing the RO (in
 their browser) back to the client instance's redirect URL sent in [the callback request](#request-interact-callback-redirect).
