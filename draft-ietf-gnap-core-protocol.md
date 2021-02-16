@@ -960,7 +960,7 @@ assertions (array of strings)
 
 ~~~
 "subject": {
-   "sub_ids": [ "iss_sub", "email" ],
+   "subject_type_identifiers": [ "iss_sub", "email" ],
    "assertions": [ "id_token", "saml2" ]
 }
 ~~~
@@ -4094,7 +4094,7 @@ key_proofs (array strings)
           values of the `proof` field of the 
           [key section](#key-format) of the request.
 
-subject_type_identifiers (array of strings)
+subject_types_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
           identifier types. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
