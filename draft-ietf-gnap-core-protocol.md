@@ -1505,7 +1505,7 @@ be present on the incoming HTTP request.
 ### Hints
 
 The `hints` key is an object describing one or more suggestions from the client
-to the AS.
+instance that the AS can use to help drive user interaction.
 
 #### Indicate Desired Interaction Locales {#request-interact-locale}
 
