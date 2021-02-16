@@ -2149,7 +2149,7 @@ If the client instance indicates that it can [receive a post-interaction redirec
 and the AS supports this mode for the
 client instance's request, the AS responds with a `finish` field containing a nonce
 that the client instance will use in validating the callback as defined in
-{{interaction-callback}}.
+{{interaction-finalize}}.
 
 ~~~
     "interact": {
@@ -2157,9 +2157,9 @@ that the client instance will use in validating the callback as defined in
     }
 ~~~
 
-When the RO completes interaction at the AS, the AS MUST call the
-client instance's callback URL using the method indicated in the
-[interaction request](#finish-interaction-modes) as described in {{interaction-callback}}.
+When the RO completes interaction at the AS, the AS MUST either redirect the RO's browser
+or send an HTTP POST to the client instance's callback URL using the method indicated in the
+[interaction request](#finish-interaction-modes) as described in {{interaction-finalize}}.
 
 If the AS returns a nonce, the client instance MUST NOT
 continue a grant request before it receives the associated
@@ -2495,7 +2495,7 @@ sections.
 
 ### Completing Interaction with a Browser Redirect to the Callback URI {#interaction-callback}
 
-When using the [interaction finish](#response-interact-callback) with the `redirect` method,
+When using the [`redirect` interaction finish method](#response-interact-callback),
 the AS signals to the client instance that interaction is
 complete and the request can be continued by directing the RO (in
 their browser) back to the client instance's redirect URL sent in [the callback request](#request-interact-callback-redirect).
