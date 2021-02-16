@@ -4039,46 +4039,7 @@ the client instance is requesting access to a `photo-api` and `financial-transac
 as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
 
 ~~~
-<<<<<<< HEAD
-POST /tx HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-PoP: eyJhbGciOiJSUzI1NiIsImp3ayI6eyJrdHkiOiJSU0EiLCJlIjoi
-QVFBQiIsImtpZCI6Inh5ei1jbGllbnQiLCJhbGciOiJSUzI1NiIsIm4iO
-iJ6d0NUXzNieC1nbGJiSHJoZVlwWXBSV2lZOUktbkVhTVJwWm5ScklqQ3
-M2Yl9lbXlUa0JrRERFalN5c2kzOE9DNzNoajEtV2d4Y1BkS05HWnlJb0g
-zUVplbjFNS3l5aFFwTEpHMS1vTE5McW03cFhYdGRZelNkQzlPMy1vaXl5
-OHlrTzRZVXlOWnJSUmZQY2loZFFDYk9fT0M4UXVnbWc5cmdORE9TcXBwZ
-GFOZWFzMW92OVB4WXZ4cXJ6MS04SGE3Z2tEMDBZRUNYSGFCMDV1TWFVYW
-RIcS1PX1dJdllYaWNnNkk1ajZTNDRWTlU2NVZCd3UtQWx5blR4UWRNQVd
-QM2JZeFZWeTZwMy03ZVRKb2t2allURnFnRFZEWjhsVVhicjV5Q1RuUmhu
-aEpndmYzVmpEX21hbE5lOC10T3FLNU9TRGxIVHk2Z0Q5TnFkR0NtLVBtM
-1EifX0.eyJwIjoiXC9hcGlcL2FzXC90cmFuc2FjdGlvbiIsImIiOiJxa0
-lPYkdOeERhZVBTZnc3NnFjamtqSXNFRmxDb3g5bTU5NFM0M0RkU0xBIiw
-idSI6Imhvc3QuZG9ja2VyLmludGVybmFsIiwiaCI6W1siQWNjZXB0Iiwi
-Q29udGVudC1UeXBlIiwiQ29udGVudC1MZW5ndGgiXSwiVjQ2OUhFWGx6S
-k9kQTZmQU5oMmpKdFhTd3pjSGRqMUloOGk5M0h3bEVHYyJdLCJtIjoiUE
-9TVCIsInRzIjoxNTcyNjQyNjEwfQ.xyQ47qy8bu4fyK1T3Ru1Sway8wp6
-5rfAKnTQQU92AUUU07I2iKoBL2tipBcNCC5zLH5j_WUyjlN15oi_lLHym
-fPdzihtt8_Jibjfjib5J15UlifakjQ0rHX04tPal9PvcjwnyZHFcKn-So
-Y3wsARn-gGwxpzbsPhiKQP70d2eG0CYQMA6rTLslT7GgdQheelhVFW29i
-27NcvqtkJmiAG6Swrq4uUgCY3zRotROkJ13qo86t2DXklV-eES4-2dCxf
-cWFkzBAr6oC4Qp7HnY_5UT6IWkRJt3efwYprWcYouOVjtRan3kEtWkaWr
-G0J4bPVnTI5St9hJYvvh7FE8JirIg
- 
-{
-    "resources": [
-        "dolphin-metadata"
-    ],
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.foo",
-            "nonce": "VJLO6A4CAYLBXHTR0KRO"
-        }
-=======
-"access": [
+  "access": [
     {
         "type": "photo-api",
         "actions": [
@@ -4094,7 +4055,6 @@ G0J4bPVnTI5St9hJYvvh7FE8JirIg
             "metadata",
             "images"
         ]
->>>>>>> b388dd2f9495263d699ac87221423f7e3ef0750b
     },
     "read", 
     "dolphin-metadata",
@@ -4483,12 +4443,9 @@ sure that it has the permission to do so.
 - -04
     - Updated terminology.
     - Refactored key presentation and binding.
-<<<<<<< HEAD
     - Refactored "interact" request to group start and end modes.
-=======
     - Changed access token request and response syntax.
     - Removed closed issue links.
->>>>>>> b388dd2f9495263d699ac87221423f7e3ef0750b
 
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
