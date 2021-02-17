@@ -4077,18 +4077,18 @@ grant_request_endpoint (string)
           AS's grant request endpoint. This MUST match the URL the client instance used to
           make the discovery request.
 
-capabilities (array of strings)
+capabilities_supported (array of strings)
 : OPTIONAL. A list of the AS's
           capabilities. The values of this result MAY be used by the client instance in the
           [capabilities section](#request-capabilities) of
           the request.
 
-interaction_methods (array of strings)
+interaction_methods_supported (array of strings)
 : OPTIONAL. A list of the AS's
           interaction methods. The values of this list correspond to the
           possible fields in the [interaction section](#request-interact) of the request.
 
-key_proofs (array strings)
+key_proofs_supported (array strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
@@ -4099,7 +4099,7 @@ sub_ids (array of strings)
           identifiers. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
-assertions (array of strings)
+assertions_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
           assertion formats. The values of this list correspond to possible
           values of the [subject assertion section](#request-subject) of the request.
