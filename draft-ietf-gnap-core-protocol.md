@@ -4096,7 +4096,7 @@ key_proofs (array strings)
 
 subject_types_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
-          identifier types. The values of this list correspond to possible values
+          subject identifier types. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
 assertions (array of strings)
