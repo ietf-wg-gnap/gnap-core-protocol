@@ -948,7 +948,7 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in 
 [a registry TBD](#IANA)).
 
-subject_type_identifiers (array of strings)
+subject_types (array of strings)
 : An array of subject identifier subject types
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -960,7 +960,7 @@ assertions (array of strings)
 
 ~~~
 "subject": {
-   "subject_type_identifiers": [ "iss_sub", "email" ],
+   "subject_types": [ "iss_sub", "email" ],
    "assertions": [ "id_token", "saml2" ]
 }
 ~~~
