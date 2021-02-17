@@ -3591,7 +3591,7 @@ signature header as described in {{I-D.ietf-oauth-dpop}}
 section 2. In addition to the required fields, the DPoP body MUST also
 contain a digest of the request body:
 
-digest (string)
+htd (string)
 : Digest of the request body as the value of the Digest 
     header defined in {{RFC3230}}.
 
@@ -4429,6 +4429,7 @@ sure that it has the permission to do so.
     - Updated terminology.
     - Refactored key presentation and binding.
     - Changed access token request and response syntax.
+    - Changed DPoP digest field to 'htd' to match proposed FAPI profile.
     - Removed closed issue links.
 
 - -03
