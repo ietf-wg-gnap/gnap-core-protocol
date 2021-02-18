@@ -33,7 +33,7 @@ author:
 
 normative:
     BCP195:
-       target: 'http://www.rfc-editor.org/info/bcp195'
+       target: 'https://www.rfc-editor.org/info/bcp195'
        title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
        date: May 2015
        author:
@@ -204,12 +204,12 @@ Privilege
     Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end-user. This process is refered to as privilege delegation. 
 
 Protected Resource
-: protected API (Application Programming Interface) served by a RS and that can be accessed by a client, if and only if a valid access token is provided.
+: protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid access token is provided.
 
     Note: to avoid complex sentences, the specification document may simply refer to resource instead of protected resource.   
 
 Right
-: ability given to a subject to perform a given operation on a resource under the control of a RS.
+: ability given to a subject to perform a given operation on a resource under the control of an RS.
 
 Subject
 : person, organization or device.
@@ -407,7 +407,7 @@ that returns from the interaction.
     Note that the client instance needs to ensure that the parameters for the incoming
     request match those that it is expecting from the session created
     in (1). The client instance also needs to be prepared for the end-user never being returned
-    to the client instance and handle time outs appropriately.
+    to the client instance and handle timeouts appropriately.
     
 8. The client instance loads the continuation information from (3) and sends the 
     interaction reference from (7) in a request to
@@ -1165,7 +1165,7 @@ identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
 or by reference.
 
-sub_ids (array of strings)
+sub_ids (array of objects)
 : An array of subject identifiers for the
             end-user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -1562,11 +1562,11 @@ subject (object)
 : Claims about the RO as known and declared by the AS. {{response-subject}}
 
 instance_id (string)
-: An identifier this client instance instance can use to identify itself when making 
+: An identifier this client instance can use to identify itself when making 
     future requests. {{response-dynamic-handles}}
 
 user_handle (string)
-: An identifier this client instance instance can use to identify its current end-user when
+: An identifier this client instance can use to identify its current end-user when
     making future requests. {{response-dynamic-handles}}
 
 error (object)
@@ -2887,32 +2887,6 @@ Since the old access tokens are good for a subset of the rights requested here, 
 AS might decide to not revoke them. However, any access tokens granted after this update
 process are new access tokens and do not modify the rights of existing access tokens.
 
-## Getting the Current State of a Grant Request {#continue-state}
-
-If the client instance needs to get the current state of an ongoing grant request, it makes an
-HTTP GET request to the continuation URI. This request MUST NOT alter the grant
-request in any fashion, including causing the issuance of new access tokens or
-modification of interaction parameters. 
-
-The AS MAY include existing access tokens and previously-released subject claims in
-the response. The AS MUST NOT issue a new access token or release a new subject 
-claim in response to this request. 
-
-~~~
-GET /continue HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
-~~~
-
-The response MAY include any fields described {{response}} that are applicable to this
-ongoing request, including the most recently issued access tokens, any released subject
-claims, and any currently active interaction modes. The response MAY contain a 
-new ["continue" response](#response-continue) as described above.
-
-\[\[ [See issue #98](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/98) \]\]
-
 ## Canceling a Grant Request {#continue-delete}
 
 If the client instance wishes to cancel an ongoing grant request, it makes an
@@ -2950,8 +2924,6 @@ same [key identified in the initial request](#request-client) as described in {{
 The AS MUST validate the proof and assure that it is associated with
 either the token itself or the client instance the token was issued to, as
 appropriate for the token's presentation type.
-
-\[\[ [See issue #99](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/99) \]\]
 
 ## Rotating the Access Token {#rotate-access-token}
 
@@ -3428,8 +3400,8 @@ This example's JWS header decodes to:
 {
   "alg": "RS256",
   "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
-  "htm": "post",
-  "htu": "/tx",
+  "htm": "POST",
+  "htu": "https://server.example.com/tx",
   "ts": 1603800783
 }
 ~~~
@@ -4088,7 +4060,7 @@ interaction_methods (array of strings)
           interaction methods. The values of this list correspond to the
           possible fields in the [interaction section](#request-interact) of the request.
 
-key_proofs (array strings)
+key_proofs (array of strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
@@ -4351,7 +4323,7 @@ has been pre-configured to represent what the AS is protecting. The
 content of this handle is opaque to the RS and the client instance.
 
 ~~~
-WWW-Authenticate: GNAP as_uri=http://server.example/tx,resource=FWWIKYBQ6U56NL1
+WWW-Authenticate: GNAP as_uri=https://server.example/tx,resource=FWWIKYBQ6U56NL1
 ~~~
 
 The client instance then makes a call to the "as_uri" as described in 
@@ -4430,6 +4402,8 @@ sure that it has the permission to do so.
     - Refactored key presentation and binding.
     - Changed access token request and response syntax.
     - Removed closed issue links.
+    - Removed function to read state of grant request by client.
+    - Closed issues related to reading and updating access tokens.
 
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
