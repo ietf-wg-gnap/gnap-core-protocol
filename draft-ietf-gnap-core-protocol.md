@@ -3400,8 +3400,8 @@ This example's JWS header decodes to:
 {
   "alg": "RS256",
   "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
-  "htm": "post",
-  "htu": "/tx",
+  "htm": "POST",
+  "htu": "https://server.example.com/tx",
   "ts": 1603800783
 }
 ~~~
