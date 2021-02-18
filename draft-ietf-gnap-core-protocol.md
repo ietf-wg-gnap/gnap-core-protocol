@@ -33,7 +33,7 @@ author:
 
 normative:
     BCP195:
-       target: 'http://www.rfc-editor.org/info/bcp195'
+       target: 'https://www.rfc-editor.org/info/bcp195'
        title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
        date: May 2015
        author:
@@ -204,12 +204,12 @@ Privilege
     Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end-user. This process is refered to as privilege delegation. 
 
 Protected Resource
-: protected API (Application Programming Interface) served by a RS and that can be accessed by a client, if and only if a valid access token is provided.
+: protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid access token is provided.
 
     Note: to avoid complex sentences, the specification document may simply refer to resource instead of protected resource.   
 
 Right
-: ability given to a subject to perform a given operation on a resource under the control of a RS.
+: ability given to a subject to perform a given operation on a resource under the control of an RS.
 
 Subject
 : person, organization or device.
@@ -407,7 +407,7 @@ that returns from the interaction.
     Note that the client instance needs to ensure that the parameters for the incoming
     request match those that it is expecting from the session created
     in (1). The client instance also needs to be prepared for the end-user never being returned
-    to the client instance and handle time outs appropriately.
+    to the client instance and handle timeouts appropriately.
     
 8. The client instance loads the continuation information from (3) and sends the 
     interaction reference from (7) in a request to
@@ -1562,11 +1562,11 @@ subject (object)
 : Claims about the RO as known and declared by the AS. {{response-subject}}
 
 instance_id (string)
-: An identifier this client instance instance can use to identify itself when making 
+: An identifier this client instance can use to identify itself when making 
     future requests. {{response-dynamic-handles}}
 
 user_handle (string)
-: An identifier this client instance instance can use to identify its current end-user when
+: An identifier this client instance can use to identify its current end-user when
     making future requests. {{response-dynamic-handles}}
 
 error (object)
@@ -4060,7 +4060,7 @@ interaction_methods (array of strings)
           interaction methods. The values of this list correspond to the
           possible fields in the [interaction section](#request-interact) of the request.
 
-key_proofs (array strings)
+key_proofs (array of strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
@@ -4323,7 +4323,7 @@ has been pre-configured to represent what the AS is protecting. The
 content of this handle is opaque to the RS and the client instance.
 
 ~~~
-WWW-Authenticate: GNAP as_uri=http://server.example/tx,resource=FWWIKYBQ6U56NL1
+WWW-Authenticate: GNAP as_uri=https://server.example/tx,resource=FWWIKYBQ6U56NL1
 ~~~
 
 The client instance then makes a call to the "as_uri" as described in 
