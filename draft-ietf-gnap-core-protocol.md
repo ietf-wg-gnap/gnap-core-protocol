@@ -46,7 +46,9 @@ normative:
     RFC2119:
     RFC3230:
     RFC5646:
+    RFC7468:
     RFC7515:
+    RFC7517:
     RFC6749:
     RFC6750:
     RFC7797:
@@ -76,18 +78,11 @@ normative:
 
 --- abstract
 
-This document defines a mechanism for delegating authorization to a
+GNAP defines a mechanism for delegating authorization to a
 piece of software, and conveying that delegation to the software. This
 delegation can include access to a set of APIs as well as information
 passed directly to the software.
 
-This document has been prepared by the GNAP working group design team of
-Kathleen Moriarty, Fabien Imbault, Dick Hardt, Mike Jones, and Justin Richer. This document
-is intended as a starting point for the working group and includes decision points for discussion
-and agreement. Many of the
-features in this proposed protocol can be accomplished in a number of
-ways. Where possible, the editor has included notes and discussion
-from the design team regarding the options as understood.
 
 --- middle
 
@@ -96,7 +91,7 @@ from the design team regarding the options as understood.
 This protocol allows a piece of software, the client instance, to request delegated
 authorization to resource servers and to request direct information. This delegation is
 facilitated by an authorization server usually on
-behalf of a resource owner. The requesting party operating the software may interact
+behalf of a resource owner. The end-user operating the software may interact
 with the authorization server to authenticate, provide consent, and
 authorize the request.
 
@@ -125,37 +120,27 @@ Roles are defined by the actions taken and the expectations leveraged
 on the role by the overall protocol. 
 
 Authorization Server (AS)
-: Manages the requested delegations for the RO. 
-    The AS issues tokens and directly delegated information to an instance of the client.
-    The AS is defined by its grant endpoint, a single URL that accepts a POST
-    request with a JSON payload. The AS could also have other endpoints,
-    including interaction endpoints and user code endpoints, and these are
-    introduced to the RC as needed during the delegation process. 
+: server that grants delegated privileges to a particular instance of client software in the form of an access token and other information (such as subject information). 
 
 Client
-: Requests tokens and directly delegated information from the AS, and uses tokens at the RS.
-    For some kinds of client software, there could be many instances
-    of a single piece of client software. This specification
-    differentiates between a specific instance (the client instance) and the 
-    software running the instance (the client software).
-    A client instance is identified by its unique key, which can
-    be known to the AS prior to the first request or introduced
-    to the AS as part of the protocol. The AS determines
-    which policies apply to a given client instance, including what it can
-    request and on whose behalf. 
+: application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. 
 
-Resource Server (RS, aka "API")
-: Accepts tokens from the client instance issued by the AS and serves delegated resources
-    on behalf of the RO. There could be multiple RSs protected
-    by the AS that the client instance will call.
+    Example: a client can be a mobile application, a web application, etc.
+
+    Note: this specification differentiates between a specific instance (the client instance, identified by its unique key) and the software running the instance (the client software). For some kinds of client software, there could be many instances of that software, each instance with a different key.
+
+Resource Server (RS)
+: server that provides operations on protected resources, where operations require a valid access token issued by an AS. 
 
 Resource Owner (RO)
-: Authorizes the request from the client instance to the
-    RS, often interactively at the AS.
+: subject entity that may grant or deny operations on resources it has authority upon.
 
-Requesting Party (RQ, aka "user")
-: Operates and interacts with the client instance.
+    Note: the act of granting or denying an operation may be manual (i.e. through an interaction with a physical person) or automatic (i.e. through predefined organizational rules).
 
+End-user 
+: natural person that operates a client instance.
+
+    Note: that natural person may or may not be the same entity as the RO. 
 
 The design of GNAP does not assume any one deployment architecture,
 but instead attempts to define roles that can be fulfilled in a number
@@ -165,9 +150,9 @@ not make additional requirements on its structure or setup.
 
 Multiple roles can be fulfilled by the same party, and a given party
 can switch roles in different instances of the protocol. For example,
-the RO and RQ in many instances are the same person, where a user is
+the RO and end-user in many instances are the same person, where a user is
 authorizing the client instance to act on their own behalf at the RS. In this case,
-one party fulfills both of the RO and RQ roles, but the roles themselves
+one party fulfills both of the RO and end-user roles, but the roles themselves
 are still defined separately from each other to allow for other
 use cases where they are fulfilled by different parties.
 
@@ -179,7 +164,7 @@ RS and a client instance from different perspectives, and it fulfills these
 roles separately as far as the overall protocol is concerned.
 
 A single role need not be deployed as a monolithic service. For example, 
-A client instance could have components that are installed on the RQ's device as 
+A client instance could have components that are installed on the end-user's device as 
 well as a back-end system that it communicates with. If both of these
 components participate in the delegation protocol, they are both considered
 part of the client instance. If there are several copies of the client software
@@ -204,29 +189,35 @@ role of the AS as defined by the protocol.
 In addition to the roles above, the protocol also involves several 
 elements that are acted upon by the roles throughout the process.
 
+Attribute
+: characteristics related to a subject.
+
 Access Token
-: A credential representing a set of access rights
-delegated to the client instance. The access token is created by the AS, consumed
-and verified by the RS, and issued to and carried by the client instance. The contents
-and format of the access token are opaque to the client.
+: a data artifact representing a set of rights and/or attributes.
+
+    Note: an access token can be first issued to an client instance (requiring authorization by the RO) and subsequently rotated.
 
 Grant
-: The process by which the client instance requests and is given delegated
-access to the RS by the AS through the authority of the RO.
+: (verb): to permit an instance of client software to receive some attributes at a specific time and valid for a specific duration and/or to exercise some set of delegated rights to access a protected resource (noun): the act of granting. 
 
-Cryptographic Key
-: A cryptographic element binding a request to a
-holder of the key. Access tokens and client instances can be associated with
-specific keys.
+Privilege
+: right or attribute associated with a subject.
 
-Resource
-: A protected API served by the RS and accessed by the client instance. Access to this
-resource is delegated by the RO as part of the grant process.
+    Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end-user. This process is refered to as privilege delegation. 
+
+Protected Resource
+: protected API (Application Programming Interface) served by a RS and that can be accessed by a client, if and only if a valid access token is provided.
+
+    Note: to avoid complex sentences, the specification document may simply refer to resource instead of protected resource.   
+
+Right
+: ability given to a subject to perform a given operation on a resource under the control of a RS.
+
+Subject
+: person, organization or device.
 
 Subject Information
-: Information about the RO that is returned directly to the client instance from the AS
-without the client instance making a separate call to an RS. Access to this information
-is delegated by the RO as part of the grant process.
+: statement asserted locally by an AS about a subject.
 
 ## Sequences {#sequence}
 
@@ -251,8 +242,8 @@ protocol flow.
 
 ~~~
         +------------+             +------------+
-        | Requesting | ~ ~ ~ ~ ~ ~ |  Resource  |
-        | Party (RQ) |             | Owner (RO) |
+        | End-user   | ~ ~ ~ ~ ~ ~ |  Resource  |
+        |            |             | Owner (RO) |
         +------------+             +------------+
             +                            +      
             +                            +      
@@ -285,10 +276,10 @@ protocol flow.
     ~ ~ ~ indicates a potential equivalence or out-of-band communication between roles
 ~~~
 
-- (A) The RQ interacts with the client instance to indicate a need for resources on
+- (A) The end-user interacts with the client instance to indicate a need for resources on
     behalf of the RO. This could identify the RS the client instance needs to call,
     the resources needed, or the RO that is needed to approve the 
-    request. Note that the RO and RQ are often
+    request. Note that the RO and end-user are often
     the same entity in practice.
     
 - (1) The client instance [attempts to call the RS](#rs-request-without-token) to determine 
@@ -308,7 +299,7 @@ protocol flow.
     using a variety of possible mechanisms including web page
     redirects, applications, challenge/response protocols, or 
     other methods. The RO approves the request for the client instance
-    being operated by the RQ. Note that the RO and RQ are often
+    being operated by the end-user. Note that the RO and end-user are often
     the same entity in practice.
 
 - (4) The client instance [continues the grant at the AS](#continue-request).
@@ -348,7 +339,7 @@ GNAP in different situations and deployments.
 ### Redirect-based Interaction {#sequence-redirect}
 
 In this example flow, the client instance is a web application that wants access to resources on behalf
-of the current user, who acts as both the requesting party (RQ) and the resource
+of the current user, who acts as both the end-user and the resource
 owner (RO). Since the client instance is capable of directing the user to an arbitrary URL and 
 receiving responses from the user's browser, interaction here is handled through
 front-channel redirects using the user's browser. The client instance uses a persistent session
@@ -357,10 +348,10 @@ that returns from the interaction.
 
 ~~~
     +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         |  RO  |
-    |Instance|                                  |        |         |  +   |
-    |        |< (1) + Start Session + + + + + + + + + + + + + + + +|  RQ  |
-    |        |                                  |        |         |(User)|
+    | Client |                                  |   AS   |         | User |
+    |Instance|                                  |        |         |      |
+    |        |< (1) + Start Session + + + + + + + + + + + + + + + +|      |
+    |        |                                  |        |         |      |
     |        |--(2)--- Request Access --------->|        |         |      |
     |        |                                  |        |         |      |
     |        |<-(3)-- Interaction Needed -------|        |         |      |
@@ -382,7 +373,7 @@ that returns from the interaction.
     +--------+                                  +--------+
 ~~~
 
-1. The client instance establishes a verifiable session to the user, in the role of the RQ. 
+1. The client instance establishes a verifiable session to the user, in the role of the end-user. 
 
 2. The client instance [requests access to the resource](#request). The client instance indicates that
     it can [redirect to an arbitrary URL](#request-interact-redirect) and
@@ -417,7 +408,7 @@ that returns from the interaction.
     based on this information and continues only if the hash validates.
     Note that the client instance needs to ensure that the parameters for the incoming
     request match those that it is expecting from the session created
-    in (1). The client instance also needs to be prepared for the RQ never being returned
+    in (1). The client instance also needs to be prepared for the end-user never being returned
     to the client instance and handle time outs appropriately.
     
 8. The client instance loads the continuation information from (3) and sends the 
@@ -440,16 +431,16 @@ a known URL. The client instance is not capable of presenting an arbitrary URL t
 nor is it capable of accepting incoming HTTP requests from the user's browser.
 The client instance polls the AS while it is waiting for the RO to authorize the request.
 The user's interaction is assumed to occur on a secondary device. In this example
-it is assumed that the user is both the RQ and RO, though the user is not assumed
+it is assumed that the user is both the end-user and RO, though the user is not assumed
 to be interacting with the client instance through the same web browser used for interaction at
 the AS.
 
 ~~~
     +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         |  RO  |
-    |Instance|--(1)--- Request Access --------->|        |         |  +   |
-    |        |                                  |        |         |  RQ  |
-    |        |<-(2)-- Interaction Needed -------|        |         |(User)|
+    | Client |                                  |   AS   |         | User |
+    |Instance|--(1)--- Request Access --------->|        |         |      |
+    |        |                                  |        |         |      |
+    |        |<-(2)-- Interaction Needed -------|        |         |      |
     |        |                                  |        |         |      |
     |        |+ (3) + + Display User Code + + + + + + + + + + + + >|      |
     |        |                                  |        |         |      |
@@ -495,7 +486,7 @@ the AS.
     with the AS through a secondary device, the client instance does not provide a mechanism to
     launch the RO's browser at this URL.
     
-5. The RQ authenticates at the AS, taking on the role of the RO.
+5. The end-user authenticates at the AS, taking on the role of the RO.
 
 6.  The RO enters the code communicated in (3) to the AS. The AS validates this code
     against a current request in process.
@@ -530,7 +521,7 @@ An example set of protocol messages for this method can be found in {{example-de
 
 ### Asynchronous Authorization {#sequence-async}
 
-In this example flow, the RQ and RO roles are fulfilled by different parties, and
+In this example flow, the end-user and RO roles are fulfilled by different parties, and
 the RO does not interact with the client instance. The AS reaches out asynchronously to the RO 
 during the request process to gather the RO's authorization for the client instance's request. 
 The client instance polls the AS while it is waiting for the RO to authorize the request.
@@ -702,8 +693,8 @@ client (object / string)
     interactions at the AS. {{request-client}}
 
 user (object / string)
-: Identifies the RQ to the AS in a manner that the AS can verify, either directly or
-    by interacting with the RQ to determine their status as the RO. {{request-user}}
+: Identifies the end-user to the AS in a manner that the AS can verify, either directly or
+    by interacting with the end-user to determine their status as the RO. {{request-user}}
 
 interact (object)
 : Describes the modes that the client instance has for allowing the RO to interact with the
@@ -870,7 +861,7 @@ is the cross-product of all fields of the object. That is to
 say, the object represents a request for all `action` values listed within the object
 to be used at all `locations` values listed within the object for all `datatype`
 values listed within the object. Assuming the request above was granted,
-the RC could assume that it
+the client instance could assume that it
 would be able to do a `read` action against the `images` on the first server
 as well as a `delete` action on the `metadata` of the second server, or any other
 combination of these fields, using the same access token. 
@@ -878,7 +869,7 @@ combination of these fields, using the same access token.
 To request a different combination of access, 
 such as requesting one `action` against one `location` 
 and a different `action` against a different `location`, the 
-RC can include multiple separate objects in the `resources` array.
+client instance can include multiple separate objects in the `resources` array.
 The following non-normative example uses the same fictitious `photo-api`
 type definition to request a single access token with more specifically
 targeted access rights by using two discrete objects within the request.
@@ -996,7 +987,7 @@ string here is not bound to the same character restrictions as in OAuth 2's `sco
 
 A single "resources" array MAY include both object-type and
 string-type resource items. In this non-normative example,
-the RC is requesting access to a `photo-api` and `financial-transaction` API type
+the client instance is requesting access to a `photo-api` and `financial-transaction` API type
 as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
 
 ~~~
@@ -1120,7 +1111,7 @@ split_token
     \[\[ [See issue #37](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/37) \]\]
 
 bind_token
-: The client instance wants the issued access token to be bound to the [key the client instance used](#request-key)
+: The client instance wants the issued access token to be bound to the [key the client instance used](#request-client)
     to make the request. The resulting access token MUST be bound using the same
     `proof` mechanism used by the client instance with a `key` value of `true`, indicating
     the client instance's presented key is to be used for binding.
@@ -1219,7 +1210,8 @@ object with the following fields.
 
 key (object / string)
 : The public key of the client instance to be used in this request as 
-    described in {{request-key}}. This field is REQUIRED.
+    described in {{key-format}} or a reference to a key as
+    described in {{key-reference}}. This field is REQUIRED.
 
 class_id (string)
 : An identifier string that the AS can use to identify the
@@ -1272,7 +1264,7 @@ within the `client` request, and other mechanisms.
 
 \[\[ [See issue #44](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/44) \]\]
 
-### Identifying the Client Instance {#request-instance}
+### Identifying the Client Instance by Reference {#request-instance}
 
 If the client instance has an instance identifier that the AS can use to determine
 appropriate key information, the client instance can send this value in the `instance_id`
@@ -1315,57 +1307,6 @@ If the client instance is identified in this manner, the registered key for the 
 MAY be a symmetric key known to the AS. The client instance MUST NOT send a
 symmetric key by value in the request, as doing so would expose
 the key directly instead of proving possession of it. 
-
-### Identifying the Client Instance Key {#request-key}
-
-The client instance key MUST be a public key in at least one
-supported format and MUST be applicable to the
-proofing mechanism used in the request. If the key is sent in multiple
-formats, all the keys MUST be the same. The key presented in this
-field MUST be the key used to sign the request.
-
-proof (string)
-: The form of proof that the client instance will use when
-    presenting the key to the AS. The valid values of this field and
-    the processing requirements for each are detailed in 
-    {{binding-keys}}. This field is REQUIRED.
-
-jwk (object)
-: Value of the public key as a JSON Web Key. MUST
-            contain an "alg" field which is used to validate the signature.
-            MUST contain the "kid" field to identify the key in the signed
-            object.
-
-cert (string)
-: PEM serialized value of the certificate used to
-            sign the request, with optional internal whitespace.
-
-cert#S256 (string)
-: The certificate thumbprint calculated as
-            per [OAuth-MTLS](#RFC8705) in base64 URL
-            encoding.
-
-Additional key types are defined in [a registry TBD](#IANA).
-
-This non-normative example shows a single key presented in multiple
-formats using a single proofing mechanism.
-
-~~~
-    "key": {
-        "proof": "jwsd",
-        "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
-        },
-        "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
-    }
-~~~
-
-[Continuation requests](#continue-request)
-MUST use the same key (or its most recent rotation) and proof method as the initial request.
 
 ### Providing Displayable Client Instance Information {#request-display}
 
@@ -1429,14 +1370,14 @@ client instances with unknown keys have to be interactively approved by an RO.
 
 ## Identifying the User {#request-user}
 
-If the client instance knows the identity of the RQ through one or more
+If the client instance knows the identity of the end-user through one or more
 identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
 or by reference.
 
 sub_ids (array of strings)
 : An array of subject identifiers for the
-            RQ, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+            end-user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
 assertions (object)
 : An object containing assertions as values keyed on the assertion 
@@ -1461,11 +1402,10 @@ assertions (object)
 
 Subject identifiers are hints to the AS in determining the
 RO and MUST NOT be taken as declarative statements that a particular
-RO is present at the client instance and acting as the RQ. Assertions SHOULD be validated by the
-AS. 
+RO is present at the client instance and acting as the end-user. Assertions SHOULD be validated by the AS. 
 \[\[ [See issue #49](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/49) \]\]
 
-If the identified RQ does not match the RO present at the AS
+If the identified end-user does not match the RO present at the AS
 during an interaction step, the AS SHOULD reject the request with an error.
 
 \[\[ [See issue #50](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/50) \]\]
@@ -1479,9 +1419,9 @@ if the client instance provides one or more interaction modes in its request.
 
 User reference identifiers can be dynamically
 [issued by the AS](#response-dynamic-handles) to allow the client instance 
-to represent the same RQ to the AS over subsequent requests.
+to represent the same end-user to the AS over subsequent requests.
 
-If the client instance has a reference for the RQ at this AS, the
+If the client instance has a reference for the end-user at this AS, the
 client instance MAY pass that reference as a string. The format of this string
 is opaque to the client instance.
 
@@ -1502,9 +1442,9 @@ return an error.
 
 Many times, the AS will require interaction with the RO in order to
 approve a requested delegation to the client instance for both resources and direct
-claim information. Many times the RQ using the client instance is the same person as
+claim information. Many times the end-user using the client instance is the same person as
 the RO, and the client instance can directly drive interaction with the AS by redirecting
-the RQ on the same device, or by launching an application. Other times, the 
+the end-user on the same device, or by launching an application. Other times, the 
 client instance can provide information to start the RO's interaction on a secondary
 device, or the client instance will wait for the RO to approve the request asynchronously.
 The client instance could also be signaled that interaction has completed by the AS making
@@ -1521,11 +1461,11 @@ its capabilities and what is allowed to fulfill the request. This specification
 defines the following interaction modes:
 
 redirect (boolean)
-: Indicates that the client instance can direct the RQ to an arbitrary URL
+: Indicates that the client instance can direct the end-user to an arbitrary URL
     at the AS for interaction. {{request-interact-redirect}}
 
 app (boolean)
-: Indicates that the client instance can launch an application on the RQ's
+: Indicates that the client instance can launch an application on the end-user's
     device for interaction. {{request-interact-app}}
 
 callback (object)
@@ -1534,10 +1474,10 @@ callback (object)
 
 user_code (boolean)
 : Indicates that the client instance can communicate a human-readable short
-    code to the RQ for use with a stable URL at the AS. {{request-interact-usercode}}
+    code to the end-user for use with a stable URL at the AS. {{request-interact-usercode}}
 
 ui_locales (array of strings)
-: Indicates the RQ's preferred locales that the AS can use
+: Indicates the end-user's preferred locales that the AS can use
     during interaction, particularly before the RO has 
     authenticated. {{request-interact-locale}}
 
@@ -1546,7 +1486,7 @@ modes. Additional interaction modes are defined in
 [a registry TBD](#IANA).
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
-the RQ to an arbitrary URL and can receive a [callback](#request-interact-callback) through
+the end-user to an arbitrary URL and can receive a [callback](#request-interact-callback) through
 a browser request.
 
 ~~~
@@ -1561,7 +1501,7 @@ a browser request.
 ~~~
 
 In this non-normative example, the client instance is indicating that it can 
-display a [user code](#request-interact-usercode) and direct the RQ
+display a [user code](#request-interact-usercode) and direct the end-user
 to an [arbitrary URL](#request-interact-redirect) on a secondary
 device, but it cannot accept a callback.
 
@@ -1584,12 +1524,12 @@ apply suitable timeouts to any callback URLs.
 
 ### Redirect to an Arbitrary URL {#request-interact-redirect}
 
-If the client instance is capable of directing the RQ to a URL defined
+If the client instance is capable of directing the end-user to a URL defined
 by the AS at runtime, the client instance indicates this by sending the
 "redirect" field with the boolean value "true". The means by which
 the client instance will activate this URL is out of scope of this
 specification, but common methods include an HTTP redirect,
-launching a browser on the RQ's device, providing a scannable
+launching a browser on the end-user's device, providing a scannable
 image encoding, and printing out a URL to an interactive
 console.
 
@@ -1605,7 +1545,7 @@ request, the AS returns a redirect interaction response {{response-interact-redi
 ### Open an Application-specific URL {#request-interact-app}
 
 If the client instance can open a URL associated with an application on
-the RQ's device, the client instance indicates this by sending the "app"
+the end-user's device, the client instance indicates this by sending the "app"
 field with boolean value "true". The means by which the client instance
 determines the application to open with this URL are out of scope of
 this specification.
@@ -1709,8 +1649,8 @@ Requests to the callback URI MUST be processed by the client instance as describ
 {{interaction-callback}}.
 
 Since the incoming request to the callback URL is from the RO's
-browser, this method is usually used when the RO and RQ are the
-same entity. As such, the client instance MUST ensure the RQ is present on the request to
+browser, this method is usually used when the RO and end-user are the
+same entity. As such, the client instance MUST ensure the end-user is present on the request to
 prevent substitution attacks.
 
 #### Receive an HTTP Direct Callback {#request-interact-callback-push}
@@ -1733,7 +1673,7 @@ Requests to the callback URI MUST be processed by the client instance as describ
 {{interaction-pushback}}.
 
 Since the incoming request to the callback URL is from the AS and
-not from the RO's browser, the client instance MUST NOT require the RQ to
+not from the RO's browser, the client instance MUST NOT require the end-user to
 be present on the incoming HTTP request.
 
 \[\[ [See issue #60](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/60) \]\]
@@ -1758,7 +1698,7 @@ in {{interaction-usercode}}.
 
 ### Indicate Desired Interaction Locales {#request-interact-locale}
 
-If the client instance knows the RQ's locale and language preferences, the
+If the client instance knows the end-user's locale and language preferences, the
 client instance can send this information to the AS using the `ui_locales` field
 with an array of locale strings as defined by {{RFC5646}}.
 
@@ -1841,7 +1781,7 @@ instance_id (string)
     future requests. {{response-dynamic-handles}}
 
 user_handle (string)
-: An identifier this client instance instance can use to identify its current RQ when
+: An identifier this client instance instance can use to identify its current end-user when
     making future requests. {{response-dynamic-handles}}
 
 error (object)
@@ -1989,11 +1929,11 @@ expires_in (integer)
 
 key (object / string / boolean)
 : REQUIRED. The key that the token is bound to. If the boolean value `true` is used,
-              the token is bound to the [key used by the client instance](#request-key) in its request 
+              the token is bound to the [key used by the client instance](#request-client) in its request 
               for access. If the boolean value `false` is used,
               the token is a bearer token with no key bound to it.
               Otherwise, the key MUST be an object or string in a format
-              described in {{request-key}}, describing a public key to which the
+              described in {{key-format}}, describing a public key to which the
               client instance can use the associated private key. The client instance MUST be able to
               dereference or process the key information in order to be able
               to sign the request.
@@ -2130,7 +2070,7 @@ particularly if the client instance [modifies its request](#continue-modify).
 
 If the client instance indicates that it can [redirect to an arbitrary URL](#request-interact-redirect) and the AS supports this mode for the client instance's
 request, the AS responds with the "redirect" field, which is
-a string containing the URL to direct the RQ to. This URL MUST be
+a string containing the URL to direct the end-user to. This URL MUST be
 unique for the request and MUST NOT contain any security-sensitive
 information.
 
@@ -2147,9 +2087,9 @@ functionality.
 
 \[\[ [See issue #72](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/72) \]\]
 
-The client instance sends the RQ to the URL to interact with the AS. The
+The client instance sends the end-user to the URL to interact with the AS. The
 client instance MUST NOT alter the URL in any way. The means for the client instance
-to send the RQ to this URL is out of scope of this specification,
+to send the end-user to this URL is out of scope of this specification,
 but common methods include an HTTP redirect, launching the system
 browser, displaying a scannable code, or printing out the URL in an
 interactive console.
@@ -2159,7 +2099,7 @@ interactive console.
 If the client instance indicates that it can [launch an application URL](#request-interact-app) and
 the AS supports this mode for the client instance's request, the AS
 responds with the "app" field, which is a string containing the URL
-to direct the RQ to. This URL MUST be unique for the request and
+to direct the end-user to. This URL MUST be unique for the request and
 MUST NOT contain any security-sensitive information.
 
 ~~~
@@ -2233,7 +2173,7 @@ url (string)
     }
 ~~~
 
-The client instance MUST communicate the "code" to the RQ in some
+The client instance MUST communicate the "code" to the end-user in some
 fashion, such as displaying it on a screen or reading it out
 audibly. The `code` is a one-time-use credential that the AS uses to identify
 the pending request from the client instance. When the RO [enters this code](#interaction-usercode) into the
@@ -2247,11 +2187,11 @@ to facilitate user interaction, but since the URL should be stable,
 the client instance should be able to safely decide to not display this value.
 As this interaction mode is designed to facilitate interaction
 via a secondary device, it is not expected that the client instance redirect
-the RQ to the URL given here at runtime. Consequently, the URL needs to 
+the end-user to the URL given here at runtime. Consequently, the URL needs to 
 be stable enough that a client instance could be statically configured with it, perhaps
-referring the RQ to the URL via documentation instead of through an
+referring the end-user to the URL via documentation instead of through an
 interactive means. If the client instance is capable of communicating an
-arbitrary URL to the RQ, such as through a scannable code, the
+arbitrary URL to the end-user, such as through a scannable code, the
 client instance can use the ["redirect"](#request-interact-redirect) mode
 for this purpose instead of or in addition to the user code mode.
 
@@ -2278,7 +2218,7 @@ information in the "subject" response field. This field is an object
 with the following OPTIONAL properties.
 
 
-sub_ids (array of strings)
+sub_ids (array of objects)
 : An array of subject identifiers for the
             RO, as defined by 
             {{I-D.ietf-secevent-subject-identifiers}}.
@@ -2309,7 +2249,7 @@ updated_at (string)
 ~~~
 
 The AS MUST return the `subject` field only in cases where the AS is sure that
-the RO and the RQ are the same party. This can be accomplished through some forms of
+the RO and the end-user are the same party. This can be accomplished through some forms of
 [interaction with the RO](#user-interaction).
 
 Subject identifiers returned by the AS SHOULD uniquely identify the RO at the
@@ -2440,7 +2380,7 @@ initiate one of the returned
 When the RO is interacting with the AS, the AS MAY perform whatever
 actions it sees fit, including but not limited to:
 
-- authenticate the current user (who may be the RQ) as the RO
+- authenticate the current user (who may be the end-user) as the RO
 
 - gather consent and authorization from the RO for access to
           requested resources and direct information
@@ -2468,8 +2408,8 @@ note that the RO MAY open the URL on a separate device from the client instance
 itself. The interaction URL MUST be accessible from an HTTP GET
 request, and MUST be protected by HTTPS or equivalent means.
 
-With this method, it is common for the RO to be the same party as the RQ, since
-the client instance has to communicate the redirection URI to the RQ.
+With this method, it is common for the RO to be the same party as the end-user, since
+the client instance has to communicate the redirection URI to the end-user.
 
 ## Interaction at the User Code URI {#interaction-usercode}
 
@@ -2487,9 +2427,9 @@ note that the RO MAY open the URL on a separate device from the client instance
 itself. The user code URL MUST be accessible from an HTTP GET request,
 and MUST be protected by HTTPS or equivalent means.
 
-While it is common for the RO to be the same party as the RQ, since
+While it is common for the RO to be the same party as the end-user, since
 the client instance has to communicate the user code to someone, there are
-cases where the RQ and RO are separate parties and the authorization
+cases where the end-user and RO are separate parties and the authorization
 happens asynchronously.
 
 
@@ -2690,6 +2630,8 @@ when the client instance makes any calls to the continuation URL, the client ins
 the access token as described in {{use-access-token}} and present
 proof of the client instance's key (or its most recent rotation)
 by signing the request as described in {{binding-keys}}.
+The AS MUST validate all keys presented by the client instance or referenced in an
+ongoing request for each call within that request.
 
 \[\[ [See issue #85](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/85) \]\]
 
@@ -2891,7 +2833,7 @@ replaces any values from a previous request. The AS MAY respond to any of the in
 responses as described in {{response-interact}}, just like it would to a new request.
 
 The client instance MAY include the `user` field as described in {{request-user}} to present new assertions
-or information about the RQ. 
+or information about the end-user. 
 \[\[ [See issue #93](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/93) \]\]
 
 The client instance MUST NOT include the `client` section of the request.
@@ -3092,32 +3034,6 @@ Since the old access tokens are good for a subset of the rights requested here, 
 AS might decide to not revoke them. However, any access tokens granted after this update
 process are new access tokens and do not modify the rights of existing access tokens.
 
-## Getting the Current State of a Grant Request {#continue-state}
-
-If the client instance needs to get the current state of an ongoing grant request, it makes an
-HTTP GET request to the continuation URI. This request MUST NOT alter the grant
-request in any fashion, including causing the issuance of new access tokens or
-modification of interaction parameters. 
-
-The AS MAY include existing access tokens and previously-released subject claims in
-the response. The AS MUST NOT issue a new access token or release a new subject 
-claim in response to this request. 
-
-~~~
-GET /continue HTTP/1.1
-Host: server.example.com
-Content-type: application/json
-Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
-~~~
-
-The response MAY include any fields described {{response}} that are applicable to this
-ongoing request, including the most recently issued access tokens, any released subject
-claims, and any currently active interaction modes. The response MAY contain a 
-new ["continue" response](#response-continue) as described above.
-
-\[\[ [See issue #98](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/98) \]\]
-
 ## Canceling a Grant Request {#continue-delete}
 
 If the client instance wishes to cancel an ongoing grant request, it makes an
@@ -3150,13 +3066,11 @@ If the token is sender-constrained (i.e., not a bearer token), it
 MUST be sent [with the appropriate binding for the access token](#use-access-token). 
 
 If the token is a bearer token, the client instance MUST present proof of the
-same [key identified in the initial request](#request-key) as described in {{binding-keys}}.
+same [key identified in the initial request](#request-client) as described in {{binding-keys}}.
 
 The AS MUST validate the proof and assure that it is associated with
 either the token itself or the client instance the token was issued to, as
 appropriate for the token's presentation type.
-
-\[\[ [See issue #99](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/99) \]\]
 
 ## Rotating the Access Token {#rotate-access-token}
 
@@ -3261,12 +3175,106 @@ the token management URL as valid, since the end result is still the token
 not being usable.
 
 
-# Using Access Tokens {#use-access-token}
+# Securing Requests from the Client Instance {#secure-requests}
 
-The method the client instance uses to send an access token to the RS depends on the value of the
-"key" and "proof" parameters in [the access token response](#response-token-single).
+In GNAP, the client instance secures its requests to the AS and RS by presenting an access
+token, presenting proof of a key that it possesses, or both an access token and
+key proof together.
 
-If the key value is the boolean `false`, the access token is a bearer token
+- When an access token is used with a key proof, this is a bound token request. This type of
+    request is used for calls to the RS as well as the AS during negotiation.
+- When a key proof is used with no access token, this is a non-authorized signed request. This
+    type of request is used for calls to the AS to initiate a negotiation.
+- When an access token is used with no key proof, this is a bearer token request. This type of
+    request is used only for calls to the RS, and only with access tokens that are
+    not bound to any key as described in {{response-token-single}}.
+- When neither an access token nor key proof are used, this is an unsecured request. This 
+    type of used only for calls to the RS during a discovery phase as
+    described in {{rs-request-without-token}}.
+
+## Key Formats {#key-format}
+
+Several different places in GNAP require the presentation of key material 
+by value. Proof of this key material MUST be bound to a request, the nature of which varies with
+the location in the protocol the key is used. For a key used as part of a client instance's initial request
+in {{request-client}}, the key value is the client instance's public key, and
+proof of that key MUST be presented in that request. For a key used as part of an
+access token response in {{response-token-single}}, the proof of that key MUST
+be used when presenting the access token.
+
+A key presented by value MUST be a public key in at least one
+supported format. If a key is sent in multiple
+formats, all the key format values MUST be equivalent. Note that
+while most formats present the full value of the public key, some
+formats present a value cryptographically derived from the public key.
+
+proof (string)
+: The form of proof that the client instance will use when
+    presenting the key. The valid values of this field and
+    the processing requirements for each are detailed in 
+    {{binding-keys}}. The `proof` field is REQUIRED.
+
+jwk (object)
+: Value of the public key as a JSON Web Key {{RFC7517}}. The object MUST
+            contain an "alg" field which is used to validate the signature.
+            The object MUST contain the "kid" field to identify the key.
+
+cert (string)
+: PEM serialized value of the certificate used to
+            sign the request, with optional internal whitespace per {{RFC7468}}. The 
+            PEM header and footer are optionally removed. 
+
+cert#S256 (string)
+: The certificate thumbprint calculated as
+            per [OAuth-MTLS](#RFC8705) in base64 URL
+            encoding. Note that this format does not include
+            the full public key.
+
+Additional key formats are defined in [a registry TBD](#IANA).
+
+This non-normative example shows a single key presented in multiple
+formats. This key is intended to be used with the [detached JWS](#detached-jws)
+proofing mechanism, as indicated by the `proof` field.
+
+~~~
+    "key": {
+        "proof": "jwsd",
+        "jwk": {
+                    "kty": "RSA",
+                    "e": "AQAB",
+                    "kid": "xyz-1",
+                    "alg": "RS256",
+                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+        },
+        "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
+    }
+~~~
+
+### Key References {#key-reference}
+
+Keys in GNAP can also be passed by reference such that the party receiving
+the reference will be able to determine the appropriate keying material for
+use in that part of the protocol. 
+
+~~~
+    "key": "S-P4XJQ_RYJCRTSU1.63N3E"
+~~~
+
+Keys referenced in this manner MAY be shared symmetric keys. The key reference
+MUST NOT contain any unencrypted private or shared symmetric key information.
+
+Keys referenced in this manner MUST be bound to a single proofing mechanism.
+
+The means of dereferencing this value are out of scope for this specification.
+
+## Presenting Access Tokens {#use-access-token}
+
+The method the client instance uses to send an access token depends on whether
+the token is bound to a key, and if so which proofing method is associated
+with the key. This information is conveyed in the
+`key` and `proof` parameters in [the access token response](#response-token-single).
+
+If the `key` value is the boolean `false`, the access token is a bearer token
 sent using the HTTP Header method defined in {{RFC6750}}.
 
 ~~~
@@ -3276,11 +3284,11 @@ Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 The form parameter and query parameter methods of {{RFC6750}} MUST NOT
 be used.
 
-If the "key" value is the boolean `true`, the access token MUST be sent
-to the RS using the same key and proofing mechanism that the client instance used
-in its initial request.
+If the `key` value is the boolean `true`, the access token MUST be sent
+using the same key and proofing mechanism that the client instance used
+in its initial request (or its most recent rotation).
 
-If the "key" value is an object, the value of the "proof" field within
+If the `key` value is an object as described in {{key-format}}, the value of the `proof` field within
 the key indicates the particular proofing mechanism to use.
 The access token is sent using the HTTP authorization scheme "GNAP" along with 
 a key proof as described in {{binding-keys}} for the key bound to the
@@ -3295,13 +3303,12 @@ Detached-JWS: eyj0....
 
 \[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
 
-# Binding Keys {#binding-keys}
+## Proving Possession of a Key with a Request {#binding-keys}
 
 Any keys presented by the client instance to the AS or RS MUST be validated as
 part of the request in which they are presented. The type of binding
-used is indicated by the proof parameter of the key section in the
-initial request {{request-key}}. Values defined by this
-specification are as follows:
+used is indicated by the proof parameter of the key object in {{key-format}}. 
+Values defined by this specification are as follows:
 
 
 jwsd
@@ -3334,22 +3341,21 @@ MUST validate all components of the signed message to ensure that nothing
 has been tampered with or substituted in a way that would change the nature of
 the request.
 
+When a key proofing mechanism is bound to an access token, the access token MUST be covered 
+by the signature method of the proofing mechanism.
+
 When used for delegation in GNAP, these key binding mechanisms allow
 the AS to ensure that the keys presented by the client instance in the initial request are in 
 control of the party calling any follow-up or continuation requests. To facilitate 
 this requirement, the [continuation response](#response-continue) includes
-an access token bound to the [client instance's key](#request-key), and that key (or its most recent rotation)
+an access token bound to the [client instance's key](#request-client), and that key (or its most recent rotation)
 MUST be proved in all continuation requests
 {{continue-request}}. Token management requests {{token-management}} are similarly bound
 to either the access token's own key or, in the case of bearer tokens, the client instance's key.
-The AS MUST validate all keys [presented by the client instance](#request-key) or referenced in an
-ongoing request for each call within that request.
 
 \[\[ [See issue #105](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/105) \]\]
 
-When used to bind to an access token, the access token MUST be covered by the signature method.
-
-## Detached JWS {#detached-jws}
+### Detached JWS {#detached-jws}
 
 This method is indicated by `jwsd` in the
 `proof` field. A JWS {{RFC7515}} signature object is created as follows:
@@ -3444,7 +3450,7 @@ contents as a detached JWS object. The HTTP Body is used as the
 payload for purposes of validating the JWS, with no
 transformations.
 
-## Attached JWS {#attached-jws}
+### Attached JWS {#attached-jws}
 
 This method is indicated by `jws` in the
 `proof` field. A JWS {{RFC7515}} signature object is created as follows:
@@ -3594,7 +3600,7 @@ header as described in {{detached-jws}}.
 
 \[\[ [See issue #109](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/109) \]\]
 
-## Mutual TLS {#mtls}
+### Mutual TLS {#mtls}
 
 This method is indicated by `mtls` in the
 `proof` field. The client instance presents its TLS client
@@ -3679,7 +3685,7 @@ fHI6kqm3NCyCCTihe2ck5RmCc5l2KBO/vAHF0ihhFOOOby1v6qbPHQcxAU6rEb907
 
 \[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
 
-## Demonstration of Proof-of-Possession (DPoP) {#dpop-binding}
+### Demonstration of Proof-of-Possession (DPoP) {#dpop-binding}
 
 This method is indicated by `dpop` in the
 `proof` field. The client instance creates a Demonstration of Proof-of-Possession
@@ -3749,7 +3755,7 @@ B7_8Wbw4ttzbMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFekpdfWdiPQddQ6Y
 }
 ~~~
 
-## HTTP Signing {#httpsig-binding}
+### HTTP Message Signing {#httpsig-binding}
 
 This method is indicated by `httpsig` in
 the `proof` field. The client instance creates an HTTP
@@ -3813,7 +3819,7 @@ Y1cK2U3obvUg7w"
 When used to present an access token as in {{use-access-token}},
 the Authorization header MUST be included in the signature.
 
-## OAuth Proof of Possession (PoP) {#oauth-pop-binding}
+### OAuth Proof of Possession (PoP) {#oauth-pop-binding}
 
 This method is indicated by `oauthpop` in
 the `proof` field. The client instance creates an HTTP
@@ -3933,7 +3939,7 @@ key_proofs (array strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
-          [key section](#request-key) of the request.
+          [key section](#key-format) of the request.
 
 sub_ids (array of strings)
 : OPTIONAL. A list of the AS's supported
@@ -4203,7 +4209,7 @@ request multiple access tokens.
 
 # Acknowledgements {#Acknowledgements}
 
-The author would like to thank the feedback of the following individuals for their reviews, 
+The editors would like to thank the feedback of the following individuals for their reviews,
 implementations, and contributions:
 Aaron Parecki,
 Annabelle Backman,
@@ -4217,6 +4223,7 @@ Haardik Haardik,
 Hamid Massaoud,
 Jacky Yuan,
 Joseph Heenan,
+Justin Richer,
 Kathleen Moriarty,
 Mike Jones,
 Mike Varley,
@@ -4224,10 +4231,14 @@ Nat Sakimura,
 Takahiko Kawasaki,
 Takahiro Tsuchiya.
 
-In particular, the author would like to thank Aaron Parecki and Mike Jones for insights into how
-to integrate identity and authentication systems into the core protocol, and to Dick Hardt for 
-the use cases, diagrams, and insights provided in the XAuth proposal that have been 
-incorporated here. The author would like to especially thank Mike Varley and the team at SecureKey
+The editors would also like to thank the GNAP working group design team of
+Kathleen Moriarty, Fabien Imbault, Dick Hardt, Mike Jones, and Justin Richer, who incorporated
+elements from the XAuth and XYZ proposals to create the first version of this document.
+
+In addition, the editors would like to thank Aaron Parecki and Mike Jones for insights into how
+to integrate identity and authentication systems into the core protocol, and Justin Richer and Dick Hardt for
+the use cases, diagrams, and insights provided in the XYZ and XAuth proposals that have been
+incorporated here. The editors would like to especially thank Mike Varley and the team at SecureKey
 for feedback and development of early versions of the XYZ protocol that fed into this standards work.
 
 # IANA Considerations {#IANA}
@@ -4259,8 +4270,21 @@ sure that it has the permission to do so.
    
 # Document History {#history}
 
+- -04
+    - Updated terminology.
+    - Refactored key presentation and binding.
+    - Changed access token request and response syntax.
+    - Removed closed issue links.
+    - Removed function to read state of grant request by client.
+    - Closed issues related to reading and updating access tokens.
+
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
+    - Removed OpenID Connect "claims" parameter.
+    - Dropped "short URI" redirect.
+    - Access token is mandatory for continuation.
+    - Removed closed issue links.
+    - Editorial fixes.
 
 - -02
     - Moved all "editor's note" items to GitHub Issues.
@@ -4917,7 +4941,7 @@ dimensional components, or the aspect can be requested using a string. In both c
 request is being described in a way that the AS needs to interpret, but with different
 levels of specificity and complexity for the client instance to deal with. An API designer
 can provide a set of common access scopes as simple strings but still allow
-RC developers to specify custom access when needed for more complex APIs.
+client software developers to specify custom access when needed for more complex APIs.
 
 Extensions to this specification can use different data types for defined fields, but
 each extension needs to not only declare what the data type means, but also provide
