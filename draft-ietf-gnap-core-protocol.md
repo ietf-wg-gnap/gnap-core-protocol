@@ -2509,7 +2509,7 @@ includes the access token, and signs with detached JWS:
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2551,7 +2551,7 @@ response includes an interaction reference. The client instance MUST include tha
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2606,7 +2606,7 @@ include a message body.
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 ~~~
@@ -2704,7 +2704,7 @@ For example, a client instance initially requests a set of resources using refer
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -2755,7 +2755,7 @@ instead of both "read" and "write" as before.
 ~~~
 PATCH /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2802,7 +2802,7 @@ needs to step up its access. The initial request could look like this example.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -2859,7 +2859,7 @@ needs to be included in order to use the callback again.
 ~~~
 PATCH /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2895,7 +2895,7 @@ HTTP DELETE request to the continuation URI.
 ~~~
 DELETE /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 ~~~
@@ -4126,7 +4126,7 @@ token as the body of the request.
 ~~~
 POST /introspect HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4142,7 +4142,7 @@ token's presentation, such as its intended proofing mechanism and key
 material.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "active": true,
@@ -4216,7 +4216,7 @@ request.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4260,7 +4260,7 @@ request.
 ~~~
 POST /resource HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4293,7 +4293,7 @@ The AS responds with a handle appropriate to represent the
 resources list that the RS presented.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "resource_handle": "FWWIKYBQ6U56NL1"
@@ -4467,7 +4467,7 @@ identifies itself using its public key.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4522,7 +4522,7 @@ client instance that it can use the given instance identifier to identify itself
 [future requests](#request-instance).
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "interact": {
@@ -4580,7 +4580,7 @@ the request as above.
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -4595,7 +4595,7 @@ The AS retrieves the pending request based on the handle and issues
 a bearer access token and returns this to the client instance.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "access_token": {
@@ -4644,7 +4644,7 @@ The client instance initiates the request to the AS.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4670,7 +4670,7 @@ a nonce, but does include a "wait" parameter on the continuation
 section because it expects the client instance to poll for results.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "interact": {
@@ -4725,7 +4725,7 @@ the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "continue": {
@@ -4758,7 +4758,7 @@ determines that it has been approved, and issues an access
 token for the client to use at the RS.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "access_token": {
@@ -4784,7 +4784,7 @@ public key and using MTLS to make the request.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 
 {
     "access_token": {
@@ -4807,7 +4807,7 @@ The AS processes this and determines that the client instance can ask for
 the requested resources and issues an access token.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "access_token": {
@@ -4834,7 +4834,7 @@ resources. The client instance also identifies a particular user.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4887,7 +4887,7 @@ request. The AS indicates to the client instance that it can poll for
 continuation.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "continue": {
@@ -4925,7 +4925,7 @@ the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "continue": {
@@ -4959,7 +4959,7 @@ determines that it has been approved and it issues an access
 token.
 
 ~~~
-Content-type: application/json
+Content-Type: application/json
 
 {
     "access_token": {
@@ -5008,7 +5008,7 @@ places the OAuth 2 values in the appropriate places.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
