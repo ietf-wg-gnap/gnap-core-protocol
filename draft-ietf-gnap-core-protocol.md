@@ -1165,7 +1165,7 @@ identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
 or by reference.
 
-sub_ids (array of strings)
+sub_ids (array of objects)
 : An array of subject identifiers for the
             end-user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
