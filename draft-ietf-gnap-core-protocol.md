@@ -46,6 +46,7 @@ normative:
     RFC2119:
     RFC3230:
     RFC5646:
+    RFC7234:
     RFC7468:
     RFC7515:
     RFC7517:
@@ -770,7 +771,7 @@ The request and response MUST be sent as a JSON object in the body of the HTTP
 POST request with Content-Type `application/json`,
 unless otherwise specified by the signature mechanism.
 
-The authorization server MUST include the HTTP "Cache-Control" response header field with a value set to "no-store".
+The authorization server MUST include the HTTP "Cache-Control" response header field {{RFC7234}} with a value set to "no-store".
 
 ## Requesting Access to Resources {#request-token}
 
