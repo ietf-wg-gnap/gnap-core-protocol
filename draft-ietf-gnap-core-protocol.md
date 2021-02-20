@@ -766,13 +766,11 @@ A non-normative example of a grant request is below:
 
 
 
-The request MUST be sent as a JSON object in the body of the HTTP
+The request and response MUST be sent as a JSON object in the body of the HTTP
 POST request with Content-Type `application/json`,
 unless otherwise specified by the signature mechanism.
 
-The authorization server response MUST be a JSON object in the body of the HTTP
-response with Content-Type `application/json`. The authorization server MUST
-include the HTTP "Cache-Control" response header field with a value set to "no-store".
+The authorization server MUST include the HTTP "Cache-Control" response header field with a value set to "no-store".
 
 ## Requesting Access to Resources {#request-token}
 
