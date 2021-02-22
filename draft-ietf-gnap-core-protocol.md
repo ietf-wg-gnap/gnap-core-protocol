@@ -2733,9 +2733,11 @@ Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "access": [
-        "read", "write"
-    ],
+    "access_token": {
+        "access": [
+            "read", "write"
+        ]
+    },
     "interact": {
         "start": ["redirect"],
         "finish": {
