@@ -3272,6 +3272,10 @@ the object is signed according to detached JWS {{RFC7797}}.
 The client instance presents the signature in the Detached-JWS HTTP Header
 field. 
 
+The authorization and resource server SHOULD employ Syntax-Based Normalization and Scheme-Based
+Normalization in accordance with Section 6.2.2. and Section 6.2.3. of
+{{RFC3986}} before comparing the "htu" claim.
+
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
@@ -3367,6 +3371,10 @@ The client instance presents the JWS as the body of the request along with a
 content type of `application/jose`. The AS
 MUST extract the payload of the JWS and treat it as the request body
 for further processing.
+
+The authorization and resource server SHOULD employ Syntax-Based Normalization and Scheme-Based
+Normalization in accordance with Section 6.2.2. and Section 6.2.3. of
+{{RFC3986}} before comparing the "htu" claim.
 
 ~~~
 POST /tx HTTP/1.1
