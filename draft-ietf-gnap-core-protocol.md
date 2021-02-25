@@ -45,6 +45,7 @@ normative:
            ins: P. Saint-Andre
     RFC2119:
     RFC3230:
+    RFC3986:
     RFC5646:
     RFC7468:
     RFC7515:
@@ -4060,9 +4061,11 @@ containing the following information:
 
 
 grant_request_endpoint (string)
-: REQUIRED. The full URL of the
-          AS's grant request endpoint. This MUST match the URL the client instance used to
-          make the discovery request.
+: REQUIRED. The location of the
+          AS's grant request endpoint. The location MUST be a URL {{RFC3986}}
+          with a scheme component that MUST be https, a host component, and optionally,
+          port, path and query components and no fragment components. This URL MUST
+          match the URL the client instance used to make the discovery request.
 
 capabilities (array of strings)
 : OPTIONAL. A list of the AS's
