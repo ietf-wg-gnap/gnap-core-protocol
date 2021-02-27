@@ -33,7 +33,7 @@ author:
 
 normative:
     BCP195:
-       target: 'http://www.rfc-editor.org/info/bcp195'
+       target: 'https://www.rfc-editor.org/info/bcp195'
        title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
        date: May 2015
        author:
@@ -45,7 +45,6 @@ normative:
            ins: P. Saint-Andre
     RFC2119:
     RFC3230:
-    RFC3986:
     RFC5646:
     RFC7468:
     RFC7515:
@@ -3268,11 +3267,7 @@ The payload of the JWS object is the serialized body of the request, and
 the object is signed according to detached JWS {{RFC7797}}. 
 
 The client instance presents the signature in the Detached-JWS HTTP Header
-field. 
-
-The authorization and resource server SHOULD employ Syntax-Based Normalization and Scheme-Based
-Normalization in accordance with Section 6.2.2. and Section 6.2.3. of
-{{RFC3986}} before comparing the "htu" claim.
+field.
 
 ~~~
 POST /tx HTTP/1.1
