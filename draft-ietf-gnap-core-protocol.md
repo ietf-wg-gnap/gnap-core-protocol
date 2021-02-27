@@ -4413,7 +4413,10 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - -Since 04
-    - 
+    - Changed "interaction_methods" to "interaction_methods_supported".
+    - Changed "key_proofs" to "key_proofs_supported".
+    - Changed "sub_ids" to "sub_ids_supported".
+    - Changed "assertions" to "assertions_supported".
 
 - -04
     - Updated terminology.
