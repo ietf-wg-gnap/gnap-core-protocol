@@ -4081,7 +4081,7 @@ key_proofs_supported (array of strings)
           values of the `proof` field of the 
           [key section](#key-format) of the request.
 
-sub_ids (array of strings)
+sub_ids_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
           identifiers. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
