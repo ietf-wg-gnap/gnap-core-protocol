@@ -3365,7 +3365,6 @@ content type of `application/jose`. The AS
 MUST extract the payload of the JWS and treat it as the request body
 for further processing.
 
-
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
