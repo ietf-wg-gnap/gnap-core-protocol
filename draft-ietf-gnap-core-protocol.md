@@ -3070,7 +3070,7 @@ key proof together.
     request is used only for calls to the RS, and only with access tokens that are
     not bound to any key as described in {{response-token-single}}.
 - When neither an access token nor key proof are used, this is an unsecured request. This 
-    type of used only for calls to the RS during a discovery phase as
+    type of request is used only for calls to the RS during a discovery phase as
     described in {{rs-request-without-token}}.
 
 ## Key Formats {#key-format}
@@ -3830,7 +3830,7 @@ types during comparison. It is RECOMMENDED that designers of general-purpose
 APIs use a URI for this field to avoid collisions between multiple
 API types protected by a single AS.
 
-While it is expected that many APIs will have its own properties, a set of
+While it is expected that many APIs will have their own properties, a set of
 common properties are defined here. Specific API implementations
 SHOULD NOT re-use these fields with different semantics or syntax. The
 available values for these properties are determined by the API
@@ -3883,7 +3883,7 @@ using the fictitious `photo-api` type definition.
 The access requested for a given object when using these fields 
 is the cross-product of all fields of the object. That is to 
 say, the object represents a request for all `action` values listed within the object
-to be used at all `locations` values listed within the object for all `datatype`
+to be used at all `location` values listed within the object for all `datatype`
 values listed within the object. Assuming the request above was granted,
 the client instance could assume that it
 would be able to do a `read` action against the `images` on the first server
