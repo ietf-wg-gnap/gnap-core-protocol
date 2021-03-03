@@ -33,7 +33,7 @@ author:
 
 normative:
     BCP195:
-       target: 'https://www.rfc-editor.org/info/bcp195'
+       target: 'http://www.rfc-editor.org/info/bcp195'
        title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
        date: May 2015
        author:
@@ -45,7 +45,6 @@ normative:
            ins: P. Saint-Andre
     RFC2119:
     RFC3230:
-    RFC3986:
     RFC5646:
     RFC7468:
     RFC7515:
@@ -205,12 +204,12 @@ Privilege
     Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end-user. This process is refered to as privilege delegation. 
 
 Protected Resource
-: protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid access token is provided.
+: protected API (Application Programming Interface) served by a RS and that can be accessed by a client, if and only if a valid access token is provided.
 
     Note: to avoid complex sentences, the specification document may simply refer to resource instead of protected resource.   
 
 Right
-: ability given to a subject to perform a given operation on a resource under the control of an RS.
+: ability given to a subject to perform a given operation on a resource under the control of a RS.
 
 Subject
 : person, organization or device.
@@ -376,13 +375,13 @@ that returns from the interaction.
 
 2. The client instance [requests access to the resource](#request). The client instance indicates that
     it can [redirect to an arbitrary URL](#request-interact-redirect) and
-    [receive a redirect from the browser](#request-interact-callback-redirect). The client instance
-    stores verification information for its redirect in the session created
+    [receive a callback from the browser](#request-interact-callback). The client instance
+    stores verification information for its callback in the session created
     in (1).
 
 3. The AS determines that interaction is needed and [responds](#response) with
     a [URL to send the user to](#response-interact-redirect) and
-    [information needed to verify the redirect](#response-interact-callback) in (7).
+    [information needed to verify the callback](#response-interact-callback) in (7).
     The AS also includes information the client instance will need to 
     [continue the request](#response-continue) in (8). The AS associates this
     continuation information with an ongoing request that will be referenced in (4), (6), and (8).
@@ -398,9 +397,9 @@ that returns from the interaction.
 
 7. When the AS is done interacting with the user, the AS 
     [redirects the user back](#interaction-callback) to the
-    client instance using the redirect URL provided in (2). The redirect URL is augmented with
+    client instance using the callback URL provided in (2). The callback URL is augmented with
     an interaction reference that the AS associates with the ongoing 
-    request created in (2) and referenced in (4). The redirect URL is also
+    request created in (2) and referenced in (4). The callback URL is also
     augmented with a hash of the security information provided
     in (2) and (3). The client instance loads the verification information from (2) and (3) from 
     the session created in (1). The client instance [calculates a hash](#interaction-hash)
@@ -408,7 +407,7 @@ that returns from the interaction.
     Note that the client instance needs to ensure that the parameters for the incoming
     request match those that it is expecting from the session created
     in (1). The client instance also needs to be prepared for the end-user never being returned
-    to the client instance and handle timeouts appropriately.
+    to the client instance and handle time outs appropriately.
     
 8. The client instance loads the continuation information from (3) and sends the 
     interaction reference from (7) in a request to
@@ -750,8 +749,8 @@ A non-normative example of a grant request is below:
       }
     },
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -1166,7 +1165,7 @@ identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
 or by reference.
 
-sub_ids (array of objects)
+sub_ids (array of strings)
 : An array of subject identifiers for the
             end-user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -1242,58 +1241,30 @@ The client instance could also be signaled that interaction has completed by the
 callbacks. To facilitate all of these modes, the client instance declares the means that it 
 can interact using the `interact` field. 
 
-The `interact` field is a JSON object with three keys whose values declare how the client can initiate
-and complete the request, as well as provide hints to the AS about user preferences such as locale. 
-A client instance MUST NOT declare an interaction mode it does not support.
+The `interact` field is a JSON object with keys that declare
+different interaction modes. A client instance MUST NOT declare an
+interaction mode it does not support.
 The client instance MAY send multiple modes in the same request.
 There is no preference order specified in this request. An AS MAY
 [respond to any, all, or none of the presented interaction modes](#response-interact) in a request, depending on
-its capabilities and what is allowed to fulfill the request. 
+its capabilities and what is allowed to fulfill the request. This specification
+defines the following interaction modes:
 
-start (list of strings/objects)
-: Indicates how the client instance can start an interaction.
-
-finish (object)
-: Indicates how the client instance can receive an indication that interaction has finished at the AS.
-
-hints (object)
-: Provides additional information to inform the interaction process at the AS.
-
-
-The `interact` field MUST contain the `start` key, and MAY contain the `finish` and `hints` keys. The value
-of each key is an array which contains strings or JSON objects as defined below.
-
-### Start Mode Definitions
-
-This specification defines the following interaction start modes as an array of string values under the `start` key:
-
-"redirect"
+redirect (boolean)
 : Indicates that the client instance can direct the end-user to an arbitrary URL
     at the AS for interaction. {{request-interact-redirect}}
 
-"app"
+app (boolean)
 : Indicates that the client instance can launch an application on the end-user's
     device for interaction. {{request-interact-app}}
 
-"user_code"
+callback (object)
+: Indicates that the client instance can receive a callback from the AS
+    after interaction with the RO has concluded. {{request-interact-callback}}
+
+user_code (boolean)
 : Indicates that the client instance can communicate a human-readable short
     code to the end-user for use with a stable URL at the AS. {{request-interact-usercode}}
-
-### Finish Mode Definitions
-
-This specification defines the following interaction completion methods:
-
-"redirect"
-: Indicates that the client instance can receive a redirect from the end-user's device
-    after interaction with the RO has concluded. {{request-interact-callback-redirect}}
-
-"push"
-: Indicates that the client instance can receive an HTTP POST request from the AS
-    after interaction with the RO has concluded. {{request-interact-callback-push}}
-
-### Hint Definitions
-
-This specification defines the following properties under the `hints` key:
 
 ui_locales (array of strings)
 : Indicates the end-user's preferred locales that the AS can use
@@ -1304,16 +1275,14 @@ The following sections detail requests for interaction
 modes. Additional interaction modes are defined in 
 [a registry TBD](#IANA).
 
-### Example Interactions
-
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
-the end-user to an arbitrary URL and can receive a [redirect](#request-interact-callback-redirect) through
+the end-user to an arbitrary URL and can receive a [callback](#request-interact-callback) through
 a browser request.
 
 ~~~
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -1324,11 +1293,12 @@ a browser request.
 In this non-normative example, the client instance is indicating that it can 
 display a [user code](#request-interact-usercode) and direct the end-user
 to an [arbitrary URL](#request-interact-redirect) on a secondary
-device, but it cannot accept a redirect or push callback.
+device, but it cannot accept a callback.
 
 ~~~
     "interact": {
-        "start": ["redirect", "user_code"]
+        "redirect": true,
+        "user_code": true
     }
 ~~~
 
@@ -1342,9 +1312,7 @@ The AS SHOULD apply suitable timeouts to any interaction mechanisms
 provided, including user codes and redirection URLs. The client instance SHOULD
 apply suitable timeouts to any callback URLs.
 
-### Start Interaction Modes
-
-#### Redirect to an Arbitrary URL {#request-interact-redirect}
+### Redirect to an Arbitrary URL {#request-interact-redirect}
 
 If the client instance is capable of directing the end-user to a URL defined
 by the AS at runtime, the client instance indicates this by sending the
@@ -1357,14 +1325,14 @@ console.
 
 ~~~
 "interact": {
-  "start": ["redirect"]
+   "redirect": true
 }
 ~~~
 
 If this interaction mode is supported for this client instance and
 request, the AS returns a redirect interaction response {{response-interact-redirect}}.
 
-#### Open an Application-specific URL {#request-interact-app}
+### Open an Application-specific URL {#request-interact-app}
 
 If the client instance can open a URL associated with an application on
 the end-user's device, the client instance indicates this by sending the "app"
@@ -1374,9 +1342,11 @@ this specification.
 
 ~~~
 "interact": {
-   "start": ["app"]
+   "app": true
 }
 ~~~
+
+
 
 If this interaction mode is supported for this client instance and
 request, the AS returns an app interaction response with an app URL
@@ -1384,40 +1354,17 @@ payload {{response-interact-app}}.
 
 \[\[ [See issue #54](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/54) \]\]
 
-#### Display a Short User Code {#request-interact-usercode}
-
-If the client instance is capable of displaying or otherwise communicating
-a short, human-entered code to the RO, the client instance indicates this
-by sending the "user_code" field with the boolean value "true". This
-code is to be entered at a static URL that does not change at
-runtime, as described in {{response-interact-usercode}}.
-
-~~~
-"interact": {
-    "start": ["user_code"]
-}
-~~~
-
-If this interaction mode is supported for this client instance and
-request, the AS returns a user code and interaction URL as specified
-in {{interaction-usercode}}.
-
-
-### Finish Interaction Modes {#finish-interaction-modes}
+### Receive a Callback After Interaction {#request-interact-callback}
 
 If the client instance is capable of receiving a message from the AS indicating
 that the RO has completed their interaction, the client instance
-indicates this by sending the following members of an object under the `finish` key.
+indicates this by sending the "callback" field. The value of this
+field is an object containing the following members.
 
-method (string)
-: REQUIRED. The callback method that the AS will use to contact the client instance.
-              Valid values include `redirect` {{request-interact-callback-redirect}}
-              and `push` {{request-interact-callback-push}}, with other values
-              defined by [a registry TBD](#IANA).
 
 uri (string)
-: REQUIRED. Indicates the URI that the AS will either send the RO to
-              after interaction or send an HTTP POST request. This URI MAY be unique per request and MUST
+: REQUIRED. Indicates the URI to send the RO to
+              after interaction. This URI MAY be unique per request and MUST
               be hosted by or accessible by the client instance. This URI MUST NOT contain
               any fragment component. This URI MUST be protected by HTTPS, be
               hosted on a server local to the RO's browser ("localhost"), or
@@ -1436,11 +1383,28 @@ nonce (string)
               MUST be generated by the client instance as a unique value for this
               request.
 
+method (string)
+: REQUIRED. The callback method that the AS will use to contact the client instance.
+              Valid values include `redirect` {{request-interact-callback-redirect}}
+              and `push` {{request-interact-callback-push}}, with other values
+              defined by [a registry TBD](#IANA).
+
 hash_method (string)
 : OPTIONAL. The hash calculation
               mechanism to be used for the callback hash in {{interaction-hash}}. Can be one of `sha3` or `sha2`. If
               absent, the default value is `sha3`.
               \[\[ [See issue #56](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/56) \]\] 
+
+
+~~~
+"interact": {
+    "callback": {
+       "method": "redirect",
+       "uri": "https://client.example.net/return/123455",
+       "nonce": "LKLTI25DK82FX4T4QFZC"
+    }
+}
+~~~
 
 If this interaction mode is supported for this client instance and
 request, the AS returns a nonce for use in validating 
@@ -1456,16 +1420,16 @@ presentation of an interaction callback reference as described in
 
 #### Receive an HTTP Callback Through the Browser {#request-interact-callback-redirect}
 
-A finish `method` value of `redirect` indicates that the client instance
-will expect a request from the RO's browser using the HTTP method
+A callback `method` value of `redirect` indicates that the client instance
+will expect a call from the RO's browser using the HTTP method
 GET as described in {{interaction-callback}}.
 
 ~~~
 "interact": {
-    "finish": {
-        "method": "redirect",
-        "uri": "https://client.example.net/return/123455",
-        "nonce": "LKLTI25DK82FX4T4QFZC"
+    "callback": {
+       "method": "redirect",
+       "uri": "https://client.example.net/return/123455",
+       "nonce": "LKLTI25DK82FX4T4QFZC"
     }
 }
 ~~~
@@ -1480,16 +1444,16 @@ prevent substitution attacks.
 
 #### Receive an HTTP Direct Callback {#request-interact-callback-push}
 
-A finish `method` value of `push` indicates that the client instance will
-expect a request from the AS directly using the HTTP method POST
+A callback `method` value of `push` indicates that the client instance will
+expect a call from the AS directly using the HTTP method POST
 as described in {{interaction-pushback}}.
 
 ~~~
 "interact": {
-    "finish": {
-        "method": "push",
-        "uri": "https://client.example.net/return/123455",
-        "nonce": "LKLTI25DK82FX4T4QFZC"
+    "callback": {
+       "method": "push",
+       "uri": "https://client.example.net/return/123455",
+       "nonce": "LKLTI25DK82FX4T4QFZC"
     }
 }
 ~~~
@@ -1503,12 +1467,25 @@ be present on the incoming HTTP request.
 
 \[\[ [See issue #60](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/60) \]\]
 
-### Hints
+### Display a Short User Code {#request-interact-usercode}
 
-The `hints` key is an object describing one or more suggestions from the client
-instance that the AS can use to help drive user interaction.
+If the client instance is capable of displaying or otherwise communicating
+a short, human-entered code to the RO, the client instance indicates this
+by sending the "user_code" field with the boolean value "true". This
+code is to be entered at a static URL that does not change at
+runtime, as described in {{response-interact-usercode}}.
 
-#### Indicate Desired Interaction Locales {#request-interact-locale}
+~~~
+"interact": {
+    "user_code": true
+}
+~~~
+
+If this interaction mode is supported for this client instance and
+request, the AS returns a user code and interaction URL as specified
+in {{interaction-usercode}}.
+
+### Indicate Desired Interaction Locales {#request-interact-locale}
 
 If the client instance knows the end-user's locale and language preferences, the
 client instance can send this information to the AS using the `ui_locales` field
@@ -1516,9 +1493,7 @@ with an array of locale strings as defined by {{RFC5646}}.
 
 ~~~
 "interact": {
-    "hints": {
-        "ui_locales": ["en-US", "fr-CA"]
-    }
+    "ui_locales": ["en-US", "fr-CA"]
 }
 ~~~
 
@@ -1587,11 +1562,11 @@ subject (object)
 : Claims about the RO as known and declared by the AS. {{response-subject}}
 
 instance_id (string)
-: An identifier this client instance can use to identify itself when making 
+: An identifier this client instance instance can use to identify itself when making 
     future requests. {{response-dynamic-handles}}
 
 user_handle (string)
-: An identifier this client instance can use to identify its current end-user when
+: An identifier this client instance instance can use to identify its current end-user when
     making future requests. {{response-dynamic-handles}}
 
 error (object)
@@ -1604,7 +1579,7 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
 {
     "interact": {
         "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
-        "push": "MBDOFXG4Y5CVJCX821LH"
+        "callback": "MBDOFXG4Y5CVJCX821LH"
     },
     "continue": {
         "access_token": {
@@ -1922,8 +1897,8 @@ redirect (string)
 app (string)
 : Launch of an application URL. {{response-interact-app}}
 
-finish (string)
-: A nonce used by the client instance to verify the callback after interaction is completed. {{response-interact-callback}}
+callback (string)
+: Callback to a client instance accessible URL after interaction is completed. {{response-interact-callback}}
 
 user_code (object)
 : Display a short user code. {{response-interact-usercode}}
@@ -1992,23 +1967,22 @@ application URL.
 
 ### Post-interaction Callback to a Client Instance Accessible URL {#response-interact-callback}
 
-If the client instance indicates that it can [receive a post-interaction redirect or push at a URL](#finish-interaction-modes) 
-and the AS supports this mode for the
-client instance's request, the AS responds with a `finish` field containing a nonce
+If the client instance indicates that it can [receive a post-interaction callback on a URL](#request-interact-callback) and the AS supports this mode for the
+client instance's request, the AS responds with a "callback" field containing a nonce
 that the client instance will use in validating the callback as defined in
-{{interaction-finalize}}.
+{{interaction-callback}}.
 
 ~~~
     "interact": {
-        "finish": "MBDOFXG4Y5CVJCX821LH"
+        "callback": "MBDOFXG4Y5CVJCX821LH"
     }
 ~~~
 
-When the RO completes interaction at the AS, the AS MUST either redirect the RO's browser
-or send an HTTP POST to the client instance's callback URL using the method indicated in the
-[interaction request](#finish-interaction-modes) as described in {{interaction-finalize}}.
+When the RO completes interaction at the AS, the AS MUST call the
+client instance's callback URL using the method indicated in the
+[callback request](#request-interact-callback) as described in {{interaction-callback}}.
 
-If the AS returns a nonce, the client instance MUST NOT
+If the AS returns a "callback" nonce, the client instance MUST NOT
 continue a grant request before it receives the associated
 interaction reference on the callback URI.
 
@@ -2273,7 +2247,7 @@ Note that since the client instance does not add any parameters to the URL, the
 AS MUST determine the grant request being referenced from the URL
 value itself. If the URL cannot be associated with a currently active
 request, the AS MUST display an error to the RO and MUST NOT attempt
-to redirect the RO back to any client instance even if a [redirect is supplied](#request-interact-callback-redirect).
+to redirect the RO back to any client instance even if a [callback is supplied](#request-interact-callback).
 
 The interaction URL MUST be reachable from the RO's browser, though
 note that the RO MAY open the URL on a separate device from the client instance
@@ -2292,7 +2266,7 @@ Note that since the URL itself is static, the AS MUST determine the
 grant request being referenced from the user code value itself. If the
 user code cannot be associated with a currently active request, the AS
 MUST display an error to the RO and MUST NOT attempt to redirect the
-RO back to any client instance even if a [redirect is supplied](#request-interact-callback-redirect).
+RO back to any client instance even if a [callback is supplied](#request-interact-callback).
 
 The user code URL MUST be reachable from the RO's browser, though
 note that the RO MAY open the URL on a separate device from the client instance
@@ -2342,13 +2316,13 @@ sections.
 
 ### Completing Interaction with a Browser Redirect to the Callback URI {#interaction-callback}
 
-When using the [`redirect` interaction finish method](#response-interact-callback),
+When using the ["callback" interaction mode](#response-interact-callback) with the `redirect` method,
 the AS signals to the client instance that interaction is
 complete and the request can be continued by directing the RO (in
-their browser) back to the client instance's redirect URL sent in [the callback request](#request-interact-callback-redirect).
+their browser) back to the client instance's callback URL sent in [the callback request](#request-interact-callback-redirect).
 
-The AS secures this redirect by adding the hash and interaction
-reference as query parameters to the client instance's redirect URL.
+The AS secures this callback by adding the hash and interaction
+reference as query parameters to the client instance's callback URL.
 
 
 hash
@@ -2431,7 +2405,7 @@ always provide this hash, and the client instance MUST validate the hash when re
 
 To calculate the "hash" value, the party doing the calculation
 first takes the "nonce" value sent by the client instance in the 
-[interaction section of the initial request](#finish-interaction-modes), the AS's nonce value
+[interaction section of the initial request](#request-interact-callback), the AS's nonce value
 from [the callback response](#response-interact-callback), and the "interact_ref"
 sent to the client instance's callback URL.
 These three values are concatenated to each other in this order
@@ -2535,7 +2509,7 @@ includes the access token, and signs with detached JWS:
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2577,7 +2551,7 @@ response includes an interaction reference. The client instance MUST include tha
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2632,7 +2606,7 @@ include a message body.
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 ~~~
@@ -2730,18 +2704,16 @@ For example, a client instance initially requests a set of resources using refer
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Detached-JWS: ejy0...
 
 {
-    "access_token": {
-        "access": [
-            "read", "write"
-        ]
-    },
+    "access": [
+        "read", "write"
+    ],
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -2783,7 +2755,7 @@ instead of both "read" and "write" as before.
 ~~~
 PATCH /continue HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2830,7 +2802,7 @@ needs to step up its access. The initial request could look like this example.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -2840,8 +2812,8 @@ Detached-JWS: ejy0...
         ]
     },
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -2887,7 +2859,7 @@ needs to be included in order to use the callback again.
 ~~~
 PATCH /continue HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2898,8 +2870,8 @@ Detached-JWS: ejy0...
         ]
     },
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.example.net/return/654321",
             "nonce": "K82FX4T4LKLTI25DQFZC"
@@ -2915,6 +2887,32 @@ Since the old access tokens are good for a subset of the rights requested here, 
 AS might decide to not revoke them. However, any access tokens granted after this update
 process are new access tokens and do not modify the rights of existing access tokens.
 
+## Getting the Current State of a Grant Request {#continue-state}
+
+If the client instance needs to get the current state of an ongoing grant request, it makes an
+HTTP GET request to the continuation URI. This request MUST NOT alter the grant
+request in any fashion, including causing the issuance of new access tokens or
+modification of interaction parameters. 
+
+The AS MAY include existing access tokens and previously-released subject claims in
+the response. The AS MUST NOT issue a new access token or release a new subject 
+claim in response to this request. 
+
+~~~
+GET /continue HTTP/1.1
+Host: server.example.com
+Content-type: application/json
+Authorization: GNAP 80UPRY5NM33OMUKMKSKU
+Detached-JWS: ejy0...
+~~~
+
+The response MAY include any fields described {{response}} that are applicable to this
+ongoing request, including the most recently issued access tokens, any released subject
+claims, and any currently active interaction modes. The response MAY contain a 
+new ["continue" response](#response-continue) as described above.
+
+\[\[ [See issue #98](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/98) \]\]
+
 ## Canceling a Grant Request {#continue-delete}
 
 If the client instance wishes to cancel an ongoing grant request, it makes an
@@ -2923,7 +2921,7 @@ HTTP DELETE request to the continuation URI.
 ~~~
 DELETE /continue HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 ~~~
@@ -2952,6 +2950,8 @@ same [key identified in the initial request](#request-client) as described in {{
 The AS MUST validate the proof and assure that it is associated with
 either the token itself or the client instance the token was issued to, as
 appropriate for the token's presentation type.
+
+\[\[ [See issue #99](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/99) \]\]
 
 ## Rotating the Access Token {#rotate-access-token}
 
@@ -3070,7 +3070,7 @@ key proof together.
     request is used only for calls to the RS, and only with access tokens that are
     not bound to any key as described in {{response-token-single}}.
 - When neither an access token nor key proof are used, this is an unsecured request. This 
-    type of request is used only for calls to the RS during a discovery phase as
+    type of used only for calls to the RS during a discovery phase as
     described in {{rs-request-without-token}}.
 
 ## Key Formats {#key-format}
@@ -3272,10 +3272,6 @@ the object is signed according to detached JWS {{RFC7797}}.
 The client instance presents the signature in the Detached-JWS HTTP Header
 field. 
 
-The authorization and resource server SHOULD employ Syntax-Based Normalization and Scheme-Based
-Normalization in accordance with Section 6.2.2. and Section 6.2.3. of
-{{RFC3986}} before comparing the "htu" claim.
-
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
@@ -3295,8 +3291,8 @@ Detached-JWS: eyJiNjQiOmZhbHNlLCJhbGciOiJSUzI1NiIsImtpZCI6Inh5ei0xIn0.
         ]
     },
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3372,10 +3368,6 @@ content type of `application/jose`. The AS
 MUST extract the payload of the JWS and treat it as the request body
 for further processing.
 
-The authorization and resource server SHOULD employ Syntax-Based Normalization and Scheme-Based
-Normalization in accordance with Section 6.2.2. and Section 6.2.3. of
-{{RFC3986}} before comparing the "htu" claim.
-
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
@@ -3384,40 +3376,50 @@ Content-Type: application/jose
 eyJhbGciOiJSUzI1NiIsImtpZCI6IktBZ05wV2JSeXk5T
 WYycmlrbDQ5OExUaE1ydmtiWldIVlNRT0JDNFZIVTQiLC
 JodG0iOiJwb3N0IiwiaHR1IjoiL3R4IiwidHMiOjE2MDM
-4MDA3ODN9.eyJjYXBhYmlsaXRpZXMiOltdLCJjbGllbnQ
-iOnsia2V5Ijp7Imp3ayI6eyJrdHkiOiJSU0EiLCJlIjoi
-QVFBQiIsImtpZCI6IktBZ05wV2JSeXk5TWYycmlrbDQ5O
-ExUaE1ydmtiWldIVlNRT0JDNFZIVTQiLCJuIjoibGxXbU
-hGOFhBMktOTGRteE9QM2t4RDlPWTc2cDBTcjM3amZoejk
-0YTkzeG0yRk5xb1NQY1JaQVBkMGxxRFM4TjNVaWE1M2RC
-MjNaNTlPd1k0YnBNX1ZmOEdKdnZwdExXbnhvMVB5aG1Qc
-i1lY2RTQ1JRZFRjX1pjTUY0aFJWNDhxcWx2dUQwbXF0Y0
-RiSWtTQkR2Y2NKbVpId2ZUcERIaW5UOHR0dmNWUDhWa0F
-NQXE0a1ZhenhPcE1vSVJzb3lFcF9lQ2U1cFN3cUhvMGRh
-Q1dOS1ItRXBLbTZOaU90ZWRGNE91bXQ4TkxLVFZqZllnR
-khlQkRkQ2JyckVUZDR2Qk13RHRBbmpQcjNDVkN3d3gyYk
-FRVDZTbHhGSjNmajJoaHlJcHE3cGM4clppYjVqTnlYS3d
-mQnVrVFZZWm96a3NodC1Mb2h5QVNhS3BZVHA4THROWi13
-In0sInByb29mIjoiandzIn0sIm5hbWUiOiJNeUZpcnN0Q
-2xpZW50IiwidXJpIjoiaHR0cDovL2xvY2FsaG9zdC9jbG
-llbnQvY2xpZW50SUQifSwiaW50ZXJhY3QiOnsic3RhcnQ
-iOlsicmVkaXJlY3QiXSwiZmluaXNoIjp7Im1ldGhvZCI6
-InJlZGlyZWN0Iiwibm9uY2UiOiJkOTAyMTM4ODRiODQwO
-TIwNTM4YjVjNTEiLCJ1cmkiOiJodHRwOi8vbG9jYWxob3
-N0L2NsaWVudC9yZXF1ZXN0LWRvbmUifX0sImFjY2Vzc19
-0b2tlbiI6eyJhY2Nlc3MiOlt7ImFjdGlvbnMiOlsicmVh
-ZCIsInByaW50Il0sImxvY2F0aW9ucyI6WyJodHRwOi8vb
-G9jYWxob3N0L3Bob3RvcyJdLCJ0eXBlIjoicGhvdG8tYX
-BpIn1dfSwic3ViamVjdCI6eyJzdWJfaWRzIjpbImlzc19
-zdWIiLCJlbWFpbCJdfX0.LUyZ8_fERmxbYARq8kBYMwzc
-d8GnCAKAlo2ZSYLRRNAYWPrp2XGLJOvg97WK1idf_LB08
-OJmLVsCXxCvn9mgaAkYNL_ZjHcusBvY1mNo0E1sdTEr31
-CVKfC-6WrZCscb8YqE4Ayhh0Te8kzSng3OkLdy7xN4xeK
-uHzpF7yGsM52JZ0cBcTo6WrYEfGdr08AWQJ59ht72n3jT
-smYNy9A6I4Wrvfgj3TNxmwYojpBAicfjnzA1UVcNm9F_x
-iSz1_y2tdH7j5rVqBMQife-k9Ewk95vr3lurthenliYSN
-iUinVfoW1ybnaIBcTtP1_YCxg_h1y-B5uZEvYNGCuoCqa
-6IQ
+4MDA3ODN9.ewogICJjYXBhYmlsaXRpZXMiOiBbXSwKICA
+iY2xpZW50IjogewogICAgImtleSI6IHsKICAgICAgImp3
+ayI6IHsKICAgICAgICAia3R5IjogIlJTQSIsCiAgICAgI
+CAgImUiOiAiQVFBQiIsCiAgICAgICAgImtpZCI6ICJLQW
+dOcFdiUnl5OU1mMnJpa2w0OThMVGhNcnZrYlpXSFZTUU9
+CQzRWSFU0IiwKICAgICAgICAibiI6ICJsbFdtSEY4WEEy
+S05MZG14T1Aza3hEOU9ZNzZwMFNyMzdqZmh6OTRhOTN4b
+TJGTnFvU1BjCiAgICAgICAgUlpBUGQwbHFEUzhOM1VpYT
+UzZEIyM1o1OU93WTRicE1fVmY4R0p2dnB0TFdueG8xUHl
+obVByLWVjZAogICAgICAgIFNDUlFkVGNfWmNNRjRoUlY0
+OHFxbHZ1RDBtcXRjRGJJa1NCRHZjY0ptWkh3ZlRwREhpb
+lQ4dHR2Y1YKICAgICAgICBQOFZrQU1BcTRrVmF6eE9wTW
+9JUnNveUVwX2VDZTVwU3dxSG8wZGFDV05LUi1FcEttNk5
+pT3RlZEY0CiAgICAgICAgT3VtdDhOTEtUVmpmWWdGSGVC
+RGRDYnJyRVRkNHZCTXdEdEFualByM0NWQ3d3eDJiQVFUN
+lNseEZKMwogICAgICAgIGZqMmhoeUlwcTdwYzhyWmliNW
+pOeVhLd2ZCdWtUVllab3prc2h0LUxvaHlBU2FLcFlUcDh
+MdE5aLXciCiAgICAgIH0sCiAgICAgICJwcm9vZiI6ICJq
+d3MiCiAgICB9LAogICAgIm5hbWUiOiAiTXkgRmlzdCBDb
+GllbnQiLAogICAgInVyaSI6ICJodHRwOi8vbG9jYWxob3
+N0L2NsaWVudC9jbGllbnRJRCIKICB9LAogICJpbnRlcmF
+jdCI6IHsKICAgICJjYWxsYmFjayI6IHsKICAgICAgIm1l
+dGhvZCI6ICJyZWRpcmVjdCIsCiAgICAgICJub25jZSI6I
+CJkOTAyMTM4ODRiODQwOTIwNTM4YjVjNTEiLAogICAgIC
+AidXJpIjogImh0dHA6Ly9sb2NhbGhvc3QvY2xpZW50L3J
+lcXVlc3QtZG9uZSIKICAgIH0sCiAgICAicmVkaXJlY3Qi
+OiB0cnVlCiAgfSwKICAiYWNjZXNzX3Rva2VuIjogewogI
+CAgImFjY2VzcyI6IFsKICAgICAgewogICAgICAgICJhY3
+Rpb25zIjogWwogICAgICAgICAgInJlYWQiLAogICAgICA
+gICAgInByaW50IgogICAgICAgIF0sCiAgICAgICAgImxv
+Y2F0aW9ucyI6IFsKICAgICAgICAgICJodHRwOi8vbG9jY
+Wxob3N0L3Bob3RvcyIKICAgICAgICBdLAogICAgICAgIC
+J0eXBlIjogInBob3RvLWFwaSIKICAgICAgfQogICAgXQo
+gIH0KICAic3ViamVjdCI6IHsKICAgICJzdWJfaWRzIjog
+WwogICAgICAiaXNzX3N1YiIsCiAgICAgICJlbWFpbCIKI
+CAgIF0KICB9Cn0K.LUy
+Z8_fERmxbYARq8kBYMwzcd8GnCAKAlo2ZSYLRRNAYWPrp
+2XGLJOvg97WK1idf_LB08OJmLVsCXxCvn9mgaAkYNL_Zj
+HcusBvY1mNo0E1sdTEr31CVKfC-6WrZCscb8YqE4Ayhh0
+Te8kzSng3OkLdy7xN4xeKuHzpF7yGsM52JZ0cBcTo6WrY
+EfGdr08AWQJ59ht72n3jTsmYNy9A6I4Wrvfgj3TNxmwYo
+jpBAicfjnzA1UVcNm9F_xiSz1_y2tdH7j5rVqBMQife-k
+9Ewk95vr3lurthenliYSNiUinVfoW1ybnaIBcTtP1_YCx
+g_h1y-B5uZEvYNGCuoCqa6IQ
 ~~~
 
 This example's JWS header decodes to:
@@ -3426,8 +3428,8 @@ This example's JWS header decodes to:
 {
   "alg": "RS256",
   "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
-  "htm": "POST",
-  "htu": "https://server.example.com/tx",
+  "htm": "post",
+  "htu": "/tx",
   "ts": 1603800783
 }
 ~~~
@@ -3452,16 +3454,16 @@ And the JWS body decodes to:
       },
       "proof": "jws"
     },
-    "name": "My First Client",
+    "name": "My Fist Client",
     "uri": "http://localhost/client/clientID"
   },
   "interact": {
-    "start": ["redirect"],
-    "finish": {
+    "callback": {
       "method": "redirect",
       "nonce": "d90213884b840920538b5c51",
       "uri": "http://localhost/client/request-done"
-    }
+    },
+    "redirect": true
   },
   "access_token": {
     "access": [
@@ -3538,8 +3540,8 @@ SSL_CLIENT_CERT: MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBmjE3MDUGA1UEAwwuQmV
         ]
     },
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3622,8 +3624,8 @@ T9tyEYqGrTfm5uautELgMls9sgSyE929woZ59elg
         ]
     },
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3684,8 +3686,8 @@ Digest: SHA=oZz2O3kg5SEFAhmr0xEBbc4jEfo=
         ]
     },
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "push",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3838,7 +3840,7 @@ types during comparison. It is RECOMMENDED that designers of general-purpose
 APIs use a URI for this field to avoid collisions between multiple
 API types protected by a single AS.
 
-While it is expected that many APIs will have their own properties, a set of
+While it is expected that many APIs will have its own properties, a set of
 common properties are defined here. Specific API implementations
 SHOULD NOT re-use these fields with different semantics or syntax. The
 available values for these properties are determined by the API
@@ -3891,7 +3893,7 @@ using the fictitious `photo-api` type definition.
 The access requested for a given object when using these fields 
 is the cross-product of all fields of the object. That is to 
 say, the object represents a request for all `action` values listed within the object
-to be used at all `location` values listed within the object for all `datatype`
+to be used at all `locations` values listed within the object for all `datatype`
 values listed within the object. Assuming the request above was granted,
 the client instance could assume that it
 would be able to do a `read` action against the `images` on the first server
@@ -4071,11 +4073,9 @@ containing the following information:
 
 
 grant_request_endpoint (string)
-: REQUIRED. The location of the
-          AS's grant request endpoint. The location MUST be a URL {{RFC3986}}
-          with a scheme component that MUST be https, a host component, and optionally,
-          port, path and query components and no fragment components. This URL MUST
-          match the URL the client instance used to make the discovery request.
+: REQUIRED. The full URL of the
+          AS's grant request endpoint. This MUST match the URL the client instance used to
+          make the discovery request.
 
 capabilities (array of strings)
 : OPTIONAL. A list of the AS's
@@ -4088,7 +4088,7 @@ interaction_methods (array of strings)
           interaction methods. The values of this list correspond to the
           possible fields in the [interaction section](#request-interact) of the request.
 
-key_proofs (array of strings)
+key_proofs (array strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
@@ -4154,7 +4154,7 @@ token as the body of the request.
 ~~~
 POST /introspect HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4170,7 +4170,7 @@ token's presentation, such as its intended proofing mechanism and key
 material.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "active": true,
@@ -4244,7 +4244,7 @@ request.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4288,7 +4288,7 @@ request.
 ~~~
 POST /resource HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4321,7 +4321,7 @@ The AS responds with a handle appropriate to represent the
 resources list that the RS presented.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "resource_handle": "FWWIKYBQ6U56NL1"
@@ -4351,7 +4351,7 @@ has been pre-configured to represent what the AS is protecting. The
 content of this handle is opaque to the RS and the client instance.
 
 ~~~
-WWW-Authenticate: GNAP as_uri=https://server.example/tx,resource=FWWIKYBQ6U56NL1
+WWW-Authenticate: GNAP as_uri=http://server.example/tx,resource=FWWIKYBQ6U56NL1
 ~~~
 
 The client instance then makes a call to the "as_uri" as described in 
@@ -4430,11 +4430,8 @@ sure that it has the permission to do so.
 - -04
     - Updated terminology.
     - Refactored key presentation and binding.
-    - Refactored "interact" request to group start and end modes.
     - Changed access token request and response syntax.
     - Removed closed issue links.
-    - Removed function to read state of grant request by client.
-    - Closed issues related to reading and updating access tokens.
 
 - -03
     - Changed "resource client" terminology to separate "client instance" and "client software".
@@ -4498,7 +4495,7 @@ identifies itself using its public key.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4534,8 +4531,8 @@ Detached-JWS: ejy0...
       }
     },
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -4553,12 +4550,12 @@ client instance that it can use the given instance identifier to identify itself
 [future requests](#request-instance).
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "interact": {
        "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
-       "push": "MBDOFXG4Y5CVJCX821LH"
+       "callback": "MBDOFXG4Y5CVJCX821LH"
     }
     "continue": {
         "access_token": {
@@ -4611,7 +4608,7 @@ the request as above.
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -4626,7 +4623,7 @@ The AS retrieves the pending request based on the handle and issues
 a bearer access token and returns this to the client instance.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "access_token": {
@@ -4675,7 +4672,7 @@ The client instance initiates the request to the AS.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4686,7 +4683,8 @@ Detached-JWS: ejy0...
     },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
-        "start": ["redirect", "user_code"]
+        "redirect": true,
+        "user_code": true
     }
 }
 ~~~
@@ -4700,7 +4698,7 @@ a nonce, but does include a "wait" parameter on the continuation
 section because it expects the client instance to poll for results.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "interact": {
@@ -4755,7 +4753,7 @@ the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "continue": {
@@ -4788,7 +4786,7 @@ determines that it has been approved, and issues an access
 token for the client to use at the RS.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "access_token": {
@@ -4814,7 +4812,7 @@ public key and using MTLS to make the request.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 
 {
     "access_token": {
@@ -4837,7 +4835,7 @@ The AS processes this and determines that the client instance can ask for
 the requested resources and issues an access token.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "access_token": {
@@ -4864,7 +4862,7 @@ resources. The client instance also identifies a particular user.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4917,7 +4915,7 @@ request. The AS indicates to the client instance that it can poll for
 continuation.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "continue": {
@@ -4955,7 +4953,7 @@ the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "continue": {
@@ -4989,7 +4987,7 @@ determines that it has been approved and it issues an access
 token.
 
 ~~~
-Content-Type: application/json
+Content-type: application/json
 
 {
     "access_token": {
@@ -5038,7 +5036,7 @@ places the OAuth 2 values in the appropriate places.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-Type: application/json
+Content-type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -5050,8 +5048,8 @@ Detached-JWS: ejy0...
     },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
-        "start": ["redirect"],
-        "finish": {
+        "redirect": true,
+        "callback": {
             "method": "redirect",
             "uri": "https://client.example.net/return?state=123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
