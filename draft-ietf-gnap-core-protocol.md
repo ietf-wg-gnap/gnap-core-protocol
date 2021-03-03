@@ -4424,7 +4424,9 @@ sure that it has the permission to do so.
 --- back
    
 # Document History {#history}
-
+   
+   - Updated discovery and field names for subject types.
+   
 - -04
     - Updated terminology.
     - Refactored key presentation and binding.
