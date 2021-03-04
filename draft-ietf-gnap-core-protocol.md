@@ -759,7 +759,7 @@ A non-normative example of a grant request is below:
     },
     "capabilities": ["ext1", "ext2"],
     "subject": {
-        "sub_ids": ["iss_sub", "email"],
+        "subject_types": ["iss_sub", "email"],
         "assertions": ["id_token"]
     }
 }
@@ -3470,10 +3470,7 @@ And the JWS body decodes to:
     ]
   }
   "subject": {
-    "sub_ids": [
-      "iss_sub",
-      "email"
-    ]
+    "subject_types": ["iss_sub", "email"]
   }
 }
 ~~~
