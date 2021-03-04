@@ -972,7 +972,7 @@ AS policies, or [assertions presented by the client instance](#request-user). If
 this is determined positively, the AS MAY [return the RO's information in its response](#response-subject)
 as requested. 
 
-Subject identifiers types requested by the client instance serve only to identify 
+Subject identifier types requested by the client instance serve only to identify 
 the RO in the context of the AS and can't be used as communication
 channels by the client instance, as discussed in {{response-subject}}.
 
