@@ -976,7 +976,7 @@ Subject identifier types requested by the client instance serve only to identify
 the RO in the context of the AS and can't be used as communication
 channels by the client instance, as discussed in {{response-subject}}.
 
-The AS SHOULD NOT re-use subject identifier types for multiple different ROs.
+The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
 \[\[ [See issue #42](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/42) \]\]
 
