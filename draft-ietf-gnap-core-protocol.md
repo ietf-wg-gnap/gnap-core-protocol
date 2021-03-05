@@ -1568,8 +1568,8 @@ the values or behavior of other request and response objects.
 # Grant Response {#response}
 
 In response to a client instance's request, the AS responds with an HTTP 200 (OK)
-status code and a JSON object as the HTTP entity body. Each possible field is detailed in
-the sections below
+status code and a JSON object as the HTTP entity body. Each possible field for
+a successful response is detailed in the sections below
 
 
 continue (object)
@@ -1594,9 +1594,6 @@ instance_id (string)
 user_handle (string)
 : An identifier this client instance can use to identify its current end-user when
     making future requests. {{response-dynamic-handles}}
-
-error (object)
-: An error code indicating that something has gone wrong. {{response-error}}
 
 In this example, the AS is returning an [interaction URL](#response-interact-redirect),
 a [callback nonce](#response-interact-callback), and a [continuation response](#response-continue).
