@@ -3193,10 +3193,10 @@ Values defined by this specification are as follows:
 
 
 jwsd
-: A detached JSON Web Signature (JWS) object
+: A detached JWS signature header
 
 jws
-: An attached JWS object
+: Attached JWS payload
 
 mtls
 : Mutual TLS certificate verification
