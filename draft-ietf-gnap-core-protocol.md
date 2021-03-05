@@ -1567,8 +1567,9 @@ the values or behavior of other request and response objects.
 
 # Grant Response {#response}
 
-In response to a client instance's request, the AS responds with a JSON object
-as the HTTP entity body. Each possible field is detailed in the sections below
+In response to a client instance's request, the AS responds with an HTTP 200 (OK)
+status code and a JSON object as the HTTP entity body. Each possible field is detailed in
+the sections below
 
 
 continue (object)
