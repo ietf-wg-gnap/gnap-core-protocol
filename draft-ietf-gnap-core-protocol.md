@@ -3193,10 +3193,10 @@ Values defined by this specification are as follows:
 
 
 jwsd
-: A detached JWS signature header
+: A detached JSON Web Signature (JWS) object
 
 jws
-: Attached JWS payload
+: An attached JWS object
 
 mtls
 : Mutual TLS certificate verification
@@ -3239,16 +3239,16 @@ to either the access token's own key or, in the case of bearer tokens, the clien
 ### Detached JWS {#detached-jws}
 
 This method is indicated by `jwsd` in the
-`proof` field. A JWS {{RFC7515}} signature object is created as follows:
+`proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The header of the JWS MUST contain the
-`kid` field of the key bound to this client instance for this request. The JWS header
-MUST contain an `alg` field appropriate for the key identified by kid
-and MUST NOT be `none`.  The `b64` field MUST be set to `false` and the
-`crit` field MUST contain at least `b64` as specified in {{RFC7797}}
+The JOSE (JSON Object Signing and Encryption) header MUST contain the `kid` parameter of
+the key bound to this client instance for this request.  The `alg` parameter MUST be set
+to a value appropriate for the key identified by kid and MUST NOT be `none`.  The `b64`
+parameter MUST be set to `false` and the `crit` parameter MUST contain at least `b64`
+as specified in {{RFC7797}}.
 
-To protect the request, the JWS header MUST contain the following
-additional fields.
+To protect the request, the JOSE header MUST contain the following
+additional parameters.
 
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
@@ -3334,15 +3334,14 @@ transformations.
 ### Attached JWS {#attached-jws}
 
 This method is indicated by `jws` in the
-`proof` field. A JWS {{RFC7515}} signature object is created as follows:
+`proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The header of the JWS MUST contain the
-`kid` field of the key bound to this client instance for this request. The JWS header
-MUST contain an `alg` field appropriate for the key identified by `kid`
-and MUST NOT be `none`.
+The JOSE header MUST contain the `kid` parameter of the key bound to this client
+instance for this request. The `alg` parameter MUST be set to a value appropriate
+for the key identified by kid and MUST NOT be `none`.
 
 To protect the request, the JWS header MUST contain the following
-additional fields.
+additional parameters.
 
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
