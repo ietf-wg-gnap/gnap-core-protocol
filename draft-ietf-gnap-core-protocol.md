@@ -3163,7 +3163,7 @@ sent using the HTTP Header method defined in {{RFC6750}}.
 Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 ~~~
 
-The form parameter and query parameter methods of {{RFC6750}} MUST NOT
+The form-encoded body and URI query parameter methods of {{RFC6750}} MUST NOT
 be used.
 
 If the `bound` value is the boolean `true`, the access token MUST be sent
