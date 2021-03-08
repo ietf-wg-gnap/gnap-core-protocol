@@ -3153,9 +3153,9 @@ The means of dereferencing this value are out of scope for this specification.
 The method the client instance uses to send an access token depends on whether
 the token is bound to a key, and if so which proofing method is associated
 with the key. This information is conveyed in the
-`key` and `proof` parameters in [the access token response](#response-token-single).
+`bound` and `key` parameters in [the access token response](#response-token-single).
 
-If the `key` value is the boolean `false`, the access token is a bearer token
+If the `bound` value is the boolean `false`, the access token is a bearer token
 sent using the HTTP Header method defined in {{RFC6750}}.
 
 ~~~
@@ -3165,7 +3165,7 @@ Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 The form parameter and query parameter methods of {{RFC6750}} MUST NOT
 be used.
 
-If the `key` value is the boolean `true`, the access token MUST be sent
+If the `bound` value is the boolean `true`, the access token MUST be sent
 using the same key and proofing mechanism that the client instance used
 in its initial request (or its most recent rotation).
 
