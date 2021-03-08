@@ -3153,7 +3153,8 @@ The means of dereferencing this value are out of scope for this specification.
 The method the client instance uses to send an access token depends on whether
 the token is bound to a key, and if so which proofing method is associated
 with the key. This information is conveyed in the
-`bound` and `key` parameters in [the access token response](#response-token-single).
+`bound` and `key` parameters in [the single](#response-token-single)
+and [multiple access tokens](#response-token-multiple) responses.
 
 If the `bound` value is the boolean `false`, the access token is a bearer token
 sent using the HTTP Header method defined in {{RFC6750}}.
