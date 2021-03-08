@@ -1817,7 +1817,7 @@ with access to two described resources.
 ~~~
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
+        "bound": false,
         "access": [
             "finance", "medical"
         ]
@@ -1851,14 +1851,14 @@ URL associated with it.
         {
             "label": "token1",
             "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-            "bound": true,
+            "bound": false,
             "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
             "access": [ "finance" ]
         },
         {
             "label": "token2",
             "value": "UFGLO2FDAFG7VGZZPJ3IZEMN21EVU71FHCARP4J1",
-            "bound": true,
+            "bound": false,
             "access": [ "medical" ]
         }
     }
