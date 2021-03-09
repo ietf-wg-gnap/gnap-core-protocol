@@ -3183,6 +3183,7 @@ Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 Detached-JWS: eyj0....
 ~~~
 
+
 \[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
 
 The client software MUST reject as an error a situation where the `bound` value is
