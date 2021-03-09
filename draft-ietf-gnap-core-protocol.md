@@ -3156,16 +3156,6 @@ with the key. This information is conveyed in the
 `bound` and `key` parameters in [the single](#response-token-single)
 and [multiple access tokens](#response-token-multiple) responses.
 
-If the `bound` value is the boolean `false`, the access token is a bearer token
-that MUST be sent using the `Authorization Request Header Field` method defined in {{RFC6750}}.
-
-~~~
-Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-~~~
-
-The `Form-Encoded Body Parameter` and `URI Query Parameter` methods of {{RFC6750}} MUST NOT
-be used.
-
 If the `bound` value is the boolean `true` and the `key` is absent, the access token
 MUST be sent using the same key and proofing mechanism that the client instance used
 in its initial request (or its most recent rotation).
@@ -3182,6 +3172,16 @@ For example, a "jwsd"-bound access token is sent as follows:
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 Detached-JWS: eyj0....
 ~~~
+
+If the `bound` value is the boolean `false`, the access token is a bearer token
+that MUST be sent using the `Authorization Request Header Field` method defined in {{RFC6750}}.
+
+~~~
+Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+~~~
+
+The `Form-Encoded Body Parameter` and `URI Query Parameter` methods of {{RFC6750}} MUST NOT
+be used.
 
 
 \[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
