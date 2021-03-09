@@ -1787,7 +1787,6 @@ used in the initial request, with a management URL, and that has access to three
 ~~~
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             {
@@ -1842,7 +1841,7 @@ tokens as described in {{response-token-single}}.
 Each object MUST have a unique `label` field, corresponding to the token labels
 chosen by the client instance in the [multiple access token request](#request-token-multiple).
 
-In this non-normative example, two bearer tokens are issued under the
+In this non-normative example, two tokens are issued under the
 names `token1` and `token2`, and only the first token has a management
 URL associated with it.
 
@@ -1851,14 +1850,12 @@ URL associated with it.
         {
             "label": "token1",
             "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-            "bound": false,
             "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
             "access": [ "finance" ]
         },
         {
             "label": "token2",
             "value": "UFGLO2FDAFG7VGZZPJ3IZEMN21EVU71FHCARP4J1",
-            "bound": false,
             "access": [ "medical" ]
         }
     }
