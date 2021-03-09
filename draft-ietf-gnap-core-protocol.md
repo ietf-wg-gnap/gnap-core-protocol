@@ -1608,8 +1608,7 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
     },
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/tx"
     }
@@ -1670,8 +1669,7 @@ access_token (object)
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -1882,7 +1880,6 @@ If the AS has split the access token response, the response MUST include the `sp
         {
             "label": "split-1",
             "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
-            "bound": true,
             "split": true,
             "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
             "access": [ "fruits" ]
@@ -1890,7 +1887,6 @@ If the AS has split the access token response, the response MUST include the `sp
         {
             "label": "split-2",
             "value": "FG7VGZZPJ3IZEMN21EVU71FHCAR-UFGLO2FDAP4J1",
-            "bound": true,
             "split": true,
             "access": [ "vegetables" ]
         }
@@ -2187,8 +2183,7 @@ access token.
     "user_handle": "XUT2MFM1XBIKJKSDU8QM",
     "instance_id": "7C7C4AZ9KHRS6X63AJAO",
     "access_token": {
-        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true
+        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0"
     }
 }
 ~~~
@@ -2602,7 +2597,6 @@ release subject claims, the response could look like this:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
@@ -2649,8 +2643,7 @@ next continuation request.
 {
     "continue": {
         "access_token": {
-            "value": "33OMUKMKSKU80UPRY5NM",
-            "bound": true
+            "value": "33OMUKMKSKU80UPRY5NM"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
@@ -2669,7 +2662,6 @@ release subject claims, the response could look like this example:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
@@ -2756,15 +2748,13 @@ a separate access token for accessing the continuation API:
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "RP1LT0-OS9M2P_R64TB",
-        "bound": true,
         "access": [
             "read", "write"
         ]
@@ -2805,15 +2795,13 @@ with the `durable` flag.
 {
     "continue": {
         "access_token": {
-            "value": "M33OMUK80UPRY5NMKSKU",
-            "bound": true
+            "value": "M33OMUK80UPRY5NMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "0EVKC7-2ZKwZM_6N760",
-        "bound": true,
         "access": [
             "read"
         ]
@@ -2855,15 +2843,13 @@ In its final response, the AS includes a `continue` field:
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "RP1LT0-OS9M2P_R64TB",
-        "bound": true,
         "access": [
             "read"
         ]
@@ -2991,7 +2977,6 @@ MUST use this new URL to manage the new access token.
 {
     "access_token": {
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             {
@@ -4552,8 +4537,7 @@ Content-Type: application/json
     }
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue"
     },
@@ -4621,7 +4605,6 @@ Content-Type: application/json
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [{
             "actions": [
@@ -4641,8 +4624,7 @@ Content-Type: application/json
     },
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue"
     }
@@ -4702,8 +4684,7 @@ Content-Type: application/json
     },
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue/VGJKPTKC50",
         "wait": 60
@@ -4750,8 +4731,7 @@ Content-Type: application/json
 {
     "continue": {
         "access_token": {
-            "value": "G7YQT4KQQ5TZY9SLSS5E",
-            "bound": true
+            "value": "G7YQT4KQQ5TZY9SLSS5E"
         },
         "uri": "https://server.example.com/continue/ATWHO4Q1WV",
         "wait": 60
@@ -4783,7 +4763,6 @@ Content-Type: application/json
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             "dolphin-metadata", "some other thing"
@@ -4832,7 +4811,6 @@ Content-Type: application/json
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token",
         "access": [
             "backend service", "nightly-routine-3"
@@ -4912,8 +4890,7 @@ Content-Type: application/json
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -4950,8 +4927,7 @@ Content-Type: application/json
 {
     "continue": {
         "access_token": {
-            "value": "BI9QNW6V9W3XFJK4R02D",
-            "bound": true
+            "value": "BI9QNW6V9W3XFJK4R02D"
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -4984,7 +4960,6 @@ Content-Type: application/json
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             "dolphin-metadata", "some other thing"
