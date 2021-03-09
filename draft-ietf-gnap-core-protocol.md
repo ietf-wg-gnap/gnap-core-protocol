@@ -3164,9 +3164,9 @@ If the `bound` value is the boolean `true` and the `key` value is an object as
 described in {{key-format}}, the access token MUST be sent using the key and proofing
 mechanism defined by the value of the `proof` field within the key object.
 
-The access token MUST be sent using the HTTP authorization scheme "GNAP" along with
-a key proof as described in {{binding-keys}} for the key bound to the access token.
-For example, a "jwsd"-bound access token is sent as follows:
+The access token MUST be sent using the HTTP "Authorization" request header field and
+the "GNAP" authorization scheme along with a key proof as described in {{binding-keys}}
+for the key bound to the access token. For example, a "jwsd"-bound access token is sent as follows:
 
 ~~~
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
