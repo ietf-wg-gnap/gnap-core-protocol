@@ -237,21 +237,24 @@ the information needed at a given stage is communicated out of band
 or is preconfigured between the components or entities performing
 the roles. For example, one entity can fulfil multiple roles, and so
 explicit communication between the roles is not necessary within the
-protocol flow.
+protocol flow. Additionally some components may not be involved
+in all use cases. For example, a client instance could be calling the
+AS just to get direct user information and have no need to get
+an access token to call an RS.
 
 ~~~
-        +------------+             +------------+
-        | End-user   | ~ ~ ~ ~ ~ ~ |  Resource  |
-        |            |             | Owner (RO) |
-        +------------+             +------------+
-            +                            +      
-            +                            +      
-           (A)                          (B)       
-            +                            +        
-            +                            +         
-        +--------+                       +       +------------+
-        | Client |--------------(1)------+------>|  Resource  |
-        |Instance|                       +       |   Server   |
+        +------------+         +------------+
+        | End-user   | ~ ~ ~ ~ |  Resource  |
+        |            |         | Owner (RO) |
+        +------------+         +------------+
+            +                         +      
+            +                         +      
+           (A)                       (B)       
+            +                         +        
+            +                         +         
+        +--------+                    +          +------------+
+        | Client |--------------(1)---+--------->|  Resource  |
+        |Instance|                    +          |   Server   |
         |        |       +---------------+       |    (RS)    |
         |        |--(2)->| Authorization |       |            |
         |        |<-(3)--|     Server    |       |            |
@@ -281,7 +284,7 @@ protocol flow.
     request. Note that the RO and end-user are often
     the same entity in practice.
     
-- (1) The client instance [attempts to call the RS](#rs-request-without-token) to determine 
+- (1) The client instance [can attempt to call the RS](#rs-request-without-token) to determine 
     what access is needed.
     The RS informs the client instance that access can be granted through the AS. Note that
     for most situations, the client instance already knows which AS to talk to and which
@@ -333,7 +336,9 @@ protocol flow.
     has completed its access of the RS and no longer needs the token.
 
 The following sections and {{examples}} contain specific guidance on how to use
-GNAP in different situations and deployments.
+GNAP in different situations and deployments. For example, it is possible for the 
+client instance to never request an access token and never call an RS, just as it is
+possible for there not to be a user involved in the delegation process.
 
 ### Redirect-based Interaction {#sequence-redirect}
 
@@ -369,6 +374,11 @@ that returns from the interaction.
     |        |                                  |        |
     |        |<-(9)----- Grant Access ----------|        |
     |        |                                  |        |
+    |        |                                  |        |     +--------+
+    |        |--(10)-- Access API ---------------------------->|   RS   |
+    |        |                                  |        |     |        |
+    |        |<-(11)-- API Response ---------------------------|        |
+    |        |                                  |        |     +--------+
     +--------+                                  +--------+
 ~~~
 
@@ -420,6 +430,11 @@ that returns from the interaction.
     in the form of [access tokens](#response-token) and
     [direct subject information](#response-subject) to the client instance.
 
+10. The client instance [uses the access token](#use-access-token) to call the RS.
+
+11. The RS validates the token and returns an appropriate response for the
+    API.
+
 An example set of protocol messages for this method can be found in {{example-auth-code}}.
 
 ### User-code Interaction {#sequence-user-code}
@@ -462,6 +477,11 @@ the AS.
     |        |                                  |        |
     |        |<-(12)----- Grant Access ---------|        |
     |        |                                  |        |
+    |        |                                  |        |     +--------+
+    |        |--(13)-- Access API ---------------------------->|   RS   |
+    |        |                                  |        |     |        |
+    |        |<-(14)-- API Response ---------------------------|        |
+    |        |                                  |        |     +--------+
     +--------+                                  +--------+
 ~~~
 
@@ -516,6 +536,11 @@ the AS.
     in the form of [access tokens](#response-token) and
     [direct subject information](#response-subject) to the client instance.
 
+13. The client instance [uses the access token](#use-access-token) to call the RS.
+
+14. The RS validates the token and returns an appropriate response for the
+    API.
+
 An example set of protocol messages for this method can be found in {{example-device}}.
 
 ### Asynchronous Authorization {#sequence-async}
@@ -545,6 +570,11 @@ The client instance polls the AS while it is waiting for the RO to authorize the
     |        |                                  |        |
     |        |<-(9)------ Grant Access ---------|        |
     |        |                                  |        |
+    |        |                                  |        |     +--------+
+    |        |--(10)-- Access API ---------------------------->|   RS   |
+    |        |                                  |        |     |        |
+    |        |<-(11)-- API Response ---------------------------|        |
+    |        |                                  |        |     +--------+
     +--------+                                  +--------+
 ~~~
 
@@ -592,6 +622,11 @@ The client instance polls the AS while it is waiting for the RO to authorize the
     in the form of [access tokens](#response-token) and
     [direct subject information](#response-subject) to the client instance.
 
+10. The client instance [uses the access token](#use-access-token) to call the RS.
+
+11. The RS validates the token and returns an appropriate response for the
+    API.
+
 An example set of protocol messages for this method can be found in {{example-async}}.
 
 ### Software-only Authorization {#sequence-no-user}
@@ -601,13 +636,17 @@ without the need for a RO to be involved at runtime to approve the decision.
 Since there is no explicit RO, the client instance does not interact with an RO.
 
 ~~~
-    +--------+                                  +--------+
-    | Client |                                  |   AS   |
-    |Instance|--(1)--- Request Access --------->|        |
-    |        |                                  |        |
-    |        |<-(2)---- Grant Access -----------|        |
-    |        |                                  |        |
-    +--------+                                  +--------+
+    +--------+                            +--------+
+    | Client |                            |   AS   |
+    |Instance|--(1)--- Request Access --->|        |
+    |        |                            |        |
+    |        |<-(2)---- Grant Access -----|        |
+    |        |                            |        |  +--------+
+    |        |--(3)--- Access API ------------------->|   RS   |
+    |        |                            |        |  |        |
+    |        |<-(4)--- API Response ------------------|        |
+    |        |                            |        |  +--------+
+    +--------+                            +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
@@ -615,8 +654,14 @@ Since there is no explicit RO, the client instance does not interact with an RO.
 
 2. The AS determines that the request is been authorized, 
     the AS grants access to the information
-    in the form of [access tokens](#response-token) and
-    [direct subject information](#response-subject) to the client instance.
+    in the form of [access tokens](#response-token) to the client instance.
+    Note that [direct subject information](#response-subject) is not
+    generally applicable in this use case, as their is no user involved.
+
+3. The client instance [uses the access token](#use-access-token) to call the RS.
+
+4. The RS validates the token and returns an appropriate response for the
+    API.
 
 An example set of protocol messages for this method can be found in {{example-no-user}}.
 
@@ -637,12 +682,16 @@ expired access token at the AS using the token's management URL.
     |        |                             +--------+   |        |
     |        |--(3)--- Access Resource --->|   RS   |   |        | 
     |        |                             |        |   |        | 
-    |        |<-(4)--- Error Response -----|        |   |        |
+    |        |<-(4)--- Success Response ---|        |   |        |
+    |        |                             |        |   |        | 
+    |        |--(5)--- Access Resource --->|        |   |        | 
+    |        |                             |        |   |        | 
+    |        |<-(6)--- Error Response -----|        |   |        |
     |        |                             +--------+   |        |
     |        |                                          |        |
-    |        |--(5)--- Rotate Token ------------------->|        |
+    |        |--(7)--- Rotate Token ------------------->|        |
     |        |                                          |        |
-    |        |<-(6)--- Rotated Token -------------------|        |
+    |        |<-(8)--- Rotated Token -------------------|        |
     |        |                                          |        |
     +--------+                                          +--------+
 ~~~
@@ -653,24 +702,82 @@ expired access token at the AS using the token's management URL.
     [access token](#response-token) usable at the RS. The access token
     response includes a token management URI.
     
-3. The client instance [presents the token](#use-access-token) to the RS. The RS 
-    validates the token and returns an appropriate response for the
+3. The client instance [presents the token](#use-access-token) to the RS. 
+
+4. The RS validates the token and returns an appropriate response for the
     API.
-    
-4. When the access token is expired, the RS responds to the client instance with
-    an error.
-    
-5. The client instance calls the token management URI returned in (2) to
+ 
+5. Time passes and the client instance presents the token to the RS again.
+   
+6. The RS validates the token and determines that the access token is expired
+    The RS responds to the client instance with an error.
+
+7. The client instance calls the token management URI returned in (2) to
     [rotate the access token](#rotate-access-token). The client instance
     presents the access token as well as the appropriate key.
 
-6. The AS validates the rotation request including the signature
+8. The AS validates the rotation request including the signature
     and keys presented in (5) and returns a 
     [new access token](#response-token-single). The response includes
     a new access token and can also include updated token management 
     information, which the client instance will store in place of the values 
     returned in (2).
-   
+
+### Requesting User Information {#sequence-user}
+
+In this scenario, the client instance is not calling an RS, and does not
+request an access token. Instead, the client instance only requests
+and is returned [direct subject information](#response-subject). Many different
+interaction modes can be used in this scenario, so these are shown only in 
+the abstract here.
+
+~~~
+    +--------+                                  +--------+         +------+
+    | Client |                                  |   AS   |         | User |
+    |Instance|                                  |        |         |      |
+    |        |--(1)--- Request Access --------->|        |         |      |
+    |        |                                  |        |         |      |
+    |        |<-(2)--- Request Access ----------|        |         |      |
+    |        |                                  |        |         |      |
+    |        |+ (3) + Facilitate Interaction + + + + + + + + + + > |      |
+    |        |                                  |        |         |      |
+    |        |                                  |        |<+ (4) +>|      |
+    |        |                                  |        |  AuthN  |      |
+    |        |                                  |        |         |      |
+    |        |                                  |        |<+ (5) +>|      |
+    |        |                                  |        |  AuthZ  |      |
+    |        |                                  |        |         |      |
+    |        |< (6) + Signal Continuation + + + + + + + + + + + + +|      |
+    |        |                                  |        |         +------+
+    |        |--(7)--- Continue Request ------->|        |
+    |        |                                  |        |
+    |        |<-(8)----- Grant Access ----------|        |
+    |        |                                  |        |
+    +--------+                                  +--------+
+~~~
+
+1. The client instance [requests access to subject information](#request).
+
+2. The AS determines that interaction is needed and [responds](#response) with
+    appropriate information for [facilitating user interaction](#response-interact).
+
+3. The client instance facilitates [the user interacting with the AS](#user-interaction) as directed in (2).
+
+4. The user authenticates at the AS, taking on the role of the RO.
+
+5. As the RO, the user authorizes the pending request from the client instance.
+
+6. When the AS is done interacting with the user, the AS
+    returns the user to the client instance and signals continuation.
+
+7. The client instance loads the continuation information from (2) and
+    calls the AS to [continue the request](#continue-request).
+
+8. If the request has been authorized, the AS grants access to the requested
+    [direct subject information](#response-subject) to the client instance.
+    At this stage, the user is generally considered "logged in" to the client
+    instance based on the identifiers and assertions provided by the AS.
+
 # Requesting Access {#request}
 
 To start a request, the client instance sends [JSON](#RFC8259) document with an object as its root. Each
