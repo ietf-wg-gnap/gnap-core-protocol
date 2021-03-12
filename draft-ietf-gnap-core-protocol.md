@@ -673,21 +673,21 @@ the access token expires. The client instance then gets a new access token by ro
 expired access token at the AS using the token's management URL.
 
 ~~~
-    +--------+                                          +--------+  
+    +--------+                                          +--------+
     | Client |                                          |   AS   |
     |Instance|--(1)--- Request Access ----------------->|        |
     |        |                                          |        |
     |        |<-(2)--- Grant Access --------------------|        |
     |        |                                          |        |
     |        |                             +--------+   |        |
-    |        |--(3)--- Access Resource --->|   RS   |   |        | 
-    |        |                             |        |   |        | 
+    |        |--(3)--- Access Resource --->|   RS   |   |        |
+    |        |                             |        |   |        |
     |        |<-(4)--- Success Response ---|        |   |        |
-    |        |                             |        |   |        | 
-    |        |                             |        |   |        | 
-    |        |                             |        |   |        | 
-    |        |--(5)--- Access Resource --->|        |   |        | 
-    |        |                             |        |   |        | 
+    |        |                             |        |   |        |
+    |        |                             |        |   |        |
+    |        |                             |        |   |        |
+    |        |--(5)--- Access Resource --->|        |   |        |
+    |        |                             |        |   |        |
     |        |<-(6)--- Error Response -----|        |   |        |
     |        |                             +--------+   |        |
     |        |                                          |        |
@@ -728,7 +728,7 @@ expired access token at the AS using the token's management URL.
 
 ### Requesting User Information {#sequence-user}
 
-In this scenario, the client instance is not calling an RS, and does not
+In this scenario, the client instance is not calling an RS and does not
 request an access token. Instead, the client instance only requests
 and is returned [direct subject information](#response-subject). Many different
 interaction modes can be used in this scenario, so these are shown only in 
