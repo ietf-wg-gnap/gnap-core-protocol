@@ -121,7 +121,7 @@ Roles are defined by the actions taken and the expectations leveraged
 on the role by the overall protocol. 
 
 Authorization Server (AS)
-: server that grants delegated privileges to a particular instance of client software in the form of an access token and other information (such as subject information). 
+: server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information). 
 
 Client
 : application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. 
@@ -432,7 +432,7 @@ that returns from the interaction.
 
 10. The client instance [uses the access token](#use-access-token) to call the RS.
 
-11. The RS validates the token and returns an appropriate response for the
+11. The RS validates the access token and returns an appropriate response for the
     API.
 
 An example set of protocol messages for this method can be found in {{example-auth-code}}.
@@ -538,7 +538,7 @@ the AS.
 
 13. The client instance [uses the access token](#use-access-token) to call the RS.
 
-14. The RS validates the token and returns an appropriate response for the
+14. The RS validates the access token and returns an appropriate response for the
     API.
 
 An example set of protocol messages for this method can be found in {{example-device}}.
@@ -624,7 +624,7 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 
 10. The client instance [uses the access token](#use-access-token) to call the RS.
 
-11. The RS validates the token and returns an appropriate response for the
+11. The RS validates the access token and returns an appropriate response for the
     API.
 
 An example set of protocol messages for this method can be found in {{example-async}}.
@@ -656,11 +656,11 @@ Since there is no explicit RO, the client instance does not interact with an RO.
     the AS grants access to the information
     in the form of [access tokens](#response-token) to the client instance.
     Note that [direct subject information](#response-subject) is not
-    generally applicable in this use case, as their is no user involved.
+    generally applicable in this use case, as there is no user involved.
 
 3. The client instance [uses the access token](#use-access-token) to call the RS.
 
-4. The RS validates the token and returns an appropriate response for the
+4. The RS validates the access token and returns an appropriate response for the
     API.
 
 An example set of protocol messages for this method can be found in {{example-no-user}}.
@@ -684,6 +684,8 @@ expired access token at the AS using the token's management URL.
     |        |                             |        |   |        | 
     |        |<-(4)--- Success Response ---|        |   |        |
     |        |                             |        |   |        | 
+    |        |                             |        |   |        | 
+    |        |                             |        |   |        | 
     |        |--(5)--- Access Resource --->|        |   |        | 
     |        |                             |        |   |        | 
     |        |<-(6)--- Error Response -----|        |   |        |
@@ -702,19 +704,20 @@ expired access token at the AS using the token's management URL.
     [access token](#response-token) usable at the RS. The access token
     response includes a token management URI.
     
-3. The client instance [presents the token](#use-access-token) to the RS. 
+3. The client instance [uses the access token](#use-access-token) to call the RS.
 
-4. The RS validates the token and returns an appropriate response for the
+4. The RS validates the access token and returns an appropriate response for the
     API.
  
-5. Time passes and the client instance presents the token to the RS again.
+5. Time passes and the client instance uses the access token to call the RS again.
    
-6. The RS validates the token and determines that the access token is expired
+6. The RS validates the access token and determines that the access token is expired
     The RS responds to the client instance with an error.
 
 7. The client instance calls the token management URI returned in (2) to
     [rotate the access token](#rotate-access-token). The client instance
-    presents the access token as well as the appropriate key.
+    [uses the access token](#use-access-token) in this call as well as the appropriate key,
+    see the token rotation section for details.
 
 8. The AS validates the rotation request including the signature
     and keys presented in (5) and returns a 
@@ -777,6 +780,10 @@ the abstract here.
     [direct subject information](#response-subject) to the client instance.
     At this stage, the user is generally considered "logged in" to the client
     instance based on the identifiers and assertions provided by the AS.
+    Note that the AS can restrict the subject information returned and it
+    might not match what the client instance requested, see the section on
+    subject information for details.
+
 
 # Requesting Access {#request}
 
@@ -1725,7 +1732,7 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
 
 In this example, the AS is returning a bearer [access token](#response-token-single)
 with a management URL and a [subject identifier](#response-subject) in the form of
-an email address.
+an opaque identifier.
 
 ~~~
 {
@@ -1736,6 +1743,23 @@ an email address.
     },
     "subject": {
         "sub_ids": [ {
+           "subject_type": "opaque",
+           "id": "J2G8G8O4AZ",
+        } ]
+    }
+}
+~~~
+
+In this example, the AS is returning only a pair of [subject identifiers](#response-subject)
+as both an email address and an opaque identifier.
+
+~~~
+{
+    "subject": {
+        "sub_ids": [ {
+           "subject_type": "opaque",
+           "id": "J2G8G8O4AZ",
+        }, {
            "subject_type": "email",
            "email": "user@example.com",
         } ]
@@ -4242,7 +4266,7 @@ endpoint at the AS to get token information.
     The RS signs the request with its own key (not the client instance's
     key or the token's key).
 
-3. The AS validates the token value and the client instance's request
+3. The AS validates the access token value and the client instance's request
     and returns the introspection response for the token.
 
 4. The RS fulfills the request from the client instance.
