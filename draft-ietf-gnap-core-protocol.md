@@ -728,7 +728,7 @@ expired access token at the AS using the token's management URL.
 
 ### Requesting User Information {#sequence-user}
 
-In this scenario, the client instance is not calling an RS and does not
+In this scenario, the client instance does not call an RS and does not
 request an access token. Instead, the client instance only requests
 and is returned [direct subject information](#response-subject). Many different
 interaction modes can be used in this scenario, so these are shown only in 
