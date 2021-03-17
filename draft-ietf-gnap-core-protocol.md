@@ -3260,7 +3260,7 @@ ts (integer)
 : A timestamp of the request in integer seconds
 
 at_hash (string)
-: When to bind a request to an access token, the access token hash value. Its value is the 
+: When a request is bound to an access token, the access token hash value. Its value is the 
     base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
     `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
     header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
@@ -3354,7 +3354,7 @@ ts (integer)
 : A timestamp of the request in integer seconds
 
 at_hash (string)
-: When to bind a request to an access token, the access token hash value. Its value is the 
+: When a request is bound to an access token, the access token hash value. Its value is the 
     base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
     `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
     header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
@@ -3575,12 +3575,20 @@ fHI6kqm3NCyCCTihe2ck5RmCc5l2KBO/vAHF0ihhFOOOby1v6qbPHQcxAU6rEb907
 This method is indicated by `dpop` in the
 `proof` field. The client instance creates a Demonstration of Proof-of-Possession
 signature header as described in {{I-D.ietf-oauth-dpop}}
-section 2. In addition to the required fields, the DPoP body MUST also
-contain a digest of the request body:
+section 2. In addition, this specification defines the following fields
+to be added to the DPoP payload:
 
-digest (string)
+htd (string)
 : Digest of the request body as the value of the Digest 
-    header defined in {{RFC3230}}.
+    header defined in {{RFC3230}}. When a request contains a message body, such as a POST or PUT request,
+    this field is REQUIRED.
+
+at_hash (string)
+: When a request is bound to an access token, the access token hash value. Its value is the 
+    base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
+    `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
+    header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
+    value with SHA-256, then take the left-most 128 bits and base64url encode them. 
 
 ~~~
 POST /tx HTTP/1.1
@@ -4425,6 +4433,8 @@ sure that it has the permission to do so.
     - Refactored key presentation and binding.
     - Refactored "interact" request to group start and end modes.
     - Changed access token request and response syntax.
+    - Changed DPoP digest field to 'htd' to match proposed FAPI profile.
+    - Include the access token hash in the DPoP message.
     - Removed closed issue links.
     - Removed function to read state of grant request by client.
     - Closed issues related to reading and updating access tokens.
