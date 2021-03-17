@@ -4072,12 +4072,12 @@ capabilities (array of strings)
           [capabilities section](#request-capabilities) of
           the request.
 
-interaction_methods (array of strings)
+interaction_methods_supported (array of strings)
 : OPTIONAL. A list of the AS's
           interaction methods. The values of this list correspond to the
           possible fields in the [interaction section](#request-interact) of the request.
 
-key_proofs (array of strings)
+key_proofs_supported (array of strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
@@ -4088,7 +4088,7 @@ subject_types_supported (array of strings)
           subject identifier types. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
-assertions (array of strings)
+assertions_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
           assertion formats. The values of this list correspond to possible
           values of the [subject assertion section](#request-subject) of the request.
@@ -4415,7 +4415,10 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - -Since 04
-   - Updated discovery and field names for subject types.
+    - Changed "interaction_methods" to "interaction_methods_supported".
+    - Changed "key_proofs" to "key_proofs_supported".
+    - Changed "assertions" to "assertions_supported".
+    - Updated discovery and field names for subject types.
 
 - -04
     - Updated terminology.
