@@ -47,6 +47,7 @@ normative:
     RFC3230:
     RFC3986:
     RFC5646:
+    RFC7234:
     RFC7468:
     RFC7515:
     RFC7517:
@@ -767,9 +768,11 @@ A non-normative example of a grant request is below:
 
 
 
-The request MUST be sent as a JSON object in the body of the HTTP
+The request and response MUST be sent as a JSON object in the body of the HTTP
 POST request with Content-Type `application/json`,
 unless otherwise specified by the signature mechanism.
+
+The authorization server MUST include the HTTP "Cache-Control" response header field {{RFC7234}} with a value set to "no-store".
 
 ## Requesting Access to Resources {#request-token}
 
@@ -4167,7 +4170,9 @@ token's presentation, such as its intended proofing mechanism and key
 material.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "active": true,
@@ -4318,7 +4323,9 @@ The AS responds with a handle appropriate to represent the
 resources list that the RS presented.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "resource_handle": "FWWIKYBQ6U56NL1"
@@ -4556,7 +4563,9 @@ client instance that it can use the given instance identifier to identify itself
 [future requests](#request-instance).
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "interact": {
@@ -4629,7 +4638,9 @@ The AS retrieves the pending request based on the handle and issues
 a bearer access token and returns this to the client instance.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "access_token": {
@@ -4703,7 +4714,9 @@ a nonce, but does include a "wait" parameter on the continuation
 section because it expects the client instance to poll for results.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "interact": {
@@ -4758,7 +4771,9 @@ the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "continue": {
@@ -4791,7 +4806,9 @@ determines that it has been approved, and issues an access
 token for the client to use at the RS.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "access_token": {
@@ -4840,7 +4857,9 @@ The AS processes this and determines that the client instance can ask for
 the requested resources and issues an access token.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "access_token": {
@@ -4920,7 +4939,9 @@ request. The AS indicates to the client instance that it can poll for
 continuation.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "continue": {
@@ -4958,7 +4979,9 @@ the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "continue": {
@@ -4992,7 +5015,9 @@ determines that it has been approved and it issues an access
 token.
 
 ~~~
+HTTP/1.1 200 OK
 Content-Type: application/json
+Cache-Control: no-store
 
 {
     "access_token": {
