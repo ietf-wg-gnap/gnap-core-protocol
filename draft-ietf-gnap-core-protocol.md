@@ -1608,7 +1608,8 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
     },
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU"
+            "value": "80UPRY5NM33OMUKMKSKU",
+            "bound": true
         },
         "uri": "https://server.example.com/tx"
     }
