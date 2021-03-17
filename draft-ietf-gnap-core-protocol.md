@@ -759,7 +759,7 @@ A non-normative example of a grant request is below:
     },
     "capabilities": ["ext1", "ext2"],
     "subject": {
-        "sub_ids": ["iss_sub", "email"],
+        "subject_types": ["iss_sub", "email"],
         "assertions": ["id_token"]
     }
 }
@@ -949,7 +949,7 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in 
 [a registry TBD](#IANA)).
 
-sub_ids (array of strings)
+subject_types (array of strings)
 : An array of subject identifier subject types
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -961,7 +961,7 @@ assertions (array of strings)
 
 ~~~
 "subject": {
-   "sub_ids": [ "iss_sub", "email" ],
+   "subject_types": [ "iss_sub", "email" ],
    "assertions": [ "id_token", "saml2" ]
 }
 ~~~
@@ -972,7 +972,7 @@ AS policies, or [assertions presented by the client instance](#request-user). If
 this is determined positively, the AS MAY [return the RO's information in its response](#response-subject)
 as requested. 
 
-Subject identifiers requested by the client instance serve only to identify 
+Subject identifier types requested by the client instance serve only to identify 
 the RO in the context of the AS and can't be used as communication
 channels by the client instance, as discussed in {{response-subject}}.
 
@@ -980,7 +980,7 @@ The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
 \[\[ [See issue #42](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/42) \]\]
 
-Note: the "sub_ids" and "assertions" request fields are independent of
+Note: the "subject_types" and "assertions" request fields are independent of
 each other, and a returned assertion MAY omit a requested subject
 identifier. 
 
@@ -3470,10 +3470,7 @@ And the JWS body decodes to:
     ]
   }
   "subject": {
-    "sub_ids": [
-      "iss_sub",
-      "email"
-    ]
+    "subject_types": ["iss_sub", "email"]
   }
 }
 ~~~
@@ -4086,9 +4083,9 @@ key_proofs (array of strings)
           values of the `proof` field of the 
           [key section](#key-format) of the request.
 
-sub_ids (array of strings)
+subject_types_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
-          identifiers. The values of this list correspond to possible values
+          subject identifier types. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
 assertions (array of strings)
@@ -4418,7 +4415,7 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - -Since 04
-    - 
+   - Updated discovery and field names for subject types.
 
 - -04
     - Updated terminology.
