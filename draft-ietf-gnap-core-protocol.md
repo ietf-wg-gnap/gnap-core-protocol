@@ -45,6 +45,7 @@ normative:
            ins: P. Saint-Andre
     RFC2119:
     RFC3230:
+    RFC3986:
     RFC5646:
     RFC7468:
     RFC7515:
@@ -758,7 +759,7 @@ A non-normative example of a grant request is below:
     },
     "capabilities": ["ext1", "ext2"],
     "subject": {
-        "sub_ids": ["iss_sub", "email"],
+        "subject_types": ["iss_sub", "email"],
         "assertions": ["id_token"]
     }
 }
@@ -948,7 +949,7 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in 
 [a registry TBD](#IANA)).
 
-sub_ids (array of strings)
+subject_types (array of strings)
 : An array of subject identifier subject types
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -960,7 +961,7 @@ assertions (array of strings)
 
 ~~~
 "subject": {
-   "sub_ids": [ "iss_sub", "email" ],
+   "subject_types": [ "iss_sub", "email" ],
    "assertions": [ "id_token", "saml2" ]
 }
 ~~~
@@ -971,7 +972,7 @@ AS policies, or [assertions presented by the client instance](#request-user). If
 this is determined positively, the AS MAY [return the RO's information in its response](#response-subject)
 as requested. 
 
-Subject identifiers requested by the client instance serve only to identify 
+Subject identifier types requested by the client instance serve only to identify 
 the RO in the context of the AS and can't be used as communication
 channels by the client instance, as discussed in {{response-subject}}.
 
@@ -979,7 +980,7 @@ The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
 \[\[ [See issue #42](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/42) \]\]
 
-Note: the "sub_ids" and "assertions" request fields are independent of
+Note: the "subject_types" and "assertions" request fields are independent of
 each other, and a returned assertion MAY omit a requested subject
 identifier. 
 
@@ -2733,9 +2734,11 @@ Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "access": [
-        "read", "write"
-    ],
+    "access_token": {
+        "access": [
+            "read", "write"
+        ]
+    },
     "interact": {
         "start": ["redirect"],
         "finish": {
@@ -3067,7 +3070,7 @@ key proof together.
     request is used only for calls to the RS, and only with access tokens that are
     not bound to any key as described in {{response-token-single}}.
 - When neither an access token nor key proof are used, this is an unsecured request. This 
-    type of used only for calls to the RS during a discovery phase as
+    type of request is used only for calls to the RS during a discovery phase as
     described in {{rs-request-without-token}}.
 
 ## Key Formats {#key-format}
@@ -3467,10 +3470,7 @@ And the JWS body decodes to:
     ]
   }
   "subject": {
-    "sub_ids": [
-      "iss_sub",
-      "email"
-    ]
+    "subject_types": ["iss_sub", "email"]
   }
 }
 ~~~
@@ -3827,7 +3827,7 @@ types during comparison. It is RECOMMENDED that designers of general-purpose
 APIs use a URI for this field to avoid collisions between multiple
 API types protected by a single AS.
 
-While it is expected that many APIs will have its own properties, a set of
+While it is expected that many APIs will have their own properties, a set of
 common properties are defined here. Specific API implementations
 SHOULD NOT re-use these fields with different semantics or syntax. The
 available values for these properties are determined by the API
@@ -3880,7 +3880,7 @@ using the fictitious `photo-api` type definition.
 The access requested for a given object when using these fields 
 is the cross-product of all fields of the object. That is to 
 say, the object represents a request for all `action` values listed within the object
-to be used at all `locations` values listed within the object for all `datatype`
+to be used at all `location` values listed within the object for all `datatype`
 values listed within the object. Assuming the request above was granted,
 the client instance could assume that it
 would be able to do a `read` action against the `images` on the first server
@@ -4060,9 +4060,11 @@ containing the following information:
 
 
 grant_request_endpoint (string)
-: REQUIRED. The full URL of the
-          AS's grant request endpoint. This MUST match the URL the client instance used to
-          make the discovery request.
+: REQUIRED. The location of the
+          AS's grant request endpoint. The location MUST be a URL {{RFC3986}}
+          with a scheme component that MUST be https, a host component, and optionally,
+          port, path and query components and no fragment components. This URL MUST
+          match the URL the client instance used to make the discovery request.
 
 capabilities (array of strings)
 : OPTIONAL. A list of the AS's
@@ -4081,9 +4083,9 @@ key_proofs_supported (array of strings)
           values of the `proof` field of the 
           [key section](#key-format) of the request.
 
-sub_ids (array of strings)
+subject_types_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
-          identifiers. The values of this list correspond to possible values
+          subject identifier types. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
 assertions_supported (array of strings)
@@ -4416,6 +4418,7 @@ sure that it has the permission to do so.
     - Changed "interaction_methods" to "interaction_methods_supported".
     - Changed "key_proofs" to "key_proofs_supported".
     - Changed "assertions" to "assertions_supported".
+    - Updated discovery and field names for subject types.
 
 - -04
     - Updated terminology.
