@@ -3156,36 +3156,41 @@ The means of dereferencing this value are out of scope for this specification.
 The method the client instance uses to send an access token depends on whether
 the token is bound to a key, and if so which proofing method is associated
 with the key. This information is conveyed in the
-`key` and `proof` parameters in [the access token response](#response-token-single).
+`bound` and `key` parameters in [the single](#response-token-single)
+and [multiple access tokens](#response-token-multiple) responses.
 
-If the `key` value is the boolean `false`, the access token is a bearer token
-sent using the HTTP Header method defined in {{RFC6750}}.
-
-~~~
-Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-~~~
-
-The form parameter and query parameter methods of {{RFC6750}} MUST NOT
-be used.
-
-If the `key` value is the boolean `true`, the access token MUST be sent
-using the same key and proofing mechanism that the client instance used
+If the `bound` value is the boolean `true` and the `key` is absent, the access token
+MUST be sent using the same key and proofing mechanism that the client instance used
 in its initial request (or its most recent rotation).
 
-If the `key` value is an object as described in {{key-format}}, the value of the `proof` field within
-the key indicates the particular proofing mechanism to use.
-The access token is sent using the HTTP authorization scheme "GNAP" along with 
-a key proof as described in {{binding-keys}} for the key bound to the
-access token. For example, a "jwsd"-bound access token is sent as
-follows:
+If the `bound` value is the boolean `true` and the `key` value is an object as
+described in {{key-format}}, the access token MUST be sent using the key and proofing
+mechanism defined by the value of the `proof` field within the key object.
+
+The access token MUST be sent using the HTTP "Authorization" request header field and
+the "GNAP" authorization scheme along with a key proof as described in {{binding-keys}}
+for the key bound to the access token. For example, a "jwsd"-bound access token is sent as follows:
 
 ~~~
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 Detached-JWS: eyj0....
 ~~~
 
+If the `bound` value is the boolean `false`, the access token is a bearer token
+that MUST be sent using the `Authorization Request Header Field` method defined in {{RFC6750}}.
+
+~~~
+Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+~~~
+
+The `Form-Encoded Body Parameter` and `URI Query Parameter` methods of {{RFC6750}} MUST NOT
+be used.
+
 
 \[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
+
+The client software MUST reject as an error a situation where the `bound` value is
+the boolean `false` and the `key` is present.
 
 ## Proving Possession of a Key with a Request {#binding-keys}
 
