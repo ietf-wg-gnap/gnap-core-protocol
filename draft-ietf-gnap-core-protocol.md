@@ -217,7 +217,7 @@ Subject
 : person, organization or device.
 
 Subject Information
-: statement asserted locally by an AS about a subject.
+: statement asserted by an AS about a subject.
 
 ## Sequences {#sequence}
 
