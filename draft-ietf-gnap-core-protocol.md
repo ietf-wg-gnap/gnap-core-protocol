@@ -51,6 +51,7 @@ normative:
     RFC7468:
     RFC7515:
     RFC7517:
+    RFC7519:
     RFC6749:
     RFC6750:
     RFC7797:
@@ -3378,8 +3379,8 @@ htm (string)
 htu (string)
 : The HTTP URI used for this request, including all path and query components.
 
-iat (integer)
-: A timestamp at which the JWS object was created.
+iat (number)
+: Time at which the JWS object was created. Its value is `NumericDate` as defined in Section 2 of {{RFC7519}}.
 
 at_hash (string)
 : When a request is bound to an access token, the access token hash value. Its value is the 
@@ -3471,8 +3472,8 @@ htm (string)
 htu (string)
 : The HTTP URI used for this request, including all path and query components.
 
-iat (integer)
-: A timestamp at which the JWS object was created.
+iat (number)
+: Time at which the JWS object was created. Its value is `NumericDate` as defined in Section 2 of {{RFC7519}}.
 
 at_hash (string)
 : When a request is bound to an access token, the access token hash value. Its value is the 
