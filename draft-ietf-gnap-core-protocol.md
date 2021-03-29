@@ -874,7 +874,7 @@ A non-normative example of a grant request is below:
     },
     "capabilities": ["ext1", "ext2"],
     "subject": {
-        "subject_types": ["iss_sub", "email"],
+        "subject_types": ["iss_sub", "opaque"],
         "assertions": ["id_token"]
     }
 }
@@ -1078,7 +1078,7 @@ assertions (array of strings)
 
 ~~~
 "subject": {
-   "subject_types": [ "iss_sub", "email" ],
+   "subject_types": [ "iss_sub", "opaque" ],
    "assertions": [ "id_token", "saml2" ]
 }
 ~~~
@@ -1297,8 +1297,8 @@ assertions (object)
 ~~~
 "user": {
    "sub_ids": [ {
-     "subject_type": "email",
-     "email": "user@example.com"
+     "subject_type": "opaque",
+     "id": "J2G8G8O4AZ"
    } ],
    "assertions": {
      "id_token": "eyj..."
@@ -2239,8 +2239,8 @@ updated_at (string)
 ~~~
 "subject": {
    "sub_ids": [ {
-     "subject_type": "email",
-     "email": "user@example.com",
+     "subject_type": "opaque",
+     "id": "J2G8G8O4AZ",
    } ],
    "assertions": {
      "id_token": "eyj..."
@@ -2726,7 +2726,7 @@ SHOULD NOT contain any [interaction responses](#response-interact).
 \[\[ [See issue #89](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/89) \]\]
 
 For example, if the request is successful in causing the AS to issue access tokens and
-release subject claims, the response could look like this:
+release opaque subject claims, the response could look like this:
 
 ~~~
 {
@@ -2736,8 +2736,8 @@ release subject claims, the response could look like this:
     },
     "subject": {
         "sub_ids": [ {
-           "subject_type": "email",
-           "email": "user@example.com",
+           "subject_type": "opaque",
+           "id": "J2G8G8O4AZ",
         } ]
     }
 }
@@ -2801,8 +2801,8 @@ release subject claims, the response could look like this example:
     },
     "subject": {
         "sub_ids": [ {
-           "subject_type": "email",
-           "email": "user@example.com",
+           "subject_type": "opaque",
+           "id": "J2G8G8O4AZ",
         } ]
     }
 }
@@ -3591,7 +3591,7 @@ And the JWS body decodes to:
     ]
   }
   "subject": {
-    "subject_types": ["iss_sub", "email"]
+    "subject_types": ["iss_sub", "opaque"]
   }
 }
 ~~~
@@ -5034,8 +5034,8 @@ Detached-JWS: ejy0...
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "user": {
         "sub_ids": [ {
-            "subject_type": "email",
-            "email": "user@example.com"
+            "subject_type": "opaque",
+            "id": "J2G8G8O4AZ"
         } ]
    }
 }
