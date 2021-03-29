@@ -3378,8 +3378,8 @@ htm (string)
 htu (string)
 : The HTTP URI used for this request, including all path and query components.
 
-ts (integer)
-: A timestamp of the request in integer seconds
+iat (integer)
+: A timestamp at which the JWS object was created.
 
 at_hash (string)
 : When a request is bound to an access token, the access token hash value. Its value is the 
@@ -3471,8 +3471,8 @@ htm (string)
 htu (string)
 : The HTTP URI used for this request, including all path and query components.
 
-ts (integer)
-: A timestamp of the request in integer seconds
+iat (integer)
+: A timestamp at which the JWS object was created.
 
 at_hash (string)
 : When a request is bound to an access token, the access token hash value. Its value is the 
@@ -3541,7 +3541,7 @@ This example's JWS header decodes to:
   "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
   "htm": "POST",
   "htu": "https://server.example.com/tx",
-  "ts": 1603800783
+  "iat": 1603800783
 }
 ~~~
 
