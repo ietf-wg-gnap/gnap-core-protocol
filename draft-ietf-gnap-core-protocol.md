@@ -1747,7 +1747,7 @@ an opaque identifier.
     "subject": {
         "sub_ids": [ {
            "subject_type": "opaque",
-           "id": "J2G8G8O4AZ",
+           "id": "J2G8G8O4AZ"
         } ]
     }
 }
@@ -1761,7 +1761,7 @@ as both an email address and an opaque identifier.
     "subject": {
         "sub_ids": [ {
            "subject_type": "opaque",
-           "id": "J2G8G8O4AZ",
+           "id": "J2G8G8O4AZ"
         }, {
            "subject_type": "email",
            "email": "user@example.com",
@@ -2240,7 +2240,7 @@ updated_at (string)
 "subject": {
    "sub_ids": [ {
      "subject_type": "opaque",
-     "id": "J2G8G8O4AZ",
+     "id": "J2G8G8O4AZ"
    } ],
    "assertions": {
      "id_token": "eyj..."
@@ -2737,7 +2737,7 @@ release opaque subject claims, the response could look like this:
     "subject": {
         "sub_ids": [ {
            "subject_type": "opaque",
-           "id": "J2G8G8O4AZ",
+           "id": "J2G8G8O4AZ"
         } ]
     }
 }
@@ -2802,7 +2802,7 @@ release subject claims, the response could look like this example:
     "subject": {
         "sub_ids": [ {
            "subject_type": "opaque",
-           "id": "J2G8G8O4AZ",
+           "id": "J2G8G8O4AZ"
         } ]
     }
 }
