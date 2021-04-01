@@ -3213,9 +3213,10 @@ proof (string)
     {{binding-keys}}. The `proof` field is REQUIRED.
 
 jwk (object)
-: Value of the public key as a JSON Web Key {{RFC7517}}. The object MUST
-            contain an "alg" field which is used to validate the signature.
-            The object MUST contain the "kid" field to identify the key.
+: The public key and its properties represented as a JSON Web Key {{RFC7517}}.
+    A JWK MUST contain the "alg" (Algorithm) and "kid" (Key ID) parameters. The `alg`
+    parameter MUST NOT be `none`.  The JWK x5c (X.509 Certificate Chain) parameter MAY
+    be used to provide X.509 representation of the provided public key.
 
 cert (string)
 : PEM serialized value of the certificate used to
