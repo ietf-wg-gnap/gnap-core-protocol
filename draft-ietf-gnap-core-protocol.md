@@ -297,7 +297,7 @@ an access token to call an RS.
     the request. The AS sends its [response to the client instance](#response).
 
 - (B) If interaction is required, the 
-    AS [interacts with the RO](#user-interaction) to gather authorization.
+    AS [interacts with the RO](#authorization) to gather authorization.
     The interactive component of the AS can function
     using a variety of possible mechanisms including web page
     redirects, applications, challenge/response protocols, or 
@@ -393,7 +393,7 @@ that returns from the interaction.
 
 3. The AS determines that interaction is needed and [responds](#response) with
     a [URL to send the user to](#response-interact-redirect) and
-    [information needed to verify the redirect](#response-interact-callback) in (7).
+    [information needed to verify the redirect](#response-interact-finish) in (7).
     The AS also includes information the client instance will need to 
     [continue the request](#response-continue) in (8). The AS associates this
     continuation information with an ongoing request that will be referenced in (4), (6), and (8).
@@ -765,7 +765,7 @@ the abstract here.
 2. The AS determines that interaction is needed and [responds](#response) with
     appropriate information for [facilitating user interaction](#response-interact).
 
-3. The client instance facilitates [the user interacting with the AS](#user-interaction) as directed in (2).
+3. The client instance facilitates [the user interacting with the AS](#authorization) as directed in (2).
 
 4. The user authenticates at the AS, taking on the role of the RO.
 
@@ -1084,7 +1084,7 @@ assertions (array of strings)
 ~~~
 
 The AS can determine the RO's identity and permission for releasing
-this information through [interaction with the RO](#user-interaction),
+this information through [interaction with the RO](#authorization),
 AS policies, or [assertions presented by the client instance](#request-user). If
 this is determined positively, the AS MAY [return the RO's information in its response](#response-subject)
 as requested. 
@@ -1376,52 +1376,8 @@ finish (object)
 hints (object)
 : Provides additional information to inform the interaction process at the AS.
 
-
 The `interact` field MUST contain the `start` key, and MAY contain the `finish` and `hints` keys. The value
 of each key is an array which contains strings or JSON objects as defined below.
-
-### Start Mode Definitions
-
-This specification defines the following interaction start modes as an array of string values under the `start` key:
-
-"redirect"
-: Indicates that the client instance can direct the end-user to an arbitrary URL
-    at the AS for interaction. {{request-interact-redirect}}
-
-"app"
-: Indicates that the client instance can launch an application on the end-user's
-    device for interaction. {{request-interact-app}}
-
-"user_code"
-: Indicates that the client instance can communicate a human-readable short
-    code to the end-user for use with a stable URL at the AS. {{request-interact-usercode}}
-
-### Finish Mode Definitions
-
-This specification defines the following interaction completion methods:
-
-"redirect"
-: Indicates that the client instance can receive a redirect from the end-user's device
-    after interaction with the RO has concluded. {{request-interact-callback-redirect}}
-
-"push"
-: Indicates that the client instance can receive an HTTP POST request from the AS
-    after interaction with the RO has concluded. {{request-interact-callback-push}}
-
-### Hint Definitions
-
-This specification defines the following properties under the `hints` key:
-
-ui_locales (array of strings)
-: Indicates the end-user's preferred locales that the AS can use
-    during interaction, particularly before the RO has 
-    authenticated. {{request-interact-locale}}
-
-The following sections detail requests for interaction
-modes. Additional interaction modes are defined in 
-[a registry TBD](#IANA).
-
-### Example Interactions
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
 the end-user to an arbitrary URL and can receive a [redirect](#request-interact-callback-redirect) through
@@ -1459,7 +1415,21 @@ The AS SHOULD apply suitable timeouts to any interaction mechanisms
 provided, including user codes and redirection URLs. The client instance SHOULD
 apply suitable timeouts to any callback URLs.
 
-### Start Interaction Modes
+### Start Mode Definitions {#request-interact-start}
+
+This specification defines the following interaction start modes as an array of string values under the `start` key:
+
+"redirect"
+: Indicates that the client instance can direct the end-user to an arbitrary URL
+    at the AS for interaction. {{request-interact-redirect}}
+
+"app"
+: Indicates that the client instance can launch an application on the end-user's
+    device for interaction. {{request-interact-app}}
+
+"user_code"
+: Indicates that the client instance can communicate a human-readable short
+    code to the end-user for use with a stable URL at the AS. {{request-interact-usercode}}
 
 #### Redirect to an Arbitrary URL {#request-interact-redirect}
 
@@ -1520,7 +1490,7 @@ request, the AS returns a user code and interaction URL as specified
 in {{interaction-usercode}}.
 
 
-### Finish Interaction Modes {#finish-interaction-modes}
+### Finish Interaction Modes {#request-interact-finish}
 
 If the client instance is capable of receiving a message from the AS indicating
 that the RO has completed their interaction, the client instance
@@ -1528,9 +1498,16 @@ indicates this by sending the following members of an object under the `finish` 
 
 method (string)
 : REQUIRED. The callback method that the AS will use to contact the client instance.
-              Valid values include `redirect` {{request-interact-callback-redirect}}
-              and `push` {{request-interact-callback-push}}, with other values
-              defined by [a registry TBD](#IANA).
+    This specification defines the following interaction completion methods, 
+    with other values defined by [a registry TBD](#IANA):
+
+    "redirect"
+    : Indicates that the client instance can receive a redirect from the end-user's device
+    after interaction with the RO has concluded. {{request-interact-callback-redirect}}
+                  
+    "push"
+    : Indicates that the client instance can receive an HTTP POST request from the AS
+    after interaction with the RO has concluded. {{request-interact-callback-push}}
 
 uri (string)
 : REQUIRED. Indicates the URI that the AS will either send the RO to
@@ -1561,9 +1538,9 @@ hash_method (string)
 
 If this interaction mode is supported for this client instance and
 request, the AS returns a nonce for use in validating 
-[the callback response](#response-interact-callback).
+[the callback response](#response-interact-finish).
 Requests to the callback URI MUST be processed as described in 
-{{interaction-finalize}}, and the AS MUST require
+{{interaction-finish}}, and the AS MUST require
 presentation of an interaction callback reference as described in
 {{continue-after-interaction}}.
 
@@ -1620,10 +1597,22 @@ be present on the incoming HTTP request.
 
 \[\[ [See issue #60](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/60) \]\]
 
-### Hints
+### Hints {#request-interact-hint}
 
 The `hints` key is an object describing one or more suggestions from the client
 instance that the AS can use to help drive user interaction.
+
+This specification defines the following properties under the `hints` key:
+
+ui_locales (array of strings)
+: Indicates the end-user's preferred locales that the AS can use
+    during interaction, particularly before the RO has 
+    authenticated. {{request-interact-locale}}
+
+The following sections detail requests for interaction
+modes. Additional interaction modes are defined in 
+[a registry TBD](#IANA).
+
 
 #### Indicate Desired Interaction Locales {#request-interact-locale}
 
@@ -1715,7 +1704,7 @@ error (object)
 : An error code indicating that something has gone wrong. {{response-error}}
 
 In this example, the AS is returning an [interaction URL](#response-interact-redirect),
-a [callback nonce](#response-interact-callback), and a [continuation response](#response-continue).
+a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
 
 ~~~
 {
@@ -2051,7 +2040,7 @@ app (string)
 : Launch of an application URL. {{response-interact-app}}
 
 finish (string)
-: A nonce used by the client instance to verify the callback after interaction is completed. {{response-interact-callback}}
+: A nonce used by the client instance to verify the callback after interaction is completed. {{response-interact-finish}}
 
 user_code (object)
 : Display a short user code. {{response-interact-usercode}}
@@ -2091,14 +2080,14 @@ client instance MUST NOT alter the URL in any way. The means for the client inst
 to send the end-user to this URL is out of scope of this specification,
 but common methods include an HTTP redirect, launching the system
 browser, displaying a scannable code, or printing out the URL in an
-interactive console.
+interactive console. See details of the interaction in {{interaction-redirect}}.
 
 ### Launch of an application URL {#response-interact-app}
 
 If the client instance indicates that it can [launch an application URL](#request-interact-app) and
 the AS supports this mode for the client instance's request, the AS
 responds with the "app" field, which is a string containing the URL
-to direct the end-user to. This URL MUST be unique for the request and
+for the client instance to launch. This URL MUST be unique for the request and
 MUST NOT contain any security-sensitive information.
 
 ~~~
@@ -2107,38 +2096,14 @@ MUST NOT contain any security-sensitive information.
     }
 ~~~
 
-
-
 The client instance launches the URL as appropriate on its platform, and
 the means for the client instance to launch this URL is out of scope of this
 specification. The client instance MUST NOT alter the URL in any way. The
 client instance MAY attempt to detect if an installed application will
 service the URL being sent before attempting to launch the
-application URL.
+application URL. See details of the interaction in {{interaction-app}}.
 
 \[\[ [See issue #71](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/71) \]\]
-
-### Post-interaction Callback to a Client Instance Accessible URL {#response-interact-callback}
-
-If the client instance indicates that it can [receive a post-interaction redirect or push at a URL](#finish-interaction-modes) 
-and the AS supports this mode for the
-client instance's request, the AS responds with a `finish` field containing a nonce
-that the client instance will use in validating the callback as defined in
-{{interaction-finalize}}.
-
-~~~
-    "interact": {
-        "finish": "MBDOFXG4Y5CVJCX821LH"
-    }
-~~~
-
-When the RO completes interaction at the AS, the AS MUST either redirect the RO's browser
-or send an HTTP POST to the client instance's callback URL using the method indicated in the
-[interaction request](#finish-interaction-modes) as described in {{interaction-finalize}}.
-
-If the AS returns a nonce, the client instance MUST NOT
-continue a grant request before it receives the associated
-interaction reference on the callback URI.
 
 ### Display of a Short User Code {#response-interact-usercode}
 
@@ -2200,7 +2165,31 @@ distinct from the URL the client instance uses to [request access](#request), al
 AS to separate its user-interactive functionality from its back-end security
 functionality.
 
+See details of the interaction in {{interaction-usercode}}.
+
 \[\[ [See issue #72](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/72) \]\]
+
+### Interaction Finish {#response-interact-finish}
+
+If the client instance indicates that it can [receive a post-interaction redirect or push at a URL](#request-interact-finish) 
+and the AS supports this mode for the
+client instance's request, the AS responds with a `finish` field containing a nonce
+that the client instance will use in validating the callback as defined in
+{{interaction-finish}}.
+
+~~~
+    "interact": {
+        "finish": "MBDOFXG4Y5CVJCX821LH"
+    }
+~~~
+
+When the RO completes interaction at the AS, the AS MUST either redirect the RO's browser
+or send an HTTP POST to the client instance's callback URL using the method indicated in the
+[interaction request](#request-interact-finish) as described in {{interaction-finish}}.
+
+If the AS returns a nonce, the client instance MUST NOT
+continue a grant request before it receives the associated
+interaction reference on the callback URI. See details in {{interaction-finish}}.
 
 ### Extending Interaction Mode Responses {#response-interact-extend}
 
@@ -2250,7 +2239,7 @@ updated_at (string)
 
 The AS MUST return the `subject` field only in cases where the AS is sure that
 the RO and the end-user are the same party. This can be accomplished through some forms of
-[interaction with the RO](#user-interaction).
+[interaction with the RO](#authorization).
 
 Subject identifiers returned by the AS SHOULD uniquely identify the RO at the
 AS. Some forms of subject identifier are opaque to the client instance (such as the subject of an 
@@ -2368,108 +2357,196 @@ unknown_request
 Extensions to this specification MAY define additional fields for
 the grant response in [a registry TBD](#IANA).
 
-# Interaction at the AS {#user-interaction}
+# Determining Authorization and Consent {#authorization}
 
-If the client instance [indicates that it is capable of driving interaction with the RO in its request](#request-interact), and
-the AS determines that interaction is required and responds to one or
-more of the client instance's interaction modes, the client instance SHOULD
-initiate one of the returned 
-[interaction modes in the response](#response-interact).
 
-When the RO is interacting with the AS, the AS MAY perform whatever
-actions it sees fit, including but not limited to:
 
-- authenticate the current user (who may be the end-user) as the RO
 
-- gather consent and authorization from the RO for access to
-          requested resources and direct information
 
-- allow the RO to modify the parameters of the request (such as
-          disallowing some requested resources or specifying an account or
-          record)
 
-- provide warnings to the RO about potential attacks or negative
-    effects of the requested information
 
-## Interaction at a Redirected URI {#interaction-redirect}
 
-When the RO is directed to the AS through the ["redirect"](#response-interact-redirect)
-mode, the AS can interact with the RO through their web
-browser to authenticate the user as an RO and gather their consent.
-Note that since the client instance does not add any parameters to the URL, the
-AS MUST determine the grant request being referenced from the URL
-value itself. If the URL cannot be associated with a currently active
-request, the AS MUST display an error to the RO and MUST NOT attempt
-to redirect the RO back to any client instance even if a [redirect is supplied](#request-interact-callback-redirect).
 
-The interaction URL MUST be reachable from the RO's browser, though
-note that the RO MAY open the URL on a separate device from the client instance
-itself. The interaction URL MUST be accessible from an HTTP GET
-request, and MUST be protected by HTTPS or equivalent means.
 
-With this method, it is common for the RO to be the same party as the end-user, since
+
+
+
+When the client instance makes its [request](#request) to the AS for delegated access, it 
+asks for two kinds of information in response:
+
+- the access being requested in the `access_token` request parameter
+- the subject information being requested in the `subject` request parameter
+- any additional requested information defined by extensions of this protocol
+
+The AS needs to determine what authorizations will be required to fulfill this request. The details of how the
+AS makes this determination are out of scope for this document. However, there are several common patterns
+defined and supported by GNAP.
+
+The client instance can supply supplementary information to declare its right to the 
+stated delegation, including:
+
+- the identity of the client instance, known from the presented keys or associated identifiers
+- the identity of the end user presented in the `user` request parameter
+- any additional information presented by the client instance in the request, including any extensions
+
+If the AS determines that the information presented in the initial request is sufficient for granting the requested
+access, the AS MAY return the positive results immediately in its [response](#response) with
+access tokens and subject information objects.
+
+If the AS determines that additional runtime authorization is required, the AS can either deny the request
+outright or use a number of means at its disposal to gather that authorization from the appropriate ROs, 
+including for example:
+
+- starting interaction with the end user through the client instance
+- challenging the client instance through a response mechanism
+- request that the client instance present specific additional information
+- contacting a RO through an out-of-band mechanism
+- contacting an auxiliary software process through an out-of-band mechanism
+- any additional mechanisms defined by extensions to this protocol
+
+In this process, the AS can gather consent from the RO as necessitated by the access that has
+been requested. The AS can sometimes determine which RO needs to consent based on what has been requested
+by the client instance, such as a specific RS record, an identified user, or a request requiring specific
+access such as approval by an administrator. If the AS has a means of contacting the RO directly, it could
+do so without involving the client instance in its consent gathering process. For example, the AS could
+push a notification to a known RO and have the RO approve the pending request asynchronously. These interactions
+can be through an interface of the AS itself (such as a hosted web page), through another application (such as
+something installed on the RO's device), through a messaging fabric, or any other means.
+When interacting with an RO, the AS can do anything it needs to determine the authorization of the requested grant:
+
+- authenticate the RO, through a local account or some other means
+- validate the RO through presentation of claims, attributes, or other information
+- prompt the RO for consent for the requested delegation
+- describe to the RO what information is being released, to whom, and for what purpose
+- provide warnings to the RO about potential attacks or negative effects of allowing the information
+- allow the RO to modify the client instance's requested access, including limiting or expanding that access
+- provide the RO with artifacts such as receipts to facilitate an audit trail of authorizations
+- allow the RO to deny the requested delegation
+
+The AS is also allowed to request authorization from more than one RO, if the AS deems fit. For example, a medical
+record might need to be released by both an attending nurse and a physician, or both owners of a bank account
+need to sign off on a transfer request. Alternatively, the AS could require N of M possible RO's
+to approve a given request in order. The AS could also determine that the end user is not the appropriate RO
+for a given request and reach out to the appropriate RO asynchronously. The details of determining which RO's are required for a given
+request are out of scope for this specification.
+
+The client instance can also indicate that it is capable of facilitating interaction with the end user,
+another party, or another piece of software through its [interaction start](#request-interact-start) request.
+In many cases, the end user is delegating their own access as RO to the client instance. Here, the 
+AS needs to determine the identity of the end user and will often need to interact directly with
+the end user to determine their status as an RO and collect their consent. If the AS has determined
+that authorization is required and the AS can support one or more of the requested interaction start
+methods, the AS returns the associated [interaction start responses](#response-interact). The client
+instance SHOULD [initiate one or more of these interaction methods](#interaction-start) in order to 
+facilitate the granting of the request. If more than one interaction start method is available,
+the means by which the client chooses which methods to follow is out of scope of this specification.
+The client instance MUST use each interaction method once at most.
+
+After starting interaction, the client instance can then make a [continuation request](#continue-request)
+either in response to a signal indicating the [finish of the interaction](#interaction-finish), through
+polling, or through some other method defined by an extension of this specification.
+
+## Interaction Start Methods {#interaction-start}
+
+To initiate an interaction start method indicated by the
+[interaction start responses](#response-interact) from the AS, the client instance
+follows the steps defined by that interaction method. The actions of the client instance 
+required for the interaction start modes defined in this specification are described
+in the following sections.
+
+### Interaction at a Redirected URI {#interaction-redirect}
+
+When the end user is directed to an arbitrary URI through the ["redirect"](#response-interact-redirect)
+mode, the client instance facilitates opening the URI through the end user's web browser.
+The client instance could launch the URI through the system browser, provide a clickable
+link, redirect the user through HTTP response codes, or display the URI in a form
+the end user can use to launch such as a multidimensional barcode.
+With this method, it is common (though not required) for the RO to be the same party as the end-user, since
 the client instance has to communicate the redirection URI to the end-user.
 
-## Interaction at the User Code URI {#interaction-usercode}
+In many cases, the URI indicates a web page hosted at the AS, allowing the
+AS to authenticate the end user as the RO and interactively provide consent.
+If the URI is hosted by the AS,
+the AS MUST determine the grant request being referenced from the URL
+value itself. If the URL cannot be associated with a currently active
+request, the AS MUST display an error to the RO and MUST NOT attempt
+to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
+If the URI is not hosted by the AS directly, the means of communication between
+the AS and this URI are out of scope for this specification.
 
-When the RO is directed to the AS through the ["user_code"](#response-interact-usercode) mode, the
-AS can interact with the RO through their web browser to collect the
-user code, authenticate the user as an RO, and gather their consent.
-Note that since the URL itself is static, the AS MUST determine the
-grant request being referenced from the user code value itself. If the
-user code cannot be associated with a currently active request, the AS
-MUST display an error to the RO and MUST NOT attempt to redirect the
-RO back to any client instance even if a [redirect is supplied](#request-interact-callback-redirect).
+The client instance MUST NOT modify the URI when launching it,
+in particular the client instance MUST NOT add any parameters to the URI.
+The URI MUST be reachable from the end user's browser, though
+the URI MAY be opened on a separate device from the client instance
+itself. The URI MUST be accessible from an HTTP GET
+request and MUST be protected by HTTPS or equivalent means.
 
-The user code URL MUST be reachable from the RO's browser, though
-note that the RO MAY open the URL on a separate device from the client instance
-itself. The user code URL MUST be accessible from an HTTP GET request,
-and MUST be protected by HTTPS or equivalent means.
+### Interaction at the User Code URI {#interaction-usercode}
 
-While it is common for the RO to be the same party as the end-user, since
-the client instance has to communicate the user code to someone, there are
-cases where the end-user and RO are separate parties and the authorization
-happens asynchronously.
+When the end user is directed to enter a short code through the ["user_code"](#response-interact-usercode)
+mode, the client instance communicates the user code to the end-user and 
+directs the end user to enter that code at an associated URI.
+This mode is used when the client instance is not able to facilitate launching
+an arbitrary URI. The associated URI could be statically configured with the client instance or 
+communicated in the response from the AS, but the client instance
+communicates that URL to the end user. As a consequence, these URIs SHOULD be short.
 
+In many cases, the URI indicates a web page hosted at the AS, allowing the
+AS to authenticate the end user as the RO and interactively provide consent.
+If the URI is hosted by the AS,
+the AS MUST determine the grant request being referenced from the user code.
+If the user code cannot be associated with a currently active
+request, the AS MUST display an error to the RO and MUST NOT attempt
+to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
+If the user code URI is not hosted by the AS directly, the means of communication between
+the AS and this URI, including communication of the user code itself, are out of scope for this specification.
 
-## Interaction through an Application URI {#interaction-app}
+The client instance MUST NOT modify the URI when launching it,
+in particular the client instance MUST NOT add any parameters to the URI.
+The user code URI MUST be reachable from the end user's browser, though
+the URI is usually be opened on a separate device from the client instance
+itself. The URI MUST be accessible from an HTTP GET
+request and MUST be protected by HTTPS or equivalent means.
 
-When the client instance successfully launches an application through the
-["app" mode](#response-interact-app), the AS
-interacts with the RO through that application to authenticate the
-user as the RO and gather their consent. The details of this
-interaction are out of scope for this specification.
+### Interaction through an Application URI {#interaction-app}
 
-## Post-Interaction Completion {#interaction-finalize}
+When the client instance is directed to launch an application through the
+["app"](#response-interact-app) mode, the client launches the
+URL as appropriate to the system. The means by which the AS and the
+launched application communicate with each other and perform any
+of the required actions are out of scope for this specification.
 
-Upon completing an interaction with the RO, if a ["callback"](#response-interact-callback) mode is
-available with the current request, the AS MUST follow the appropriate
-method at the end of interaction to allow the client instance to continue. If
-this mode is not available, the AS SHOULD instruct the RO to
-return to their client instance upon completion. Note that these steps
-still take place in most error cases, such as when the RO has denied
-access. This pattern allows the client instance to potentially recover from the error
-state without restarting the request from scratch by modifying its
-request or providing additional information directly to the AS.
+## Post-Interaction Completion {#interaction-finish}
+
+If an interaction ["finish"](#response-interact-finish) method is
+associated with the current request, the AS MUST follow the appropriate
+method at upon completion of interaction in order to signal the client instance to continue.
+If a finish method is not available, the AS SHOULD instruct the RO to
+return to the client instance upon completion.
 
 The AS MUST create an interaction reference and associate that
 reference with the current interaction and the underlying pending
-request. This value MUST be sufficiently random so as not to be
+request. This interaction reference value MUST be sufficiently random so as not to be
 guessable by an attacker. The interaction reference MUST be
-one-time-use.
+one-time-use to prevent interception and replay attacks.
 
 The AS MUST calculate a hash value based on the client instance and AS nonces and the
 interaction reference, as described in 
 {{interaction-hash}}. The client instance will use this value to
-validate the return call from the AS.
+validate the "finish" call.
 
-The AS then MUST send the hash and interaction reference based on
-the interaction finalization mode as described in the following
+The AS MUST send the hash and interaction reference based on
+the interaction finish mode as described in the following
 sections.
+
+Note that the "finish" method still occurs in some error cases, such as when the RO has denied
+access. This pattern allows the client instance to potentially recover from the error
+state by modifying its request or providing additional information directly to the AS in a
+continuation request.
 
 ### Completing Interaction with a Browser Redirect to the Callback URI {#interaction-callback}
 
-When using the [`redirect` interaction finish method](#response-interact-callback),
+When using the [`redirect` interaction finish method](#response-interact-finish),
 the AS signals to the client instance that interaction is
 complete and the request can be continued by directing the RO (in
 their browser) back to the client instance's redirect URL sent in [the callback request](#request-interact-callback-redirect).
@@ -2510,7 +2587,7 @@ reference value received here.
 ### Completing Interaction with a Direct HTTP Request Callback {#interaction-pushback}
 
 When using the 
-["callback" interaction mode](#response-interact-callback) with the `push` method,
+["callback" interaction mode](#response-interact-finish) with the `push` method,
 the AS signals to the client instance that interaction is
 complete and the request can be continued by sending an HTTP POST
 request to the client instance's callback URL sent in [the callback request](#request-interact-callback-push).
@@ -2558,8 +2635,8 @@ always provide this hash, and the client instance MUST validate the hash when re
 
 To calculate the "hash" value, the party doing the calculation
 first takes the "nonce" value sent by the client instance in the 
-[interaction section of the initial request](#finish-interaction-modes), the AS's nonce value
-from [the callback response](#response-interact-callback), and the "interact_ref"
+[interaction section of the initial request](#request-interact-finish), the AS's nonce value
+from [the interaction finish response](#response-interact-finish), and the "interact_ref"
 sent to the client instance's callback URL.
 These three values are concatenated to each other in this order
 using a single newline character as a separator between the fields.
@@ -2613,7 +2690,7 @@ While it is possible for the AS to return a [response](#response) with all the
 client instance's requested information (including [access tokens](#response-token) and 
 [direct user information](#response-subject)), it's more common that the AS and
 the client instance will need to communicate several times over the lifetime of an access grant.
-This is often part of facilitating [interaction](#user-interaction), but it could
+This is often part of facilitating [interaction](#authorization), but it could
 also be used to allow the AS and client instance to continue negotiating the parameters of
 the [original grant request](#request). 
 
