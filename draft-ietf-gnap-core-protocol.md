@@ -1891,8 +1891,7 @@ expires_in (integer)
 key (object / string)
 : OPTIONAL. The key that the token is bound to, if different from the
     client instance's presented key. The key MUST be an object or string in a format
-    described in {{key-format}}, describing a public key to which the
-    client instance can use the associated private key. The client instance MUST be able to
+    described in {{key-format}}. The client instance MUST be able to
     dereference or process the key information in order to be able
     to sign the request.
 
