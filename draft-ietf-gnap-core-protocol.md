@@ -4277,6 +4277,7 @@ Detached-JWS: ejy0...
 
 {
     "access_token": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
+    "client": "7C7C4AZ9KHRS6X63AJAO"
 }
 ~~~
 
