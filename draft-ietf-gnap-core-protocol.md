@@ -4306,6 +4306,8 @@ sure that it has the permission to do so.
     - Changed "key_proofs" to "key_proofs_supported".
     - Changed "assertions" to "assertions_supported".
     - Updated discovery and field names for subject formats.
+    - Updated discovery and field names for subject types.
+    - Refactored the RS-centric components into a new document. 
 
 - -04
     - Updated terminology.
