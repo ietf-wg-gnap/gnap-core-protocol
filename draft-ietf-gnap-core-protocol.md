@@ -43,6 +43,7 @@ normative:
            ins: R. Holz
          -
            ins: P. Saint-Andre
+    I-D.draft-ietf-gnap-resource-servers:
     RFC2119:
     RFC3230:
     RFC3986:
@@ -254,7 +255,7 @@ an access token to call an RS.
             +                         +        
             +                         +         
         +--------+                    +          +------------+
-        | Client |--------------(1)---+--------->|  Resource  |
+        | Client | (1)                +          |  Resource  |
         |Instance|                    +          |   Server   |
         |        |       +---------------+       |    (RS)    |
         |        |--(2)->| Authorization |       |            |
@@ -263,12 +264,12 @@ an access token to call an RS.
         |        |--(4)->|               |       |            |
         |        |<-(5)--|               |       |            |
         |        |--------------(6)------------->|            |
-        |        |       |               |<~(7)~~|            |
+        |        |       |               |   (7) |            |
         |        |<-------------(8)------------->|            |
         |        |--(9)->|               |       |            |
         |        |<-(10)-|               |       |            |
         |        |--------------(11)------------>|            |
-        |        |       |               |<~(12)~|            |
+        |        |       |               |  (12) |            |
         |        |-(13)->|               |       |            |
         |        |       |               |       |            |
         +--------+       +---------------+       +------------+
@@ -283,12 +284,11 @@ an access token to call an RS.
     behalf of the RO. This could identify the RS the client instance needs to call,
     the resources needed, or the RO that is needed to approve the 
     request. Note that the RO and end-user are often
-    the same entity in practice.
+    the same entity in practice, but some more dynamic processes are discussed in
+    {{I-D.draft-ietf-gnap-resource-servers}}.
     
-- (1) The client instance [can attempt to call the RS](#rs-request-without-token) to determine 
-    what access is needed.
-    The RS informs the client instance that access can be granted through the AS. Note that
-    for most situations, the client instance already knows which AS to talk to and which
+- (1) The client instance determines what access is needed and which AS to approach for access. Note that
+    for most situations, the client instance is pre-configured with which AS to talk to and which
     kinds of access it needs.
 
 - (2) The client instance [requests access at the AS](#request).
@@ -314,10 +314,9 @@ an access token to call an RS.
 - (6) The client instance [uses the access token](#use-access-token) to call the RS.
 
 - (7) The RS determines if the token is sufficient for the request by
-    examining the token, potentially [calling the AS](#introspection). Note that
-    the RS could also examine the token directly, call an internal data store,
-    execute a policy engine request, or any number of alternative methods for
-    validating the token and its fitness for the request.
+    examining the token. The means of the RS determining this access are
+    out of scope of this specification, but some options are discussed in
+    {{I-D.draft-ietf-gnap-resource-servers}}.
     
 - (8) The client instance [calls the RS](#use-access-token) using the access token
     until the RS or client instance determine that the token is no longer valid.
@@ -330,8 +329,10 @@ an access token to call an RS.
 
 - (11) The client instance [uses the new access token](#use-access-token) to call the RS.
 
-- (12) The RS determines if the new token is sufficient for the request by
-    examining the token, potentially [calling the AS](#introspection).
+- (12) The RS determines if the new token is sufficient for the request.
+    The means of the RS determining this access are
+    out of scope of this specification, but some options are discussed in
+    {{I-D.draft-ietf-gnap-resource-servers}}.
 
 - (13) The client instance [disposes of the token](#revoke-access-token) once the client instance
     has completed its access of the RS and no longer needs the token.
@@ -3186,9 +3187,8 @@ key proof together.
 - When an access token is used with no key proof, this is a bearer token request. This type of
     request is used only for calls to the RS, and only with access tokens that are
     not bound to any key as described in {{response-token-single}}.
-- When neither an access token nor key proof are used, this is an unsecured request. This 
-    type of request is used only for calls to the RS during a discovery phase as
-    described in {{rs-request-without-token}}.
+- When neither an access token nor key proof are used, this is an unsecured request. This type
+    of request is not used in the core protocol of GNAP.
 
 ## Key Formats {#key-format}
 
@@ -4237,259 +4237,6 @@ can be registered with the `mtls` key proofing
 mechanism, but the AS also returns other proofing methods, then the AS
 will deny a request from that client instance using a different proofing
 mechanism.
-
-
-# Resource Servers {#resource-servers}
-
-In some deployments, a resource server will need to be able to call
-the AS for a number of functions.
-
-\[\[ [See issue #114](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/114) \]\]
-
-## Introspecting a Token {#introspection}
-
-When the RS receives an access token, it can call the introspection
-endpoint at the AS to get token information. 
-\[\[ [See issue #115](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/115) \]\]
-
-~~~
-+--------+       +------+       +------+
-| Client |--(1)->|  RS  |       |  AS  |
-|Instance|       |      |--(2)->|      |
-|        |       |      |<-(3)--|      |
-|        |       |      |       +------+
-|        |<-(4)--|      |               
-+--------+       +------+               
-~~~
-
-1. The client instance calls the RS with its access token.
-
-2. The RS introspects the access token value at the AS.
-    The RS signs the request with its own key (not the client instance's
-    key or the token's key).
-
-3. The AS validates the access token value and the client instance's request
-    and returns the introspection response for the token.
-
-4. The RS fulfills the request from the client instance.
-
-The RS signs the request with its own key and sends the access
-token as the body of the request.
-
-~~~
-POST /introspect HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-Detached-JWS: ejy0...
-
-{
-    "access_token": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-}
-~~~
-
-
-
-The AS responds with a data structure describing the token's
-current state and any information the RS would need to validate the
-token's presentation, such as its intended proofing mechanism and key
-material.
-
-~~~
-HTTP/1.1 200 OK
-Content-Type: application/json
-Cache-Control: no-store
-
-{
-    "active": true,
-    "access": [
-        "dolphin-metadata", "some other thing"
-    ],
-    "client": {
-      "key": {
-        "proof": "httpsig",
-        "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeL...."
-        }
-      }
-    }
-}
-~~~
-
-
-
-
-## Deriving a downstream token {#token-chaining}
-
-Some architectures require an RS to act as a client instance and request a derived access
-token for a secondary RS. This internal token is issued in the context
-of the incoming access token.
-
-~~~
-+--------+       +-------+       +------+       +-------+
-| Client |--(1)->|  RS1  |       |  AS  |       |  RS2  |
-|Instance|       |       |--(2)->|      |       |       |
-|        |       |       |<-(3)--|      |       |       |
-|        |       |       |       +------+       |       |
-|        |       |       |                      |       |
-|        |       |       |-----------(4)------->|       |
-|        |       |       |<----------(5)--------|       |
-|        |<-(6)--|       |                      |       |
-+--------+       +-------+                      +-------+
-~~~
-
-1. The client instance calls RS1 with an access token.
-
-2. RS1 presents that token to the AS to get a derived token
-    for use at RS2. RS1 indicates that it has no ability
-    to interact with the RO.
-    RS1 signs its request with its own key, not the token's
-    key or the client instance's key.
-
-3. The AS returns a derived token to RS1 for use at RS2.
-
-4. RS1 calls RS2 with the token from (3).
-
-5. RS2 fulfills the call from RS1.
-
-6. RS1 fulfills the call from client instance.
-
-
-If the RS needs to derive a token from one presented to it, it can
-request one from the AS by making a token request as described in
-{{request}} and presenting the existing access token's
-value in the "existing_access_token" field.
-
-The RS MUST identify itself with its own key and sign the
-request.
-
-\[\[ [See issue #116](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/116) \]\]
-
-~~~
-POST /tx HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-Detached-JWS: ejy0...
-
-{
-    "access_token": {
-        "access": [
-            {
-                "actions": [
-                    "read",
-                    "write",
-                    "dolphin"
-                ],
-                "locations": [
-                    "https://server.example.net/",
-                    "https://resource.local/other"
-                ],
-                "datatypes": [
-                    "metadata",
-                    "images"
-                ]
-            },
-            "dolphin-metadata"
-        ]
-    },
-    "client": "7C7C4AZ9KHRS6X63AJAO",
-    "existing_access_token": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0"
-}
-~~~
-
-The AS responds with a token for the downstream RS2 as described in 
-{{response-token}}. 
-
-## Registering a Resource Handle {#rs-register-resource-handle}
-
-If the RS needs to, it can post a set of resources as described in
-{{resource-access-rights}} to the AS's resource
-registration endpoint.
-
-The RS MUST identify itself with its own key and sign the
-request.
-
-~~~
-POST /resource HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-Detached-JWS: ejy0...
-
-{
-    "access": [
-        {
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        },
-        "dolphin-metadata"
-    ],
-    "client": "7C7C4AZ9KHRS6X63AJAO"
-
-}
-~~~
-
-
-
-The AS responds with a handle appropriate to represent the
-resources list that the RS presented.
-
-~~~
-HTTP/1.1 200 OK
-Content-Type: application/json
-Cache-Control: no-store
-
-{
-    "resource_handle": "FWWIKYBQ6U56NL1"
-}
-~~~
-
-
-
-The RS MAY make this handle available as part of a 
-[response](#rs-request-without-token) or as
-documentation to developers.
-
-\[\[ [See issue #117](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/117) \]\]
-
-## Requesting Resources With Insufficient Access {#rs-request-without-token}
-
-If the client instance calls an RS without an access token, or with an
-invalid access token, the RS MAY respond to the client instance with an
-authentication header indicating that GNAP needs to be used
-to access the resource. The address of the GNAP
-endpoint MUST be sent in the "as_uri" parameter. The RS MAY
-additionally return a resource reference that the client instance MAY use in
-its [access token request](#request-token). This
-resource reference handle SHOULD be sufficient for at least the action
-the client instance was attempting to take at the RS. The RS MAY use the [dynamic resource handle request](#rs-register-resource-handle) to register a new resource handle, or use a handle that
-has been pre-configured to represent what the AS is protecting. The
-content of this handle is opaque to the RS and the client instance.
-
-~~~
-WWW-Authenticate: GNAP as_uri=https://server.example/tx,resource=FWWIKYBQ6U56NL1
-~~~
-
-The client instance then makes a call to the "as_uri" as described in 
-{{request}}, with the value of "resource" as one of the members
-of the `access` array {{request-token-single}}. The
-client instance MAY request additional resources and other information, and MAY
-request multiple access tokens.
-
-\[\[ [See issue #118](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/118) \]\]
 
 # Acknowledgements {#Acknowledgements}
 
