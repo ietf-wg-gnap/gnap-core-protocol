@@ -122,7 +122,7 @@ Roles are defined by the actions taken and the expectations leveraged
 on the role by the overall protocol. 
 
 Authorization Server (AS)
-: server that grants delegated privileges to a particular instance of client software in the form of an access token and other information (such as subject information). 
+: server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information). 
 
 Client
 : application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. 
@@ -238,21 +238,24 @@ the information needed at a given stage is communicated out of band
 or is preconfigured between the components or entities performing
 the roles. For example, one entity can fulfil multiple roles, and so
 explicit communication between the roles is not necessary within the
-protocol flow.
+protocol flow. Additionally some components may not be involved
+in all use cases. For example, a client instance could be calling the
+AS just to get direct user information and have no need to get
+an access token to call an RS.
 
 ~~~
-        +------------+             +------------+
-        | End-user   | ~ ~ ~ ~ ~ ~ |  Resource  |
-        |            |             | Owner (RO) |
-        +------------+             +------------+
-            +                            +      
-            +                            +      
-           (A)                          (B)       
-            +                            +        
-            +                            +         
-        +--------+                       +       +------------+
-        | Client |--------------(1)------+------>|  Resource  |
-        |Instance|                       +       |   Server   |
+        +------------+         +------------+
+        | End-user   | ~ ~ ~ ~ |  Resource  |
+        |            |         | Owner (RO) |
+        +------------+         +------------+
+            +                         +      
+            +                         +      
+           (A)                       (B)       
+            +                         +        
+            +                         +         
+        +--------+                    +          +------------+
+        | Client |--------------(1)---+--------->|  Resource  |
+        |Instance|                    +          |   Server   |
         |        |       +---------------+       |    (RS)    |
         |        |--(2)->| Authorization |       |            |
         |        |<-(3)--|     Server    |       |            |
@@ -282,7 +285,7 @@ protocol flow.
     request. Note that the RO and end-user are often
     the same entity in practice.
     
-- (1) The client instance [attempts to call the RS](#rs-request-without-token) to determine 
+- (1) The client instance [can attempt to call the RS](#rs-request-without-token) to determine 
     what access is needed.
     The RS informs the client instance that access can be granted through the AS. Note that
     for most situations, the client instance already knows which AS to talk to and which
@@ -334,7 +337,9 @@ protocol flow.
     has completed its access of the RS and no longer needs the token.
 
 The following sections and {{examples}} contain specific guidance on how to use
-GNAP in different situations and deployments.
+GNAP in different situations and deployments. For example, it is possible for the 
+client instance to never request an access token and never call an RS, just as it is
+possible for there not to be a user involved in the delegation process.
 
 ### Redirect-based Interaction {#sequence-redirect}
 
@@ -370,6 +375,11 @@ that returns from the interaction.
     |        |                                  |        |
     |        |<-(9)----- Grant Access ----------|        |
     |        |                                  |        |
+    |        |                                  |        |     +--------+
+    |        |--(10)-- Access API ---------------------------->|   RS   |
+    |        |                                  |        |     |        |
+    |        |<-(11)-- API Response ---------------------------|        |
+    |        |                                  |        |     +--------+
     +--------+                                  +--------+
 ~~~
 
@@ -421,6 +431,11 @@ that returns from the interaction.
     in the form of [access tokens](#response-token) and
     [direct subject information](#response-subject) to the client instance.
 
+10. The client instance [uses the access token](#use-access-token) to call the RS.
+
+11. The RS validates the access token and returns an appropriate response for the
+    API.
+
 An example set of protocol messages for this method can be found in {{example-auth-code}}.
 
 ### User-code Interaction {#sequence-user-code}
@@ -463,6 +478,11 @@ the AS.
     |        |                                  |        |
     |        |<-(12)----- Grant Access ---------|        |
     |        |                                  |        |
+    |        |                                  |        |     +--------+
+    |        |--(13)-- Access API ---------------------------->|   RS   |
+    |        |                                  |        |     |        |
+    |        |<-(14)-- API Response ---------------------------|        |
+    |        |                                  |        |     +--------+
     +--------+                                  +--------+
 ~~~
 
@@ -517,6 +537,11 @@ the AS.
     in the form of [access tokens](#response-token) and
     [direct subject information](#response-subject) to the client instance.
 
+13. The client instance [uses the access token](#use-access-token) to call the RS.
+
+14. The RS validates the access token and returns an appropriate response for the
+    API.
+
 An example set of protocol messages for this method can be found in {{example-device}}.
 
 ### Asynchronous Authorization {#sequence-async}
@@ -546,6 +571,11 @@ The client instance polls the AS while it is waiting for the RO to authorize the
     |        |                                  |        |
     |        |<-(9)------ Grant Access ---------|        |
     |        |                                  |        |
+    |        |                                  |        |     +--------+
+    |        |--(10)-- Access API ---------------------------->|   RS   |
+    |        |                                  |        |     |        |
+    |        |<-(11)-- API Response ---------------------------|        |
+    |        |                                  |        |     +--------+
     +--------+                                  +--------+
 ~~~
 
@@ -593,6 +623,11 @@ The client instance polls the AS while it is waiting for the RO to authorize the
     in the form of [access tokens](#response-token) and
     [direct subject information](#response-subject) to the client instance.
 
+10. The client instance [uses the access token](#use-access-token) to call the RS.
+
+11. The RS validates the access token and returns an appropriate response for the
+    API.
+
 An example set of protocol messages for this method can be found in {{example-async}}.
 
 ### Software-only Authorization {#sequence-no-user}
@@ -602,13 +637,17 @@ without the need for a RO to be involved at runtime to approve the decision.
 Since there is no explicit RO, the client instance does not interact with an RO.
 
 ~~~
-    +--------+                                  +--------+
-    | Client |                                  |   AS   |
-    |Instance|--(1)--- Request Access --------->|        |
-    |        |                                  |        |
-    |        |<-(2)---- Grant Access -----------|        |
-    |        |                                  |        |
-    +--------+                                  +--------+
+    +--------+                            +--------+
+    | Client |                            |   AS   |
+    |Instance|--(1)--- Request Access --->|        |
+    |        |                            |        |
+    |        |<-(2)---- Grant Access -----|        |
+    |        |                            |        |  +--------+
+    |        |--(3)--- Access API ------------------->|   RS   |
+    |        |                            |        |  |        |
+    |        |<-(4)--- API Response ------------------|        |
+    |        |                            |        |  +--------+
+    +--------+                            +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
@@ -616,8 +655,14 @@ Since there is no explicit RO, the client instance does not interact with an RO.
 
 2. The AS determines that the request is been authorized, 
     the AS grants access to the information
-    in the form of [access tokens](#response-token) and
-    [direct subject information](#response-subject) to the client instance.
+    in the form of [access tokens](#response-token) to the client instance.
+    Note that [direct subject information](#response-subject) is not
+    generally applicable in this use case, as there is no user involved.
+
+3. The client instance [uses the access token](#use-access-token) to call the RS.
+
+4. The RS validates the access token and returns an appropriate response for the
+    API.
 
 An example set of protocol messages for this method can be found in {{example-no-user}}.
 
@@ -629,21 +674,27 @@ the access token expires. The client instance then gets a new access token by ro
 expired access token at the AS using the token's management URL.
 
 ~~~
-    +--------+                                          +--------+  
+    +--------+                                          +--------+
     | Client |                                          |   AS   |
     |Instance|--(1)--- Request Access ----------------->|        |
     |        |                                          |        |
     |        |<-(2)--- Grant Access --------------------|        |
     |        |                                          |        |
     |        |                             +--------+   |        |
-    |        |--(3)--- Access Resource --->|   RS   |   |        | 
-    |        |                             |        |   |        | 
-    |        |<-(4)--- Error Response -----|        |   |        |
+    |        |--(3)--- Access Resource --->|   RS   |   |        |
+    |        |                             |        |   |        |
+    |        |<-(4)--- Success Response ---|        |   |        |
+    |        |                             |        |   |        |
+    |        |                             |        |   |        |
+    |        |                             |        |   |        |
+    |        |--(5)--- Access Resource --->|        |   |        |
+    |        |                             |        |   |        |
+    |        |<-(6)--- Error Response -----|        |   |        |
     |        |                             +--------+   |        |
     |        |                                          |        |
-    |        |--(5)--- Rotate Token ------------------->|        |
+    |        |--(7)--- Rotate Token ------------------->|        |
     |        |                                          |        |
-    |        |<-(6)--- Rotated Token -------------------|        |
+    |        |<-(8)--- Rotated Token -------------------|        |
     |        |                                          |        |
     +--------+                                          +--------+
 ~~~
@@ -654,24 +705,87 @@ expired access token at the AS using the token's management URL.
     [access token](#response-token) usable at the RS. The access token
     response includes a token management URI.
     
-3. The client instance [presents the token](#use-access-token) to the RS. The RS 
-    validates the token and returns an appropriate response for the
-    API.
-    
-4. When the access token is expired, the RS responds to the client instance with
-    an error.
-    
-5. The client instance calls the token management URI returned in (2) to
-    [rotate the access token](#rotate-access-token). The client instance
-    presents the access token as well as the appropriate key.
+3. The client instance [uses the access token](#use-access-token) to call the RS.
 
-6. The AS validates the rotation request including the signature
+4. The RS validates the access token and returns an appropriate response for the
+    API.
+ 
+5. Time passes and the client instance uses the access token to call the RS again.
+   
+6. The RS validates the access token and determines that the access token is expired
+    The RS responds to the client instance with an error.
+
+7. The client instance calls the token management URI returned in (2) to
+    [rotate the access token](#rotate-access-token). The client instance
+    [uses the access token](#use-access-token) in this call as well as the appropriate key,
+    see the token rotation section for details.
+
+8. The AS validates the rotation request including the signature
     and keys presented in (5) and returns a 
     [new access token](#response-token-single). The response includes
     a new access token and can also include updated token management 
     information, which the client instance will store in place of the values 
     returned in (2).
-   
+
+### Requesting User Information {#sequence-user}
+
+In this scenario, the client instance does not call an RS and does not
+request an access token. Instead, the client instance only requests
+and is returned [direct subject information](#response-subject). Many different
+interaction modes can be used in this scenario, so these are shown only in 
+the abstract here.
+
+~~~
+    +--------+                                  +--------+         +------+
+    | Client |                                  |   AS   |         | User |
+    |Instance|                                  |        |         |      |
+    |        |--(1)--- Request Access --------->|        |         |      |
+    |        |                                  |        |         |      |
+    |        |<-(2)--- Request Access ----------|        |         |      |
+    |        |                                  |        |         |      |
+    |        |+ (3) + Facilitate Interaction + + + + + + + + + + > |      |
+    |        |                                  |        |         |      |
+    |        |                                  |        |<+ (4) +>|      |
+    |        |                                  |        |  AuthN  |      |
+    |        |                                  |        |         |      |
+    |        |                                  |        |<+ (5) +>|      |
+    |        |                                  |        |  AuthZ  |      |
+    |        |                                  |        |         |      |
+    |        |< (6) + Signal Continuation + + + + + + + + + + + + +|      |
+    |        |                                  |        |         +------+
+    |        |--(7)--- Continue Request ------->|        |
+    |        |                                  |        |
+    |        |<-(8)----- Grant Access ----------|        |
+    |        |                                  |        |
+    +--------+                                  +--------+
+~~~
+
+1. The client instance [requests access to subject information](#request).
+
+2. The AS determines that interaction is needed and [responds](#response) with
+    appropriate information for [facilitating user interaction](#response-interact).
+
+3. The client instance facilitates [the user interacting with the AS](#user-interaction) as directed in (2).
+
+4. The user authenticates at the AS, taking on the role of the RO.
+
+5. As the RO, the user authorizes the pending request from the client instance.
+
+6. When the AS is done interacting with the user, the AS
+    returns the user to the client instance and signals continuation.
+
+7. The client instance loads the continuation information from (2) and
+    calls the AS to [continue the request](#continue-request).
+
+8. If the request has been authorized, the AS grants access to the requested
+    [direct subject information](#response-subject) to the client instance.
+    At this stage, the user is generally considered "logged in" to the client
+    instance based on the identifiers and assertions provided by the AS.
+    Note that the AS can restrict the subject information returned and it
+    might not match what the client instance requested, see the section on
+    subject information for details.
+
+
 # Requesting Access {#request}
 
 To start a request, the client instance sends [JSON](#RFC8259) document with an object as its root. Each
@@ -1621,7 +1735,7 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
 
 In this example, the AS is returning a bearer [access token](#response-token-single)
 with a management URL and a [subject identifier](#response-subject) in the form of
-an email address.
+an opaque identifier.
 
 ~~~
 {
@@ -1632,8 +1746,25 @@ an email address.
     },
     "subject": {
         "sub_ids": [ {
+           "format": "opaque",
+           "id": "J2G8G8O4AZ"
+        } ]
+    }
+}
+~~~
+
+In this example, the AS is returning only a pair of [subject identifiers](#response-subject)
+as both an email address and an opaque identifier.
+
+~~~
+{
+    "subject": {
+        "sub_ids": [ {
+           "subject_type": "opaque",
+           "id": "J2G8G8O4AZ",
+        }, {
            "format": "email",
-           "email": "user@example.com",
+           "email": "user@example.com"
         } ]
     }
 }
@@ -1673,8 +1804,7 @@ access_token (object)
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -1790,7 +1920,6 @@ used in the initial request, with a management URL, and that has access to three
 ~~~
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             {
@@ -1820,7 +1949,7 @@ with access to two described resources.
 ~~~
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
+        "bound": false,
         "access": [
             "finance", "medical"
         ]
@@ -1845,7 +1974,7 @@ tokens as described in {{response-token-single}}.
 Each object MUST have a unique `label` field, corresponding to the token labels
 chosen by the client instance in the [multiple access token request](#request-token-multiple).
 
-In this non-normative example, two bearer tokens are issued under the
+In this non-normative example, two tokens are issued under the
 names `token1` and `token2`, and only the first token has a management
 URL associated with it.
 
@@ -1854,14 +1983,12 @@ URL associated with it.
         {
             "label": "token1",
             "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-            "bound": true,
             "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
             "access": [ "finance" ]
         },
         {
             "label": "token2",
             "value": "UFGLO2FDAFG7VGZZPJ3IZEMN21EVU71FHCARP4J1",
-            "bound": true,
             "access": [ "medical" ]
         }
     }
@@ -1888,7 +2015,6 @@ If the AS has split the access token response, the response MUST include the `sp
         {
             "label": "split-1",
             "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
-            "bound": true,
             "split": true,
             "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
             "access": [ "fruits" ]
@@ -1896,7 +2022,6 @@ If the AS has split the access token response, the response MUST include the `sp
         {
             "label": "split-2",
             "value": "FG7VGZZPJ3IZEMN21EVU71FHCAR-UFGLO2FDAP4J1",
-            "bound": true,
             "split": true,
             "access": [ "vegetables" ]
         }
@@ -2193,8 +2318,7 @@ access token.
     "user_handle": "XUT2MFM1XBIKJKSDU8QM",
     "instance_id": "7C7C4AZ9KHRS6X63AJAO",
     "access_token": {
-        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true
+        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0"
     }
 }
 ~~~
@@ -2608,7 +2732,6 @@ release subject claims, the response could look like this:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
@@ -2655,8 +2778,7 @@ next continuation request.
 {
     "continue": {
         "access_token": {
-            "value": "33OMUKMKSKU80UPRY5NM",
-            "bound": true
+            "value": "33OMUKMKSKU80UPRY5NM"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
@@ -2675,7 +2797,6 @@ release subject claims, the response could look like this example:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
@@ -2762,15 +2883,13 @@ a separate access token for accessing the continuation API:
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "RP1LT0-OS9M2P_R64TB",
-        "bound": true,
         "access": [
             "read", "write"
         ]
@@ -2811,15 +2930,13 @@ with the `durable` flag.
 {
     "continue": {
         "access_token": {
-            "value": "M33OMUK80UPRY5NMKSKU",
-            "bound": true
+            "value": "M33OMUK80UPRY5NMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "0EVKC7-2ZKwZM_6N760",
-        "bound": true,
         "access": [
             "read"
         ]
@@ -2861,15 +2978,13 @@ In its final response, the AS includes a `continue` field:
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "RP1LT0-OS9M2P_R64TB",
-        "bound": true,
         "access": [
             "read"
         ]
@@ -2997,7 +3112,6 @@ MUST use this new URL to manage the new access token.
 {
     "access_token": {
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             {
@@ -3156,36 +3270,41 @@ The means of dereferencing this value are out of scope for this specification.
 The method the client instance uses to send an access token depends on whether
 the token is bound to a key, and if so which proofing method is associated
 with the key. This information is conveyed in the
-`key` and `proof` parameters in [the access token response](#response-token-single).
+`bound` and `key` parameters in [the single](#response-token-single)
+and [multiple access tokens](#response-token-multiple) responses.
 
-If the `key` value is the boolean `false`, the access token is a bearer token
-sent using the HTTP Header method defined in {{RFC6750}}.
-
-~~~
-Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-~~~
-
-The form parameter and query parameter methods of {{RFC6750}} MUST NOT
-be used.
-
-If the `key` value is the boolean `true`, the access token MUST be sent
-using the same key and proofing mechanism that the client instance used
+If the `bound` value is the boolean `true` and the `key` is absent, the access token
+MUST be sent using the same key and proofing mechanism that the client instance used
 in its initial request (or its most recent rotation).
 
-If the `key` value is an object as described in {{key-format}}, the value of the `proof` field within
-the key indicates the particular proofing mechanism to use.
-The access token is sent using the HTTP authorization scheme "GNAP" along with 
-a key proof as described in {{binding-keys}} for the key bound to the
-access token. For example, a "jwsd"-bound access token is sent as
-follows:
+If the `bound` value is the boolean `true` and the `key` value is an object as
+described in {{key-format}}, the access token MUST be sent using the key and proofing
+mechanism defined by the value of the `proof` field within the key object.
+
+The access token MUST be sent using the HTTP "Authorization" request header field and
+the "GNAP" authorization scheme along with a key proof as described in {{binding-keys}}
+for the key bound to the access token. For example, a "jwsd"-bound access token is sent as follows:
 
 ~~~
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 Detached-JWS: eyj0....
 ~~~
 
+If the `bound` value is the boolean `false`, the access token is a bearer token
+that MUST be sent using the `Authorization Request Header Field` method defined in {{RFC6750}}.
+
+~~~
+Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+~~~
+
+The `Form-Encoded Body Parameter` and `URI Query Parameter` methods of {{RFC6750}} MUST NOT
+be used.
+
 
 \[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
+
+The client software MUST reject as an error a situation where the `bound` value is
+the boolean `false` and the `key` is present.
 
 ## Proving Possession of a Key with a Request {#binding-keys}
 
@@ -3242,16 +3361,16 @@ to either the access token's own key or, in the case of bearer tokens, the clien
 ### Detached JWS {#detached-jws}
 
 This method is indicated by `jwsd` in the
-`proof` field. A JWS {{RFC7515}} signature object is created as follows:
+`proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The header of the JWS MUST contain the
-`kid` field of the key bound to this client instance for this request. The JWS header
-MUST contain an `alg` field appropriate for the key identified by kid
-and MUST NOT be `none`.  The `b64` field MUST be set to `false` and the
-`crit` field MUST contain at least `b64` as specified in {{RFC7797}}
+The JOSE (JSON Object Signing and Encryption) header MUST contain the `kid` parameter of
+the key bound to this client instance for this request.  The `alg` parameter MUST be set
+to a value appropriate for the key identified by kid and MUST NOT be `none`.  The `b64`
+parameter MUST be set to `false` and the `crit` parameter MUST contain at least `b64`
+as specified in {{RFC7797}}.
 
-To protect the request, the JWS header MUST contain the following
-additional fields.
+To protect the request, the JOSE header MUST contain the following
+additional parameters.
 
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
@@ -3337,15 +3456,14 @@ transformations.
 ### Attached JWS {#attached-jws}
 
 This method is indicated by `jws` in the
-`proof` field. A JWS {{RFC7515}} signature object is created as follows:
+`proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The header of the JWS MUST contain the
-`kid` field of the key bound to this client instance for this request. The JWS header
-MUST contain an `alg` field appropriate for the key identified by `kid`
-and MUST NOT be `none`.
+The JOSE header MUST contain the `kid` parameter of the key bound to this client
+instance for this request. The `alg` parameter MUST be set to a value appropriate
+for the key identified by kid and MUST NOT be `none`.
 
 To protect the request, the JWS header MUST contain the following
-additional fields.
+additional parameters.
 
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
@@ -4143,7 +4261,7 @@ endpoint at the AS to get token information.
     The RS signs the request with its own key (not the client instance's
     key or the token's key).
 
-3. The AS validates the token value and the client instance's request
+3. The AS validates the access token value and the client instance's request
     and returns the introspection response for the token.
 
 4. The RS fulfills the request from the client instance.
@@ -4574,8 +4692,7 @@ Cache-Control: no-store
     }
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue"
     },
@@ -4645,7 +4762,6 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [{
             "actions": [
@@ -4665,8 +4781,7 @@ Cache-Control: no-store
     },
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue"
     }
@@ -4728,8 +4843,7 @@ Cache-Control: no-store
     },
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue/VGJKPTKC50",
         "wait": 60
@@ -4778,8 +4892,7 @@ Cache-Control: no-store
 {
     "continue": {
         "access_token": {
-            "value": "G7YQT4KQQ5TZY9SLSS5E",
-            "bound": true
+            "value": "G7YQT4KQQ5TZY9SLSS5E"
         },
         "uri": "https://server.example.com/continue/ATWHO4Q1WV",
         "wait": 60
@@ -4813,7 +4926,6 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             "dolphin-metadata", "some other thing"
@@ -4864,7 +4976,6 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token",
         "access": [
             "backend service", "nightly-routine-3"
@@ -4946,8 +5057,7 @@ Cache-Control: no-store
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -4986,8 +5096,7 @@ Cache-Control: no-store
 {
     "continue": {
         "access_token": {
-            "value": "BI9QNW6V9W3XFJK4R02D",
-            "bound": true
+            "value": "BI9QNW6V9W3XFJK4R02D"
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -5022,7 +5131,6 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": true,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             "dolphin-metadata", "some other thing"
