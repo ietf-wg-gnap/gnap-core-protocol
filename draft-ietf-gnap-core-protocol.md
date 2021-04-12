@@ -874,7 +874,7 @@ A non-normative example of a grant request is below:
     },
     "capabilities": ["ext1", "ext2"],
     "subject": {
-        "subject_types": ["iss_sub", "opaque"],
+        "formats": ["iss_sub", "opaque"],
         "assertions": ["id_token"]
     }
 }
@@ -1066,7 +1066,7 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in 
 [a registry TBD](#IANA)).
 
-subject_types (array of strings)
+formats (array of strings)
 : An array of subject identifier subject types
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -1078,7 +1078,7 @@ assertions (array of strings)
 
 ~~~
 "subject": {
-   "subject_types": [ "iss_sub", "opaque" ],
+   "formats": [ "iss_sub", "opaque" ],
    "assertions": [ "id_token", "saml2" ]
 }
 ~~~
@@ -1097,7 +1097,7 @@ The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
 \[\[ [See issue #42](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/42) \]\]
 
-Note: the "subject_types" and "assertions" request fields are independent of
+Note: the "formats" and "assertions" request fields are independent of
 each other, and a returned assertion MAY omit a requested subject
 identifier. 
 
@@ -1297,7 +1297,7 @@ assertions (object)
 ~~~
 "user": {
    "sub_ids": [ {
-     "subject_type": "opaque",
+     "format": "opaque",
      "id": "J2G8G8O4AZ"
    } ],
    "assertions": {
@@ -1746,7 +1746,7 @@ an opaque identifier.
     },
     "subject": {
         "sub_ids": [ {
-           "subject_type": "opaque",
+           "format": "opaque",
            "id": "J2G8G8O4AZ"
         } ]
     }
@@ -1763,8 +1763,8 @@ as both an email address and an opaque identifier.
            "subject_type": "opaque",
            "id": "J2G8G8O4AZ"
         }, {
-           "subject_type": "email",
-           "email": "user@example.com",
+           "format": "email",
+           "email": "user@example.com"
         } ]
     }
 }
@@ -2239,7 +2239,7 @@ updated_at (string)
 ~~~
 "subject": {
    "sub_ids": [ {
-     "subject_type": "opaque",
+     "format": "opaque",
      "id": "J2G8G8O4AZ"
    } ],
    "assertions": {
@@ -2736,7 +2736,7 @@ release opaque subject claims, the response could look like this:
     },
     "subject": {
         "sub_ids": [ {
-           "subject_type": "opaque",
+           "format": "opaque",
            "id": "J2G8G8O4AZ"
         } ]
     }
@@ -2801,7 +2801,7 @@ release subject claims, the response could look like this example:
     },
     "subject": {
         "sub_ids": [ {
-           "subject_type": "opaque",
+           "format": "opaque",
            "id": "J2G8G8O4AZ"
         } ]
     }
@@ -3372,6 +3372,9 @@ as specified in {{RFC7797}}.
 To protect the request, the JOSE header MUST contain the following
 additional parameters.
 
+typ (string)
+: The type header, value ”gnap-binding+jwsd”.
+
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
 
@@ -3465,6 +3468,9 @@ for the key identified by kid and MUST NOT be `none`.
 To protect the request, the JWS header MUST contain the following
 additional parameters.
 
+typ (string)
+: The type header, value ”gnap-binding+jws”.
+
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
 
@@ -3537,6 +3543,7 @@ This example's JWS header decodes to:
 
 ~~~
 {
+  "typ": "gnap-binding+jws",
   "alg": "RS256",
   "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
   "htm": "POST",
@@ -3591,7 +3598,7 @@ And the JWS body decodes to:
     ]
   }
   "subject": {
-    "subject_types": ["iss_sub", "opaque"]
+    "formats": ["iss_sub", "opaque"]
   }
 }
 ~~~
@@ -4212,7 +4219,7 @@ key_proofs_supported (array of strings)
           values of the `proof` field of the 
           [key section](#key-format) of the request.
 
-subject_types_supported (array of strings)
+subject_formats_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
           subject identifier types. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
@@ -4551,7 +4558,7 @@ sure that it has the permission to do so.
     - Changed "interaction_methods" to "interaction_methods_supported".
     - Changed "key_proofs" to "key_proofs_supported".
     - Changed "assertions" to "assertions_supported".
-    - Updated discovery and field names for subject types.
+    - Updated discovery and field names for subject formats.
 
 - -04
     - Updated terminology.
@@ -5034,7 +5041,7 @@ Detached-JWS: ejy0...
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "user": {
         "sub_ids": [ {
-            "subject_type": "opaque",
+            "format": "opaque",
             "id": "J2G8G8O4AZ"
         } ]
    }
