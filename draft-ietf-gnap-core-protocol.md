@@ -3372,6 +3372,9 @@ as specified in {{RFC7797}}.
 To protect the request, the JOSE header MUST contain the following
 additional parameters.
 
+typ (string)
+: The type header, value ”gnap-binding+jwsd”.
+
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
 
@@ -3465,6 +3468,9 @@ for the key identified by kid and MUST NOT be `none`.
 To protect the request, the JWS header MUST contain the following
 additional parameters.
 
+typ (string)
+: The type header, value ”gnap-binding+jws”.
+
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
 
@@ -3537,6 +3543,7 @@ This example's JWS header decodes to:
 
 ~~~
 {
+  "typ": "gnap-binding+jws",
   "alg": "RS256",
   "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
   "htm": "POST",
