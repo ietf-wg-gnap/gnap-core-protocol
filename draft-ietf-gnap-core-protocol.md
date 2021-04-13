@@ -347,8 +347,8 @@ In this example flow, the client instance is a web application that wants access
 of the current user, who acts as both the end-user and the resource
 owner (RO). Since the client instance is capable of directing the user to an arbitrary URL and 
 receiving responses from the user's browser, interaction here is handled through
-front-channel redirects using the user's browser. The interaction URL is functionally
-a direct service of the AS in this example. The client instance uses a persistent session
+front-channel redirects using the user's browser. The redirection URL used for interaction is
+a service hosted by the AS in this example. The client instance uses a persistent session
 with the user to ensure the same user that is starting the interaction is the user 
 that returns from the interaction.
 
@@ -443,7 +443,7 @@ An example set of protocol messages for this method can be found in {{example-au
 
 In this example flow, the client instance is a device that is capable of presenting a short,
 human-readable code to the user and directing the user to enter that code at
-a known URL. The URL the user enters the code at is a functional component of the
+a known URL. The URL the user enters the code at is an interactive service hosted by the
 AS in this example. The client instance is not capable of presenting an arbitrary URL to the user, 
 nor is it capable of accepting incoming HTTP requests from the user's browser.
 The client instance polls the AS while it is waiting for the RO to authorize the request.
@@ -2373,7 +2373,7 @@ the grant response in [a registry TBD](#IANA).
 # Determining Authorization and Consent {#authorization}
 
 When the client instance makes its [request](#request) to the AS for delegated access, it 
-asks for two kinds of information in response:
+is capable of asking for several different kinds of information in response:
 
 - the access being requested in the `access_token` request parameter
 - the subject information being requested in the `subject` request parameter
@@ -2381,13 +2381,13 @@ asks for two kinds of information in response:
 
 The AS determines what authorizations and consents are required to fulfill this requested delegation. The details of how the
 AS makes this determination are out of scope for this document. However, there are several common patterns
-defined and supported by GNAP for fulfilling these requirements, including information send by the client instance, information
+defined and supported by GNAP for fulfilling these requirements, including information sent by the client instance, information
 gathered through the interaction process, and information supplied by external parties. An individual AS
 can define its own policies and processes for deciding when and how to gather the necessary authorizations
 and consent.
 
-The client instance can supply information indicating that the client instance has the
-right to be granted the requested delegation immediately, including:
+The client instance can supply information directly to the AS in its request. From this information, the AS can determine 
+if the requested delegation can be granted immediately. The client instance can send several kinds of things, including:
 
 - the identity of the client instance, known from the presented keys or associated identifiers
 - the identity of the end user presented in the `user` request parameter
@@ -2403,13 +2403,14 @@ If the AS determines that additional runtime authorization is required, the AS c
 outright or use a number of means at its disposal to gather that authorization from the appropriate ROs, 
 including for example:
 
-- starting interaction with the end user through the client instance
-- challenging the client instance through a response mechanism
-- request that the client instance present specific additional information
-- contacting a RO through an out-of-band mechanism
-- contacting an auxiliary software process through an out-of-band mechanism
-- any additional mechanisms defined by extensions to this protocol
+- starting interaction with the end user facilitated by the client software, such as a redirection or user code
+- challenging the client instance through a challenge-response mechanism
+- requesting that the client instance present specific additional information, such as a user's credential or an assertion
+- contacting a RO through an out-of-band mechanism, such as a push notification
+- contacting an auxiliary software process through an out-of-band mechanism, such as querying a digital wallet
 
+The authorization and consent gathering process in GNAP is left deliberately flexible to allow for a 
+wide variety of different deployments, interactions, and methodologies. 
 In this process, the AS can gather consent from the RO as necessitated by the access that has
 been requested. The AS can sometimes determine which RO needs to consent based on what has been requested
 by the client instance, such as a specific RS record, an identified user, or a request requiring specific
@@ -2418,9 +2419,10 @@ do so without involving the client instance in its consent gathering process. Fo
 push a notification to a known RO and have the RO approve the pending request asynchronously. These interactions
 can be through an interface of the AS itself (such as a hosted web page), through another application (such as
 something installed on the RO's device), through a messaging fabric, or any other means.
-When interacting with an RO, the AS can do anything it needs to determine the authorization of the requested grant:
+When interacting with an RO, the AS can do anything it needs to determine the authorization of the requested grant,
+including:
 
-- authenticate the RO, through a local account or some other means
+- authenticate the RO, through a local account or some other means such as federated login
 - validate the RO through presentation of claims, attributes, or other information
 - prompt the RO for consent for the requested delegation
 - describe to the RO what information is being released, to whom, and for what purpose
@@ -2514,8 +2516,10 @@ the AS and this URI, including communication of the user code itself, are out of
 When the RO enters this code at the user code URI,
 the AS MUST uniquely identify the pending request that the code was associated
 with. If the AS does not recognize the entered code, the interaction component MUST
-display an error to the user. If the AS detects too many unrecognized codes
-enter attempts, the interaction component SHOULD display an error to the user.
+display an error to the user. If the AS detects too many unrecognized code
+enter attempts, the interaction component SHOULD display an error to the user and 
+MAY take additional actions such as slowing down the input interactions.
+The user should be warned as such an error state is approached, if possible.
 
 The client instance MUST NOT modify the URI when launching it,
 in particular the client instance MUST NOT add any parameters to the URI.
@@ -2528,7 +2532,8 @@ request and MUST be protected by HTTPS or equivalent means.
 
 When the client instance is directed to launch an application through the
 ["app"](#response-interact-app) mode, the client launches the
-URL as appropriate to the system. The means by which the AS and the
+URL as appropriate to the system, such as through a deep link or custom URI
+scheme registered to a mobile application. The means by which the AS and the
 launched application communicate with each other and perform any
 of the required actions are out of scope for this specification.
 
@@ -2536,7 +2541,8 @@ of the required actions are out of scope for this specification.
 
 If an interaction ["finish"](#response-interact-finish) method is
 associated with the current request, the AS MUST follow the appropriate
-method at upon completion of interaction in order to signal the client instance to continue.
+method at upon completion of interaction in order to signal the client 
+instance to continue, except for some limited error cases discussed below.
 If a finish method is not available, the AS SHOULD instruct the RO to
 return to the client instance upon completion.
 
@@ -2555,10 +2561,15 @@ The AS MUST send the hash and interaction reference based on
 the interaction finish mode as described in the following
 sections.
 
-Note that the "finish" method still occurs in some error cases, such as when the RO has denied
+Note that the "finish" method still occurs in many error cases, such as when the RO has denied
 access. This pattern allows the client instance to potentially recover from the error
 state by modifying its request or providing additional information directly to the AS in a
-continuation request.
+continuation request. The AS MUST NOT follow the "finish" method in the
+following circumstances:
+
+- The AS has determined that any URIs involved with the finish method are dangerous or blocked.
+- The AS cannot determine which ongoing grant request is being referenced.
+- The ongoing grant request has been cancelled or otherwise blocked.
 
 ### Completing Interaction with a Browser Redirect to the Callback URI {#interaction-callback}
 
