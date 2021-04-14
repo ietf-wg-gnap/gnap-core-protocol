@@ -602,7 +602,7 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 5. When the AS is done interacting with the RO, the AS 
     indicates to the RO that the request has been completed.
     
-6. Meanwhile, the client instance loads the continuation information stored at (3) and 
+6. Meanwhile, the client instance loads the continuation information stored at (2) and 
     [continues the request](#continue-request). The AS determines which
     ongoing access request is referenced here and checks its state.
     
