@@ -4560,7 +4560,7 @@ sure that it has the permission to do so.
     - Changed "key_proofs" to "key_proofs_supported".
     - Changed "assertions" to "assertions_supported".
     - Updated discovery and field names for subject formats.
-    - Add an appending to provide protocol rationale, compared to OAuth2.
+    - Add an appendix to provide protocol rationale, compared to OAuth2.
 
 - -04
     - Updated terminology.
