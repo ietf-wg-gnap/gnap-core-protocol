@@ -3873,25 +3873,53 @@ B7_8Wbw4ttzbMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFekpdfWdiPQddQ6Y
 ### HTTP Message Signing {#httpsig-binding}
 
 This method is indicated by `httpsig` in
-the `proof` field. The client instance creates an HTTP
-Signature header as described in {{I-D.ietf-httpbis-message-signatures}} section 4. The client instance MUST
-calculate and present the Digest header as defined in {{RFC3230}} and include
-this header in the signature.
+the `proof` field. The sender creates an HTTP
+Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}. 
+
+The covered content of the signature MUST include the following:
+
+@request-target:
+: the target of the HTTP request 
+
+digest:
+: The Digest header as defined in {{RFC3230}}. When the request message has a body, 
+the signer MUST calculate this header value and the verifier 
+MUST validate this header.
+
+When the request is bound to an access token, the covered content
+MUST also include:
+
+authorization:
+: The Authorization header used to present the access token as discussed in
+{{use-access-token}}.
+
+Other content MAY also be included.
+
+The signing key material used by the client is the relevant signature key
+associated with the client instance or the token, as appropriate. If the
+key presented is a JWK, the `keyid` parameter of the signature MUST be set
+to the `kid` value of the JWK. The signing algorithm used MUST be the JWS
+algorithm denoted by the key's `alg` field, and the explicit `alg` signature 
+parameter MUST NOT be included.
+
+The verification key material used by the verifier (either AS or AS) is the
+key material 
+
 
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Content-Length: 716
-Signature: keyId="xyz-client", algorithm="rsa-sha256",
- headers="(request-target) digest content-length",
- signature="TkehmgK7GD/z4jGkmcHS67cjVRgm3zVQNlNrrXW32Wv7d
+SignatureInput: gnap=("@request-target" "digest" 
+  "content-length");keyid="xyz-client"
+Signature=:TkehmgK7GD/z4jGkmcHS67cjVRgm3zVQNlNrrXW32Wv7d
 u0VNEIVI/dMhe0WlHC93NP3ms91i2WOW5r5B6qow6TNx/82/6W84p5jqF
 YuYfTkKYZ69GbfqXkYV9gaT++dl5kvZQjVk+KZT1dzpAzv8hdk9nO87Xi
 rj7qe2mdAGE1LLc3YvXwNxuCQh82sa5rXHqtNT1077fiDvSVYeced0UEm
 rWwErVgr7sijtbTohC4FJLuJ0nG/KJUcIG/FTchW9rd6dHoBnY43+3Dzj
 CIthXpdH5u4VX3TBe6GJDO6Mkzc6vB+67OWzPwhYTplUiFFV6UZCsDEeu
-Sa/Ue1yLEAMg=="]}
+Sa/Ue1yLEAMg:
 Digest: SHA=oZz2O3kg5SEFAhmr0xEBbc4jEfo=
  
 {
