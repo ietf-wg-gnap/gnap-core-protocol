@@ -3442,15 +3442,24 @@ Additional proofing methods are defined by [a registry TBD](#IANA).
 
 All key binding methods used by this specification MUST cover all relevant portions
 of the request, including anything that would change the nature of the request, to allow
-for secure validation of the request by the AS. Relevant aspects include
+for secure validation of the request. Relevant aspects include
 the URI being called, the HTTP method being used, any relevant HTTP headers and
-values, and the HTTP message body itself. The recipient of the signed message
+values, and the HTTP message body itself. The verifier of the signed message
 MUST validate all components of the signed message to ensure that nothing
 has been tampered with or substituted in a way that would change the nature of
-the request.
+the request. Key binding method definitions SHOULD enumerate how these 
+requirements are fulfilled.
 
-When a key proofing mechanism is bound to an access token, the access token MUST be covered 
+When a key proofing mechanism is bound to an access token, the key being presented MUST
+be the key associated with the access token and the access token MUST be covered 
 by the signature method of the proofing mechanism.
+
+The key binding methods in this section MAY be used by other components making calls
+as part of GNAP, such as the extensions allowing the RS to make calls to the
+AS defined in {{I-D.ietf-gnap-resource-servers}}. To facilitate this extended use, the
+sections below are defined in generic terms of the "sender" and "verifier" of the HTTP message.
+In the core functions of GNAP, the "sender" is the client instance and the "verifier" 
+is the AS or RS, as appropriate.
 
 When used for delegation in GNAP, these key binding mechanisms allow
 the AS to ensure that the keys presented by the client instance in the initial request are in 
@@ -3468,30 +3477,34 @@ to either the access token's own key or, in the case of bearer tokens, the clien
 This method is indicated by `jwsd` in the
 `proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The JOSE (JSON Object Signing and Encryption) header MUST contain the `kid` parameter of
-the key bound to this client instance for this request.  The `alg` parameter MUST be set
-to a value appropriate for the key identified by kid and MUST NOT be `none`. 
+To protect the request, the JOSE header of the signature contains the following
+parameters:
 
-To protect the request, the JOSE header MUST contain the following
-additional parameters.
+kid (string)
+: The key identifier. RECOMMENDED. If the key is presented in JWK format, this
+  MUST be the value of the `kid` field of the key.
+
+alg (string)
+: The algorithm used to sign the request. REQUIRED. MUST be appropriate to the key presented. 
+  If the key is presented as a JWK, this MUST be equal to the `alg` parameter of the key. MUST NOT be `none`. 
 
 typ (string)
-: The type header, value ”gnap-binding+jwsd”.
+: The type header, value ”gnap-binding+jwsd”. REQUIRED
 
 htm (string)
-: The HTTP Method used to make this request, as an uppercase ASCII string.
+: The HTTP Method used to make this request, as an uppercase ASCII string. REQUIRED
 
 uri (string)
-: The HTTP URI used for this request, including all path and query components and no fragment component.
+: The HTTP URI used for this request, including all path and query components and no fragment component. REQUIRED
 
 ts (integer)
-: A timestamp of the request in integer seconds
+: A timestamp of the request in integer seconds. REQUIRED
 
 ath (string)
 : When a request is bound to an access token, the access token hash value. The value MUST be the
   result of a Base64url encoding (with no padding) the SHA-256 digest
-  of the ASCII encoding of the associated access token's value.
-
+  of the ASCII encoding of the associated access token's value. REQUIRED if the request
+  protects an access token.
 
 If the HTTP request has a message body, such as an HTTP POST or PUT method,
 the payload of the JWS object is the Base64url encoding (without padding)
@@ -3553,10 +3566,12 @@ kpdfWdiPQddQ6Y1cK2U3obvUg7w"
 }
 ~~~
 
-When the server (AS or RS) receives the Detached-JWS header, it MUST parse its
-contents as a detached JWS object. The HTTP Body is used as the
-payload for purposes of validating the JWS, with no
-transformations.
+When the verifier receives the Detached-JWS header, it MUST parse and
+validate the JWS object. The signature MUST be validated against the
+expected key of the signer. All required fields MUST be present
+and their values MUST be valid. If the HTTP message request contains
+a body, the verifier MUST calculate the hash of body just as
+the signer does, with no normalization or transformation of the request.
 
 ### Attached JWS {#attached-jws}
 
@@ -3710,15 +3725,18 @@ And the JWS body decodes to:
 
 \[\[ [See issue #109](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/109) \]\]
 
+When the verifier receives an attached JWS request, it MUST parse and
+validate the JWS object. The signature MUST be validated against the
+expected key of the signer. All required fields MUST be present
+and their values MUST be valid. If the HTTP message request contains
+a body, the verifier MUST decode the payload of the JWS object and
+treat this as the HTTP message body.
+
 ### Mutual TLS {#mtls}
 
 This method is indicated by `mtls` in the
-`proof` field. The client instance presents its TLS client
-certificate during TLS negotiation with the server (either AS or RS).
-The AS or RS takes the thumbprint of the TLS client certificate presented
-during mutual TLS negotiation and compares that thumbprint to the
-thumbprint presented by the client instance application as described in 
-{{RFC8705}} section 3.
+`proof` field. The signer presents its TLS client
+certificate during TLS negotiation with the verifier.
 
 ~~~
 POST /tx HTTP/1.1
@@ -3795,12 +3813,16 @@ fHI6kqm3NCyCCTihe2ck5RmCc5l2KBO/vAHF0ihhFOOOby1v6qbPHQcxAU6rEb907
 
 ~~~
 
+The verifier compares the TLS client certificate presented
+during mutual TLS negotiation and compares that to the
+expected key of the signer.
+
 \[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
 
 ### Demonstration of Proof-of-Possession (DPoP) {#dpop-binding}
 
 This method is indicated by `dpop` in the
-`proof` field. The client instance creates a Demonstration of Proof-of-Possession
+`proof` field. The signer creates a Demonstration of Proof-of-Possession
 signature header as described in {{I-D.ietf-oauth-dpop}}
 section 2. In addition, this specification defines the following fields
 to be added to the DPoP payload:
@@ -3870,6 +3892,12 @@ B7_8Wbw4ttzbMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFekpdfWdiPQddQ6Y
 }
 ~~~
 
+The verifier MUST parse and validate the DPoP proof header as defined in
+{{I-D.ietf-oauth-dpop}}. If the HTTP message request includes a message body,
+the verifier MUST calculate the digest of the body and compare it to the
+`htd` value. The verifier MUST ensure the key presented in the DPoP
+proof header is the same as the expected key of the signer.
+
 ### HTTP Message Signing {#httpsig-binding}
 
 This method is indicated by `httpsig` in
@@ -3893,18 +3921,12 @@ authorization:
 : The Authorization header used to present the access token as discussed in
 {{use-access-token}}.
 
-Other content MAY also be included.
+Other covered content MAY also be included.
 
-The signing key material used by the client is the relevant signature key
-associated with the client instance or the token, as appropriate. If the
-key presented is a JWK, the `keyid` parameter of the signature MUST be set
-to the `kid` value of the JWK. The signing algorithm used MUST be the JWS
+If the singer's key presented is a JWK, the `keyid` parameter of the signature MUST be set
+to the `kid` value of the JWK, the signing algorithm used MUST be the JWS
 algorithm denoted by the key's `alg` field, and the explicit `alg` signature 
 parameter MUST NOT be included.
-
-The verification key material used by the verifier (either AS or AS) is the
-key material 
-
 
 ~~~
 POST /tx HTTP/1.1
@@ -3912,8 +3934,8 @@ Host: server.example.com
 Content-Type: application/json
 Content-Length: 716
 SignatureInput: gnap=("@request-target" "digest" 
-  "content-length");keyid="xyz-client"
-Signature=:TkehmgK7GD/z4jGkmcHS67cjVRgm3zVQNlNrrXW32Wv7d
+  "content-length");keyid="xyz-client";created=1618518151
+Signature: gnap=:TkehmgK7GD/z4jGkmcHS67cjVRgm3zVQNlNrrXW32Wv7d
 u0VNEIVI/dMhe0WlHC93NP3ms91i2WOW5r5B6qow6TNx/82/6W84p5jqF
 YuYfTkKYZ69GbfqXkYV9gaT++dl5kvZQjVk+KZT1dzpAzv8hdk9nO87Xi
 rj7qe2mdAGE1LLc3YvXwNxuCQh82sa5rXHqtNT1077fiDvSVYeced0UEm
@@ -3961,28 +3983,31 @@ Y1cK2U3obvUg7w"
 }
 ~~~
 
-When used to present an access token as in {{use-access-token}},
-the Authorization header MUST be included in the signature.
+If the HTTP Message includes a message body, the verifier MUST
+calculate and verify the value of the Digest header. The verifier
+MUST ensure that the signature includes all required covered
+content. The verifier MUST validate the signature against the
+expected key of the signer.
 
 ### OAuth Proof of Possession (PoP) {#oauth-pop-binding}
 
 This method is indicated by `oauthpop` in
-the `proof` field. The client instance creates an HTTP
+the `proof` field. The signer creates an HTTP
 Authorization PoP header as described in {{I-D.ietf-oauth-signed-http-request}} section 4, with the
 following additional requirements:
 
 - The `at` (access token) field MUST be omitted
-            unless this method is being used in conjunction with
-            an access token as in {{use-access-token}}.
-            \[\[ [See issue #112](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/112) \]\]
+    unless this method is being used in conjunction with
+    an access token as in {{use-access-token}}.
+    \[\[ [See issue #112](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/112) \]\]
 
-- The `b` (body hash) field MUST be calculated and supplied,
-    unless there is no entity body (such as a GET, OPTIONS, or
-    DELETE request).
+- The `b` (body hash) field MUST be calculated and included,
+    if the message includes an entity body (such as a PUT or PATCH request).
 
-- All components of the URL MUST be calculated and supplied
-
-- The m (method) field MUST be supplied
+- All components of the URL MUST be calculated and included,
+    including query parameters `q`, path `p`, and host `u`.
+    
+- The `m` (method) field MUST be included
 
 ~~~
 POST /tx HTTP/1.1
@@ -4051,6 +4076,12 @@ Y1cK2U3obvUg7w"
 ~~~
 
 \[\[ [See issue #113](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/113) \]\]
+
+The verifier MUST parse the JWS object of the PoP header.
+The verifier MUST validate the signature of the header against the expected
+key of the signer. The verifier MUST ensure that all required parts
+of the message are covered by the signature. The verifier MUST ensure that
+all components of the signature contain correct values.
 
 # Resource Access Rights {#resource-access-rights}
 
