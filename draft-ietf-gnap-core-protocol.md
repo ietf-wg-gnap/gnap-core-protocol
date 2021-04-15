@@ -3456,7 +3456,7 @@ by the signature method of the proofing mechanism.
 
 The key binding methods in this section MAY be used by other components making calls
 as part of GNAP, such as the extensions allowing the RS to make calls to the
-AS defined in {{I-D.ietf-gnap-resource-servers}}. To facilitate this extended use, the
+AS defined in \{\{I-D.ietf-gnap-resource-servers\}\}. To facilitate this extended use, the
 sections below are defined in generic terms of the "sender" and "verifier" of the HTTP message.
 In the core functions of GNAP, the "sender" is the client instance and the "verifier" 
 is the AS or RS, as appropriate.
