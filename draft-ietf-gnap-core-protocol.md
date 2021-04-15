@@ -54,7 +54,6 @@ normative:
     RFC7517:
     RFC6749:
     RFC6750:
-    RFC7797:
     RFC8174:
     RFC8259:
     RFC8705:
@@ -3471,9 +3470,7 @@ This method is indicated by `jwsd` in the
 
 The JOSE (JSON Object Signing and Encryption) header MUST contain the `kid` parameter of
 the key bound to this client instance for this request.  The `alg` parameter MUST be set
-to a value appropriate for the key identified by kid and MUST NOT be `none`.  The `b64`
-parameter MUST be set to `false` and the `crit` parameter MUST contain at least `b64`
-as specified in {{RFC7797}}.
+to a value appropriate for the key identified by kid and MUST NOT be `none`. 
 
 To protect the request, the JOSE header MUST contain the following
 additional parameters.
@@ -3495,11 +3492,16 @@ ath (string)
   result of a Base64url encoding (with no padding) the SHA-256 digest
   of the ASCII encoding of the associated access token's value.
 
-The payload of the JWS object is the serialized body of the request, and
-the object is signed according to detached JWS {{RFC7797}}. 
 
-The client instance presents the signature in the Detached-JWS HTTP Header
-field. 
+If the HTTP request has a message body, such as an HTTP POST or PUT method,
+the payload of the JWS object is the Base64url encoding (without padding)
+of the SHA256 digest of the bytes of the body.
+If the request being made does not have a message body, such as
+an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
+calculated over an empty payload. 
+
+The client instance presents the signed object in compact form
+{{RFC7515}} in the Detached-JWS HTTP Header field. 
 
 ~~~
 POST /tx HTTP/1.1
@@ -3551,10 +3553,6 @@ kpdfWdiPQddQ6Y1cK2U3obvUg7w"
 }
 ~~~
 
-If the request being made does not have a message body, such as
-an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
-calculated over an empty payload.
-
 When the server (AS or RS) receives the Detached-JWS header, it MUST parse its
 contents as a detached JWS object. The HTTP Body is used as the
 payload for purposes of validating the JWS, with no
@@ -3589,13 +3587,18 @@ ath (string)
   result of a Base64url encoding (with no padding) the SHA-256 digest
   of the ASCII encoding of the associated access token's value.
 
-The payload of the JWS object is the JSON serialized body of the request, and
+If the HTTP request has a message body, such as an HTTP POST or PUT method,
+the payload of the JWS object is the JSON serialized body of the request, and
 the object is signed according to JWS and serialized into compact form {{RFC7515}}. 
-
 The client instance presents the JWS as the body of the request along with a
 content type of `application/jose`. The AS
 MUST extract the payload of the JWS and treat it as the request body
 for further processing.
+
+If the request being made does not have a message body, such as
+an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
+calculated over an empty payload and passed in the `Detached-JWS`
+header as described in {{detached-jws}}.
 
 ~~~
 POST /tx HTTP/1.1
@@ -3704,12 +3707,6 @@ And the JWS body decodes to:
   }
 }
 ~~~
-
-
-If the request being made does not have a message body, such as
-an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
-calculated over an empty payload and passed in the `Detached-JWS`
-header as described in {{detached-jws}}.
 
 \[\[ [See issue #109](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/109) \]\]
 
