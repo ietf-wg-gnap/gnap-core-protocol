@@ -3490,12 +3490,10 @@ uri (string)
 ts (integer)
 : A timestamp of the request in integer seconds
 
-at_hash (string)
-: When a request is bound to an access token, the access token hash value. Its value is the 
-    base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
-    `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
-    header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
-    value with SHA-256, then take the left-most 128 bits and base64url encode them. 
+ath (string)
+: When a request is bound to an access token, the access token hash value. The value MUST be the
+  result of a Base64url encoding (with no padding) the SHA-256 digest
+  of the ASCII encoding of the associated access token's value.
 
 The payload of the JWS object is the serialized body of the request, and
 the object is signed according to detached JWS {{RFC7797}}. 
@@ -3586,12 +3584,10 @@ uri (string)
 ts (integer)
 : A timestamp of the request in integer seconds
 
-at_hash (string)
-: When a request is bound to an access token, the access token hash value. Its value is the 
-    base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
-    `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
-    header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
-    value with SHA-256, then take the left-most 128 bits and base64url encode them. 
+ath (string)
+: When a request is bound to an access token, the access token hash value. The value MUST be the
+  result of a Base64url encoding (with no padding) the SHA-256 digest
+  of the ASCII encoding of the associated access token's value.
 
 The payload of the JWS object is the JSON serialized body of the request, and
 the object is signed according to JWS and serialized into compact form {{RFC7515}}. 
@@ -3816,13 +3812,6 @@ htd (string)
 : Digest of the request body as the value of the Digest 
     header defined in {{RFC3230}}. When a request contains a message body, such as a POST or PUT request,
     this field is REQUIRED.
-
-at_hash (string)
-: When a request is bound to an access token, the access token hash value. Its value is the 
-    base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
-    `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
-    header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
-    value with SHA-256, then take the left-most 128 bits and base64url encode them. 
 
 ~~~
 POST /tx HTTP/1.1
