@@ -4460,6 +4460,8 @@ sure that it has the permission to do so.
     - Add an appendix to provide protocol rationale, compared to OAuth2.
     - Updated subject information definition.
     - Refactored the RS-centric components into a new document. 
+    - Updated cryptographic proof of possession methods to match current reference syntax.
+    - Updated proofing language to use "signer" and "verifier" generically.
 
 - -04
     - Updated terminology.
