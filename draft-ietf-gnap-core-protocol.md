@@ -3484,8 +3484,8 @@ typ (string)
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
 
-htu (string)
-: The HTTP URI used for this request, including all path and query components.
+uri (string)
+: The HTTP URI used for this request, including all path and query components and no fragment component.
 
 ts (integer)
 : A timestamp of the request in integer seconds
@@ -3580,8 +3580,8 @@ typ (string)
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
 
-htu (string)
-: The HTTP URI used for this request, including all path and query components.
+uri (string)
+: The HTTP URI used for this request, including all path and query components and no fragment component.
 
 ts (integer)
 : A timestamp of the request in integer seconds
