@@ -3813,9 +3813,15 @@ fHI6kqm3NCyCCTihe2ck5RmCc5l2KBO/vAHF0ihhFOOOby1v6qbPHQcxAU6rEb907
 
 ~~~
 
-The verifier compares the TLS client certificate presented
-during mutual TLS negotiation and compares that to the
-expected key of the signer.
+The verifier compares the TLS client certificate presented during 
+mutual TLS negotiation to the expected key of the signer. Since the
+TLS connection covers the entire message, there are no additional
+requirements to check.
+
+Note that in many instances, the verifier will not do a full certificate
+chain validation of the presented TLS client certificate, as the
+means of trust for this certificate could be in something other than
+a PKI system, such as a static registration or trust-on-first-use.
 
 \[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
 
