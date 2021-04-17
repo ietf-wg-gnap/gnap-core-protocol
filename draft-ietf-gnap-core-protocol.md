@@ -1721,7 +1721,7 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
 {
     "interact": {
         "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
-        "push": "MBDOFXG4Y5CVJCX821LH"
+        "finish": "MBDOFXG4Y5CVJCX821LH"
     },
     "continue": {
         "access_token": {
