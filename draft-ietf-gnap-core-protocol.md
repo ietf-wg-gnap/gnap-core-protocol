@@ -117,6 +117,8 @@ of these can be found in {{example-oauth2}}.
 
 {::boilerplate bcp14}
 
+This document contains non-normative examples of partial and complete HTTP messages. Some examples use a single trailing backslash '\' to indicate line wrapping for long values, as per {{!RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
+
 ## Roles
 
 The parties in GNAP perform actions under different roles. 
@@ -3497,12 +3499,12 @@ htm (string)
 uri (string)
 : The HTTP URI used for this request, including all path and query components and no fragment component. REQUIRED
 
-ts (integer)
-: A timestamp of the request in integer seconds. REQUIRED
+created (integer)
+: A timestamp of when the signature was created, in integer seconds since UNIX Epoch
 
 ath (string)
 : When a request is bound to an access token, the access token hash value. The value MUST be the
-  result of a Base64url encoding (with no padding) the SHA-256 digest
+  result of Base64url encoding (with no padding) the SHA-256 digest
   of the ASCII encoding of the associated access token's value. REQUIRED if the request
   protects an access token.
 
@@ -3594,12 +3596,12 @@ htm (string)
 uri (string)
 : The HTTP URI used for this request, including all path and query components and no fragment component.
 
-ts (integer)
-: A timestamp of the request in integer seconds
+created (integer)
+: A timestamp of when the signature was created, in integer seconds since UNIX Epoch
 
 ath (string)
 : When a request is bound to an access token, the access token hash value. The value MUST be the
-  result of a Base64url encoding (with no padding) the SHA-256 digest
+  result of Base64url encoding (with no padding) the SHA-256 digest
   of the ASCII encoding of the associated access token's value.
 
 If the HTTP request has a message body, such as an HTTP POST or PUT method,
@@ -3929,7 +3931,7 @@ authorization:
 
 Other covered content MAY also be included.
 
-If the singer's key presented is a JWK, the `keyid` parameter of the signature MUST be set
+If the signer's key presented is a JWK, the `keyid` parameter of the signature MUST be set
 to the `kid` value of the JWK, the signing algorithm used MUST be the JWS
 algorithm denoted by the key's `alg` field, and the explicit `alg` signature 
 parameter MUST NOT be included.
