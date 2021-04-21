@@ -217,7 +217,7 @@ Subject
 : person, organization or device.
 
 Subject Information
-: statement asserted locally by an AS about a subject.
+: statement asserted by an AS about a subject.
 
 ## Sequences {#sequence}
 
@@ -2256,7 +2256,7 @@ Subject identifiers returned by the AS SHOULD uniquely identify the RO at the
 AS. Some forms of subject identifier are opaque to the client instance (such as the subject of an 
 issuer and subject pair), while others forms (such as email address and phone number) are
 intended to allow the client instance to correlate the identifier with other account information
-at the client instance. The client instance MUST NOT request or use any returned subject identifiers for communication
+at the client instance. The AS MUST ensure that the returned subject identifiers only apply to the authenticated end user. The client instance MUST NOT request or use any returned subject identifiers for communication
 purposes (see {{request-subject}}). That is, a subject identifier returned in the format of an email address or 
 a phone number only identifies the RO to the AS and does not indicate that the
 AS has validated that the represented email address or phone number in the identifier
@@ -4559,6 +4559,7 @@ sure that it has the permission to do so.
     - Changed "key_proofs" to "key_proofs_supported".
     - Changed "assertions" to "assertions_supported".
     - Updated discovery and field names for subject formats.
+    - Updated subject information definition.
 
 - -04
     - Updated terminology.
