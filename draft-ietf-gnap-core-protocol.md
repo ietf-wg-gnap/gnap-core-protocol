@@ -63,6 +63,7 @@ normative:
     I-D.ietf-oauth-signed-http-request:
     I-D.ietf-oauth-dpop:
     I-D.ietf-secevent-subject-identifiers:
+    I-D.ietf-oauth-rar:
     OIDC:
       title: OpenID Connect Core 1.0 incorporating errata set 1
       target: https://openiD.net/specs/openiD-connect-core-1_0.html
@@ -107,7 +108,8 @@ OpenID Connect {{OIDC}}, and the family of protocols that have grown up
 around that ecosystem. However, GNAP is not an extension of OAuth 2.0
 and is not intended to be directly compatible with OAuth 2.0. GNAP seeks to
 provide functionality and solve use cases that OAuth 2.0 cannot easily
-or cleanly address. Even so, GNAP and OAuth 2.0 will exist in parallel 
+or cleanly address. {{vs-oauth2}} further details the protocol rationale compared to OAuth 2.0.
+GNAP and OAuth 2.0 will exist in parallel 
 for many deployments, and considerations have been taken to facilitate
 the mapping and transition from legacy systems to GNAP. Some examples
 of these can be found in {{example-oauth2}}. 
@@ -4410,6 +4412,7 @@ sure that it has the permission to do so.
     - Changed "key_proofs" to "key_proofs_supported".
     - Changed "assertions" to "assertions_supported".
     - Updated discovery and field names for subject formats.
+    - Add an appendix to provide protocol rationale, compared to OAuth2.
     - Updated subject information definition.
     - Refactored the RS-centric components into a new document. 
 
@@ -4445,6 +4448,46 @@ sure that it has the permission to do so.
 
 - -00 
     - Initial working group draft.
+
+# Compared to OAuth2 {#vs-oauth2}
+
+GNAP's protocol design differs from OAuth 2's in several fundamental ways:
+
+1. **Consent and authorization flexibility:**
+
+OAuth 2 generally assumes the user has access to the a web browser. The type of interaction available is fixed by the grant type, and the most common interactive grant types start in the browser. OAuth 2 assumes that the user using the client software is the same user that will interact with the AS to approve access.
+
+GNAP allows various patterns to manage authorizations and consents required to fulfill this requested delegation, including information sent by the client instance, information supplied by external parties, and information gathered through the interaction process. GNAP allows a client instance to list different ways that it can start and finish an interaction, and these can be mixed together as needed for different use cases. GNAP interactions can use a browser, but don’t have to. Methods can use inter-application messaging protocols, out-of-band data transfer, or anything else. GNAP allows extensions to define new ways to start and finish an interaction, as new methods and platforms are expected to become available over time. GNAP is designed to allow the end-user and the resource owner to be two different people, but still works in the optimized case of them being the same party.
+
+2. **Intent registration and inline negotiation:**
+
+OAuth 2 uses different “grant types” that start at different endpoints for different purposes. Many of these require discovery of several interrelated parameters.
+
+GNAP requests all start with the same type of request to the same endpoint at the AS. Next steps are negotiated between the client instance and AS based on software capabilities, policies surrounding requested access, and the overall context of the ongoing request. GNAP defines a continuation API that allows the client instance and AS to request and send additional information from each other over multiple steps. This continuation API uses the same access token protection that other GNAP-protected APIs use. GNAP allows discovery to optimize the requests but it isn’t required thanks to the negotiation capabilities.
+
+3. **Client instances:**
+
+OAuth 2 requires all clients to be registered at the AS and to use a client_id known to the AS as part of the protocol. This client_id is generally assumed to be assigned by a trusted authority during a registration process, and OAuth places a lot of trust on the client_id as a result. Dynamic registration allows different classes of clients to get a client_id at runtime, even if they only ever use it for one request.
+
+GNAP allows the client instance to present an unknown key to the AS and use that key to protect the ongoing request. GNAP’s client instance identifier mechanism allows for pre-registered clients and dynamically registered clients to exist as an optimized case without requiring the identifier as part of the protocol at all times.
+
+4. **Expanded delegation:**
+
+OAuth 2 defines the “scope” parameter for controlling access to APIs. This parameter has been coopted to mean a number of different things in different protocols, including flags for turning special behavior on and off, including the return of data apart from the access token. The “resource” parameter and RAR extensions (as defined in {{I-D.ietf-oauth-rar}}) expand on the “scope” concept in similar but different ways.
+
+GNAP defines a rich structure for requesting access, with string references as an optimization. GNAP defines methods for requesting directly-returned user information, separate from API access. This information includes identifiers for the current user and structured assertions. The core GNAP protocol makes no assumptions or demands on the format or contents of the access token, but the RS extension allows a negotiation of token formats between the AS and RS.
+
+5. **Cryptography-based security:**
+
+OAuth 2 uses shared bearer secrets, including the client_secret and access token, and advanced authentication and sender constraint have been built on after the fact in inconsistent ways.
+
+In GNAP, all communication between the client instance and AS is bound to a key held by the client instance. GNAP uses the same cryptographic mechanisms for both authenticating the client (to the AS) and binding the access token (to the RS and the AS). GNAP allows extensions to define new cryptographic protection mechanisms, as new methods are expected to become available over time. GNAP does not have a notion of “public clients” because key information can always be sent and used dynamically.
+
+6. **Privacy and usable security:** 
+
+OAuth 2's deployment model assumes a strong binding between the AS and the RS.
+
+GNAP is designed to be interoperable with decentralized identity standards and to provide a human-centric authorization layer. In addition to the core protocol, GNAP that supports various patterns of communication between RSs and ASs through extensions. GNAP tries to limit the odds of a consolidation to just a handful of super-popular AS services.  
 
 # Component Data Models {#data-models}
 
