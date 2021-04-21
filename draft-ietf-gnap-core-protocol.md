@@ -4270,6 +4270,8 @@ sure that it has the permission to do so.
    
 # Document History {#history}
 
+    - Updated subject information definition.
+
 - -04
     - Updated terminology.
     - Refactored key presentation and binding.
