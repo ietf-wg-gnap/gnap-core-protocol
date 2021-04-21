@@ -3619,7 +3619,7 @@ PGiVuOZUcN1tRtUS6tx2b4cBgw9mPgXG3IPB3wY7ctc
 
 This leads to the following full HTTP request message:
 
-~~~
+~~~ http-message
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3782,7 +3782,7 @@ The request body, used as the JWS Payload, is the following JSON object:
 
 This leads to the following full HTTP request message:
 
-~~~
+~~~ http-message
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/jose
@@ -3838,7 +3838,7 @@ In this example, the certificate is communicated to the application
 through the `Client-Cert` header from a TLS reverse proxy, leading
 to the following full HTTP request message:
 
-~~~
+~~~ http-message
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/jose
@@ -4008,7 +4008,7 @@ The JWS Payload contains the following JWT claims, including a hash of the body:
 
 This results in the following full HTTP message request:
 
-~~~
+~~~ http-message
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -4168,7 +4168,7 @@ The HTTP message signature input string is calculated to be the following:
 
 This leads to the following full HTTP message request:
 
-~~~
+~~~ http-message
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -4320,7 +4320,7 @@ After calculating the hashes for the body, headers, and URL components, the JWS 
 
 This leads to the following HTTP message request:
 
-~~~
+~~~ http-message
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
