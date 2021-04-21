@@ -33,7 +33,7 @@ author:
 
 normative:
     BCP195:
-       target: 'http://www.rfc-editor.org/info/bcp195'
+       target: 'https://www.rfc-editor.org/info/bcp195'
        title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
        date: May 2015
        author:
@@ -45,7 +45,9 @@ normative:
            ins: P. Saint-Andre
     RFC2119:
     RFC3230:
+    RFC3986:
     RFC5646:
+    RFC7234:
     RFC7468:
     RFC7515:
     RFC7517:
@@ -120,7 +122,7 @@ Roles are defined by the actions taken and the expectations leveraged
 on the role by the overall protocol. 
 
 Authorization Server (AS)
-: server that grants delegated privileges to a particular instance of client software in the form of an access token and other information (such as subject information). 
+: server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information). 
 
 Client
 : application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. 
@@ -182,8 +184,6 @@ another system that deals with security rights. From the perspective of
 GNAP, all of these are pieces of the AS and together fulfill the
 role of the AS as defined by the protocol.
 
-\[\[ [See issue #29](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/29) \]\]
-
 ## Elements {#elements}
 
 In addition to the roles above, the protocol also involves several 
@@ -206,12 +206,12 @@ Privilege
     Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end-user. This process is refered to as privilege delegation. 
 
 Protected Resource
-: protected API (Application Programming Interface) served by a RS and that can be accessed by a client, if and only if a valid access token is provided.
+: protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid access token is provided.
 
     Note: to avoid complex sentences, the specification document may simply refer to resource instead of protected resource.   
 
 Right
-: ability given to a subject to perform a given operation on a resource under the control of a RS.
+: ability given to a subject to perform a given operation on a resource under the control of an RS.
 
 Subject
 : person, organization or device.
@@ -238,21 +238,24 @@ the information needed at a given stage is communicated out of band
 or is preconfigured between the components or entities performing
 the roles. For example, one entity can fulfil multiple roles, and so
 explicit communication between the roles is not necessary within the
-protocol flow.
+protocol flow. Additionally some components may not be involved
+in all use cases. For example, a client instance could be calling the
+AS just to get direct user information and have no need to get
+an access token to call an RS.
 
 ~~~
-        +------------+             +------------+
-        | End-user   | ~ ~ ~ ~ ~ ~ |  Resource  |
-        |            |             | Owner (RO) |
-        +------------+             +------------+
-            +                            +      
-            +                            +      
-           (A)                          (B)       
-            +                            +        
-            +                            +         
-        +--------+                       +       +------------+
-        | Client |--------------(1)------+------>|  Resource  |
-        |Instance|                       +       |   Server   |
+        +------------+         +------------+
+        | End-user   | ~ ~ ~ ~ |  Resource  |
+        |            |         | Owner (RO) |
+        +------------+         +------------+
+            +                         +      
+            +                         +      
+           (A)                       (B)       
+            +                         +        
+            +                         +         
+        +--------+                    +          +------------+
+        | Client |--------------(1)---+--------->|  Resource  |
+        |Instance|                    +          |   Server   |
         |        |       +---------------+       |    (RS)    |
         |        |--(2)->| Authorization |       |            |
         |        |<-(3)--|     Server    |       |            |
@@ -282,7 +285,7 @@ protocol flow.
     request. Note that the RO and end-user are often
     the same entity in practice.
     
-- (1) The client instance [attempts to call the RS](#rs-request-without-token) to determine 
+- (1) The client instance [can attempt to call the RS](#rs-request-without-token) to determine 
     what access is needed.
     The RS informs the client instance that access can be granted through the AS. Note that
     for most situations, the client instance already knows which AS to talk to and which
@@ -334,7 +337,9 @@ protocol flow.
     has completed its access of the RS and no longer needs the token.
 
 The following sections and {{examples}} contain specific guidance on how to use
-GNAP in different situations and deployments.
+GNAP in different situations and deployments. For example, it is possible for the 
+client instance to never request an access token and never call an RS, just as it is
+possible for there not to be a user involved in the delegation process.
 
 ### Redirect-based Interaction {#sequence-redirect}
 
@@ -370,6 +375,11 @@ that returns from the interaction.
     |        |                                  |        |
     |        |<-(9)----- Grant Access ----------|        |
     |        |                                  |        |
+    |        |                                  |        |     +--------+
+    |        |--(10)-- Access API ---------------------------->|   RS   |
+    |        |                                  |        |     |        |
+    |        |<-(11)-- API Response ---------------------------|        |
+    |        |                                  |        |     +--------+
     +--------+                                  +--------+
 ~~~
 
@@ -377,13 +387,13 @@ that returns from the interaction.
 
 2. The client instance [requests access to the resource](#request). The client instance indicates that
     it can [redirect to an arbitrary URL](#request-interact-redirect) and
-    [receive a callback from the browser](#request-interact-callback). The client instance
-    stores verification information for its callback in the session created
+    [receive a redirect from the browser](#request-interact-callback-redirect). The client instance
+    stores verification information for its redirect in the session created
     in (1).
 
 3. The AS determines that interaction is needed and [responds](#response) with
     a [URL to send the user to](#response-interact-redirect) and
-    [information needed to verify the callback](#response-interact-callback) in (7).
+    [information needed to verify the redirect](#response-interact-callback) in (7).
     The AS also includes information the client instance will need to 
     [continue the request](#response-continue) in (8). The AS associates this
     continuation information with an ongoing request that will be referenced in (4), (6), and (8).
@@ -399,9 +409,9 @@ that returns from the interaction.
 
 7. When the AS is done interacting with the user, the AS 
     [redirects the user back](#interaction-callback) to the
-    client instance using the callback URL provided in (2). The callback URL is augmented with
+    client instance using the redirect URL provided in (2). The redirect URL is augmented with
     an interaction reference that the AS associates with the ongoing 
-    request created in (2) and referenced in (4). The callback URL is also
+    request created in (2) and referenced in (4). The redirect URL is also
     augmented with a hash of the security information provided
     in (2) and (3). The client instance loads the verification information from (2) and (3) from 
     the session created in (1). The client instance [calculates a hash](#interaction-hash)
@@ -409,7 +419,7 @@ that returns from the interaction.
     Note that the client instance needs to ensure that the parameters for the incoming
     request match those that it is expecting from the session created
     in (1). The client instance also needs to be prepared for the end-user never being returned
-    to the client instance and handle time outs appropriately.
+    to the client instance and handle timeouts appropriately.
     
 8. The client instance loads the continuation information from (3) and sends the 
     interaction reference from (7) in a request to
@@ -420,6 +430,11 @@ that returns from the interaction.
 9. If the request has been authorized, the AS grants access to the information
     in the form of [access tokens](#response-token) and
     [direct subject information](#response-subject) to the client instance.
+
+10. The client instance [uses the access token](#use-access-token) to call the RS.
+
+11. The RS validates the access token and returns an appropriate response for the
+    API.
 
 An example set of protocol messages for this method can be found in {{example-auth-code}}.
 
@@ -463,6 +478,11 @@ the AS.
     |        |                                  |        |
     |        |<-(12)----- Grant Access ---------|        |
     |        |                                  |        |
+    |        |                                  |        |     +--------+
+    |        |--(13)-- Access API ---------------------------->|   RS   |
+    |        |                                  |        |     |        |
+    |        |<-(14)-- API Response ---------------------------|        |
+    |        |                                  |        |     +--------+
     +--------+                                  +--------+
 ~~~
 
@@ -517,6 +537,11 @@ the AS.
     in the form of [access tokens](#response-token) and
     [direct subject information](#response-subject) to the client instance.
 
+13. The client instance [uses the access token](#use-access-token) to call the RS.
+
+14. The RS validates the access token and returns an appropriate response for the
+    API.
+
 An example set of protocol messages for this method can be found in {{example-device}}.
 
 ### Asynchronous Authorization {#sequence-async}
@@ -546,6 +571,11 @@ The client instance polls the AS while it is waiting for the RO to authorize the
     |        |                                  |        |
     |        |<-(9)------ Grant Access ---------|        |
     |        |                                  |        |
+    |        |                                  |        |     +--------+
+    |        |--(10)-- Access API ---------------------------->|   RS   |
+    |        |                                  |        |     |        |
+    |        |<-(11)-- API Response ---------------------------|        |
+    |        |                                  |        |     +--------+
     +--------+                                  +--------+
 ~~~
 
@@ -564,7 +594,7 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 
 3. The AS determines which RO to contact based on the request in (1), through a
     combination of the [user request](#request-user), the 
-    [resources request](#request-resource), and other policy information. The AS
+    [resources request](#request-token), and other policy information. The AS
     contacts the RO and authenticates them.
 
 4. The RO authorizes the pending request from the client instance.
@@ -572,7 +602,7 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 5. When the AS is done interacting with the RO, the AS 
     indicates to the RO that the request has been completed.
     
-6. Meanwhile, the client instance loads the continuation information stored at (3) and 
+6. Meanwhile, the client instance loads the continuation information stored at (2) and 
     [continues the request](#continue-request). The AS determines which
     ongoing access request is referenced here and checks its state.
     
@@ -593,6 +623,11 @@ The client instance polls the AS while it is waiting for the RO to authorize the
     in the form of [access tokens](#response-token) and
     [direct subject information](#response-subject) to the client instance.
 
+10. The client instance [uses the access token](#use-access-token) to call the RS.
+
+11. The RS validates the access token and returns an appropriate response for the
+    API.
+
 An example set of protocol messages for this method can be found in {{example-async}}.
 
 ### Software-only Authorization {#sequence-no-user}
@@ -602,13 +637,17 @@ without the need for a RO to be involved at runtime to approve the decision.
 Since there is no explicit RO, the client instance does not interact with an RO.
 
 ~~~
-    +--------+                                  +--------+
-    | Client |                                  |   AS   |
-    |Instance|--(1)--- Request Access --------->|        |
-    |        |                                  |        |
-    |        |<-(2)---- Grant Access -----------|        |
-    |        |                                  |        |
-    +--------+                                  +--------+
+    +--------+                            +--------+
+    | Client |                            |   AS   |
+    |Instance|--(1)--- Request Access --->|        |
+    |        |                            |        |
+    |        |<-(2)---- Grant Access -----|        |
+    |        |                            |        |  +--------+
+    |        |--(3)--- Access API ------------------->|   RS   |
+    |        |                            |        |  |        |
+    |        |<-(4)--- API Response ------------------|        |
+    |        |                            |        |  +--------+
+    +--------+                            +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
@@ -616,8 +655,14 @@ Since there is no explicit RO, the client instance does not interact with an RO.
 
 2. The AS determines that the request is been authorized, 
     the AS grants access to the information
-    in the form of [access tokens](#response-token) and
-    [direct subject information](#response-subject) to the client instance.
+    in the form of [access tokens](#response-token) to the client instance.
+    Note that [direct subject information](#response-subject) is not
+    generally applicable in this use case, as there is no user involved.
+
+3. The client instance [uses the access token](#use-access-token) to call the RS.
+
+4. The RS validates the access token and returns an appropriate response for the
+    API.
 
 An example set of protocol messages for this method can be found in {{example-no-user}}.
 
@@ -629,21 +674,27 @@ the access token expires. The client instance then gets a new access token by ro
 expired access token at the AS using the token's management URL.
 
 ~~~
-    +--------+                                          +--------+  
+    +--------+                                          +--------+
     | Client |                                          |   AS   |
     |Instance|--(1)--- Request Access ----------------->|        |
     |        |                                          |        |
     |        |<-(2)--- Grant Access --------------------|        |
     |        |                                          |        |
     |        |                             +--------+   |        |
-    |        |--(3)--- Access Resource --->|   RS   |   |        | 
-    |        |                             |        |   |        | 
-    |        |<-(4)--- Error Response -----|        |   |        |
+    |        |--(3)--- Access Resource --->|   RS   |   |        |
+    |        |                             |        |   |        |
+    |        |<-(4)--- Success Response ---|        |   |        |
+    |        |                             |        |   |        |
+    |        |                             |        |   |        |
+    |        |                             |        |   |        |
+    |        |--(5)--- Access Resource --->|        |   |        |
+    |        |                             |        |   |        |
+    |        |<-(6)--- Error Response -----|        |   |        |
     |        |                             +--------+   |        |
     |        |                                          |        |
-    |        |--(5)--- Rotate Token ------------------->|        |
+    |        |--(7)--- Rotate Token ------------------->|        |
     |        |                                          |        |
-    |        |<-(6)--- Rotated Token -------------------|        |
+    |        |<-(8)--- Rotated Token -------------------|        |
     |        |                                          |        |
     +--------+                                          +--------+
 ~~~
@@ -654,34 +705,96 @@ expired access token at the AS using the token's management URL.
     [access token](#response-token) usable at the RS. The access token
     response includes a token management URI.
     
-3. The client instance [presents the token](#use-access-token) to the RS. The RS 
-    validates the token and returns an appropriate response for the
-    API.
-    
-4. When the access token is expired, the RS responds to the client instance with
-    an error.
-    
-5. The client instance calls the token management URI returned in (2) to
-    [rotate the access token](#rotate-access-token). The client instance
-    presents the access token as well as the appropriate key.
+3. The client instance [uses the access token](#use-access-token) to call the RS.
 
-6. The AS validates the rotation request including the signature
+4. The RS validates the access token and returns an appropriate response for the
+    API.
+ 
+5. Time passes and the client instance uses the access token to call the RS again.
+   
+6. The RS validates the access token and determines that the access token is expired
+    The RS responds to the client instance with an error.
+
+7. The client instance calls the token management URI returned in (2) to
+    [rotate the access token](#rotate-access-token). The client instance
+    [uses the access token](#use-access-token) in this call as well as the appropriate key,
+    see the token rotation section for details.
+
+8. The AS validates the rotation request including the signature
     and keys presented in (5) and returns a 
     [new access token](#response-token-single). The response includes
     a new access token and can also include updated token management 
     information, which the client instance will store in place of the values 
     returned in (2).
-   
+
+### Requesting User Information {#sequence-user}
+
+In this scenario, the client instance does not call an RS and does not
+request an access token. Instead, the client instance only requests
+and is returned [direct subject information](#response-subject). Many different
+interaction modes can be used in this scenario, so these are shown only in 
+the abstract here.
+
+~~~
+    +--------+                                  +--------+         +------+
+    | Client |                                  |   AS   |         | User |
+    |Instance|                                  |        |         |      |
+    |        |--(1)--- Request Access --------->|        |         |      |
+    |        |                                  |        |         |      |
+    |        |<-(2)--- Request Access ----------|        |         |      |
+    |        |                                  |        |         |      |
+    |        |+ (3) + Facilitate Interaction + + + + + + + + + + > |      |
+    |        |                                  |        |         |      |
+    |        |                                  |        |<+ (4) +>|      |
+    |        |                                  |        |  AuthN  |      |
+    |        |                                  |        |         |      |
+    |        |                                  |        |<+ (5) +>|      |
+    |        |                                  |        |  AuthZ  |      |
+    |        |                                  |        |         |      |
+    |        |< (6) + Signal Continuation + + + + + + + + + + + + +|      |
+    |        |                                  |        |         +------+
+    |        |--(7)--- Continue Request ------->|        |
+    |        |                                  |        |
+    |        |<-(8)----- Grant Access ----------|        |
+    |        |                                  |        |
+    +--------+                                  +--------+
+~~~
+
+1. The client instance [requests access to subject information](#request).
+
+2. The AS determines that interaction is needed and [responds](#response) with
+    appropriate information for [facilitating user interaction](#response-interact).
+
+3. The client instance facilitates [the user interacting with the AS](#user-interaction) as directed in (2).
+
+4. The user authenticates at the AS, taking on the role of the RO.
+
+5. As the RO, the user authorizes the pending request from the client instance.
+
+6. When the AS is done interacting with the user, the AS
+    returns the user to the client instance and signals continuation.
+
+7. The client instance loads the continuation information from (2) and
+    calls the AS to [continue the request](#continue-request).
+
+8. If the request has been authorized, the AS grants access to the requested
+    [direct subject information](#response-subject) to the client instance.
+    At this stage, the user is generally considered "logged in" to the client
+    instance based on the identifiers and assertions provided by the AS.
+    Note that the AS can restrict the subject information returned and it
+    might not match what the client instance requested, see the section on
+    subject information for details.
+
+
 # Requesting Access {#request}
 
 To start a request, the client instance sends [JSON](#RFC8259) document with an object as its root. Each
 member of the request object represents a different aspect of the
 client instance's request. Each field is described in detail in a section below.
 
-resources (object / array of objects/strings)
-: Describes the rights that the client instance is requesting for one or more access tokens to be
-    used at RS's. {{request-resource}}
-   
+access_token (object / array of objects)
+: Describes the rights and properties associated with the requested access token. {{request-token}}
+
 subject (object)
 : Describes the information about the RO that the client instance is requesting to be returned
     directly in the response from the AS. {{request-subject}}
@@ -714,25 +827,27 @@ A non-normative example of a grant request is below:
 
 ~~~
 {
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        },
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            {
+                "type": "photo-api",
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            },
+            "dolphin-metadata"
+        ]
+    },
     "client": {
       "display": {
         "name": "My Client Display Name",
@@ -750,8 +865,8 @@ A non-normative example of a grant request is below:
       }
     },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -759,7 +874,7 @@ A non-normative example of a grant request is below:
     },
     "capabilities": ["ext1", "ext2"],
     "subject": {
-        "sub_ids": ["iss_sub", "email"],
+        "formats": ["iss_sub", "opaque"],
         "assertions": ["id_token"]
     }
 }
@@ -767,231 +882,73 @@ A non-normative example of a grant request is below:
 
 
 
-The request MUST be sent as a JSON object in the body of the HTTP
+The request and response MUST be sent as a JSON object in the body of the HTTP
 POST request with Content-Type `application/json`,
 unless otherwise specified by the signature mechanism.
 
-## Requesting Resources {#request-resource}
+The authorization server MUST include the HTTP "Cache-Control" response header field {{RFC7234}} with a value set to "no-store".
+
+## Requesting Access to Resources {#request-token}
 
 If the client instance is requesting one or more access tokens for the
-purpose of accessing an API, the client instance MUST include a `resources`
-field. This field MUST be an array (for a [single access token](#request-resource-single)) or
-an object (for [multiple access tokens](#request-resource-multiple)), as described in the following
-sections.
+purpose of accessing an API, the client instance MUST include an `access_token`
+field. This field MUST be an object (for a [single access token](#request-token-single)) or
+an array of these objects (for [multiple access tokens](#request-token-multiple)), 
+as described in the following sections.
 
-### Requesting a Single Access Token {#request-resource-single}
+### Requesting a Single Access Token {#request-token-single}
 
-When requesting an access token, the client instance MUST send a
-`resources` field containing a JSON array. The elements of the JSON
-array represent rights of access that the client instance is requesting in
-the access token. The requested access is the union of all elements
-within the array.
+To request a single access token, the client instance sends an `acccess_token` object
+composed of the following fields.
 
-The client instance declares what access it wants to associate with the
-resulting access token using objects that describe multiple
-dimensions of access. Each object contains a `type`
-property that determines the type of API that the client instance is calling.
+access (array of objects/strings)
+: Describes the rights that the client instance is requesting for one or more access tokens to be
+    used at RS's. This field is REQUIRED. {{resource-access-rights}}
 
-type (string)
-: The type of resource request as a string. This field MAY
-      define which other fields are allowed in the request object. 
-      This field is REQUIRED.
+label (string)
+: A unique name chosen by the client instance to refer to the resulting access token. The value of this
+    field is opaque to the AS.  If this field
+    is included in the request, the AS MUST include the same label in the [token response](#response-token).
+    This field is REQUIRED if used as part of a [multiple access token request](#request-token-multiple),
+    and is OPTIONAL otherwise.
 
-The value of this field is under the control of the AS. 
-This field MUST be compared using an exact byte match of the string
-value against known types by the AS.  The AS MUST ensure that there
-is no collision between different authorization data types that it
-supports.  The AS MUST NOT do any collation or normalization of data
-types during comparison. It is RECOMMENDED that designers of general-purpose
-APIs use a URI for this field to avoid collisions between multiple
-API types protected by a single AS.
+flags (array of strings)
+: A set of flags that indicate desired attributes or behavior to be attached to the access token by the
+    AS. This field is OPTIONAL.
 
-While it is expected that many APIs will have its own properties, a set of
-common properties are defined here. Specific API implementations
-SHOULD NOT re-use these fields with different semantics or syntax. The
-available values for these properties are determined by the API
-being protected at the RS.
+The values of the `flags` field defined by this specification are as follows:
 
-actions (array of strings)
-: The types of actions the client instance will take at the RS as an array of strings.
-    For example, a client instance asking for a combination of "read" and "write" access.
+bearer
+: If this flag is included, the access token being requested is a bearer token.
+    If this flag is omitted, the access token is bound to the key used
+    by the client instance in this request, or the key's most recent rotation. 
+    Methods for presenting bound and bearer access tokens are described
+    in {{use-access-token}}.
+    \[\[ [See issue #38](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/38) \]\]
 
-locations (array of strings)
-: The location of the RS as an array of
-    strings. These strings are typically URIs identifying the
-    location of the RS.
+split
+: If this flag is included, the client instance is capable of 
+    receiving a different number of tokens than specified in the
+    [token request](#request-token), including 
+    receiving [multiple access tokens](#response-token-multiple)
+    in response to any [single token request](#request-token-single) or a
+    different number of access tokens than requested in a [multiple access token request](#request-token-multiple).
+    The `label` fields of the returned additional tokens are chosen by the AS. 
+    The client instance MUST be able to tell from the token response where and 
+    how it can use each of the access tokens. 
+    \[\[ [See issue #37](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/37) \]\]
 
-datatypes (array of strings)
-: The kinds of data available to the client instance at the RS's API as an
-    array of strings. For example, a client instance asking for access to
-    raw "image" data and "metadata" at a photograph API.
+Flag values MUST NOT be included more than once.
 
-identifier (string)
-: A string identifier indicating a specific resource at the RS.
-    For example, a patient identifier for a medical API or
-    a bank account number for a financial API.
+Additional flags can be defined by extensions using [a registry TBD](#IANA).
 
-The following non-normative example is asking for three kinds of access (read, write, delete) to each of
-two different locations and two different data types (metadata, images) for a single access token 
-using the fictitious `photo-api` type definition.
+
+In the following example, the client instance is requesting access to a complex resource
+described by a pair of access request object. 
 
 ~~~
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write",
-                "delete"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        }
-    ]
-~~~
-
-The access requested for a given object when using these fields 
-is the cross-product of all fields of the object. That is to 
-say, the object represents a request for all `action` values listed within the object
-to be used at all `locations` values listed within the object for all `datatype`
-values listed within the object. Assuming the request above was granted,
-the client instance could assume that it
-would be able to do a `read` action against the `images` on the first server
-as well as a `delete` action on the `metadata` of the second server, or any other
-combination of these fields, using the same access token. 
-
-To request a different combination of access, 
-such as requesting one `action` against one `location` 
-and a different `action` against a different `location`, the 
-client instance can include multiple separate objects in the `resources` array.
-The following non-normative example uses the same fictitious `photo-api`
-type definition to request a single access token with more specifically
-targeted access rights by using two discrete objects within the request.
-
-~~~
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read"
-            ],
-            "locations": [
-                "https://server.example.net/"
-            ],
-            "datatypes": [
-                "images"
-            ]
-        },
-        {
-            "type": "photo-api",
-            "actions": [
-                "write",
-                "delete"
-            ],
-            "locations": [
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata"
-            ]
-        }
-    ]
-~~~
-
-The access requested here is for `read` access to `images` on one server
-while simultaneously requesting `write` and `delete` access for `metadata` on a different
-server, but importantly without requesting `write` or `delete` access to `images` on the
-first server.
-
-It is anticipated that API designers will use a combination
-of common fields defined in this specification as well as
-fields specific to the API itself. The following non-normative 
-example shows the use of both common and API-specific fields as 
-part of two different fictitious API `type` values. The first
-access request includes the `actions`, `locations`, and `datatypes` 
-fields specified here as well as the API-specific `geolocation`
-field. The second access request includes the `actions` and
-`identifier` fields specified here as well as the API-specific
-`currency` field.
-
-~~~
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ],
-            "geolocation": [
-                { lat: -32.364, lng: 153.207 },
-                { lat: -35.364, lng: 158.207 }
-            ]
-        },
-        {
-            "type": "financial-transaction",
-            "actions": [
-                "withdraw"
-            ],
-            "identifier": "account-14-32-32-3", 
-            "currency": "USD"
-        }
-    ]
-~~~
-
-If this request is approved,
-the [resulting access token](#response-token-single)'s access rights will be
-the union of the requested types of access for each of the two APIs, just as above.
-
-### Requesting Resources By Reference {#request-resource-reference}
-
-Instead of sending an [object describing the requested resource](#request-resource-single),
-a client instance MAY send a string known to
-the AS or RS representing the access being requested. Each string
-SHOULD correspond to a specific expanded object representation at
-the AS. 
-
-~~~
-    "resources": [
-        "read", "dolphin-metadata", "some other thing"
-    ]
-
-~~~
-
-This value is opaque to the client instance and MAY be any
-valid JSON string, and therefore could include spaces, unicode
-characters, and properly escaped string sequences. However, in some
-situations the value is intended to be 
-seen and understood by the client software's developer. In such cases, the
-API designer choosing any such human-readable strings SHOULD take steps
-to ensure the string values are not easily confused by a developer,
-such as by limiting the strings to easily disambiguated characters.
-
-This functionality is similar in practice to OAuth 2's `scope` parameter {{RFC6749}}, where a single string
-represents the set of access rights requested by the client instance. As such, the reference
-string could contain any valid OAuth 2 scope value as in {{example-oauth2}}. Note that the reference
-string here is not bound to the same character restrictions as in OAuth 2's `scope` definition.
-
-A single "resources" array MAY include both object-type and
-string-type resource items. In this non-normative example,
-the client instance is requesting access to a `photo-api` and `financial-transaction` API type
-as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
-
-~~~
-    "resources": [
+"access_token": {
+    "access": [
         {
             "type": "photo-api",
             "actions": [
@@ -1008,57 +965,75 @@ as well as the reference values of `read`, `dolphin-metadata`, and `some other t
                 "images"
             ]
         },
-        "read", 
-        "dolphin-metadata",
         {
-            "type": "financial-transaction",
+            "type": "walrus-access",
             "actions": [
-                "withdraw"
+                "foo",
+                "bar"
             ],
-            "identifier": "account-14-32-32-3", 
-            "currency": "USD"
-        },
-        "some other thing"
-    ]
+            "locations": [
+                "https://resource.other/"
+            ],
+            "datatypes": [
+                "data",
+                "pictures",
+                "walrus whiskers"
+            ]
+        }
+    ],
+    "label": "token1-23",
+    "flags": [ "split" ]
+}
 ~~~
 
-The requested access is the union of all elements of the array, including both objects and 
-reference strings.
+If access is approved, the resulting access token is valid for the described resource 
+and is bound to the client instance's key (or its most recent rotation). The token 
+is labeled "token1-23" and could be split into multiple access tokens by the AS, if the
+AS chooses. The token response structure is described in {{response-token-single}}.
 
-### Requesting Multiple Access Tokens {#request-resource-multiple}
+### Requesting Multiple Access Tokens {#request-token-multiple}
 
-When requesting multiple access tokens, the resources field is
-a JSON object. The names of the JSON object fields are token
-identifiers chosen by the client instance, and MAY be any valid string. The
-values of the JSON object fields are JSON arrays representing a single
+To request multiple access tokens to be returned in a single response, the
+client instance sends an array of objects as the value of the `access_token`
+parameter. Each object MUST conform to the request format for a single
 access token request, as specified in 
-[requesting a single access token](#request-resource-single).
+[requesting a single access token](#request-token-single).
+Additionally, each object in the array MUST include the `label` field, and
+all values of these fields MUST be unique within the request. If the
+client instance does not include a `label` value for any entry in the
+array, or the values of the `label` field are not unique within the array,
+the AS MUST return an error.
 
 The following non-normative example shows a request for two
 separate access tokens, `token1` and `token2`.
 
 ~~~
-    "resources": {
-        "token1": [
-          {
-              "type": "photo-api",
-              "actions": [
-                  "read",
-                  "write",
-                  "dolphin"
-              ],
-              "locations": [
-                  "https://server.example.net/",
-                  "https://resource.local/other"
-              ],
-              "datatypes": [
-                  "metadata",
-                  "images"
-              ]
-          },
-          "dolphin-metadata"
-      ],
-      "token2": [
+"access_token": [
+    {
+        "label": "token1",
+        "access": [
+            {
+                "type": "photo-api",
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            },
+            "dolphin-metadata"
+        ]
+    },
+    {
+        "label": "token2",
+        "access": [
             {
                 "type": "walrus-access",
                 "actions": [
@@ -1074,91 +1049,24 @@ separate access tokens, `token1` and `token2`.
                     "walrus whiskers"
                 ]
             }
-        ]
+        ],
+        "flags": [ "bearer" ]
     }
+]
 ~~~
 
-Any approved access requests are returned in the 
+All approved access requests are returned in the 
 [multiple access token response](#response-token-multiple) structure using
-the token identifiers in the request.
+the values of the `label` fields in the request.
 
-### Signaling Token Behavior {#request-resource-flag}
-
-While the AS is ultimately in control of how tokens are returned and bound to the client instance, 
-sometimes the client instance has context about what it can support that can affect the AS's
-response. This specification defines several flags that are passed as
-[resource reference strings](#request-resource-reference). 
-
-Each flag applies only to the single resource request in which it appears.
-
-Support of all flags is optional, such as any other resource reference value.
-
-multi_token
-: The client instance wishes to support multiple simultaneous access tokens through the
-    token rotation process. When the client instance [rotates an access token](#rotate-access-token),
-    the AS does not invalidate the previous access token. The old access token
-    continues to remain valid until such time as it expires or is revoked
-    through other means.
-
-split_token
-: The client instance is capable of receiving [multiple access tokens](#response-token-multiple)
-    in response to any [single token request](#request-resource-single), or 
-    receiving a different number of tokens than specified in the
-    [multiple token request](#request-resource-multiple). The labels of the
-    returned additional tokens are chosen by the AS. The client instance MUST be able
-    to tell from the token response where and how it can use each of the
-    access tokens. 
-    \[\[ [See issue #37](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/37) \]\]
-
-bind_token
-: The client instance wants the issued access token to be bound to the [key the client instance used](#request-client)
-    to make the request. The resulting access token MUST be bound using the same
-    `proof` mechanism used by the client instance with a `key` value of `true`, indicating
-    the client instance's presented key is to be used for binding.
-    \[\[ [See issue #38](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/38) \]\]
-
-The AS MUST respond with any applied flags in the [token response](#response-token)
-`resources` section.
-
-In this non-normative example, the requested access token is to be bound to
-the client instance's key and should be kept during rotation.
-
-~~~
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        },
-        "read", 
-        "bind_token",
-        "multi_token"
-    ]
-~~~
-
-Additional flags can be registered in [a registry TBD](#IANA).
-
-\[\[ [See issue #39](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/39) \]\]
-
-## Requesting User Information {#request-subject}
+## Requesting Subject Information {#request-subject}
 
 If the client instance is requesting information about the RO from
 the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in 
 [a registry TBD](#IANA)).
 
-sub_ids (array of strings)
+formats (array of strings)
 : An array of subject identifier subject types
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -1170,7 +1078,7 @@ assertions (array of strings)
 
 ~~~
 "subject": {
-   "sub_ids": [ "iss_sub", "email" ],
+   "formats": [ "iss_sub", "opaque" ],
    "assertions": [ "id_token", "saml2" ]
 }
 ~~~
@@ -1181,7 +1089,7 @@ AS policies, or [assertions presented by the client instance](#request-user). If
 this is determined positively, the AS MAY [return the RO's information in its response](#response-subject)
 as requested. 
 
-Subject identifiers requested by the client instance serve only to identify 
+Subject identifier types requested by the client instance serve only to identify 
 the RO in the context of the AS and can't be used as communication
 channels by the client instance, as discussed in {{response-subject}}.
 
@@ -1189,7 +1097,7 @@ The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
 \[\[ [See issue #42](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/42) \]\]
 
-Note: the "sub_ids" and "assertions" request fields are independent of
+Note: the "formats" and "assertions" request fields are independent of
 each other, and a returned assertion MAY omit a requested subject
 identifier. 
 
@@ -1375,7 +1283,7 @@ identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
 or by reference.
 
-sub_ids (array of strings)
+sub_ids (array of objects)
 : An array of subject identifiers for the
             end-user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
@@ -1389,8 +1297,8 @@ assertions (object)
 ~~~
 "user": {
    "sub_ids": [ {
-     "subject_type": "email",
-     "email": "user@example.com"
+     "format": "opaque",
+     "id": "J2G8G8O4AZ"
    } ],
    "assertions": {
      "id_token": "eyj..."
@@ -1441,8 +1349,8 @@ return an error.
 ## Interacting with the User {#request-interact}
 
 Many times, the AS will require interaction with the RO in order to
-approve a requested delegation to the client instance for both resources and direct
-claim information. Many times the end-user using the client instance is the same person as
+approve a requested delegation to the client instance for both access to resources and direct
+subject information. Many times the end-user using the client instance is the same person as
 the RO, and the client instance can directly drive interaction with the AS by redirecting
 the end-user on the same device, or by launching an application. Other times, the 
 client instance can provide information to start the RO's interaction on a secondary
@@ -1451,30 +1359,58 @@ The client instance could also be signaled that interaction has completed by the
 callbacks. To facilitate all of these modes, the client instance declares the means that it 
 can interact using the `interact` field. 
 
-The `interact` field is a JSON object with keys that declare
-different interaction modes. A client instance MUST NOT declare an
-interaction mode it does not support.
+The `interact` field is a JSON object with three keys whose values declare how the client can initiate
+and complete the request, as well as provide hints to the AS about user preferences such as locale. 
+A client instance MUST NOT declare an interaction mode it does not support.
 The client instance MAY send multiple modes in the same request.
 There is no preference order specified in this request. An AS MAY
 [respond to any, all, or none of the presented interaction modes](#response-interact) in a request, depending on
-its capabilities and what is allowed to fulfill the request. This specification
-defines the following interaction modes:
+its capabilities and what is allowed to fulfill the request. 
 
-redirect (boolean)
+start (list of strings/objects)
+: Indicates how the client instance can start an interaction.
+
+finish (object)
+: Indicates how the client instance can receive an indication that interaction has finished at the AS.
+
+hints (object)
+: Provides additional information to inform the interaction process at the AS.
+
+
+The `interact` field MUST contain the `start` key, and MAY contain the `finish` and `hints` keys. The value
+of each key is an array which contains strings or JSON objects as defined below.
+
+### Start Mode Definitions
+
+This specification defines the following interaction start modes as an array of string values under the `start` key:
+
+"redirect"
 : Indicates that the client instance can direct the end-user to an arbitrary URL
     at the AS for interaction. {{request-interact-redirect}}
 
-app (boolean)
+"app"
 : Indicates that the client instance can launch an application on the end-user's
     device for interaction. {{request-interact-app}}
 
-callback (object)
-: Indicates that the client instance can receive a callback from the AS
-    after interaction with the RO has concluded. {{request-interact-callback}}
-
-user_code (boolean)
+"user_code"
 : Indicates that the client instance can communicate a human-readable short
     code to the end-user for use with a stable URL at the AS. {{request-interact-usercode}}
+
+### Finish Mode Definitions
+
+This specification defines the following interaction completion methods:
+
+"redirect"
+: Indicates that the client instance can receive a redirect from the end-user's device
+    after interaction with the RO has concluded. {{request-interact-callback-redirect}}
+
+"push"
+: Indicates that the client instance can receive an HTTP POST request from the AS
+    after interaction with the RO has concluded. {{request-interact-callback-push}}
+
+### Hint Definitions
+
+This specification defines the following properties under the `hints` key:
 
 ui_locales (array of strings)
 : Indicates the end-user's preferred locales that the AS can use
@@ -1485,14 +1421,16 @@ The following sections detail requests for interaction
 modes. Additional interaction modes are defined in 
 [a registry TBD](#IANA).
 
+### Example Interactions
+
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
-the end-user to an arbitrary URL and can receive a [callback](#request-interact-callback) through
+the end-user to an arbitrary URL and can receive a [redirect](#request-interact-callback-redirect) through
 a browser request.
 
 ~~~
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -1503,12 +1441,11 @@ a browser request.
 In this non-normative example, the client instance is indicating that it can 
 display a [user code](#request-interact-usercode) and direct the end-user
 to an [arbitrary URL](#request-interact-redirect) on a secondary
-device, but it cannot accept a callback.
+device, but it cannot accept a redirect or push callback.
 
 ~~~
     "interact": {
-        "redirect": true,
-        "user_code": true
+        "start": ["redirect", "user_code"]
     }
 ~~~
 
@@ -1522,7 +1459,9 @@ The AS SHOULD apply suitable timeouts to any interaction mechanisms
 provided, including user codes and redirection URLs. The client instance SHOULD
 apply suitable timeouts to any callback URLs.
 
-### Redirect to an Arbitrary URL {#request-interact-redirect}
+### Start Interaction Modes
+
+#### Redirect to an Arbitrary URL {#request-interact-redirect}
 
 If the client instance is capable of directing the end-user to a URL defined
 by the AS at runtime, the client instance indicates this by sending the
@@ -1535,14 +1474,14 @@ console.
 
 ~~~
 "interact": {
-   "redirect": true
+  "start": ["redirect"]
 }
 ~~~
 
 If this interaction mode is supported for this client instance and
 request, the AS returns a redirect interaction response {{response-interact-redirect}}.
 
-### Open an Application-specific URL {#request-interact-app}
+#### Open an Application-specific URL {#request-interact-app}
 
 If the client instance can open a URL associated with an application on
 the end-user's device, the client instance indicates this by sending the "app"
@@ -1552,11 +1491,9 @@ this specification.
 
 ~~~
 "interact": {
-   "app": true
+   "start": ["app"]
 }
 ~~~
-
-
 
 If this interaction mode is supported for this client instance and
 request, the AS returns an app interaction response with an app URL
@@ -1564,17 +1501,40 @@ payload {{response-interact-app}}.
 
 \[\[ [See issue #54](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/54) \]\]
 
-### Receive a Callback After Interaction {#request-interact-callback}
+#### Display a Short User Code {#request-interact-usercode}
+
+If the client instance is capable of displaying or otherwise communicating
+a short, human-entered code to the RO, the client instance indicates this
+by sending the "user_code" field with the boolean value "true". This
+code is to be entered at a static URL that does not change at
+runtime, as described in {{response-interact-usercode}}.
+
+~~~
+"interact": {
+    "start": ["user_code"]
+}
+~~~
+
+If this interaction mode is supported for this client instance and
+request, the AS returns a user code and interaction URL as specified
+in {{interaction-usercode}}.
+
+
+### Finish Interaction Modes {#finish-interaction-modes}
 
 If the client instance is capable of receiving a message from the AS indicating
 that the RO has completed their interaction, the client instance
-indicates this by sending the "callback" field. The value of this
-field is an object containing the following members.
+indicates this by sending the following members of an object under the `finish` key.
 
+method (string)
+: REQUIRED. The callback method that the AS will use to contact the client instance.
+              Valid values include `redirect` {{request-interact-callback-redirect}}
+              and `push` {{request-interact-callback-push}}, with other values
+              defined by [a registry TBD](#IANA).
 
 uri (string)
-: REQUIRED. Indicates the URI to send the RO to
-              after interaction. This URI MAY be unique per request and MUST
+: REQUIRED. Indicates the URI that the AS will either send the RO to
+              after interaction or send an HTTP POST request. This URI MAY be unique per request and MUST
               be hosted by or accessible by the client instance. This URI MUST NOT contain
               any fragment component. This URI MUST be protected by HTTPS, be
               hosted on a server local to the RO's browser ("localhost"), or
@@ -1585,7 +1545,6 @@ uri (string)
               based on the client instance's presented key information. The callback URI
               SHOULD be presented to the RO during the interaction phase
               before redirect. 
-              \[\[ [See issue #55](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/55) \]\]
 
 nonce (string)
 : REQUIRED. Unique value to be used in the
@@ -1594,28 +1553,11 @@ nonce (string)
               MUST be generated by the client instance as a unique value for this
               request.
 
-method (string)
-: REQUIRED. The callback method that the AS will use to contact the client instance.
-              Valid values include `redirect` {{request-interact-callback-redirect}}
-              and `push` {{request-interact-callback-push}}, with other values
-              defined by [a registry TBD](#IANA).
-
 hash_method (string)
 : OPTIONAL. The hash calculation
               mechanism to be used for the callback hash in {{interaction-hash}}. Can be one of `sha3` or `sha2`. If
               absent, the default value is `sha3`.
               \[\[ [See issue #56](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/56) \]\] 
-
-
-~~~
-"interact": {
-    "callback": {
-       "method": "redirect",
-       "uri": "https://client.example.net/return/123455",
-       "nonce": "LKLTI25DK82FX4T4QFZC"
-    }
-}
-~~~
 
 If this interaction mode is supported for this client instance and
 request, the AS returns a nonce for use in validating 
@@ -1631,16 +1573,16 @@ presentation of an interaction callback reference as described in
 
 #### Receive an HTTP Callback Through the Browser {#request-interact-callback-redirect}
 
-A callback `method` value of `redirect` indicates that the client instance
-will expect a call from the RO's browser using the HTTP method
+A finish `method` value of `redirect` indicates that the client instance
+will expect a request from the RO's browser using the HTTP method
 GET as described in {{interaction-callback}}.
 
 ~~~
 "interact": {
-    "callback": {
-       "method": "redirect",
-       "uri": "https://client.example.net/return/123455",
-       "nonce": "LKLTI25DK82FX4T4QFZC"
+    "finish": {
+        "method": "redirect",
+        "uri": "https://client.example.net/return/123455",
+        "nonce": "LKLTI25DK82FX4T4QFZC"
     }
 }
 ~~~
@@ -1655,16 +1597,16 @@ prevent substitution attacks.
 
 #### Receive an HTTP Direct Callback {#request-interact-callback-push}
 
-A callback `method` value of `push` indicates that the client instance will
-expect a call from the AS directly using the HTTP method POST
+A finish `method` value of `push` indicates that the client instance will
+expect a request from the AS directly using the HTTP method POST
 as described in {{interaction-pushback}}.
 
 ~~~
 "interact": {
-    "callback": {
-       "method": "push",
-       "uri": "https://client.example.net/return/123455",
-       "nonce": "LKLTI25DK82FX4T4QFZC"
+    "finish": {
+        "method": "push",
+        "uri": "https://client.example.net/return/123455",
+        "nonce": "LKLTI25DK82FX4T4QFZC"
     }
 }
 ~~~
@@ -1678,25 +1620,12 @@ be present on the incoming HTTP request.
 
 \[\[ [See issue #60](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/60) \]\]
 
-### Display a Short User Code {#request-interact-usercode}
+### Hints
 
-If the client instance is capable of displaying or otherwise communicating
-a short, human-entered code to the RO, the client instance indicates this
-by sending the "user_code" field with the boolean value "true". This
-code is to be entered at a static URL that does not change at
-runtime, as described in {{response-interact-usercode}}.
+The `hints` key is an object describing one or more suggestions from the client
+instance that the AS can use to help drive user interaction.
 
-~~~
-"interact": {
-    "user_code": true
-}
-~~~
-
-If this interaction mode is supported for this client instance and
-request, the AS returns a user code and interaction URL as specified
-in {{interaction-usercode}}.
-
-### Indicate Desired Interaction Locales {#request-interact-locale}
+#### Indicate Desired Interaction Locales {#request-interact-locale}
 
 If the client instance knows the end-user's locale and language preferences, the
 client instance can send this information to the AS using the `ui_locales` field
@@ -1704,7 +1633,9 @@ with an array of locale strings as defined by {{RFC5646}}.
 
 ~~~
 "interact": {
-    "ui_locales": ["en-US", "fr-CA"]
+    "hints": {
+        "ui_locales": ["en-US", "fr-CA"]
+    }
 }
 ~~~
 
@@ -1761,13 +1692,9 @@ continue (object)
 : Indicates that the client instance can continue the request by making one or
     more continuation requests. {{response-continue}}
 
-access_token (object)
-: A single access token that the client instance can use to call the RS on
+access_token (object / array of objects)
+: A single access token or set of access tokens that the client instance can use to call the RS on
     behalf of the RO. {{response-token-single}}
-
-multiple_access_token (object)
-: Multiple named access tokens that the client instance can use to call the
-    RS on behalf of the RO. {{response-token-multiple}}
 
 interact (object)
 : Indicates that interaction through some set of defined mechanisms
@@ -1777,11 +1704,11 @@ subject (object)
 : Claims about the RO as known and declared by the AS. {{response-subject}}
 
 instance_id (string)
-: An identifier this client instance instance can use to identify itself when making 
+: An identifier this client instance can use to identify itself when making 
     future requests. {{response-dynamic-handles}}
 
 user_handle (string)
-: An identifier this client instance instance can use to identify its current end-user when
+: An identifier this client instance can use to identify its current end-user when
     making future requests. {{response-dynamic-handles}}
 
 error (object)
@@ -1794,12 +1721,12 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
 {
     "interact": {
         "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
-        "callback": "MBDOFXG4Y5CVJCX821LH"
+        "push": "MBDOFXG4Y5CVJCX821LH"
     },
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "bound": true
         },
         "uri": "https://server.example.com/tx"
     }
@@ -1808,19 +1735,36 @@ a [callback nonce](#response-interact-callback), and a [continuation response](#
 
 In this example, the AS is returning a bearer [access token](#response-token-single)
 with a management URL and a [subject identifier](#response-subject) in the form of
-an email address.
+an opaque identifier.
 
 ~~~
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
+        "bound": false,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
         "sub_ids": [ {
-           "subject_type": "email",
-           "email": "user@example.com",
+           "format": "opaque",
+           "id": "J2G8G8O4AZ"
+        } ]
+    }
+}
+~~~
+
+In this example, the AS is returning only a pair of [subject identifiers](#response-subject)
+as both an email address and an opaque identifier.
+
+~~~
+{
+    "subject": {
+        "sub_ids": [ {
+           "subject_type": "opaque",
+           "id": "J2G8G8O4AZ"
+        }, {
+           "format": "email",
+           "email": "user@example.com"
         } ]
     }
 }
@@ -1849,7 +1793,8 @@ access_token (object)
 : REQUIRED. A unique access token for continuing the request, in the format specified
             in {{response-token-single}}. This access token MUST be bound to the
             client instance's key used in the request and MUST NOT be a `bearer` token. As a consequence,
-            the `key` field of this access token is always the boolean value `true`.
+            the `bound` field of this access token is always the boolean value `true` and the
+            `key` field MUST be omitted.
             This access token MUST NOT be usable at resources outside of the AS.
             The client instance MUST present the access token in all requests to the continuation URI as 
             described in {{use-access-token}}.
@@ -1859,8 +1804,7 @@ access_token (object)
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -1883,11 +1827,12 @@ concluded.
 ## Access Tokens {#response-token}
 
 If the AS has successfully granted one or more access tokens to the client instance,
-the AS responds with either the `access_token` or the `multiple_access_token`
-field. The AS MUST NOT respond with both
-the `access_token` and `multiple_access_token` fields.
+the AS responds with the `access_token` field. This field contains either a single
+access token as described in {{response-token-single}} or an array of access tokens
+as described in {{response-token-multiple}}.
 
-\[\[ [See issue #68](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/68) \]\]
+The client instance uses any access tokens in this response to call the RS as
+described in {{use-access-token}}.
 
 ### Single Access Token {#response-token-single}
 
@@ -1899,54 +1844,84 @@ properties.
 
 value (string)
 : REQUIRED. The value of the access token as a
-              string. The value is opaque to the client instance. The value SHOULD be
-              limited to ASCII characters to facilitate transmission over HTTP
-              headers within other protocols without requiring additional encoding.
+    string. The value is opaque to the client instance. The value SHOULD be
+    limited to ASCII characters to facilitate transmission over HTTP
+    headers within other protocols without requiring additional encoding.
+
+bound (boolean)
+: RECOMMENDED. Flag indicating if the token is bound to the client instance's key.
+    If the boolean value is `true` or the field is omitted, and the `key` field is omitted,
+    the token is bound to the [key used by the client instance](#request-client) in its request 
+    for access. If the boolean value is `true` or the field is omitted, and the `key` field
+    is present, the token is bound to the key and proofing mechanism indicated in the
+    `key` field. If the boolean value is `false`, the token is a bearer token with no
+    key bound to it and the `key` field MUST be omitted.
+
+label (string)
+: REQUIRED for multiple access tokens, OPTIONAL for single access token. 
+    The value of the `label` the client instance provided in the associated
+    [token request](#request-token), if present. If the token has been split
+    by the AS, the value of the `label` field is chosen by the AS and the
+    `split` field is included and set to `true`.
 
 manage (string)
 : OPTIONAL. The management URI for this
-              access token. If provided, the client instance MAY manage its access
-              token as described in {{token-management}}. This management
-              URI is a function of the AS and is separate from the RS
-              the client instance is requesting access to.
-              This URI MUST NOT include the
-              access token value and SHOULD be different for each access
-              token issued in a request.
+    access token. If provided, the client instance MAY manage its access
+    token as described in {{token-management}}. This management
+    URI is a function of the AS and is separate from the RS
+    the client instance is requesting access to.
+    This URI MUST NOT include the
+    access token value and SHOULD be different for each access
+    token issued in a request.
 
-resources (array of objects/strings)
+access (array of objects/strings)
 : RECOMMENDED. A description of the rights
-              associated with this access token, as defined in 
-              {{request-resource-single}}. If included, this MUST reflect the rights
-              associated with the issued access token. These rights MAY vary
-              from what was requested by the client instance.
+    associated with this access token, as defined in 
+    {{resource-access-rights}}. If included, this MUST reflect the rights
+    associated with the issued access token. These rights MAY vary
+    from what was requested by the client instance.
 
 expires_in (integer)
 : OPTIONAL. The number of seconds in
-              which the access will expire. The client instance MUST NOT use the access
-              token past this time. An RS MUST NOT accept an access token
-              past this time. Note that the access token MAY be revoked by the
-              AS or RS at any point prior to its expiration.
+    which the access will expire. The client instance MUST NOT use the access
+    token past this time. An RS MUST NOT accept an access token
+    past this time. Note that the access token MAY be revoked by the
+    AS or RS at any point prior to its expiration.
 
-key (object / string / boolean)
-: REQUIRED. The key that the token is bound to. If the boolean value `true` is used,
-              the token is bound to the [key used by the client instance](#request-client) in its request 
-              for access. If the boolean value `false` is used,
-              the token is a bearer token with no key bound to it.
-              Otherwise, the key MUST be an object or string in a format
-              described in {{key-format}}, describing a public key to which the
-              client instance can use the associated private key. The client instance MUST be able to
-              dereference or process the key information in order to be able
-              to sign the request.
+key (object / string)
+: OPTIONAL. The key that the token is bound to, if different from the
+    client instance's presented key. The key MUST be an object or string in a format
+    described in {{key-format}}, describing a public key to which the
+    client instance can use the associated private key. The client instance MUST be able to
+    dereference or process the key information in order to be able
+    to sign the request.
 
-The following non-normative example shows a single bearer token with a management
-URL that has access to three described resources.
+durable (boolean)
+: OPTIONAL. Flag indicating a hint of AS behavior on token rotation.
+    If this flag is set to the value `true`, then the client instance can expect
+    a previously-issued access token to continue to work after it has been [rotated](#rotate-access-token)
+    or the underlying grant request has been [modified](#continue-modify), resulting
+    in the issuance of new access tokens. If this flag is set to the boolean value `false`
+    or is omitted, the client instance can anticipate a given access token
+    will stop working after token rotation or grant request modification.
+    Note that a token flagged as `durable` can still expire or be revoked through
+    any normal means.
+
+split (boolean)
+: OPTIONAL. Flag indicating that this token was generated by issuing multiple access tokens
+    in response to one of the client instance's [token request](#request-token) objects.
+    This behavior MUST NOT be used unless the client instance has specifically requested it
+    by use of the `split` flag.
+
+The following non-normative example shows a single access token  bound to the client instance's key
+used in the initial request, with a management URL, and that has access to three described resources 
+(one using an object and two described by reference strings).
 
 ~~~
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [
+        "access": [
             {
                 "type": "photo-api",
                 "actions": [
@@ -1968,22 +1943,24 @@ URL that has access to three described resources.
     }
 ~~~
 
-The following non-normative example shows a single access token bound to the client instance's key, which
-was presented using the [detached JWS](#detached-jws) binding method.
+The following non-normative example shows a single bearer access token
+with access to two described resources.
 
 ~~~
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": true,
-        "resources": [
+        "bound": false,
+        "access": [
             "finance", "medical"
         ]
     }
 ~~~
 
 
-If the client instance [requested multiple access tokens](#request-resource-multiple), the AS MUST NOT respond with a
-single access token structure unless the client instance sends the `split_token` flag as described in {{request-resource-flag}}.
+If the client instance [requested a single access token](#request-token-single), the AS MUST NOT respond with the multiple
+access token structure unless the client instance sends the `split` flag as described in {{request-token-single}}.
+
+If the AS has split the access token response, the response MUST include the `split` flag set to `true`.
 
 \[\[ [See issue #69](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/69) \]\]
 
@@ -1991,34 +1968,34 @@ single access token structure unless the client instance sends the `split_token`
 
 If the client instance has requested multiple access tokens and the AS has
 granted at least one of them, the AS responds with the
-"multiple_access_tokens" field. The value of this field is a JSON
-object, and the property names correspond to the token identifiers
-chosen by the client instance in the [multiple access token request](#request-resource-multiple).
-The values of the properties of this object are access
+"access_token" field. The value of this field is a JSON
+array, the members of which are distinct access
 tokens as described in {{response-token-single}}.
+Each object MUST have a unique `label` field, corresponding to the token labels
+chosen by the client instance in the [multiple access token request](#request-token-multiple).
 
-In this non-normative example, two bearer tokens are issued under the
+In this non-normative example, two tokens are issued under the
 names `token1` and `token2`, and only the first token has a management
 URL associated with it.
 
 ~~~
-    "multiple_access_tokens": {
-        "token1": {
+    "access_token": [
+        {
+            "label": "token1",
             "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-            "key": false,
-            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
+            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+            "access": [ "finance" ]
         },
-        "token2": {
+        {
+            "label": "token2",
             "value": "UFGLO2FDAFG7VGZZPJ3IZEMN21EVU71FHCARP4J1",
-            "key": false
+            "access": [ "medical" ]
         }
     }
 ~~~
 
-
-
-Each access token corresponds to the named resources arrays in
-the client instance's [request](#request-resource-multiple). 
+Each access token corresponds to one of the objects in the `access_token` array of
+the client instance's [request](#request-token-multiple). 
 
 The multiple access token response MUST be used when multiple access tokens are
 requested, even if only one access token is issued as a result of the request.
@@ -2027,11 +2004,33 @@ requested access tokens, for any reason. In such cases the refused token is omit
 from the response and all of the other issued access
 tokens are included in the response the requested names appropriate names.
 
-If the client instance [requested a single access token](#request-resource-single), the AS MUST NOT respond with the multiple
-access token structure unless the client instance sends the `split_token` flag as described in {{request-resource-flag}}.
+If the client instance [requested multiple access tokens](#request-token-multiple), the AS MUST NOT respond with a
+single access token structure, even if only a single access token is granted. In such cases, the AS responds
+with a multiple access token structure containing one access token.
 
-Each access token MAY have different proofing mechanisms. If
-management is allowed, each access token SHOULD have different management URIs.
+If the AS has split the access token response, the response MUST include the `split` flag set to `true`.
+
+~~~
+    "access_token": [
+        {
+            "label": "split-1",
+            "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
+            "split": true,
+            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+            "access": [ "fruits" ]
+        },
+        {
+            "label": "split-2",
+            "value": "FG7VGZZPJ3IZEMN21EVU71FHCAR-UFGLO2FDAP4J1",
+            "split": true,
+            "access": [ "vegetables" ]
+        }
+    }
+~~~
+
+Each access token MAY be bound to different keys with different proofing mechanisms.
+
+If [token management](#token-management) is allowed, each access token SHOULD have different `manage` URIs.
 
 \[\[ [See issue #70](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/70) \]\]
 
@@ -2051,8 +2050,8 @@ redirect (string)
 app (string)
 : Launch of an application URL. {{response-interact-app}}
 
-callback (string)
-: Callback to a client instance accessible URL after interaction is completed. {{response-interact-callback}}
+finish (string)
+: A nonce used by the client instance to verify the callback after interaction is completed. {{response-interact-callback}}
 
 user_code (object)
 : Display a short user code. {{response-interact-usercode}}
@@ -2121,22 +2120,23 @@ application URL.
 
 ### Post-interaction Callback to a Client Instance Accessible URL {#response-interact-callback}
 
-If the client instance indicates that it can [receive a post-interaction callback on a URL](#request-interact-callback) and the AS supports this mode for the
-client instance's request, the AS responds with a "callback" field containing a nonce
+If the client instance indicates that it can [receive a post-interaction redirect or push at a URL](#finish-interaction-modes) 
+and the AS supports this mode for the
+client instance's request, the AS responds with a `finish` field containing a nonce
 that the client instance will use in validating the callback as defined in
-{{interaction-callback}}.
+{{interaction-finalize}}.
 
 ~~~
     "interact": {
-        "callback": "MBDOFXG4Y5CVJCX821LH"
+        "finish": "MBDOFXG4Y5CVJCX821LH"
     }
 ~~~
 
-When the RO completes interaction at the AS, the AS MUST call the
-client instance's callback URL using the method indicated in the
-[callback request](#request-interact-callback) as described in {{interaction-callback}}.
+When the RO completes interaction at the AS, the AS MUST either redirect the RO's browser
+or send an HTTP POST to the client instance's callback URL using the method indicated in the
+[interaction request](#finish-interaction-modes) as described in {{interaction-finalize}}.
 
-If the AS returns a "callback" nonce, the client instance MUST NOT
+If the AS returns a nonce, the client instance MUST NOT
 continue a grant request before it receives the associated
 interaction reference on the callback URI.
 
@@ -2239,8 +2239,8 @@ updated_at (string)
 ~~~
 "subject": {
    "sub_ids": [ {
-     "subject_type": "email",
-     "email": "user@example.com",
+     "format": "opaque",
+     "id": "J2G8G8O4AZ"
    } ],
    "assertions": {
      "id_token": "eyj..."
@@ -2277,7 +2277,7 @@ or a reference. The use of a reference in place of a value allows
 for a client instance to optimize requests to the AS.
 
 Some references, such as for the [client instance's identity](#request-instance) 
-or the [requested resources](#request-resource-reference), can be managed statically through an
+or the [requested resources](#resource-access-reference), can be managed statically through an
 admin console or developer portal provided by the AS or RS. The developer
 of the client software can include these values in their code for a more
 efficient and compact request.
@@ -2318,8 +2318,7 @@ access token.
     "user_handle": "XUT2MFM1XBIKJKSDU8QM",
     "instance_id": "7C7C4AZ9KHRS6X63AJAO",
     "access_token": {
-        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false
+        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0"
     }
 }
 ~~~
@@ -2401,7 +2400,7 @@ Note that since the client instance does not add any parameters to the URL, the
 AS MUST determine the grant request being referenced from the URL
 value itself. If the URL cannot be associated with a currently active
 request, the AS MUST display an error to the RO and MUST NOT attempt
-to redirect the RO back to any client instance even if a [callback is supplied](#request-interact-callback).
+to redirect the RO back to any client instance even if a [redirect is supplied](#request-interact-callback-redirect).
 
 The interaction URL MUST be reachable from the RO's browser, though
 note that the RO MAY open the URL on a separate device from the client instance
@@ -2420,7 +2419,7 @@ Note that since the URL itself is static, the AS MUST determine the
 grant request being referenced from the user code value itself. If the
 user code cannot be associated with a currently active request, the AS
 MUST display an error to the RO and MUST NOT attempt to redirect the
-RO back to any client instance even if a [callback is supplied](#request-interact-callback).
+RO back to any client instance even if a [redirect is supplied](#request-interact-callback-redirect).
 
 The user code URL MUST be reachable from the RO's browser, though
 note that the RO MAY open the URL on a separate device from the client instance
@@ -2470,13 +2469,13 @@ sections.
 
 ### Completing Interaction with a Browser Redirect to the Callback URI {#interaction-callback}
 
-When using the ["callback" interaction mode](#response-interact-callback) with the `redirect` method,
+When using the [`redirect` interaction finish method](#response-interact-callback),
 the AS signals to the client instance that interaction is
 complete and the request can be continued by directing the RO (in
-their browser) back to the client instance's callback URL sent in [the callback request](#request-interact-callback-redirect).
+their browser) back to the client instance's redirect URL sent in [the callback request](#request-interact-callback-redirect).
 
-The AS secures this callback by adding the hash and interaction
-reference as query parameters to the client instance's callback URL.
+The AS secures this redirect by adding the hash and interaction
+reference as query parameters to the client instance's redirect URL.
 
 
 hash
@@ -2559,7 +2558,7 @@ always provide this hash, and the client instance MUST validate the hash when re
 
 To calculate the "hash" value, the party doing the calculation
 first takes the "nonce" value sent by the client instance in the 
-[interaction section of the initial request](#request-interact-callback), the AS's nonce value
+[interaction section of the initial request](#finish-interaction-modes), the AS's nonce value
 from [the callback response](#response-interact-callback), and the "interact_ref"
 sent to the client instance's callback URL.
 These three values are concatenated to each other in this order
@@ -2663,7 +2662,7 @@ includes the access token, and signs with detached JWS:
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2705,7 +2704,7 @@ response includes an interaction reference. The client instance MUST include tha
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -2727,19 +2726,18 @@ SHOULD NOT contain any [interaction responses](#response-interact).
 \[\[ [See issue #89](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/89) \]\]
 
 For example, if the request is successful in causing the AS to issue access tokens and
-release subject claims, the response could look like this:
+release opaque subject claims, the response could look like this:
 
 ~~~
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
         "sub_ids": [ {
-           "subject_type": "email",
-           "email": "user@example.com",
+           "format": "opaque",
+           "id": "J2G8G8O4AZ"
         } ]
     }
 }
@@ -2760,7 +2758,7 @@ include a message body.
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 ~~~
@@ -2780,8 +2778,7 @@ next continuation request.
 {
     "continue": {
         "access_token": {
-            "value": "33OMUKMKSKU80UPRY5NM",
-            "key": true
+            "value": "33OMUKMKSKU80UPRY5NM"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
@@ -2800,13 +2797,12 @@ release subject claims, the response could look like this example:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
     },
     "subject": {
         "sub_ids": [ {
-           "subject_type": "email",
-           "email": "user@example.com",
+           "format": "opaque",
+           "id": "J2G8G8O4AZ"
         } ]
     }
 }
@@ -2819,7 +2815,7 @@ issued or claims have already been released. In such cases, the client instance 
 request to the continuation URI and includes any fields it needs to modify. Fields
 that aren't included in the request are considered unchanged from the original request.
 
-The client instance MAY include the `resources` and `subject` fields as described in {{request-resource}}
+The client instance MAY include the `access_token` and `subject` fields as described in {{request-token}}
 and {{request-subject}}. Inclusion of these fields override any values in the initial request,
 which MAY trigger additional requirements and policies by the AS. For example, if the client instance is asking for 
 more access, the AS could require additional interaction with the RO to gather additional consent.
@@ -2858,16 +2854,18 @@ For example, a client instance initially requests a set of resources using refer
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "read", "write"
-    ],
+    "access_token": {
+        "access": [
+            "read", "write"
+        ]
+    },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -2885,16 +2883,14 @@ a separate access token for accessing the continuation API:
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "RP1LT0-OS9M2P_R64TB",
-        "key": false,
-        "resources": [
+        "access": [
             "read", "write"
         ]
     }
@@ -2909,38 +2905,39 @@ instead of both "read" and "write" as before.
 ~~~
 PATCH /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "read"
-    ]
+    "access_token": {
+        "access": [
+            "read"
+        ]
+    }
     ...
 }
 ~~~
 
-The AS replaces the previous `resources` from the first request, allowing the AS to
+The AS replaces the previous `access` from the first request, allowing the AS to
 determine if any previously-granted consent already applies. In this case, the AS would
 likely determine that reducing the breadth of the requested access means that new access
 tokens can be issued to the client instance. The AS would likely revoke previously-issued access tokens
-that had the greater access rights associated with them.
+that had the greater access rights associated with them, unless they had been issued
+with the `durable` flag.
 
 ~~~
 {
     "continue": {
         "access_token": {
-            "value": "M33OMUK80UPRY5NMKSKU",
-            "key": true
+            "value": "M33OMUK80UPRY5NMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "0EVKC7-2ZKwZM_6N760",
-        "key": false,
-        "resources": [
+        "access": [
             "read"
         ]
     }
@@ -2953,16 +2950,18 @@ needs to step up its access. The initial request could look like this example.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "read"
-    ],
+    "access_token": {
+        "access": [
+            "read"
+        ]
+    },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -2979,16 +2978,14 @@ In its final response, the AS includes a `continue` field:
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 30
     },
     "access_token": {
         "value": "RP1LT0-OS9M2P_R64TB",
-        "key": false,
-        "resources": [
+        "access": [
             "read"
         ]
     }
@@ -3008,17 +3005,19 @@ needs to be included in order to use the callback again.
 ~~~
 PATCH /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "read", "write"
-    ],
+    "access_token": {
+        "access": [
+            "read", "write"
+        ]
+    },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/654321",
             "nonce": "K82FX4T4LKLTI25DQFZC"
@@ -3042,13 +3041,13 @@ HTTP DELETE request to the continuation URI.
 ~~~
 DELETE /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 ~~~
 
 If the request is successfully cancelled, the AS responds with an HTTP 202.
-The AS MUST revoke all associated access tokens, if possible.
+The AS SHOULD revoke all associated access tokens.
 
 # Token Management {#token-management}
 
@@ -3113,9 +3112,8 @@ MUST use this new URL to manage the new access token.
 {
     "access_token": {
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
-        "key": false,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [
+        "access": [
             {
                 "type": "photo-api",
                 "actions": [
@@ -3189,7 +3187,7 @@ key proof together.
     request is used only for calls to the RS, and only with access tokens that are
     not bound to any key as described in {{response-token-single}}.
 - When neither an access token nor key proof are used, this is an unsecured request. This 
-    type of used only for calls to the RS during a discovery phase as
+    type of request is used only for calls to the RS during a discovery phase as
     described in {{rs-request-without-token}}.
 
 ## Key Formats {#key-format}
@@ -3272,36 +3270,41 @@ The means of dereferencing this value are out of scope for this specification.
 The method the client instance uses to send an access token depends on whether
 the token is bound to a key, and if so which proofing method is associated
 with the key. This information is conveyed in the
-`key` and `proof` parameters in [the access token response](#response-token-single).
+`bound` and `key` parameters in [the single](#response-token-single)
+and [multiple access tokens](#response-token-multiple) responses.
 
-If the `key` value is the boolean `false`, the access token is a bearer token
-sent using the HTTP Header method defined in {{RFC6750}}.
-
-~~~
-Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-~~~
-
-The form parameter and query parameter methods of {{RFC6750}} MUST NOT
-be used.
-
-If the `key` value is the boolean `true`, the access token MUST be sent
-using the same key and proofing mechanism that the client instance used
+If the `bound` value is the boolean `true` and the `key` is absent, the access token
+MUST be sent using the same key and proofing mechanism that the client instance used
 in its initial request (or its most recent rotation).
 
-If the `key` value is an object as described in {{key-format}}, the value of the `proof` field within
-the key indicates the particular proofing mechanism to use.
-The access token is sent using the HTTP authorization scheme "GNAP" along with 
-a key proof as described in {{binding-keys}} for the key bound to the
-access token. For example, a "jwsd"-bound access token is sent as
-follows:
+If the `bound` value is the boolean `true` and the `key` value is an object as
+described in {{key-format}}, the access token MUST be sent using the key and proofing
+mechanism defined by the value of the `proof` field within the key object.
+
+The access token MUST be sent using the HTTP "Authorization" request header field and
+the "GNAP" authorization scheme along with a key proof as described in {{binding-keys}}
+for the key bound to the access token. For example, a "jwsd"-bound access token is sent as follows:
 
 ~~~
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 Detached-JWS: eyj0....
 ~~~
 
+If the `bound` value is the boolean `false`, the access token is a bearer token
+that MUST be sent using the `Authorization Request Header Field` method defined in {{RFC6750}}.
+
+~~~
+Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+~~~
+
+The `Form-Encoded Body Parameter` and `URI Query Parameter` methods of {{RFC6750}} MUST NOT
+be used.
+
 
 \[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
+
+The client software MUST reject as an error a situation where the `bound` value is
+the boolean `false` and the `key` is present.
 
 ## Proving Possession of a Key with a Request {#binding-keys}
 
@@ -3358,16 +3361,19 @@ to either the access token's own key or, in the case of bearer tokens, the clien
 ### Detached JWS {#detached-jws}
 
 This method is indicated by `jwsd` in the
-`proof` field. A JWS {{RFC7515}} signature object is created as follows:
+`proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The header of the JWS MUST contain the
-`kid` field of the key bound to this client instance for this request. The JWS header
-MUST contain an `alg` field appropriate for the key identified by kid
-and MUST NOT be `none`.  The `b64` field MUST be set to `false` and the
-`crit` field MUST contain at least `b64` as specified in {{RFC7797}}
+The JOSE (JSON Object Signing and Encryption) header MUST contain the `kid` parameter of
+the key bound to this client instance for this request.  The `alg` parameter MUST be set
+to a value appropriate for the key identified by kid and MUST NOT be `none`.  The `b64`
+parameter MUST be set to `false` and the `crit` parameter MUST contain at least `b64`
+as specified in {{RFC7797}}.
 
-To protect the request, the JWS header MUST contain the following
-additional fields.
+To protect the request, the JOSE header MUST contain the following
+additional parameters.
+
+typ (string)
+: The type header, value ”gnap-binding+jwsd”.
 
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
@@ -3379,13 +3385,11 @@ ts (integer)
 : A timestamp of the request in integer seconds
 
 at_hash (string)
-: When to bind a request to an access token, the access token hash value. Its value is the 
+: When a request is bound to an access token, the access token hash value. Its value is the 
     base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
     `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
     header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
     value with SHA-256, then take the left-most 128 bits and base64url encode them. 
-
-\[\[ [See issue #106](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/106) \]\]
 
 The payload of the JWS object is the serialized body of the request, and
 the object is signed according to detached JWS {{RFC7797}}. 
@@ -3406,12 +3410,14 @@ Detached-JWS: eyJiNjQiOmZhbHNlLCJhbGciOiJSUzI1NiIsImtpZCI6Inh5ei0xIn0.
   peQ
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3453,15 +3459,17 @@ transformations.
 ### Attached JWS {#attached-jws}
 
 This method is indicated by `jws` in the
-`proof` field. A JWS {{RFC7515}} signature object is created as follows:
+`proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The header of the JWS MUST contain the
-`kid` field of the key bound to this client instance for this request. The JWS header
-MUST contain an `alg` field appropriate for the key identified by kid
-and MUST NOT be `none`.
+The JOSE header MUST contain the `kid` parameter of the key bound to this client
+instance for this request. The `alg` parameter MUST be set to a value appropriate
+for the key identified by kid and MUST NOT be `none`.
 
 To protect the request, the JWS header MUST contain the following
-additional fields.
+additional parameters.
+
+typ (string)
+: The type header, value ”gnap-binding+jws”.
 
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
@@ -3473,7 +3481,7 @@ ts (integer)
 : A timestamp of the request in integer seconds
 
 at_hash (string)
-: When to bind a request to an access token, the access token hash value. Its value is the 
+: When a request is bound to an access token, the access token hash value. Its value is the 
     base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
     `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
     header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
@@ -3509,35 +3517,37 @@ Q1dOS1ItRXBLbTZOaU90ZWRGNE91bXQ4TkxLVFZqZllnR
 khlQkRkQ2JyckVUZDR2Qk13RHRBbmpQcjNDVkN3d3gyYk
 FRVDZTbHhGSjNmajJoaHlJcHE3cGM4clppYjVqTnlYS3d
 mQnVrVFZZWm96a3NodC1Mb2h5QVNhS3BZVHA4THROWi13
-In0sInByb29mIjoiandzIn0sIm5hbWUiOiJNeSBGaXN0I
-ENsaWVudCIsInVyaSI6Imh0dHA6Ly9sb2NhbGhvc3QvY2
-xpZW50L2NsaWVudElEIn0sImludGVyYWN0Ijp7ImNhbGx
-iYWNrIjp7Im1ldGhvZCI6InJlZGlyZWN0Iiwibm9uY2Ui
-OiJkOTAyMTM4ODRiODQwOTIwNTM4YjVjNTEiLCJ1cmkiO
-iJodHRwOi8vbG9jYWxob3N0L2NsaWVudC9yZXF1ZXN0LW
-RvbmUifSwicmVkaXJlY3QiOnRydWV9LCJyZXNvdXJjZXM
-iOnsiYWN0aW9ucyI6WyJyZWFkIiwicHJpbnQiXSwibG9j
-YXRpb25zIjpbImh0dHA6Ly9sb2NhbGhvc3QvcGhvdG9zI
-l0sInR5cGUiOiJwaG90by1hcGkifSwic3ViamVjdCI6ey
-JzdWJfaWRzIjpbImlzcy1zdWIiLCJlbWFpbCJdfX0.LUy
-Z8_fERmxbYARq8kBYMwzcd8GnCAKAlo2ZSYLRRNAYWPrp
-2XGLJOvg97WK1idf_LB08OJmLVsCXxCvn9mgaAkYNL_Zj
-HcusBvY1mNo0E1sdTEr31CVKfC-6WrZCscb8YqE4Ayhh0
-Te8kzSng3OkLdy7xN4xeKuHzpF7yGsM52JZ0cBcTo6WrY
-EfGdr08AWQJ59ht72n3jTsmYNy9A6I4Wrvfgj3TNxmwYo
-jpBAicfjnzA1UVcNm9F_xiSz1_y2tdH7j5rVqBMQife-k
-9Ewk95vr3lurthenliYSNiUinVfoW1ybnaIBcTtP1_YCx
-g_h1y-B5uZEvYNGCuoCqa6IQ
+In0sInByb29mIjoiandzIn0sIm5hbWUiOiJNeUZpcnN0Q
+2xpZW50IiwidXJpIjoiaHR0cDovL2xvY2FsaG9zdC9jbG
+llbnQvY2xpZW50SUQifSwiaW50ZXJhY3QiOnsic3RhcnQ
+iOlsicmVkaXJlY3QiXSwiZmluaXNoIjp7Im1ldGhvZCI6
+InJlZGlyZWN0Iiwibm9uY2UiOiJkOTAyMTM4ODRiODQwO
+TIwNTM4YjVjNTEiLCJ1cmkiOiJodHRwOi8vbG9jYWxob3
+N0L2NsaWVudC9yZXF1ZXN0LWRvbmUifX0sImFjY2Vzc19
+0b2tlbiI6eyJhY2Nlc3MiOlt7ImFjdGlvbnMiOlsicmVh
+ZCIsInByaW50Il0sImxvY2F0aW9ucyI6WyJodHRwOi8vb
+G9jYWxob3N0L3Bob3RvcyJdLCJ0eXBlIjoicGhvdG8tYX
+BpIn1dfSwic3ViamVjdCI6eyJzdWJfaWRzIjpbImlzc19
+zdWIiLCJlbWFpbCJdfX0.LUyZ8_fERmxbYARq8kBYMwzc
+d8GnCAKAlo2ZSYLRRNAYWPrp2XGLJOvg97WK1idf_LB08
+OJmLVsCXxCvn9mgaAkYNL_ZjHcusBvY1mNo0E1sdTEr31
+CVKfC-6WrZCscb8YqE4Ayhh0Te8kzSng3OkLdy7xN4xeK
+uHzpF7yGsM52JZ0cBcTo6WrYEfGdr08AWQJ59ht72n3jT
+smYNy9A6I4Wrvfgj3TNxmwYojpBAicfjnzA1UVcNm9F_x
+iSz1_y2tdH7j5rVqBMQife-k9Ewk95vr3lurthenliYSN
+iUinVfoW1ybnaIBcTtP1_YCxg_h1y-B5uZEvYNGCuoCqa
+6IQ
 ~~~
 
 This example's JWS header decodes to:
 
 ~~~
 {
+  "typ": "gnap-binding+jws",
   "alg": "RS256",
   "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
-  "htm": "post",
-  "htu": "/tx",
+  "htm": "POST",
+  "htu": "https://server.example.com/tx",
   "ts": 1603800783
 }
 ~~~
@@ -3562,32 +3572,33 @@ And the JWS body decodes to:
       },
       "proof": "jws"
     },
-    "name": "My Fist Client",
+    "name": "My First Client",
     "uri": "http://localhost/client/clientID"
   },
   "interact": {
-    "callback": {
+    "start": ["redirect"],
+    "finish": {
       "method": "redirect",
       "nonce": "d90213884b840920538b5c51",
       "uri": "http://localhost/client/request-done"
-    },
-    "redirect": true
+    }
   },
-  "resources": {
-    "actions": [
-      "read",
-      "print"
-    ],
-    "locations": [
-      "http://localhost/photos"
-    ],
-    "type": "photo-api"
-  },
-  "subject": {
-    "sub_ids": [
-      "iss_sub",
-      "email"
+  "access_token": {
+    "access": [
+      {
+        "actions": [
+          "read",
+          "print"
+        ],
+        "locations": [
+          "http://localhost/photos"
+        ],
+        "type": "photo-api"
+      }
     ]
+  }
+  "subject": {
+    "formats": ["iss_sub", "opaque"]
   }
 }
 ~~~
@@ -3638,12 +3649,14 @@ SSL_CLIENT_CERT: MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBmjE3MDUGA1UEAwwuQmV
  lwLW9b+Tfn/daUbIDctxeJneq2anQyU2znBgQl6KILDSF4eaOqlBut/KNZHHazJh
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3690,12 +3703,20 @@ fHI6kqm3NCyCCTihe2ck5RmCc5l2KBO/vAHF0ihhFOOOby1v6qbPHQcxAU6rEb907
 This method is indicated by `dpop` in the
 `proof` field. The client instance creates a Demonstration of Proof-of-Possession
 signature header as described in {{I-D.ietf-oauth-dpop}}
-section 2. In addition to the required fields, the DPoP body MUST also
-contain a digest of the request body:
+section 2. In addition, this specification defines the following fields
+to be added to the DPoP payload:
 
-digest (string)
+htd (string)
 : Digest of the request body as the value of the Digest 
-    header defined in {{RFC3230}}.
+    header defined in {{RFC3230}}. When a request contains a message body, such as a POST or PUT request,
+    this field is REQUIRED.
+
+at_hash (string)
+: When a request is bound to an access token, the access token hash value. Its value is the 
+    base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
+    `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
+    header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
+    value with SHA-256, then take the left-most 128 bits and base64url encode them. 
 
 ~~~
 POST /tx HTTP/1.1
@@ -3720,12 +3741,14 @@ iKEO7vj1APv32dsux67gZYiUpjm0wEZprjlG0a07R984KLeK1XPjXgViEwEdlirUmpVy
 T9tyEYqGrTfm5uautELgMls9sgSyE929woZ59elg
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3780,12 +3803,14 @@ Sa/Ue1yLEAMg=="]}
 Digest: SHA=oZz2O3kg5SEFAhmr0xEBbc4jEfo=
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "push",
             "uri": "https://client.foo",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
@@ -3867,9 +3892,11 @@ cWFkzBAr6oC4Qp7HnY_5UT6IWkRJt3efwYprWcYouOVjtRan3kEtWkaWr
 G0J4bPVnTI5St9hJYvvh7FE8JirIg
  
 {
-    "resources": [
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
     "interact": {
         "redirect": true,
         "callback": {
@@ -3905,6 +3932,255 @@ Y1cK2U3obvUg7w"
 
 \[\[ [See issue #113](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/113) \]\]
 
+# Resource Access Rights {#resource-access-rights}
+
+GNAP provides a rich structure for describing the protected resources
+hosted by RSs and accessed by client software. This structure is used when
+the client instance [requests an access token](#request-token) and when
+an [access token is returned](#response-token).
+
+The root of this structure is a JSON array. The elements of the JSON
+array represent rights of access that are associated with the
+the access token. The resulting access is the union of all elements
+within the array.
+
+The access associated with the access token is described
+using objects that each contain multiple
+dimensions of access. Each object contains a REQUIRED `type`
+property that determines the type of API that the token is used for.
+
+type (string)
+: The type of resource request as a string. This field MAY
+      define which other fields are allowed in the request object. 
+      This field is REQUIRED.
+
+The value of the `type` field is under the control of the AS. 
+This field MUST be compared using an exact byte match of the string
+value against known types by the AS.  The AS MUST ensure that there
+is no collision between different authorization data types that it
+supports.  The AS MUST NOT do any collation or normalization of data
+types during comparison. It is RECOMMENDED that designers of general-purpose
+APIs use a URI for this field to avoid collisions between multiple
+API types protected by a single AS.
+
+While it is expected that many APIs will have their own properties, a set of
+common properties are defined here. Specific API implementations
+SHOULD NOT re-use these fields with different semantics or syntax. The
+available values for these properties are determined by the API
+being protected at the RS.
+
+actions (array of strings)
+: The types of actions the client instance will take at the RS as an array of strings.
+    For example, a client instance asking for a combination of "read" and "write" access.
+
+locations (array of strings)
+: The location of the RS as an array of
+    strings. These strings are typically URIs identifying the
+    location of the RS.
+
+datatypes (array of strings)
+: The kinds of data available to the client instance at the RS's API as an
+    array of strings. For example, a client instance asking for access to
+    raw "image" data and "metadata" at a photograph API.
+
+identifier (string)
+: A string identifier indicating a specific resource at the RS.
+    For example, a patient identifier for a medical API or
+    a bank account number for a financial API.
+
+The following non-normative example is describing three kinds of access (read, write, delete) to each of
+two different locations and two different data types (metadata, images) for a single access token 
+using the fictitious `photo-api` type definition.
+
+~~~
+"access": [
+    {
+        "type": "photo-api",
+        "actions": [
+            "read",
+            "write",
+            "delete"
+        ],
+        "locations": [
+            "https://server.example.net/",
+            "https://resource.local/other"
+        ],
+        "datatypes": [
+            "metadata",
+            "images"
+        ]
+    }
+]
+~~~
+
+The access requested for a given object when using these fields 
+is the cross-product of all fields of the object. That is to 
+say, the object represents a request for all `action` values listed within the object
+to be used at all `location` values listed within the object for all `datatype`
+values listed within the object. Assuming the request above was granted,
+the client instance could assume that it
+would be able to do a `read` action against the `images` on the first server
+as well as a `delete` action on the `metadata` of the second server, or any other
+combination of these fields, using the same access token. 
+
+To request a different combination of access, 
+such as requesting one `action` against one `location` 
+and a different `action` against a different `location`, the 
+client instance can include multiple separate objects in the `resources` array.
+The following non-normative example uses the same fictitious `photo-api`
+type definition to request a single access token with more specifically
+targeted access rights by using two discrete objects within the request.
+
+~~~
+"access": [
+    {
+        "type": "photo-api",
+        "actions": [
+            "read"
+        ],
+        "locations": [
+            "https://server.example.net/"
+        ],
+        "datatypes": [
+            "images"
+        ]
+    },
+    {
+        "type": "photo-api",
+        "actions": [
+            "write",
+            "delete"
+        ],
+        "locations": [
+            "https://resource.local/other"
+        ],
+        "datatypes": [
+            "metadata"
+        ]
+    }
+]
+~~~
+
+The access requested here is for `read` access to `images` on one server
+while simultaneously requesting `write` and `delete` access for `metadata` on a different
+server, but importantly without requesting `write` or `delete` access to `images` on the
+first server.
+
+It is anticipated that API designers will use a combination
+of common fields defined in this specification as well as
+fields specific to the API itself. The following non-normative 
+example shows the use of both common and API-specific fields as 
+part of two different fictitious API `type` values. The first
+access request includes the `actions`, `locations`, and `datatypes` 
+fields specified here as well as the API-specific `geolocation`
+field. The second access request includes the `actions` and
+`identifier` fields specified here as well as the API-specific
+`currency` field.
+
+~~~
+"access": [
+    {
+        "type": "photo-api",
+        "actions": [
+            "read",
+            "write"
+        ],
+        "locations": [
+            "https://server.example.net/",
+            "https://resource.local/other"
+        ],
+        "datatypes": [
+            "metadata",
+            "images"
+        ],
+        "geolocation": [
+            { lat: -32.364, lng: 153.207 },
+            { lat: -35.364, lng: 158.207 }
+        ]
+    },
+    {
+        "type": "financial-transaction",
+        "actions": [
+            "withdraw"
+        ],
+        "identifier": "account-14-32-32-3", 
+        "currency": "USD"
+    }
+]
+~~~
+
+If this request is approved,
+the [resulting access token](#response-token-single)'s access rights will be
+the union of the requested types of access for each of the two APIs, just as above.
+
+## Requesting Resources By Reference {#resource-access-reference}
+
+Instead of sending an [object describing the requested resource](#resource-access-rights),
+access rights MAY be communicated as a string known to
+the AS or RS representing the access being requested. Each string
+SHOULD correspond to a specific expanded object representation at
+the AS. 
+
+~~~
+"access": [
+    "read", "dolphin-metadata", "some other thing"
+]
+~~~
+
+This value is opaque to the client instance and MAY be any
+valid JSON string, and therefore could include spaces, unicode
+characters, and properly escaped string sequences. However, in some
+situations the value is intended to be 
+seen and understood by the client software's developer. In such cases, the
+API designer choosing any such human-readable strings SHOULD take steps
+to ensure the string values are not easily confused by a developer,
+such as by limiting the strings to easily disambiguated characters.
+
+This functionality is similar in practice to OAuth 2's `scope` parameter {{RFC6749}}, where a single string
+represents the set of access rights requested by the client instance. As such, the reference
+string could contain any valid OAuth 2 scope value as in {{example-oauth2}}. Note that the reference
+string here is not bound to the same character restrictions as in OAuth 2's `scope` definition.
+
+A single `access` array MAY include both object-type and
+string-type resource items. In this non-normative example,
+the client instance is requesting access to a `photo-api` and `financial-transaction` API type
+as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
+
+~~~
+"access": [
+    {
+        "type": "photo-api",
+        "actions": [
+            "read",
+            "write",
+            "delete"
+        ],
+        "locations": [
+            "https://server.example.net/",
+            "https://resource.local/other"
+        ],
+        "datatypes": [
+            "metadata",
+            "images"
+        ]
+    },
+    "read", 
+    "dolphin-metadata",
+    {
+        "type": "financial-transaction",
+        "actions": [
+            "withdraw"
+        ],
+        "identifier": "account-14-32-32-3", 
+        "currency": "USD"
+    },
+    "some other thing"
+]
+~~~
+
+The requested access is the union of all elements of the array, including both objects and 
+reference strings.
+
 # Discovery {#discovery}
 
 By design, the protocol minimizes the need for any pre-flight
@@ -3920,9 +4196,11 @@ containing the following information:
 
 
 grant_request_endpoint (string)
-: REQUIRED. The full URL of the
-          AS's grant request endpoint. This MUST match the URL the client instance used to
-          make the discovery request.
+: REQUIRED. The location of the
+          AS's grant request endpoint. The location MUST be a URL {{RFC3986}}
+          with a scheme component that MUST be https, a host component, and optionally,
+          port, path and query components and no fragment components. This URL MUST
+          match the URL the client instance used to make the discovery request.
 
 capabilities (array of strings)
 : OPTIONAL. A list of the AS's
@@ -3930,23 +4208,23 @@ capabilities (array of strings)
           [capabilities section](#request-capabilities) of
           the request.
 
-interaction_methods (array of strings)
+interaction_methods_supported (array of strings)
 : OPTIONAL. A list of the AS's
           interaction methods. The values of this list correspond to the
           possible fields in the [interaction section](#request-interact) of the request.
 
-key_proofs (array strings)
+key_proofs_supported (array of strings)
 : OPTIONAL. A list of the AS's supported key
           proofing mechanisms. The values of this list correspond to possible
           values of the `proof` field of the 
           [key section](#key-format) of the request.
 
-sub_ids (array of strings)
+subject_formats_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
-          identifiers. The values of this list correspond to possible values
+          subject identifier types. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
-assertions (array of strings)
+assertions_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
           assertion formats. The values of this list correspond to possible
           values of the [subject assertion section](#request-subject) of the request.
@@ -3990,7 +4268,7 @@ endpoint at the AS to get token information.
     The RS signs the request with its own key (not the client instance's
     key or the token's key).
 
-3. The AS validates the token value and the client instance's request
+3. The AS validates the access token value and the client instance's request
     and returns the introspection response for the token.
 
 4. The RS fulfills the request from the client instance.
@@ -4001,7 +4279,7 @@ token as the body of the request.
 ~~~
 POST /introspect HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
@@ -4017,11 +4295,13 @@ token's presentation, such as its intended proofing mechanism and key
 material.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "active": true,
-    "resources": [
+    "access": [
         "dolphin-metadata", "some other thing"
     ],
     "client": {
@@ -4091,40 +4371,42 @@ request.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        {
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        },
-        "dolphin-metadata"
-    ],
+    "access_token": {
+        "access": [
+            {
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            },
+            "dolphin-metadata"
+        ]
+    },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "existing_access_token": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0"
 }
 ~~~
 
-The AS responds with a token as described in 
-{{response}}. 
+The AS responds with a token for the downstream RS2 as described in 
+{{response-token}}. 
 
 ## Registering a Resource Handle {#rs-register-resource-handle}
 
 If the RS needs to, it can post a set of resources as described in
-{{request-resource-single}} to the AS's resource
+{{resource-access-rights}} to the AS's resource
 registration endpoint.
 
 The RS MUST identify itself with its own key and sign the
@@ -4133,11 +4415,11 @@ request.
 ~~~
 POST /resource HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
+    "access": [
         {
             "actions": [
                 "read",
@@ -4166,7 +4448,9 @@ The AS responds with a handle appropriate to represent the
 resources list that the RS presented.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "resource_handle": "FWWIKYBQ6U56NL1"
@@ -4189,19 +4473,19 @@ authentication header indicating that GNAP needs to be used
 to access the resource. The address of the GNAP
 endpoint MUST be sent in the "as_uri" parameter. The RS MAY
 additionally return a resource reference that the client instance MAY use in
-its [resource request](#request-resource). This
+its [access token request](#request-token). This
 resource reference handle SHOULD be sufficient for at least the action
 the client instance was attempting to take at the RS. The RS MAY use the [dynamic resource handle request](#rs-register-resource-handle) to register a new resource handle, or use a handle that
 has been pre-configured to represent what the AS is protecting. The
 content of this handle is opaque to the RS and the client instance.
 
 ~~~
-WWW-Authenticate: GNAP as_uri=http://server.example/tx,resource=FWWIKYBQ6U56NL1
+WWW-Authenticate: GNAP as_uri=https://server.example/tx,resource=FWWIKYBQ6U56NL1
 ~~~
 
 The client instance then makes a call to the "as_uri" as described in 
 {{request}}, with the value of "resource" as one of the members
-of a "resources" array {{request-resource-single}}. The
+of the `access` array {{request-token-single}}. The
 client instance MAY request additional resources and other information, and MAY
 request multiple access tokens.
 
@@ -4270,12 +4554,20 @@ sure that it has the permission to do so.
    
 # Document History {#history}
 
+- -Since 04
+    - Changed "interaction_methods" to "interaction_methods_supported".
+    - Changed "key_proofs" to "key_proofs_supported".
+    - Changed "assertions" to "assertions_supported".
+    - Updated discovery and field names for subject formats.
     - Updated subject information definition.
 
 - -04
     - Updated terminology.
     - Refactored key presentation and binding.
+    - Refactored "interact" request to group start and end modes.
     - Changed access token request and response syntax.
+    - Changed DPoP digest field to 'htd' to match proposed FAPI profile.
+    - Include the access token hash in the DPoP message.
     - Removed closed issue links.
     - Removed function to read state of grant request by client.
     - Closed issues related to reading and updating access tokens.
@@ -4342,27 +4634,29 @@ identifies itself using its public key.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        {
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        }
-    ],
+    "access_token": {
+        "access": [
+            {
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            }
+        ],
+    },
     "client": {
       "key": {
         "proof": "jwsd",
@@ -4376,8 +4670,8 @@ Detached-JWS: ejy0...
       }
     },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return/123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
@@ -4395,17 +4689,18 @@ client instance that it can use the given instance identifier to identify itself
 [future requests](#request-instance).
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "interact": {
        "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
-       "callback": "MBDOFXG4Y5CVJCX821LH"
+       "push": "MBDOFXG4Y5CVJCX821LH"
     }
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue"
     },
@@ -4453,7 +4748,7 @@ the request as above.
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Detached-JWS: ejy0...
 
@@ -4468,14 +4763,15 @@ The AS retrieves the pending request based on the handle and issues
 a bearer access token and returns this to the client instance.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [{
+        "access": [{
             "actions": [
                 "read",
                 "write",
@@ -4493,8 +4789,7 @@ Content-type: application/json
     },
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue"
     }
@@ -4517,17 +4812,18 @@ The client instance initiates the request to the AS.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "dolphin-metadata", "some other thing"
-    ],
+    "access_token": {
+        "access": [
+            "dolphin-metadata", "some other thing"
+        ],
+    },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
-        "redirect": true,
-        "user_code": true
+        "start": ["redirect", "user_code"]
     }
 }
 ~~~
@@ -4541,7 +4837,9 @@ a nonce, but does include a "wait" parameter on the continuation
 section because it expects the client instance to poll for results.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "interact": {
@@ -4553,8 +4851,7 @@ Content-type: application/json
     },
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue/VGJKPTKC50",
         "wait": 60
@@ -4596,13 +4893,14 @@ the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "continue": {
         "access_token": {
-            "value": "G7YQT4KQQ5TZY9SLSS5E",
-            "key": true
+            "value": "G7YQT4KQQ5TZY9SLSS5E"
         },
         "uri": "https://server.example.com/continue/ATWHO4Q1WV",
         "wait": 60
@@ -4629,14 +4927,15 @@ determines that it has been approved, and issues an access
 token for the client to use at the RS.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [
+        "access": [
             "dolphin-metadata", "some other thing"
         ]
     }
@@ -4644,9 +4943,7 @@ Content-type: application/json
 ~~~
 
 
-
-
-# No User Involvement {#example-no-user}
+## No User Involvement {#example-no-user}
 
 In this scenario, the client instance is requesting access on its own
 behalf, with no user to interact with.
@@ -4657,12 +4954,14 @@ public key and using MTLS to make the request.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 
 {
-    "resources": [
-        "backend service", "nightly-routine-3"
-    ],
+    "access_token": {
+        "access": [
+            "backend service", "nightly-routine-3"
+        ],
+    },
     "client": {
       "key": {
         "proof": "mtls",
@@ -4678,14 +4977,15 @@ The AS processes this and determines that the client instance can ask for
 the requested resources and issues an access token.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": true,
         "manage": "https://server.example.com/token",
-        "resources": [
+        "access": [
             "backend service", "nightly-routine-3"
         ]
     }
@@ -4705,43 +5005,45 @@ resources. The client instance also identifies a particular user.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        {
-            "type": "photo-api",
-            "actions": [
-                "read",
-                "write",
-                "dolphin"
-            ],
-            "locations": [
-                "https://server.example.net/",
-                "https://resource.local/other"
-            ],
-            "datatypes": [
-                "metadata",
-                "images"
-            ]
-        },
-        "read", "dolphin-metadata",
-        {
-            "type": "financial-transaction",
-            "actions": [
-                "withdraw"
-            ],
-            "identifier": "account-14-32-32-3", 
-            "currency": "USD"
-        },
-        "some other thing"
-    ],
+    "access_token": {
+        "access": [
+            {
+                "type": "photo-api",
+                "actions": [
+                    "read",
+                    "write",
+                    "dolphin"
+                ],
+                "locations": [
+                    "https://server.example.net/",
+                    "https://resource.local/other"
+                ],
+                "datatypes": [
+                    "metadata",
+                    "images"
+                ]
+            },
+            "read", "dolphin-metadata",
+            {
+                "type": "financial-transaction",
+                "actions": [
+                    "withdraw"
+                ],
+                "identifier": "account-14-32-32-3", 
+                "currency": "USD"
+            },
+            "some other thing"
+        ],
+    },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "user": {
         "sub_ids": [ {
-            "subject_type": "email",
-            "email": "user@example.com"
+            "format": "opaque",
+            "id": "J2G8G8O4AZ"
         } ]
    }
 }
@@ -4756,13 +5058,14 @@ request. The AS indicates to the client instance that it can poll for
 continuation.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "continue": {
         "access_token": {
-            "value": "80UPRY5NM33OMUKMKSKU",
-            "key": true
+            "value": "80UPRY5NM33OMUKMKSKU"
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -4794,13 +5097,14 @@ the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "continue": {
         "access_token": {
-            "value": "BI9QNW6V9W3XFJK4R02D",
-            "key": true
+            "value": "BI9QNW6V9W3XFJK4R02D"
         },
         "uri": "https://server.example.com/continue",
         "wait": 60
@@ -4828,14 +5132,15 @@ determines that it has been approved and it issues an access
 token.
 
 ~~~
-Content-type: application/json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Cache-Control: no-store
 
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "key": false,
         "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "resources": [
+        "access": [
             "dolphin-metadata", "some other thing"
         ]
     }
@@ -4877,17 +5182,20 @@ places the OAuth 2 values in the appropriate places.
 ~~~
 POST /tx HTTP/1.1
 Host: server.example.com
-Content-type: application/json
+Content-Type: application/json
 Detached-JWS: ejy0...
 
 {
-    "resources": [
-        "read", "write", "dolphin"
-    ],
+    "access_token": {
+        "access": [
+            "read", "write", "dolphin"
+        ],
+        "flags": [ "bearer" ]
+    },
     "client": "7C7C4AZ9KHRS6X63AJAO",
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
             "uri": "https://client.example.net/return?state=123455",
             "nonce": "LKLTI25DK82FX4T4QFZC"
