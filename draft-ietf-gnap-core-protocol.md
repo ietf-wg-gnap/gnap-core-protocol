@@ -101,7 +101,13 @@ authorize the request.
 
 The process by which the delegation happens is known as a grant, and
 GNAP allows for the negotiation of the grant process
-over time by multiple parties acting in distinct roles. 
+over time by multiple parties acting in distinct roles.
+
+The focus of this protocol is to provide interopability between the different
+parties acting in each role, and is not to specify implementation details of each.
+Where appropriate, GNAP may make recommendations about internal implementation
+details, but these recommendations are to ensure the security of the overall
+deployment rather than to be prescriptive in the implementation.
 
 This protocol solves many of the same use cases as OAuth 2.0 {{RFC6749}},
 OpenID Connect {{OIDC}}, and the family of protocols that have grown up
@@ -109,7 +115,7 @@ around that ecosystem. However, GNAP is not an extension of OAuth 2.0
 and is not intended to be directly compatible with OAuth 2.0. GNAP seeks to
 provide functionality and solve use cases that OAuth 2.0 cannot easily
 or cleanly address. {{vs-oauth2}} further details the protocol rationale compared to OAuth 2.0.
-GNAP and OAuth 2.0 will exist in parallel 
+GNAP and OAuth 2.0 will likely exist in parallel 
 for many deployments, and considerations have been taken to facilitate
 the mapping and transition from legacy systems to GNAP. Some examples
 of these can be found in {{example-oauth2}}. 
@@ -176,6 +182,10 @@ part of the client instance. If there are several copies of the client software
 that run separately but all share the same key material, such as a
 deployed cluster, then this cluster is considered a single client instance.
 
+In these cases, the distinct components of what is considered a GNAP client instance
+may use any number of different communication mechanisms between, all of which 
+would be considered an implementation detail of the client instances and out of scope of GNAP.
+
 For another example, an AS could likewise be built out of many constituent
 components in a distributed architecture. The component that the client instance
 calls directly could be different from the component that the the
@@ -185,7 +195,9 @@ the AS could need to collect identity claims about the RO from one system
 that deals with user attributes while generating access tokens at
 another system that deals with security rights. From the perspective of
 GNAP, all of these are pieces of the AS and together fulfill the
-role of the AS as defined by the protocol.
+role of the AS as defined by the protocol. These pieces may have their own internal
+communications mechanisms which are considered out of scope of GNAP.
+
 
 ## Elements {#elements}
 
