@@ -1891,8 +1891,7 @@ expires_in (integer)
 key (object / string)
 : OPTIONAL. The key that the token is bound to, if different from the
     client instance's presented key. The key MUST be an object or string in a format
-    described in {{key-format}}, describing a public key to which the
-    client instance can use the associated private key. The client instance MUST be able to
+    described in {{key-format}}. The client instance MUST be able to
     dereference or process the key information in order to be able
     to sign the request.
 
@@ -3213,9 +3212,10 @@ proof (string)
     {{binding-keys}}. The `proof` field is REQUIRED.
 
 jwk (object)
-: Value of the public key as a JSON Web Key {{RFC7517}}. The object MUST
-            contain an "alg" field which is used to validate the signature.
-            The object MUST contain the "kid" field to identify the key.
+: The public key and its properties represented as a JSON Web Key {{RFC7517}}.
+    A JWK MUST contain the `alg` (Algorithm) and `kid` (Key ID) parameters. The `alg`
+    parameter MUST NOT be "none". The `x5c` (X.509 Certificate Chain) parameter MAY
+    be used to provide the X.509 representation of the provided public key.
 
 cert (string)
 : PEM serialized value of the certificate used to
