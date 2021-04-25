@@ -188,7 +188,7 @@ would be considered an implementation detail of the client instances and out of 
 
 For another example, an AS could likewise be built out of many constituent
 components in a distributed architecture. The component that the client instance
-calls directly could be different from the component that the the
+calls directly could be different from the component that the
 RO interacts with to drive consent, since API calls and user interaction
 have different security considerations in many environments. Furthermore,
 the AS could need to collect identity claims about the RO from one system
