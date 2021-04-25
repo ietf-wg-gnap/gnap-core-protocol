@@ -183,7 +183,7 @@ that run separately but all share the same key material, such as a
 deployed cluster, then this cluster is considered a single client instance.
 
 In these cases, the distinct components of what is considered a GNAP client instance
-may use any number of different communication mechanisms between, all of which 
+may use any number of different communication mechanisms between them, all of which 
 would be considered an implementation detail of the client instances and out of scope of GNAP.
 
 For another example, an AS could likewise be built out of many constituent
