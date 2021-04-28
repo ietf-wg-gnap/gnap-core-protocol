@@ -1113,8 +1113,6 @@ channels by the client instance, as discussed in {{response-subject}}.
 
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
-\[\[ [See issue #42](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/42) \]\]
-
 Note: the "formats" and "assertions" request fields are independent of
 each other, and a returned assertion MAY omit a requested subject
 identifier. 
@@ -2281,8 +2279,6 @@ is suitable for communication with the current user. To get such information,
 the client instance MUST use an identity protocol to request and receive additional identity
 claims. The details of an identity protocol and associated schema 
 are outside the scope of this specification.
-
-\[\[ [See issue #75](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/75) \]\]
 
 Extensions to this specification MAY define additional response
 properties in [a registry TBD](#IANA).
