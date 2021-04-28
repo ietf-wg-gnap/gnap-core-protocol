@@ -4479,17 +4479,17 @@ using the fictitious `photo-api` type definition.
 
 The access requested for a given object when using these fields 
 is the cross-product of all fields of the object. That is to 
-say, the object represents a request for all `action` values listed within the object
-to be used at all `location` values listed within the object for all `datatype`
-values listed within the object. Assuming the request above was granted,
+say, the object represents a request for all `actions` listed
+to be used at all `locations` listed for all possible `datatypes`
+listed within the object. Assuming the request above was granted,
 the client instance could assume that it
 would be able to do a `read` action against the `images` on the first server
 as well as a `delete` action on the `metadata` of the second server, or any other
 combination of these fields, using the same access token. 
 
 To request a different combination of access, 
-such as requesting one `action` against one `location` 
-and a different `action` against a different `location`, the 
+such as requesting one of the possible `actions` against one of the possible `locations` 
+and a different choice of possible `actions` against a different one of the possible `locations`, the 
 client instance can include multiple separate objects in the `resources` array.
 The following non-normative example uses the same fictitious `photo-api`
 type definition to request a single access token with more specifically
