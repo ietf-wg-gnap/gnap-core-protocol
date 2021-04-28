@@ -102,7 +102,7 @@ The process by which the delegation happens is known as a grant, and
 GNAP allows for the negotiation of the grant process
 over time by multiple parties acting in distinct roles.
 
-The focus of this protocol is to provide interopability between the different
+The focus of this protocol is to provide interoperability between the different
 parties acting in each role, and is not to specify implementation details of each.
 Where appropriate, GNAP may make recommendations about internal implementation
 details, but these recommendations are to ensure the security of the overall
@@ -292,7 +292,8 @@ an access token to call an RS.
     Legend
     + + + indicates a possible interaction with a human
     ----- indicates an interaction between protocol roles
-    ~ ~ ~ indicates a potential equivalence or out-of-band communication between roles
+    ~ ~ ~ indicates a potential equivalence or out-of-band
+            communication between roles
 ~~~
 
 - (A) The end-user interacts with the client instance to indicate a need for resources on
@@ -369,35 +370,35 @@ with the user to ensure the same user that is starting the interaction is the us
 that returns from the interaction.
 
 ~~~
-    +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         | User |
-    |Instance|                                  |        |         |      |
-    |        |< (1) + Start Session + + + + + + + + + + + + + + + +|      |
-    |        |                                  |        |         |      |
-    |        |--(2)--- Request Access --------->|        |         |      |
-    |        |                                  |        |         |      |
-    |        |<-(3)-- Interaction Needed -------|        |         |      |
-    |        |                                  |        |         |      |
-    |        |+ (4) + Redirect for Interaction + + + + + + + + + > |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (5) +>|      |
-    |        |                                  |        |  AuthN  |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (6) +>|      |
-    |        |                                  |        |  AuthZ  |      |
-    |        |                                  |        |         |      |
-    |        |< (7) + Redirect for Continuation + + + + + + + + + +|      |
-    |        |                                  |        |         +------+
-    |        |--(8)--- Continue Request ------->|        |
-    |        |                                  |        |
-    |        |<-(9)----- Grant Access ----------|        |
-    |        |                                  |        |
-    |        |                                  |        |     +--------+
-    |        |--(10)-- Access API ---------------------------->|   RS   |
-    |        |                                  |        |     |        |
-    |        |<-(11)-- API Response ---------------------------|        |
-    |        |                                  |        |     +--------+
-    +--------+                                  +--------+
++--------+                                  +--------+         +------+
+| Client |                                  |   AS   |         | User |
+|Instance|                                  |        |         |      |
+|        |< (1) + Start Session + + + + + + + + + + + + + + + +|      |
+|        |                                  |        |         |      |
+|        |--(2)--- Request Access --------->|        |         |      |
+|        |                                  |        |         |      |
+|        |<-(3)-- Interaction Needed -------|        |         |      |
+|        |                                  |        |         |      |
+|        |+ (4) + Redirect for Interaction + + + + + + + + + > |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (5) +>|      |
+|        |                                  |        |  AuthN  |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (6) +>|      |
+|        |                                  |        |  AuthZ  |      |
+|        |                                  |        |         |      |
+|        |< (7) + Redirect for Continuation + + + + + + + + + +|      |
+|        |                                  |        |         +------+
+|        |--(8)--- Continue Request ------->|        |
+|        |                                  |        |
+|        |<-(9)----- Grant Access ----------|        |
+|        |                                  |        |
+|        |                                  |        |     +--------+
+|        |--(10)-- Access API ---------------------------->|   RS   |
+|        |                                  |        |     |        |
+|        |<-(11)-- API Response ---------------------------|        |
+|        |                                  |        |     +--------+
++--------+                                  +--------+
 ~~~
 
 1. The client instance establishes a verifiable session to the user, in the role of the end-user. 
@@ -469,39 +470,39 @@ to be interacting with the client instance through the same web browser used for
 the AS.
 
 ~~~
-    +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         | User |
-    |Instance|--(1)--- Request Access --------->|        |         |      |
-    |        |                                  |        |         |      |
-    |        |<-(2)-- Interaction Needed -------|        |         |      |
-    |        |                                  |        |         |      |
-    |        |+ (3) + + Display User Code + + + + + + + + + + + + >|      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (4) + |      |
-    |        |                                  |        |Open URI |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (5) +>|      |
-    |        |                                  |        |  AuthN  |      |
-    |        |--(9)--- Continue Request (A) --->|        |         |      |
-    |        |                                  |        |<+ (6) +>|      |
-    |        |<-(10)- Not Yet Granted (Wait) ---|        |  Code   |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (7) +>|      |
-    |        |                                  |        |  AuthZ  |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (8) +>|      |
-    |        |                                  |        |Completed|      |
-    |        |                                  |        |         |      |
-    |        |--(11)-- Continue Request (B) --->|        |         +------+
-    |        |                                  |        |
-    |        |<-(12)----- Grant Access ---------|        |
-    |        |                                  |        |
-    |        |                                  |        |     +--------+
-    |        |--(13)-- Access API ---------------------------->|   RS   |
-    |        |                                  |        |     |        |
-    |        |<-(14)-- API Response ---------------------------|        |
-    |        |                                  |        |     +--------+
-    +--------+                                  +--------+
++--------+                                  +--------+         +------+
+| Client |                                  |   AS   |         | User |
+|Instance|--(1)--- Request Access --------->|        |         |      |
+|        |                                  |        |         |      |
+|        |<-(2)-- Interaction Needed -------|        |         |      |
+|        |                                  |        |         |      |
+|        |+ (3) + + Display User Code + + + + + + + + + + + + >|      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (4) + |      |
+|        |                                  |        |Open URI |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (5) +>|      |
+|        |                                  |        |  AuthN  |      |
+|        |--(9)--- Continue Request (A) --->|        |         |      |
+|        |                                  |        |<+ (6) +>|      |
+|        |<-(10)- Not Yet Granted (Wait) ---|        |  Code   |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (7) +>|      |
+|        |                                  |        |  AuthZ  |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (8) +>|      |
+|        |                                  |        |Completed|      |
+|        |                                  |        |         |      |
+|        |--(11)-- Continue Request (B) --->|        |         +------+
+|        |                                  |        |
+|        |<-(12)----- Grant Access ---------|        |
+|        |                                  |        |
+|        |                                  |        |     +--------+
+|        |--(13)-- Access API ---------------------------->|   RS   |
+|        |                                  |        |     |        |
+|        |<-(14)-- API Response ---------------------------|        |
+|        |                                  |        |     +--------+
++--------+                                  +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance indicates that
@@ -571,30 +572,30 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 
 
 ~~~
-    +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         |  RO  |
-    |Instance|--(1)--- Request Access --------->|        |         |      |
-    |        |                                  |        |         |      |
-    |        |<-(2)-- Not Yet Granted (Wait) ---|        |         |      |
-    |        |                                  |        |<+ (3) +>|      |
-    |        |                                  |        |  AuthN  |      |
-    |        |--(6)--- Continue Request (A) --->|        |         |      |
-    |        |                                  |        |<+ (4) +>|      |
-    |        |<-(7)-- Not Yet Granted (Wait) ---|        |  AuthZ  |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (5) +>|      |
-    |        |                                  |        |Completed|      |
-    |        |                                  |        |         |      |
-    |        |--(8)--- Continue Request (B) --->|        |         +------+
-    |        |                                  |        |
-    |        |<-(9)------ Grant Access ---------|        |
-    |        |                                  |        |
-    |        |                                  |        |     +--------+
-    |        |--(10)-- Access API ---------------------------->|   RS   |
-    |        |                                  |        |     |        |
-    |        |<-(11)-- API Response ---------------------------|        |
-    |        |                                  |        |     +--------+
-    +--------+                                  +--------+
++--------+                                  +--------+         +------+
+| Client |                                  |   AS   |         |  RO  |
+|Instance|--(1)--- Request Access --------->|        |         |      |
+|        |                                  |        |         |      |
+|        |<-(2)-- Not Yet Granted (Wait) ---|        |         |      |
+|        |                                  |        |<+ (3) +>|      |
+|        |                                  |        |  AuthN  |      |
+|        |--(6)--- Continue Request (A) --->|        |         |      |
+|        |                                  |        |<+ (4) +>|      |
+|        |<-(7)-- Not Yet Granted (Wait) ---|        |  AuthZ  |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (5) +>|      |
+|        |                                  |        |Completed|      |
+|        |                                  |        |         |      |
+|        |--(8)--- Continue Request (B) --->|        |         +------+
+|        |                                  |        |
+|        |<-(9)------ Grant Access ---------|        |
+|        |                                  |        |
+|        |                                  |        |     +--------+
+|        |--(10)-- Access API ---------------------------->|   RS   |
+|        |                                  |        |     |        |
+|        |<-(11)-- API Response ---------------------------|        |
+|        |                                  |        |     +--------+
++--------+                                  +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
@@ -655,17 +656,17 @@ without the need for a RO to be involved at runtime to approve the decision.
 Since there is no explicit RO, the client instance does not interact with an RO.
 
 ~~~
-    +--------+                            +--------+
-    | Client |                            |   AS   |
-    |Instance|--(1)--- Request Access --->|        |
-    |        |                            |        |
-    |        |<-(2)---- Grant Access -----|        |
-    |        |                            |        |  +--------+
-    |        |--(3)--- Access API ------------------->|   RS   |
-    |        |                            |        |  |        |
-    |        |<-(4)--- API Response ------------------|        |
-    |        |                            |        |  +--------+
-    +--------+                            +--------+
++--------+                            +--------+
+| Client |                            |   AS   |
+|Instance|--(1)--- Request Access --->|        |
+|        |                            |        |
+|        |<-(2)---- Grant Access -----|        |
+|        |                            |        |  +--------+
+|        |--(3)--- Access API ------------------->|   RS   |
+|        |                            |        |  |        |
+|        |<-(4)--- API Response ------------------|        |
+|        |                            |        |  +--------+
++--------+                            +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
@@ -692,29 +693,29 @@ the access token expires. The client instance then gets a new access token by ro
 expired access token at the AS using the token's management URL.
 
 ~~~
-    +--------+                                          +--------+
-    | Client |                                          |   AS   |
-    |Instance|--(1)--- Request Access ----------------->|        |
-    |        |                                          |        |
-    |        |<-(2)--- Grant Access --------------------|        |
-    |        |                                          |        |
-    |        |                             +--------+   |        |
-    |        |--(3)--- Access Resource --->|   RS   |   |        |
-    |        |                             |        |   |        |
-    |        |<-(4)--- Success Response ---|        |   |        |
-    |        |                             |        |   |        |
-    |        |                             |        |   |        |
-    |        |                             |        |   |        |
-    |        |--(5)--- Access Resource --->|        |   |        |
-    |        |                             |        |   |        |
-    |        |<-(6)--- Error Response -----|        |   |        |
-    |        |                             +--------+   |        |
-    |        |                                          |        |
-    |        |--(7)--- Rotate Token ------------------->|        |
-    |        |                                          |        |
-    |        |<-(8)--- Rotated Token -------------------|        |
-    |        |                                          |        |
-    +--------+                                          +--------+
++--------+                                          +--------+
+| Client |                                          |   AS   |
+|Instance|--(1)--- Request Access ----------------->|        |
+|        |                                          |        |
+|        |<-(2)--- Grant Access --------------------|        |
+|        |                                          |        |
+|        |                             +--------+   |        |
+|        |--(3)--- Access Resource --->|   RS   |   |        |
+|        |                             |        |   |        |
+|        |<-(4)--- Success Response ---|        |   |        |
+|        |                             |        |   |        |
+|        |                             |        |   |        |
+|        |                             |        |   |        |
+|        |--(5)--- Access Resource --->|        |   |        |
+|        |                             |        |   |        |
+|        |<-(6)--- Error Response -----|        |   |        |
+|        |                             +--------+   |        |
+|        |                                          |        |
+|        |--(7)--- Rotate Token ------------------->|        |
+|        |                                          |        |
+|        |<-(8)--- Rotated Token -------------------|        |
+|        |                                          |        |
++--------+                                          +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request).
@@ -754,28 +755,28 @@ interaction modes can be used in this scenario, so these are shown only in
 the abstract as functions of the AS here.
 
 ~~~
-    +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         | User |
-    |Instance|                                  |        |         |      |
-    |        |--(1)--- Request Access --------->|        |         |      |
-    |        |                                  |        |         |      |
-    |        |<-(2)--- Request Access ----------|        |         |      |
-    |        |                                  |        |         |      |
-    |        |+ (3) + Facilitate Interaction + + + + + + + + + + > |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (4) +>|      |
-    |        |                                  |        |  AuthN  |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (5) +>|      |
-    |        |                                  |        |  AuthZ  |      |
-    |        |                                  |        |         |      |
-    |        |< (6) + Signal Continuation + + + + + + + + + + + + +|      |
-    |        |                                  |        |         +------+
-    |        |--(7)--- Continue Request ------->|        |
-    |        |                                  |        |
-    |        |<-(8)----- Grant Access ----------|        |
-    |        |                                  |        |
-    +--------+                                  +--------+
++--------+                                  +--------+         +------+
+| Client |                                  |   AS   |         | User |
+|Instance|                                  |        |         |      |
+|        |--(1)--- Request Access --------->|        |         |      |
+|        |                                  |        |         |      |
+|        |<-(2)--- Request Access ----------|        |         |      |
+|        |                                  |        |         |      |
+|        |+ (3) + Facilitate Interaction + + + + + + + + + + > |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (4) +>|      |
+|        |                                  |        |  AuthN  |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (5) +>|      |
+|        |                                  |        |  AuthZ  |      |
+|        |                                  |        |         |      |
+|        |< (6) + Signal Continuation + + + + + + + + + + + + +|      |
+|        |                                  |        |         +------+
+|        |--(7)--- Continue Request ------->|        |
+|        |                                  |        |
+|        |<-(8)----- Grant Access ----------|        |
+|        |                                  |        |
++--------+                                  +--------+
 ~~~
 
 1. The client instance [requests access to subject information](#request).
@@ -1659,7 +1660,7 @@ of the given locales are supported, the AS MAY use a default locale.
 
 ### Extending Interaction Modes {#request-interact-extend}
 
-Additional interaction modes are defined in [a registry TBD](#IANA).
+Additional interaction start modes, finish modes, and hints are defined in [a registry TBD](#IANA).
 
 ## Declaring Client Capabilities {#request-capabilities}
 
@@ -1931,42 +1932,42 @@ used in the initial request, with a management URL, and that has access to three
 (one using an object and two described by reference strings).
 
 ~~~
-    "access_token": {
-        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "access": [
-            {
-                "type": "photo-api",
-                "actions": [
-                    "read",
-                    "write",
-                    "dolphin"
-                ],
-                "locations": [
-                    "https://server.example.net/",
-                    "https://resource.local/other"
-                ],
-                "datatypes": [
-                    "metadata",
-                    "images"
-                ]
-            },
-            "read", "dolphin-metadata"
-        ]
-    }
+"access_token": {
+    "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
+    "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+    "access": [
+        {
+            "type": "photo-api",
+            "actions": [
+                "read",
+                "write",
+                "dolphin"
+            ],
+            "locations": [
+                "https://server.example.net/",
+                "https://resource.local/other"
+            ],
+            "datatypes": [
+                "metadata",
+                "images"
+            ]
+        },
+        "read", "dolphin-metadata"
+    ]
+}
 ~~~
 
 The following non-normative example shows a single bearer access token
 with access to two described resources.
 
 ~~~
-    "access_token": {
-        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": false,
-        "access": [
-            "finance", "medical"
-        ]
-    }
+"access_token": {
+    "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
+    "bound": false,
+    "access": [
+        "finance", "medical"
+    ]
+}
 ~~~
 
 
@@ -1992,19 +1993,19 @@ names `token1` and `token2`, and only the first token has a management
 URL associated with it.
 
 ~~~
-    "access_token": [
-        {
-            "label": "token1",
-            "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-            "access": [ "finance" ]
-        },
-        {
-            "label": "token2",
-            "value": "UFGLO2FDAFG7VGZZPJ3IZEMN21EVU71FHCARP4J1",
-            "access": [ "medical" ]
-        }
+"access_token": [
+    {
+        "label": "token1",
+        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
+        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "access": [ "finance" ]
+    },
+    {
+        "label": "token2",
+        "value": "UFGLO2FDAFG7VGZZPJ3IZEMN21EVU71FHCARP4J1",
+        "access": [ "medical" ]
     }
+}
 ~~~
 
 Each access token corresponds to one of the objects in the `access_token` array of
@@ -2024,21 +2025,21 @@ with a multiple access token structure containing one access token.
 If the AS has split the access token response, the response MUST include the `split` flag set to `true`.
 
 ~~~
-    "access_token": [
-        {
-            "label": "split-1",
-            "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
-            "split": true,
-            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-            "access": [ "fruits" ]
-        },
-        {
-            "label": "split-2",
-            "value": "FG7VGZZPJ3IZEMN21EVU71FHCAR-UFGLO2FDAP4J1",
-            "split": true,
-            "access": [ "vegetables" ]
-        }
+"access_token": [
+    {
+        "label": "split-1",
+        "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
+        "split": true,
+        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "access": [ "fruits" ]
+    },
+    {
+        "label": "split-2",
+        "value": "FG7VGZZPJ3IZEMN21EVU71FHCAR-UFGLO2FDAP4J1",
+        "split": true,
+        "access": [ "vegetables" ]
     }
+}
 ~~~
 
 Each access token MAY be bound to different keys with different proofing mechanisms.
@@ -2087,9 +2088,9 @@ unique for the request and MUST NOT contain any security-sensitive
 information such as user identifiers or access tokens.
 
 ~~~
-    "interact": {
-        "redirect": "https://interact.example.com/4CF492MLVMSW9MKMXKHQ"
-    }
+"interact": {
+    "redirect": "https://interact.example.com/4CF492MLVMSW9MKMXKHQ"
+}
 ~~~
 
 The URL returned is a function of the AS, but the URL itself MAY be completely
@@ -2117,9 +2118,9 @@ for the client instance to launch. This URL MUST be unique for the request and
 MUST NOT contain any security-sensitive information such as user identifiers or access tokens.
 
 ~~~
-    "interact": {
-        "app": "https://app.example.com/launch?tx=4CF492MLV"
-    }
+"interact": {
+    "app": "https://app.example.com/launch?tx=4CF492MLV"
+}
 ~~~
 
 The means for the launched application to communicate with the AS are out of
@@ -2159,12 +2160,12 @@ url (string)
 
 
 ~~~
-    "interact": {
-        "user_code": {
-            "code": "A1BC-3DFF",
-            "url": "https://srv.ex/device"
-        }
+"interact": {
+    "user_code": {
+        "code": "A1BC-3DFF",
+        "url": "https://srv.ex/device"
     }
+}
 ~~~
 
 The client instance MUST communicate the "code" to the end-user in some
@@ -2204,9 +2205,9 @@ that the client instance will use in validating the callback as defined in
 {{interaction-finish}}.
 
 ~~~
-    "interact": {
-        "finish": "MBDOFXG4Y5CVJCX821LH"
-    }
+"interact": {
+    "finish": "MBDOFXG4Y5CVJCX821LH"
+}
 ~~~
 
 When the interaction is completed, the interaction component MUST contact the client instance
@@ -2652,7 +2653,6 @@ Content-Type: application/json
   "hash": "p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A",
   "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
 }
-
 ~~~
 
 
@@ -2705,7 +2705,6 @@ hash value.
 p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A
 ~~~
 
-
 #### SHA2-512 {#hash-sha2}
 
 The "sha2" hash method consists of hashing the input string
@@ -2716,11 +2715,6 @@ hash value.
 ~~~
 62SbcD3Xs7L40rjgALA-ymQujoh2LB2hPJyX9vlcr1H6ecChZ8BNKkG_HrOKP_Bpj84rh4mC9aE9x7HPBFcIHw
 ~~~
-
-
-
-
-
 
 # Continuing a Grant Request {#continue-request}
 
@@ -3350,17 +3344,17 @@ formats. This key is intended to be used with the [detached JWS](#detached-jws)
 proofing mechanism, as indicated by the `proof` field.
 
 ~~~
-    "key": {
-        "proof": "jwsd",
-        "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
-        },
-        "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
-    }
+"key": {
+    "proof": "jwsd",
+    "jwk": {
+                "kty": "RSA",
+                "e": "AQAB",
+                "kid": "xyz-1",
+                "alg": "RS256",
+                "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+    },
+    "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
+}
 ~~~
 
 ### Key References {#key-reference}
@@ -4772,6 +4766,8 @@ sure that it has the permission to do so.
     - Updated cryptographic proof of possession methods to match current reference syntax.
     - Updated proofing language to use "signer" and "verifier" generically.
     - Updated cryptographic proof of possession examples.
+    - Editorial cleanup and fixes.
+    - Diagram cleanup and fixes.
 
 - -04
     - Updated terminology.
@@ -5325,8 +5321,6 @@ Cache-Control: no-store
 }
 ~~~
 
-
-
 The AS reaches out to the RO and prompts them for consent. In this
 example, the AS has an application that it can push notifications in
 to for the specified account. 
@@ -5363,8 +5357,6 @@ Cache-Control: no-store
     }
 }
 ~~~
-
-
 
 Note that the continuation handle has been rotated since it was
 used by the client instance to make this call. The client instance polls the
@@ -5455,8 +5447,6 @@ Detached-JWS: ejy0...
     }
 }
 ~~~
-
-
 
 The `client_id` can be used to identify the client instance's keys that it
 uses for authentication, the scopes represent resources that the
