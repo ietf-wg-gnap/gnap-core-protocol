@@ -123,7 +123,7 @@ of these can be found in {{example-oauth2}}.
 
 {::boilerplate bcp14}
 
-This document contains non-normative examples of partial and complete HTTP messages. Some examples use a single trailing backslash '\' to indicate line wrapping for long values, as per {{!RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
+This document contains non-normative examples of partial and complete HTTP messages, JSON structures, URLs, query components, keys, and other elements. Some examples use a single trailing backslash '\' to indicate line wrapping for long values, as per {{!RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
 
 ## Roles
 
@@ -1158,7 +1158,7 @@ display (object)
                     "e": "AQAB",
                     "kid": "xyz-1",
                     "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8..."
         },
         "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
     },
@@ -1735,7 +1735,8 @@ a [callback nonce](#response-interact-finish), and a [continuation response](#re
 ~~~
 {
     "interact": {
-        "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
+        "redirect": "https://server.example.com/interact/4CF492ML\
+          VMSW9MKMXKHQ",
         "finish": "MBDOFXG4Y5CVJCX821LH"
     },
     "continue": {
@@ -1757,7 +1758,8 @@ an opaque identifier.
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
         "bound": false,
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
     },
     "subject": {
         "sub_ids": [ {
@@ -1934,7 +1936,8 @@ used in the initial request, with a management URL, and that has access to three
 ~~~
 "access_token": {
     "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-    "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+    "manage": "https://server.example.com/token/PRY5NM33O\
+        M4TB8N6BW7OZB8CDFONP219RP1L",
     "access": [
         {
             "type": "photo-api",
@@ -1997,7 +2000,8 @@ URL associated with it.
     {
         "label": "token1",
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [ "finance" ]
     },
     {
@@ -2030,7 +2034,8 @@ If the AS has split the access token response, the response MUST include the `sp
         "label": "split-1",
         "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
         "split": true,
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [ "fruits" ]
     },
     {
@@ -2609,8 +2614,9 @@ RO from a web page and launching the system browser with the
 target URL.
 
 ~~~
-https://client.example.net/return/123455
-  ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A
+https://client.example.net/return/123455\
+  ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2\
+    HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A\
   &interact_ref=4IFWWIKYBC2PQ6U56NL1
 ~~~
 
@@ -2650,7 +2656,8 @@ Host: client.example.net
 Content-Type: application/json
 
 {
-  "hash": "p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A",
+  "hash": "p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R\
+    2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A",
   "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
 }
 ~~~
@@ -2702,7 +2709,8 @@ using URL Safe Base64 with no padding. The resulting string is the
 hash value.
 
 ~~~
-p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A
+p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM\
+  7XHPAdJzTZMtKBsaraJ64A
 ~~~
 
 #### SHA2-512 {#hash-sha2}
@@ -2713,7 +2721,8 @@ using URL Safe Base64 with no padding. The resulting string is the
 hash value.
 
 ~~~
-62SbcD3Xs7L40rjgALA-ymQujoh2LB2hPJyX9vlcr1H6ecChZ8BNKkG_HrOKP_Bpj84rh4mC9aE9x7HPBFcIHw
+62SbcD3Xs7L40rjgALA-ymQujoh2LB2hPJyX9vlcr1H6ecChZ8BNKkG_HrOKP_Bp\
+  j84rh4mC9aE9x7HPBFcIHw
 ~~~
 
 # Continuing a Grant Request {#continue-request}
@@ -2841,7 +2850,8 @@ release opaque subject claims, the response could look like this:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
     },
     "subject": {
         "sub_ids": [ {
@@ -2906,7 +2916,8 @@ release subject claims, the response could look like this example:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
     },
     "subject": {
         "sub_ids": [ {
@@ -3221,7 +3232,8 @@ MUST use this new URL to manage the new access token.
 {
     "access_token": {
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             {
                 "type": "photo-api",
@@ -4913,7 +4925,7 @@ Detached-JWS: ejy0...
             "e": "AQAB",
             "kid": "xyz-1",
             "alg": "RS256",
-            "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+            "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8..."
         }
       }
     },
@@ -4943,7 +4955,8 @@ Cache-Control: no-store
 
 {
     "interact": {
-       "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
+       "redirect": 
+         "https://server.example.com/interact/4CF492MLVMSW9MKM",
        "push": "MBDOFXG4Y5CVJCX821LH"
     }
     "continue": {
@@ -4964,7 +4977,7 @@ browser.
 
 ~~~
 HTTP 302 Found
-Location: https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ
+Location: https://server.example.com/interact/4CF492MLVMSW9MKM
 ~~~
 
 
@@ -4978,8 +4991,9 @@ added as query parameters.
 
 ~~~
 HTTP 302 Found
-Location: https://client.example.net/return/123455
-  ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A
+Location: https://client.example.net/return/123455\
+  ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2\
+    HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A\
   &interact_ref=4IFWWIKYBC2PQ6U56NL1
 ~~~
 
@@ -5018,7 +5032,8 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [{
             "actions": [
                 "read",
@@ -5182,7 +5197,8 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             "dolphin-metadata", "some other thing"
         ]
@@ -5383,7 +5399,8 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             "dolphin-metadata", "some other thing"
         ]
