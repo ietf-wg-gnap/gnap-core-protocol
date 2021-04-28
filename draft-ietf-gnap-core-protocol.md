@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-latest
+docname: draft-ietf-gnap-core-protocol-05
 category: std
 
 ipr: trust200902
@@ -57,7 +57,6 @@ normative:
     RFC8174:
     RFC8259:
     RFC8705:
-    RFC8693:
     I-D.ietf-httpbis-message-signatures:
     I-D.ietf-oauth-signed-http-request:
     I-D.ietf-oauth-dpop:
@@ -102,7 +101,7 @@ The process by which the delegation happens is known as a grant, and
 GNAP allows for the negotiation of the grant process
 over time by multiple parties acting in distinct roles.
 
-The focus of this protocol is to provide interopability between the different
+The focus of this protocol is to provide interoperability between the different
 parties acting in each role, and is not to specify implementation details of each.
 Where appropriate, GNAP may make recommendations about internal implementation
 details, but these recommendations are to ensure the security of the overall
@@ -123,7 +122,7 @@ of these can be found in {{example-oauth2}}.
 
 {::boilerplate bcp14}
 
-This document contains non-normative examples of partial and complete HTTP messages. Some examples use a single trailing backslash '\' to indicate line wrapping for long values, as per {{!RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
+This document contains non-normative examples of partial and complete HTTP messages, JSON structures, URLs, query components, keys, and other elements. Some examples use a single trailing backslash '\' to indicate line wrapping for long values, as per {{!RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
 
 ## Roles
 
@@ -292,7 +291,8 @@ an access token to call an RS.
     Legend
     + + + indicates a possible interaction with a human
     ----- indicates an interaction between protocol roles
-    ~ ~ ~ indicates a potential equivalence or out-of-band communication between roles
+    ~ ~ ~ indicates a potential equivalence or out-of-band
+            communication between roles
 ~~~
 
 - (A) The end-user interacts with the client instance to indicate a need for resources on
@@ -369,35 +369,35 @@ with the user to ensure the same user that is starting the interaction is the us
 that returns from the interaction.
 
 ~~~
-    +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         | User |
-    |Instance|                                  |        |         |      |
-    |        |< (1) + Start Session + + + + + + + + + + + + + + + +|      |
-    |        |                                  |        |         |      |
-    |        |--(2)--- Request Access --------->|        |         |      |
-    |        |                                  |        |         |      |
-    |        |<-(3)-- Interaction Needed -------|        |         |      |
-    |        |                                  |        |         |      |
-    |        |+ (4) + Redirect for Interaction + + + + + + + + + > |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (5) +>|      |
-    |        |                                  |        |  AuthN  |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (6) +>|      |
-    |        |                                  |        |  AuthZ  |      |
-    |        |                                  |        |         |      |
-    |        |< (7) + Redirect for Continuation + + + + + + + + + +|      |
-    |        |                                  |        |         +------+
-    |        |--(8)--- Continue Request ------->|        |
-    |        |                                  |        |
-    |        |<-(9)----- Grant Access ----------|        |
-    |        |                                  |        |
-    |        |                                  |        |     +--------+
-    |        |--(10)-- Access API ---------------------------->|   RS   |
-    |        |                                  |        |     |        |
-    |        |<-(11)-- API Response ---------------------------|        |
-    |        |                                  |        |     +--------+
-    +--------+                                  +--------+
++--------+                                  +--------+         +------+
+| Client |                                  |   AS   |         | User |
+|Instance|                                  |        |         |      |
+|        |< (1) + Start Session + + + + + + + + + + + + + + + +|      |
+|        |                                  |        |         |      |
+|        |--(2)--- Request Access --------->|        |         |      |
+|        |                                  |        |         |      |
+|        |<-(3)-- Interaction Needed -------|        |         |      |
+|        |                                  |        |         |      |
+|        |+ (4) + Redirect for Interaction + + + + + + + + + > |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (5) +>|      |
+|        |                                  |        |  AuthN  |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (6) +>|      |
+|        |                                  |        |  AuthZ  |      |
+|        |                                  |        |         |      |
+|        |< (7) + Redirect for Continuation + + + + + + + + + +|      |
+|        |                                  |        |         +------+
+|        |--(8)--- Continue Request ------->|        |
+|        |                                  |        |
+|        |<-(9)----- Grant Access ----------|        |
+|        |                                  |        |
+|        |                                  |        |     +--------+
+|        |--(10)-- Access API ---------------------------->|   RS   |
+|        |                                  |        |     |        |
+|        |<-(11)-- API Response ---------------------------|        |
+|        |                                  |        |     +--------+
++--------+                                  +--------+
 ~~~
 
 1. The client instance establishes a verifiable session to the user, in the role of the end-user. 
@@ -469,39 +469,39 @@ to be interacting with the client instance through the same web browser used for
 the AS.
 
 ~~~
-    +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         | User |
-    |Instance|--(1)--- Request Access --------->|        |         |      |
-    |        |                                  |        |         |      |
-    |        |<-(2)-- Interaction Needed -------|        |         |      |
-    |        |                                  |        |         |      |
-    |        |+ (3) + + Display User Code + + + + + + + + + + + + >|      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (4) + |      |
-    |        |                                  |        |Open URI |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (5) +>|      |
-    |        |                                  |        |  AuthN  |      |
-    |        |--(9)--- Continue Request (A) --->|        |         |      |
-    |        |                                  |        |<+ (6) +>|      |
-    |        |<-(10)- Not Yet Granted (Wait) ---|        |  Code   |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (7) +>|      |
-    |        |                                  |        |  AuthZ  |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (8) +>|      |
-    |        |                                  |        |Completed|      |
-    |        |                                  |        |         |      |
-    |        |--(11)-- Continue Request (B) --->|        |         +------+
-    |        |                                  |        |
-    |        |<-(12)----- Grant Access ---------|        |
-    |        |                                  |        |
-    |        |                                  |        |     +--------+
-    |        |--(13)-- Access API ---------------------------->|   RS   |
-    |        |                                  |        |     |        |
-    |        |<-(14)-- API Response ---------------------------|        |
-    |        |                                  |        |     +--------+
-    +--------+                                  +--------+
++--------+                                  +--------+         +------+
+| Client |                                  |   AS   |         | User |
+|Instance|--(1)--- Request Access --------->|        |         |      |
+|        |                                  |        |         |      |
+|        |<-(2)-- Interaction Needed -------|        |         |      |
+|        |                                  |        |         |      |
+|        |+ (3) + + Display User Code + + + + + + + + + + + + >|      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (4) + |      |
+|        |                                  |        |Open URI |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (5) +>|      |
+|        |                                  |        |  AuthN  |      |
+|        |--(9)--- Continue Request (A) --->|        |         |      |
+|        |                                  |        |<+ (6) +>|      |
+|        |<-(10)- Not Yet Granted (Wait) ---|        |  Code   |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (7) +>|      |
+|        |                                  |        |  AuthZ  |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (8) +>|      |
+|        |                                  |        |Completed|      |
+|        |                                  |        |         |      |
+|        |--(11)-- Continue Request (B) --->|        |         +------+
+|        |                                  |        |
+|        |<-(12)----- Grant Access ---------|        |
+|        |                                  |        |
+|        |                                  |        |     +--------+
+|        |--(13)-- Access API ---------------------------->|   RS   |
+|        |                                  |        |     |        |
+|        |<-(14)-- API Response ---------------------------|        |
+|        |                                  |        |     +--------+
++--------+                                  +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance indicates that
@@ -571,30 +571,30 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 
 
 ~~~
-    +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         |  RO  |
-    |Instance|--(1)--- Request Access --------->|        |         |      |
-    |        |                                  |        |         |      |
-    |        |<-(2)-- Not Yet Granted (Wait) ---|        |         |      |
-    |        |                                  |        |<+ (3) +>|      |
-    |        |                                  |        |  AuthN  |      |
-    |        |--(6)--- Continue Request (A) --->|        |         |      |
-    |        |                                  |        |<+ (4) +>|      |
-    |        |<-(7)-- Not Yet Granted (Wait) ---|        |  AuthZ  |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (5) +>|      |
-    |        |                                  |        |Completed|      |
-    |        |                                  |        |         |      |
-    |        |--(8)--- Continue Request (B) --->|        |         +------+
-    |        |                                  |        |
-    |        |<-(9)------ Grant Access ---------|        |
-    |        |                                  |        |
-    |        |                                  |        |     +--------+
-    |        |--(10)-- Access API ---------------------------->|   RS   |
-    |        |                                  |        |     |        |
-    |        |<-(11)-- API Response ---------------------------|        |
-    |        |                                  |        |     +--------+
-    +--------+                                  +--------+
++--------+                                  +--------+         +------+
+| Client |                                  |   AS   |         |  RO  |
+|Instance|--(1)--- Request Access --------->|        |         |      |
+|        |                                  |        |         |      |
+|        |<-(2)-- Not Yet Granted (Wait) ---|        |         |      |
+|        |                                  |        |<+ (3) +>|      |
+|        |                                  |        |  AuthN  |      |
+|        |--(6)--- Continue Request (A) --->|        |         |      |
+|        |                                  |        |<+ (4) +>|      |
+|        |<-(7)-- Not Yet Granted (Wait) ---|        |  AuthZ  |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (5) +>|      |
+|        |                                  |        |Completed|      |
+|        |                                  |        |         |      |
+|        |--(8)--- Continue Request (B) --->|        |         +------+
+|        |                                  |        |
+|        |<-(9)------ Grant Access ---------|        |
+|        |                                  |        |
+|        |                                  |        |     +--------+
+|        |--(10)-- Access API ---------------------------->|   RS   |
+|        |                                  |        |     |        |
+|        |<-(11)-- API Response ---------------------------|        |
+|        |                                  |        |     +--------+
++--------+                                  +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
@@ -655,17 +655,17 @@ without the need for a RO to be involved at runtime to approve the decision.
 Since there is no explicit RO, the client instance does not interact with an RO.
 
 ~~~
-    +--------+                            +--------+
-    | Client |                            |   AS   |
-    |Instance|--(1)--- Request Access --->|        |
-    |        |                            |        |
-    |        |<-(2)---- Grant Access -----|        |
-    |        |                            |        |  +--------+
-    |        |--(3)--- Access API ------------------->|   RS   |
-    |        |                            |        |  |        |
-    |        |<-(4)--- API Response ------------------|        |
-    |        |                            |        |  +--------+
-    +--------+                            +--------+
++--------+                            +--------+
+| Client |                            |   AS   |
+|Instance|--(1)--- Request Access --->|        |
+|        |                            |        |
+|        |<-(2)---- Grant Access -----|        |
+|        |                            |        |  +--------+
+|        |--(3)--- Access API ------------------->|   RS   |
+|        |                            |        |  |        |
+|        |<-(4)--- API Response ------------------|        |
+|        |                            |        |  +--------+
++--------+                            +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
@@ -692,29 +692,29 @@ the access token expires. The client instance then gets a new access token by ro
 expired access token at the AS using the token's management URL.
 
 ~~~
-    +--------+                                          +--------+
-    | Client |                                          |   AS   |
-    |Instance|--(1)--- Request Access ----------------->|        |
-    |        |                                          |        |
-    |        |<-(2)--- Grant Access --------------------|        |
-    |        |                                          |        |
-    |        |                             +--------+   |        |
-    |        |--(3)--- Access Resource --->|   RS   |   |        |
-    |        |                             |        |   |        |
-    |        |<-(4)--- Success Response ---|        |   |        |
-    |        |                             |        |   |        |
-    |        |                             |        |   |        |
-    |        |                             |        |   |        |
-    |        |--(5)--- Access Resource --->|        |   |        |
-    |        |                             |        |   |        |
-    |        |<-(6)--- Error Response -----|        |   |        |
-    |        |                             +--------+   |        |
-    |        |                                          |        |
-    |        |--(7)--- Rotate Token ------------------->|        |
-    |        |                                          |        |
-    |        |<-(8)--- Rotated Token -------------------|        |
-    |        |                                          |        |
-    +--------+                                          +--------+
++--------+                                          +--------+
+| Client |                                          |   AS   |
+|Instance|--(1)--- Request Access ----------------->|        |
+|        |                                          |        |
+|        |<-(2)--- Grant Access --------------------|        |
+|        |                                          |        |
+|        |                             +--------+   |        |
+|        |--(3)--- Access Resource --->|   RS   |   |        |
+|        |                             |        |   |        |
+|        |<-(4)--- Success Response ---|        |   |        |
+|        |                             |        |   |        |
+|        |                             |        |   |        |
+|        |                             |        |   |        |
+|        |--(5)--- Access Resource --->|        |   |        |
+|        |                             |        |   |        |
+|        |<-(6)--- Error Response -----|        |   |        |
+|        |                             +--------+   |        |
+|        |                                          |        |
+|        |--(7)--- Rotate Token ------------------->|        |
+|        |                                          |        |
+|        |<-(8)--- Rotated Token -------------------|        |
+|        |                                          |        |
++--------+                                          +--------+
 ~~~
 
 1. The client instance [requests access to the resource](#request).
@@ -754,28 +754,28 @@ interaction modes can be used in this scenario, so these are shown only in
 the abstract as functions of the AS here.
 
 ~~~
-    +--------+                                  +--------+         +------+
-    | Client |                                  |   AS   |         | User |
-    |Instance|                                  |        |         |      |
-    |        |--(1)--- Request Access --------->|        |         |      |
-    |        |                                  |        |         |      |
-    |        |<-(2)--- Request Access ----------|        |         |      |
-    |        |                                  |        |         |      |
-    |        |+ (3) + Facilitate Interaction + + + + + + + + + + > |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (4) +>|      |
-    |        |                                  |        |  AuthN  |      |
-    |        |                                  |        |         |      |
-    |        |                                  |        |<+ (5) +>|      |
-    |        |                                  |        |  AuthZ  |      |
-    |        |                                  |        |         |      |
-    |        |< (6) + Signal Continuation + + + + + + + + + + + + +|      |
-    |        |                                  |        |         +------+
-    |        |--(7)--- Continue Request ------->|        |
-    |        |                                  |        |
-    |        |<-(8)----- Grant Access ----------|        |
-    |        |                                  |        |
-    +--------+                                  +--------+
++--------+                                  +--------+         +------+
+| Client |                                  |   AS   |         | User |
+|Instance|                                  |        |         |      |
+|        |--(1)--- Request Access --------->|        |         |      |
+|        |                                  |        |         |      |
+|        |<-(2)--- Request Access ----------|        |         |      |
+|        |                                  |        |         |      |
+|        |+ (3) + Facilitate Interaction + + + + + + + + + + > |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (4) +>|      |
+|        |                                  |        |  AuthN  |      |
+|        |                                  |        |         |      |
+|        |                                  |        |<+ (5) +>|      |
+|        |                                  |        |  AuthZ  |      |
+|        |                                  |        |         |      |
+|        |< (6) + Signal Continuation + + + + + + + + + + + + +|      |
+|        |                                  |        |         +------+
+|        |--(7)--- Continue Request ------->|        |
+|        |                                  |        |
+|        |<-(8)----- Grant Access ----------|        |
+|        |                                  |        |
++--------+                                  +--------+
 ~~~
 
 1. The client instance [requests access to subject information](#request).
@@ -1113,8 +1113,6 @@ channels by the client instance, as discussed in {{response-subject}}.
 
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
-\[\[ [See issue #42](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/42) \]\]
-
 Note: the "formats" and "assertions" request fields are independent of
 each other, and a returned assertion MAY omit a requested subject
 identifier. 
@@ -1159,7 +1157,7 @@ display (object)
                     "e": "AQAB",
                     "kid": "xyz-1",
                     "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8..."
         },
         "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
     },
@@ -1404,14 +1402,14 @@ the end-user to an arbitrary URL and can receive a [redirect](#request-interact-
 a browser request.
 
 ~~~
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.example.net/return/123455",
-            "nonce": "LKLTI25DK82FX4T4QFZC"
-        }
+"interact": {
+    "start": ["redirect"],
+    "finish": {
+        "method": "redirect",
+        "uri": "https://client.example.net/return/123455",
+        "nonce": "LKLTI25DK82FX4T4QFZC"
     }
+}
 ~~~
 
 In this non-normative example, the client instance is indicating that it can 
@@ -1420,9 +1418,9 @@ to an [arbitrary URL](#request-interact-redirect) on a secondary
 device, but it cannot accept a redirect or push callback.
 
 ~~~
-    "interact": {
-        "start": ["redirect", "user_code"]
-    }
+"interact": {
+    "start": ["redirect", "user_code"]
+}
 ~~~
 
 If the client instance does not provide a suitable interaction mechanism, the
@@ -1661,7 +1659,7 @@ of the given locales are supported, the AS MAY use a default locale.
 
 ### Extending Interaction Modes {#request-interact-extend}
 
-Additional interaction modes are defined in [a registry TBD](#IANA).
+Additional interaction start modes, finish modes, and hints are defined in [a registry TBD](#IANA).
 
 ## Declaring Client Capabilities {#request-capabilities}
 
@@ -1736,7 +1734,8 @@ a [callback nonce](#response-interact-finish), and a [continuation response](#re
 ~~~
 {
     "interact": {
-        "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
+        "redirect": "https://server.example.com/interact/4CF492ML\
+          VMSW9MKMXKHQ",
         "finish": "MBDOFXG4Y5CVJCX821LH"
     },
     "continue": {
@@ -1758,7 +1757,8 @@ an opaque identifier.
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
         "bound": false,
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
     },
     "subject": {
         "sub_ids": [ {
@@ -1933,42 +1933,43 @@ used in the initial request, with a management URL, and that has access to three
 (one using an object and two described by reference strings).
 
 ~~~
-    "access_token": {
-        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-        "access": [
-            {
-                "type": "photo-api",
-                "actions": [
-                    "read",
-                    "write",
-                    "dolphin"
-                ],
-                "locations": [
-                    "https://server.example.net/",
-                    "https://resource.local/other"
-                ],
-                "datatypes": [
-                    "metadata",
-                    "images"
-                ]
-            },
-            "read", "dolphin-metadata"
-        ]
-    }
+"access_token": {
+    "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
+    "manage": "https://server.example.com/token/PRY5NM33O\
+        M4TB8N6BW7OZB8CDFONP219RP1L",
+    "access": [
+        {
+            "type": "photo-api",
+            "actions": [
+                "read",
+                "write",
+                "dolphin"
+            ],
+            "locations": [
+                "https://server.example.net/",
+                "https://resource.local/other"
+            ],
+            "datatypes": [
+                "metadata",
+                "images"
+            ]
+        },
+        "read", "dolphin-metadata"
+    ]
+}
 ~~~
 
 The following non-normative example shows a single bearer access token
 with access to two described resources.
 
 ~~~
-    "access_token": {
-        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": false,
-        "access": [
-            "finance", "medical"
-        ]
-    }
+"access_token": {
+    "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
+    "bound": false,
+    "access": [
+        "finance", "medical"
+    ]
+}
 ~~~
 
 
@@ -1994,19 +1995,20 @@ names `token1` and `token2`, and only the first token has a management
 URL associated with it.
 
 ~~~
-    "access_token": [
-        {
-            "label": "token1",
-            "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-            "access": [ "finance" ]
-        },
-        {
-            "label": "token2",
-            "value": "UFGLO2FDAFG7VGZZPJ3IZEMN21EVU71FHCARP4J1",
-            "access": [ "medical" ]
-        }
+"access_token": [
+    {
+        "label": "token1",
+        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
+        "access": [ "finance" ]
+    },
+    {
+        "label": "token2",
+        "value": "UFGLO2FDAFG7VGZZPJ3IZEMN21EVU71FHCARP4J1",
+        "access": [ "medical" ]
     }
+}
 ~~~
 
 Each access token corresponds to one of the objects in the `access_token` array of
@@ -2026,21 +2028,22 @@ with a multiple access token structure containing one access token.
 If the AS has split the access token response, the response MUST include the `split` flag set to `true`.
 
 ~~~
-    "access_token": [
-        {
-            "label": "split-1",
-            "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
-            "split": true,
-            "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
-            "access": [ "fruits" ]
-        },
-        {
-            "label": "split-2",
-            "value": "FG7VGZZPJ3IZEMN21EVU71FHCAR-UFGLO2FDAP4J1",
-            "split": true,
-            "access": [ "vegetables" ]
-        }
+"access_token": [
+    {
+        "label": "split-1",
+        "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
+        "split": true,
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
+        "access": [ "fruits" ]
+    },
+    {
+        "label": "split-2",
+        "value": "FG7VGZZPJ3IZEMN21EVU71FHCAR-UFGLO2FDAP4J1",
+        "split": true,
+        "access": [ "vegetables" ]
     }
+}
 ~~~
 
 Each access token MAY be bound to different keys with different proofing mechanisms.
@@ -2089,9 +2092,9 @@ unique for the request and MUST NOT contain any security-sensitive
 information such as user identifiers or access tokens.
 
 ~~~
-    "interact": {
-        "redirect": "https://interact.example.com/4CF492MLVMSW9MKMXKHQ"
-    }
+"interact": {
+    "redirect": "https://interact.example.com/4CF492MLVMSW9MKMXKHQ"
+}
 ~~~
 
 The URL returned is a function of the AS, but the URL itself MAY be completely
@@ -2119,9 +2122,9 @@ for the client instance to launch. This URL MUST be unique for the request and
 MUST NOT contain any security-sensitive information such as user identifiers or access tokens.
 
 ~~~
-    "interact": {
-        "app": "https://app.example.com/launch?tx=4CF492MLV"
-    }
+"interact": {
+    "app": "https://app.example.com/launch?tx=4CF492MLV"
+}
 ~~~
 
 The means for the launched application to communicate with the AS are out of
@@ -2161,12 +2164,12 @@ url (string)
 
 
 ~~~
-    "interact": {
-        "user_code": {
-            "code": "A1BC-3DFF",
-            "url": "https://srv.ex/device"
-        }
+"interact": {
+    "user_code": {
+        "code": "A1BC-3DFF",
+        "url": "https://srv.ex/device"
     }
+}
 ~~~
 
 The client instance MUST communicate the "code" to the end-user in some
@@ -2206,9 +2209,9 @@ that the client instance will use in validating the callback as defined in
 {{interaction-finish}}.
 
 ~~~
-    "interact": {
-        "finish": "MBDOFXG4Y5CVJCX821LH"
-    }
+"interact": {
+    "finish": "MBDOFXG4Y5CVJCX821LH"
+}
 ~~~
 
 When the interaction is completed, the interaction component MUST contact the client instance
@@ -2281,8 +2284,6 @@ is suitable for communication with the current user. To get such information,
 the client instance MUST use an identity protocol to request and receive additional identity
 claims. The details of an identity protocol and associated schema 
 are outside the scope of this specification.
-
-\[\[ [See issue #75](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/75) \]\]
 
 Extensions to this specification MAY define additional response
 properties in [a registry TBD](#IANA).
@@ -2612,8 +2613,9 @@ RO from a web page and launching the system browser with the
 target URL.
 
 ~~~
-https://client.example.net/return/123455
-  ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A
+https://client.example.net/return/123455\
+  ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2\
+    HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A\
   &interact_ref=4IFWWIKYBC2PQ6U56NL1
 ~~~
 
@@ -2653,10 +2655,10 @@ Host: client.example.net
 Content-Type: application/json
 
 {
-  "hash": "p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A",
+  "hash": "p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R\
+    2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A",
   "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
 }
-
 ~~~
 
 
@@ -2706,9 +2708,9 @@ using URL Safe Base64 with no padding. The resulting string is the
 hash value.
 
 ~~~
-p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A
+p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM\
+  7XHPAdJzTZMtKBsaraJ64A
 ~~~
-
 
 #### SHA2-512 {#hash-sha2}
 
@@ -2718,13 +2720,9 @@ using URL Safe Base64 with no padding. The resulting string is the
 hash value.
 
 ~~~
-62SbcD3Xs7L40rjgALA-ymQujoh2LB2hPJyX9vlcr1H6ecChZ8BNKkG_HrOKP_Bpj84rh4mC9aE9x7HPBFcIHw
+62SbcD3Xs7L40rjgALA-ymQujoh2LB2hPJyX9vlcr1H6ecChZ8BNKkG_HrOKP_Bp\
+  j84rh4mC9aE9x7HPBFcIHw
 ~~~
-
-
-
-
-
 
 # Continuing a Grant Request {#continue-request}
 
@@ -2851,7 +2849,8 @@ release opaque subject claims, the response could look like this:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
     },
     "subject": {
         "sub_ids": [ {
@@ -2916,7 +2915,8 @@ release subject claims, the response could look like this example:
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L"
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
     },
     "subject": {
         "sub_ids": [ {
@@ -3231,7 +3231,8 @@ MUST use this new URL to manage the new access token.
 {
     "access_token": {
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             {
                 "type": "photo-api",
@@ -3354,17 +3355,17 @@ formats. This key is intended to be used with the [detached JWS](#detached-jws)
 proofing mechanism, as indicated by the `proof` field.
 
 ~~~
-    "key": {
-        "proof": "jwsd",
-        "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
-        },
-        "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
-    }
+"key": {
+    "proof": "jwsd",
+    "jwk": {
+                "kty": "RSA",
+                "e": "AQAB",
+                "kid": "xyz-1",
+                "alg": "RS256",
+                "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+    },
+    "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
+}
 ~~~
 
 ### Key References {#key-reference}
@@ -4479,17 +4480,17 @@ using the fictitious `photo-api` type definition.
 
 The access requested for a given object when using these fields 
 is the cross-product of all fields of the object. That is to 
-say, the object represents a request for all `action` values listed within the object
-to be used at all `location` values listed within the object for all `datatype`
-values listed within the object. Assuming the request above was granted,
+say, the object represents a request for all `actions` listed
+to be used at all `locations` listed for all possible `datatypes`
+listed within the object. Assuming the request above was granted,
 the client instance could assume that it
 would be able to do a `read` action against the `images` on the first server
 as well as a `delete` action on the `metadata` of the second server, or any other
 combination of these fields, using the same access token. 
 
 To request a different combination of access, 
-such as requesting one `action` against one `location` 
-and a different `action` against a different `location`, the 
+such as requesting one of the possible `actions` against one of the possible `locations` 
+and a different choice of possible `actions` against a different one of the possible `locations`, the 
 client instance can include multiple separate objects in the `resources` array.
 The following non-normative example uses the same fictitious `photo-api`
 type definition to request a single access token with more specifically
@@ -4600,10 +4601,10 @@ API designer choosing any such human-readable strings SHOULD take steps
 to ensure the string values are not easily confused by a developer,
 such as by limiting the strings to easily disambiguated characters.
 
-This functionality is similar in practice to OAuth 2's `scope` parameter {{RFC6749}}, where a single string
+This functionality is similar in practice to OAuth 2.0's `scope` parameter {{RFC6749}}, where a single string
 represents the set of access rights requested by the client instance. As such, the reference
-string could contain any valid OAuth 2 scope value as in {{example-oauth2}}. Note that the reference
-string here is not bound to the same character restrictions as in OAuth 2's `scope` definition.
+string could contain any valid OAuth 2.0 scope value as in {{example-oauth2}}. Note that the reference
+string here is not bound to the same character restrictions as in OAuth 2.0's `scope` definition.
 
 A single `access` array MAY include both object-type and
 string-type resource items. In this non-normative example,
@@ -4765,7 +4766,7 @@ sure that it has the permission to do so.
    
 # Document History {#history}
 
-- -Since 04
+- -05
     - Changed "interaction_methods" to "interaction_methods_supported".
     - Changed "key_proofs" to "key_proofs_supported".
     - Changed "assertions" to "assertions_supported".
@@ -4776,6 +4777,8 @@ sure that it has the permission to do so.
     - Updated cryptographic proof of possession methods to match current reference syntax.
     - Updated proofing language to use "signer" and "verifier" generically.
     - Updated cryptographic proof of possession examples.
+    - Editorial cleanup and fixes.
+    - Diagram cleanup and fixes.
 
 - -04
     - Updated terminology.
@@ -4810,45 +4813,45 @@ sure that it has the permission to do so.
 - -00 
     - Initial working group draft.
 
-# Compared to OAuth2 {#vs-oauth2}
+# Compared to OAuth 2.0 {#vs-oauth2}
 
-GNAP's protocol design differs from OAuth 2's in several fundamental ways:
+GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
 1. **Consent and authorization flexibility:**
 
-OAuth 2 generally assumes the user has access to the a web browser. The type of interaction available is fixed by the grant type, and the most common interactive grant types start in the browser. OAuth 2 assumes that the user using the client software is the same user that will interact with the AS to approve access.
+    OAuth 2.0 generally assumes the user has access to the a web browser. The type of interaction available is fixed by the grant type, and the most common interactive grant types start in the browser. OAuth 2.0 assumes that the user using the client software is the same user that will interact with the AS to approve access.
 
-GNAP allows various patterns to manage authorizations and consents required to fulfill this requested delegation, including information sent by the client instance, information supplied by external parties, and information gathered through the interaction process. GNAP allows a client instance to list different ways that it can start and finish an interaction, and these can be mixed together as needed for different use cases. GNAP interactions can use a browser, but don’t have to. Methods can use inter-application messaging protocols, out-of-band data transfer, or anything else. GNAP allows extensions to define new ways to start and finish an interaction, as new methods and platforms are expected to become available over time. GNAP is designed to allow the end-user and the resource owner to be two different people, but still works in the optimized case of them being the same party.
+    GNAP allows various patterns to manage authorizations and consents required to fulfill this requested delegation, including information sent by the client instance, information supplied by external parties, and information gathered through the interaction process. GNAP allows a client instance to list different ways that it can start and finish an interaction, and these can be mixed together as needed for different use cases. GNAP interactions can use a browser, but don’t have to. Methods can use inter-application messaging protocols, out-of-band data transfer, or anything else. GNAP allows extensions to define new ways to start and finish an interaction, as new methods and platforms are expected to become available over time. GNAP is designed to allow the end-user and the resource owner to be two different people, but still works in the optimized case of them being the same party.
 
 2. **Intent registration and inline negotiation:**
 
-OAuth 2 uses different “grant types” that start at different endpoints for different purposes. Many of these require discovery of several interrelated parameters.
+    OAuth 2.0 uses different “grant types” that start at different endpoints for different purposes. Many of these require discovery of several interrelated parameters.
 
-GNAP requests all start with the same type of request to the same endpoint at the AS. Next steps are negotiated between the client instance and AS based on software capabilities, policies surrounding requested access, and the overall context of the ongoing request. GNAP defines a continuation API that allows the client instance and AS to request and send additional information from each other over multiple steps. This continuation API uses the same access token protection that other GNAP-protected APIs use. GNAP allows discovery to optimize the requests but it isn’t required thanks to the negotiation capabilities.
+    GNAP requests all start with the same type of request to the same endpoint at the AS. Next steps are negotiated between the client instance and AS based on software capabilities, policies surrounding requested access, and the overall context of the ongoing request. GNAP defines a continuation API that allows the client instance and AS to request and send additional information from each other over multiple steps. This continuation API uses the same access token protection that other GNAP-protected APIs use. GNAP allows discovery to optimize the requests but it isn’t required thanks to the negotiation capabilities.
 
 3. **Client instances:**
 
-OAuth 2 requires all clients to be registered at the AS and to use a client_id known to the AS as part of the protocol. This client_id is generally assumed to be assigned by a trusted authority during a registration process, and OAuth places a lot of trust on the client_id as a result. Dynamic registration allows different classes of clients to get a client_id at runtime, even if they only ever use it for one request.
+    OAuth 2.0 requires all clients to be registered at the AS and to use a client_id known to the AS as part of the protocol. This client_id is generally assumed to be assigned by a trusted authority during a registration process, and OAuth places a lot of trust on the client_id as a result. Dynamic registration allows different classes of clients to get a client_id at runtime, even if they only ever use it for one request.
 
-GNAP allows the client instance to present an unknown key to the AS and use that key to protect the ongoing request. GNAP’s client instance identifier mechanism allows for pre-registered clients and dynamically registered clients to exist as an optimized case without requiring the identifier as part of the protocol at all times.
+    GNAP allows the client instance to present an unknown key to the AS and use that key to protect the ongoing request. GNAP’s client instance identifier mechanism allows for pre-registered clients and dynamically registered clients to exist as an optimized case without requiring the identifier as part of the protocol at all times.
 
 4. **Expanded delegation:**
 
-OAuth 2 defines the “scope” parameter for controlling access to APIs. This parameter has been coopted to mean a number of different things in different protocols, including flags for turning special behavior on and off, including the return of data apart from the access token. The “resource” parameter and RAR extensions (as defined in {{I-D.ietf-oauth-rar}}) expand on the “scope” concept in similar but different ways.
+    OAuth 2.0 defines the “scope” parameter for controlling access to APIs. This parameter has been coopted to mean a number of different things in different protocols, including flags for turning special behavior on and off, including the return of data apart from the access token. The “resource” parameter and RAR extensions (as defined in {{I-D.ietf-oauth-rar}}) expand on the “scope” concept in similar but different ways.
 
-GNAP defines a rich structure for requesting access, with string references as an optimization. GNAP defines methods for requesting directly-returned user information, separate from API access. This information includes identifiers for the current user and structured assertions. The core GNAP protocol makes no assumptions or demands on the format or contents of the access token, but the RS extension allows a negotiation of token formats between the AS and RS.
+    GNAP defines a rich structure for requesting access, with string references as an optimization. GNAP defines methods for requesting directly-returned user information, separate from API access. This information includes identifiers for the current user and structured assertions. The core GNAP protocol makes no assumptions or demands on the format or contents of the access token, but the RS extension allows a negotiation of token formats between the AS and RS.
 
 5. **Cryptography-based security:**
 
-OAuth 2 uses shared bearer secrets, including the client_secret and access token, and advanced authentication and sender constraint have been built on after the fact in inconsistent ways.
+    OAuth 2.0 uses shared bearer secrets, including the client_secret and access token, and advanced authentication and sender constraint have been built on after the fact in inconsistent ways.
 
-In GNAP, all communication between the client instance and AS is bound to a key held by the client instance. GNAP uses the same cryptographic mechanisms for both authenticating the client (to the AS) and binding the access token (to the RS and the AS). GNAP allows extensions to define new cryptographic protection mechanisms, as new methods are expected to become available over time. GNAP does not have a notion of “public clients” because key information can always be sent and used dynamically.
+    In GNAP, all communication between the client instance and AS is bound to a key held by the client instance. GNAP uses the same cryptographic mechanisms for both authenticating the client (to the AS) and binding the access token (to the RS and the AS). GNAP allows extensions to define new cryptographic protection mechanisms, as new methods are expected to become available over time. GNAP does not have a notion of “public clients” because key information can always be sent and used dynamically.
 
 6. **Privacy and usable security:** 
 
-OAuth 2's deployment model assumes a strong binding between the AS and the RS.
+    OAuth 2.0's deployment model assumes a strong binding between the AS and the RS.
 
-GNAP is designed to be interoperable with decentralized identity standards and to provide a human-centric authorization layer. In addition to the core protocol, GNAP that supports various patterns of communication between RSs and ASs through extensions. GNAP tries to limit the odds of a consolidation to just a handful of super-popular AS services.  
+    GNAP is designed to be interoperable with decentralized identity standards and to provide a human-centric authorization layer. In addition to the core protocol, GNAP that supports various patterns of communication between RSs and ASs through extensions. GNAP tries to limit the odds of a consolidation to just a handful of super-popular AS services.  
 
 # Component Data Models {#data-models}
 
@@ -4881,7 +4884,7 @@ truncated for display purposes in these examples.
 
 In this scenario, the user is the RO and has access to a web
 browser, and the client instance can take front-channel callbacks on the same
-device as the user. This combination is analogous to the OAuth 2
+device as the user. This combination is analogous to the OAuth 2.0
 Authorization Code grant type.
 
 The client instance initiates the request to the AS. Here the client instance
@@ -4921,7 +4924,7 @@ Detached-JWS: ejy0...
             "e": "AQAB",
             "kid": "xyz-1",
             "alg": "RS256",
-            "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+            "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8..."
         }
       }
     },
@@ -4951,7 +4954,8 @@ Cache-Control: no-store
 
 {
     "interact": {
-       "redirect": "https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ",
+       "redirect": 
+         "https://server.example.com/interact/4CF492MLVMSW9MKM",
        "push": "MBDOFXG4Y5CVJCX821LH"
     }
     "continue": {
@@ -4972,7 +4976,7 @@ browser.
 
 ~~~
 HTTP 302 Found
-Location: https://server.example.com/interact/4CF492MLVMSW9MKMXKHQ
+Location: https://server.example.com/interact/4CF492MLVMSW9MKM
 ~~~
 
 
@@ -4986,8 +4990,9 @@ added as query parameters.
 
 ~~~
 HTTP 302 Found
-Location: https://client.example.net/return/123455
-  ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A
+Location: https://client.example.net/return/123455\
+  ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2\
+    HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A\
   &interact_ref=4IFWWIKYBC2PQ6U56NL1
 ~~~
 
@@ -5026,7 +5031,8 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [{
             "actions": [
                 "read",
@@ -5190,7 +5196,8 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             "dolphin-metadata", "some other thing"
         ]
@@ -5329,8 +5336,6 @@ Cache-Control: no-store
 }
 ~~~
 
-
-
 The AS reaches out to the RO and prompts them for consent. In this
 example, the AS has an application that it can push notifications in
 to for the specified account. 
@@ -5368,8 +5373,6 @@ Cache-Control: no-store
 }
 ~~~
 
-
-
 Note that the continuation handle has been rotated since it was
 used by the client instance to make this call. The client instance polls the
 continuation URL after a 60 second timeout using the new handle.
@@ -5395,7 +5398,8 @@ Cache-Control: no-store
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": "https://server.example.com/token/PRY5NM33O\
+            M4TB8N6BW7OZB8CDFONP219RP1L",
         "access": [
             "dolphin-metadata", "some other thing"
         ]
@@ -5406,15 +5410,15 @@ Cache-Control: no-store
 
 
 
-## Applying OAuth 2 Scopes and Client IDs {#example-oauth2}
+## Applying OAuth 2.0 Scopes and Client IDs {#example-oauth2}
 
 While GNAP is not designed to be directly compatible with
-OAuth 2 {{RFC6749}}, considerations have been made to enable the use of
-OAuth 2 concepts and constructs more smoothly within GNAP.
+OAuth 2.0 {{RFC6749}}, considerations have been made to enable the use of
+OAuth 2.0 concepts and constructs more smoothly within GNAP.
 
 In this scenario, the client developer has a `client_id` and set of
-`scope` values from their OAuth 2 system and wants to apply them to the
-new protocol. Traditionally, the OAuth 2 client developer would put
+`scope` values from their OAuth 2.0 system and wants to apply them to the
+new protocol. Traditionally, the OAuth 2.0 client developer would put
 their `client_id` and `scope` values as parameters into a redirect request
 to the authorization endpoint.
 
@@ -5433,7 +5437,7 @@ Location: https://server.example.com/authorize
 
 Now the developer wants to make an analogous request to the AS
 using GNAP. To do so, the client instance makes an HTTP POST and
-places the OAuth 2 values in the appropriate places.
+places the OAuth 2.0 values in the appropriate places.
 
 ~~~
 POST /tx HTTP/1.1
@@ -5459,8 +5463,6 @@ Detached-JWS: ejy0...
     }
 }
 ~~~
-
-
 
 The `client_id` can be used to identify the client instance's keys that it
 uses for authentication, the scopes represent resources that the
