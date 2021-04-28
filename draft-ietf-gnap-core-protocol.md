@@ -54,7 +54,6 @@ normative:
     RFC7517:
     RFC6749:
     RFC6750:
-    RFC7797:
     RFC8174:
     RFC8259:
     RFC8705:
@@ -123,6 +122,8 @@ of these can be found in {{example-oauth2}}.
 ## Terminology
 
 {::boilerplate bcp14}
+
+This document contains non-normative examples of partial and complete HTTP messages. Some examples use a single trailing backslash '\' to indicate line wrapping for long values, as per {{!RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
 
 ## Roles
 
@@ -3455,15 +3456,24 @@ Additional proofing methods are defined by [a registry TBD](#IANA).
 
 All key binding methods used by this specification MUST cover all relevant portions
 of the request, including anything that would change the nature of the request, to allow
-for secure validation of the request by the AS. Relevant aspects include
+for secure validation of the request. Relevant aspects include
 the URI being called, the HTTP method being used, any relevant HTTP headers and
-values, and the HTTP message body itself. The recipient of the signed message
+values, and the HTTP message body itself. The verifier of the signed message
 MUST validate all components of the signed message to ensure that nothing
 has been tampered with or substituted in a way that would change the nature of
-the request.
+the request. Key binding method definitions SHOULD enumerate how these 
+requirements are fulfilled.
 
-When a key proofing mechanism is bound to an access token, the access token MUST be covered 
+When a key proofing mechanism is bound to an access token, the key being presented MUST
+be the key associated with the access token and the access token MUST be covered 
 by the signature method of the proofing mechanism.
+
+The key binding methods in this section MAY be used by other components making calls
+as part of GNAP, such as the extensions allowing the RS to make calls to the
+AS defined in \{\{I-D.ietf-gnap-resource-servers\}\}. To facilitate this extended use, the
+sections below are defined in generic terms of the "sender" and "verifier" of the HTTP message.
+In the core functions of GNAP, the "sender" is the client instance and the "verifier" 
+is the AS or RS, as appropriate.
 
 When used for delegation in GNAP, these key binding mechanisms allow
 the AS to ensure that the keys presented by the client instance in the initial request are in 
@@ -3476,57 +3486,105 @@ to either the access token's own key or, in the case of bearer tokens, the clien
 
 \[\[ [See issue #105](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/105) \]\]
 
+In the following sections, unless otherwise noted, the `RS256` JOSE Signature Algorithm is applied
+using the following RSA key (presented here in JWK format):
+
+~~~
+{
+    "kid": "gnap-rsa",
+    "p": "xS4-YbQ0SgrsmcA7xDzZKuVNxJe3pCYwdAe6efSy4hdDgF9-vhC5gjaRk\
+        i1wWuERSMW4Tv44l5HNrL-Bbj_nCJxr_HAOaesDiPn2PnywwEfg3Nv95Nn-\
+        eilhqXRaW-tJKEMjDHu_fmJBeemHNZI412gBnXdGzDVo22dvYoxd6GM",
+    "kty": "RSA",
+    "q": "rVdcT_uy-CD0GKVLGpEGRR7k4JO6Tktc8MEHkC6NIFXihk_6vAIOCzCD6\
+        LMovMinOYttpRndKoGTNdJfWlDFDScAs8C5n2y1STCQPRximBY-bw39-aZq\
+        JXMxOLyPjzuVgiTOCBIvLD6-8-mvFjXZk_eefD0at6mQ5qV3U1jZt88",
+    "d": "FHlhdTF0ozTliDxMBffT6aJVKZKmbbFJOVNten9c3lXKB3ux3NAb_D2dB\
+        7inp9EV23oWrDspFtvCvD9dZrXgRKMHofkEpo_SSvBZfgtH-OTkbY_TqtPF\
+        FLPKAw0JX5cFPnn4Q2xE4n-dQ7tpRCKl59vZLHBrHShr90zqzFp0AKXU5fj\
+        b1gC9LPwsFA2Fd7KXmI1drQQEVq9R-o18Pnn4BGQNQNjO_VkcJTiBmEIVT_\
+        KJRPdpVJAmbgnYWafL_hAfeb_dK8p85yurEVF8nCK5oO3EPrqB7IL4UqaEn\
+        5Sl3u0j8x5or-xrrAoNz-gdOv7ONfZY6NFoa-3f8q9wBAHUuQ",
+    "e": "AQAB",
+    "qi": "ogpNEkDKg22Rj9cDV_-PJBZaXMk66Fp557RT1tafIuqJRHEufSOYnsto\
+        bWPJ0gHxv1gVJw3gm-zYvV-wTMNgr2wVsBSezSJjPSjxWZtmT2z68W1DuvK\
+        kZy15vz7Jd85hmDlriGcXNCoFEUsGLWkpHH9RwPIzguUHWmTt8y0oXyI",
+    "dp": "dvCKGI2G7RLh3WyjoJ_Dr6hZ3LhXweB3YcY3qdD9BnxZ71mrLiMQg4c_\
+        EBnwqCETN_5sStn2cRc2JXnvLP3G8t7IFKHTT_i_TSTacJ7uT04MSa053Y3\
+        RfwbvLjRNPR0UKAE3ZxROUoIaVNuU_6-QMf8-2ilUv2GIOrCN87gP_Vk",
+    "alg": "RS256",
+    "dq": "iMZmELaKgT9_W_MRT-UfDWtTLeFjIGRW8aFeVmZk9R7Pnyt8rNzyN-IQ\
+        M40ql8u8J6vc2GmQGfokLlPQ6XLSCY68_xkTXrhoU1f-eDntkhP7L6XawSK\
+        Onv5F2H7wyBQ75HUmHTg8AK2B_vRlMyFKjXbVlzKf4kvqChSGEz4IjQ",
+    "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8BfYdHsFzAt\
+        YKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZGYX\
+        jHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZx\
+        e0jRETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0\
+        bunS0K3bA_3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kO\
+        zywzwPTuq-cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
+}
+~~~
+
 ### Detached JWS {#detached-jws}
 
 This method is indicated by `jwsd` in the
 `proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The JOSE (JSON Object Signing and Encryption) header MUST contain the `kid` parameter of
-the key bound to this client instance for this request.  The `alg` parameter MUST be set
-to a value appropriate for the key identified by kid and MUST NOT be `none`.  The `b64`
-parameter MUST be set to `false` and the `crit` parameter MUST contain at least `b64`
-as specified in {{RFC7797}}.
+To protect the request, the JOSE header of the signature contains the following
+parameters:
 
-To protect the request, the JOSE header MUST contain the following
-additional parameters.
+kid (string)
+: The key identifier. RECOMMENDED. If the key is presented in JWK format, this
+  MUST be the value of the `kid` field of the key.
+
+alg (string)
+: The algorithm used to sign the request. REQUIRED. MUST be appropriate to the key presented. 
+  If the key is presented as a JWK, this MUST be equal to the `alg` parameter of the key. MUST NOT be `none`. 
 
 typ (string)
-: The type header, value ”gnap-binding+jwsd”.
+: The type header, value ”gnap-binding+jwsd”. REQUIRED
 
 htm (string)
-: The HTTP Method used to make this request, as an uppercase ASCII string.
+: The HTTP Method used to make this request, as an uppercase ASCII string. REQUIRED
 
-htu (string)
-: The HTTP URI used for this request, including all path and query components.
+uri (string)
+: The HTTP URI used for this request, including all path and query components and no fragment component. REQUIRED
 
-ts (integer)
-: A timestamp of the request in integer seconds
+created (integer)
+: A timestamp of when the signature was created, in integer seconds since UNIX Epoch
 
-at_hash (string)
-: When a request is bound to an access token, the access token hash value. Its value is the 
-    base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
-    `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
-    header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
-    value with SHA-256, then take the left-most 128 bits and base64url encode them. 
+ath (string)
+: When a request is bound to an access token, the access token hash value. The value MUST be the
+  result of Base64url encoding (with no padding) the SHA-256 digest
+  of the ASCII encoding of the associated access token's value. REQUIRED if the request
+  protects an access token.
 
-The payload of the JWS object is the serialized body of the request, and
-the object is signed according to detached JWS {{RFC7797}}. 
+If the HTTP request has a message body, such as an HTTP POST or PUT method,
+the payload of the JWS object is the Base64url encoding (without padding)
+of the SHA256 digest of the bytes of the body.
+If the request being made does not have a message body, such as
+an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
+calculated over an empty payload. 
 
-The client instance presents the signature in the Detached-JWS HTTP Header
-field. 
+The client instance presents the signed object in compact form
+{{RFC7515}} in the Detached-JWS HTTP Header field. 
+
+In this example, the JOSE Header contains the following parameters:
 
 ~~~
-POST /tx HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-Detached-JWS: eyJiNjQiOmZhbHNlLCJhbGciOiJSUzI1NiIsImtpZCI6Inh5ei0xIn0.
-  .Y287HMtaY0EegEjoTd_04a4GC6qV48GgVbGKOhHdJnDtD0VuUlVjLfwne8AuUY3U7e8
-  9zUWwXLnAYK_BiS84M8EsrFvmv8yDLWzqveeIpcN5_ysveQnYt9Dqi32w6IOtAywkNUD
-  ZeJEdc3z5s9Ei8qrYFN2fxcu28YS4e8e_cHTK57003WJu-wFn2TJUmAbHuqvUsyTb-nz
-  YOKxuCKlqQItJF7E-cwSb_xULu-3f77BEU_vGbNYo5ZBa2B7UHO-kWNMSgbW2yeNNLbL
-  C18Kv80GF22Y7SbZt0e2TwnR2Aa2zksuUbntQ5c7a1-gxtnXzuIKa34OekrnyqE1hmVW
-  peQ
- 
+{
+    "alg": "RS256",
+    "kid": "gnap-rsa",
+    "uri": "https://server.example.com/gnap",
+    "htm": "POST",
+    "typ": "gnap-binding+jwsd",
+    "created": 1618884475
+}
+~~~
+
+The request body is the following JSON object:
+
+~~~
 {
     "access_token": {
         "access": [
@@ -3537,7 +3595,7 @@ Detached-JWS: eyJiNjQiOmZhbHNlLCJhbGciOiJSUzI1NiIsImtpZCI6Inh5ei0xIn0.
         "start": ["redirect"],
         "finish": {
             "method": "redirect",
-            "uri": "https://client.foo",
+            "uri": "https://client.foo/callback",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
         }
     },
@@ -3545,34 +3603,94 @@ Detached-JWS: eyJiNjQiOmZhbHNlLCJhbGciOiJSUzI1NiIsImtpZCI6Inh5ei0xIn0.
       "proof": "jwsd",
       "key": {
         "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8
-xYJCNaOKNJn_Oz0YhdHbXTeWO5AoyspDWJbN5w_7bdWDxgpD-y6jnD1u9YhBOCWObNPF
-vpkTM8LC7SdXGRKx2k8Me2r_GssYlyRpqvpBlY5-ejCywKRBfctRcnhTTGNztbbDBUyD
-SWmFMVCHe5mXT4cL0BwrZC6S-uu-LAx06aKwQOPwYOGOslK8WPm1yGdkaA1uF_FpS6LS
-63WYPHi_Ap2B7_8Wbw4ttzbMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFe
-kpdfWdiPQddQ6Y1cK2U3obvUg7w"
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
         }
       }
       "display": {
         "name": "My Client Display Name",
-        "uri": "https://example.net/client"
+        "uri": "https://client.foo/"
       },
     }
 }
 ~~~
 
-If the request being made does not have a message body, such as
-an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
-calculated over an empty payload.
+This is hashed to the following Base64 encoded value:
 
-When the server (AS or RS) receives the Detached-JWS header, it MUST parse its
-contents as a detached JWS object. The HTTP Body is used as the
-payload for purposes of validating the JWS, with no
-transformations.
+~~~
+PGiVuOZUcN1tRtUS6tx2b4cBgw9mPgXG3IPB3wY7ctc
+~~~
+
+This leads to the following full HTTP request message:
+
+~~~ http-message
+POST /gnap HTTP/1.1
+Host: server.example.com
+Content-Type: application/json
+Content-Length: 983
+Detached-JWS: eyJhbGciOiJSUzI1NiIsImNyZWF0ZWQiOjE2MTg4ODQ0NzUsImh0b\
+  SI6IlBPU1QiLCJraWQiOiJnbmFwLXJzYSIsInR5cCI6ImduYXAtYmluZGluZytqd3\
+  NkIiwidXJpIjoiaHR0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20vZ25hcCJ9.PGiVuO\
+  ZUcN1tRtUS6tx2b4cBgw9mPgXG3IPB3wY7ctc.fUq-SV-A1iFN2MwCRW_yolVtT2_\
+  TZA2h5YeXUoi5F2Q2iToC0Tc4drYFOSHIX68knd68RUA7yHqCVP-ZQEd6aL32H69e\
+  9zuMiw6O_s4TBKB3vDOvwrhYtDH6fX2hP70cQoO-47OwbqP-ifkrvI3hVgMX9TfjV\
+  eKNwnhoNnw3vbu7SNKeqJEbbwZfpESaGepS52xNBlDNMYBQQXxM9OqKJaXffzLFEl\
+  -Xe0UnfolVtBraz3aPrPy1C6a4uT7wLda3PaTOVtgysxzii3oJWpuz0WP5kRujzDF\
+  wX_EOzW0jsjCSkL-PXaKSpZgEjNjKDMg9irSxUISt1C1T6q3SzRgfuQ
+
+
+{
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
+    "interact": {
+        "start": ["redirect"],
+        "finish": {
+            "method": "redirect",
+            "uri": "https://client.foo/callback",
+            "nonce": "VJLO6A4CAYLBXHTR0KRO"
+        }
+    },
+    "client": {
+      "proof": "jwsd",
+      "key": {
+        "jwk": {
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
+        }
+      }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
+    }
+}
+~~~
+
+When the verifier receives the Detached-JWS header, it MUST parse and
+validate the JWS object. The signature MUST be validated against the
+expected key of the signer. All required fields MUST be present
+and their values MUST be valid. If the HTTP message request contains
+a body, the verifier MUST calculate the hash of body just as
+the signer does, with no normalization or transformation of the request.
 
 ### Attached JWS {#attached-jws}
 
@@ -3592,180 +3710,46 @@ typ (string)
 htm (string)
 : The HTTP Method used to make this request, as an uppercase ASCII string.
 
-htu (string)
-: The HTTP URI used for this request, including all path and query components.
+uri (string)
+: The HTTP URI used for this request, including all path and query components and no fragment component.
 
-ts (integer)
-: A timestamp of the request in integer seconds
+created (integer)
+: A timestamp of when the signature was created, in integer seconds since UNIX Epoch
 
-at_hash (string)
-: When a request is bound to an access token, the access token hash value. Its value is the 
-    base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
-    `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
-    header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
-    value with SHA-256, then take the left-most 128 bits and base64url encode them. 
+ath (string)
+: When a request is bound to an access token, the access token hash value. The value MUST be the
+  result of Base64url encoding (with no padding) the SHA-256 digest
+  of the ASCII encoding of the associated access token's value.
 
-The payload of the JWS object is the JSON serialized body of the request, and
+If the HTTP request has a message body, such as an HTTP POST or PUT method,
+the payload of the JWS object is the JSON serialized body of the request, and
 the object is signed according to JWS and serialized into compact form {{RFC7515}}. 
-
 The client instance presents the JWS as the body of the request along with a
 content type of `application/jose`. The AS
 MUST extract the payload of the JWS and treat it as the request body
 for further processing.
-
-~~~
-POST /tx HTTP/1.1
-Host: server.example.com
-Content-Type: application/jose
- 
-eyJhbGciOiJSUzI1NiIsImtpZCI6IktBZ05wV2JSeXk5T
-WYycmlrbDQ5OExUaE1ydmtiWldIVlNRT0JDNFZIVTQiLC
-JodG0iOiJwb3N0IiwiaHR1IjoiL3R4IiwidHMiOjE2MDM
-4MDA3ODN9.eyJjYXBhYmlsaXRpZXMiOltdLCJjbGllbnQ
-iOnsia2V5Ijp7Imp3ayI6eyJrdHkiOiJSU0EiLCJlIjoi
-QVFBQiIsImtpZCI6IktBZ05wV2JSeXk5TWYycmlrbDQ5O
-ExUaE1ydmtiWldIVlNRT0JDNFZIVTQiLCJuIjoibGxXbU
-hGOFhBMktOTGRteE9QM2t4RDlPWTc2cDBTcjM3amZoejk
-0YTkzeG0yRk5xb1NQY1JaQVBkMGxxRFM4TjNVaWE1M2RC
-MjNaNTlPd1k0YnBNX1ZmOEdKdnZwdExXbnhvMVB5aG1Qc
-i1lY2RTQ1JRZFRjX1pjTUY0aFJWNDhxcWx2dUQwbXF0Y0
-RiSWtTQkR2Y2NKbVpId2ZUcERIaW5UOHR0dmNWUDhWa0F
-NQXE0a1ZhenhPcE1vSVJzb3lFcF9lQ2U1cFN3cUhvMGRh
-Q1dOS1ItRXBLbTZOaU90ZWRGNE91bXQ4TkxLVFZqZllnR
-khlQkRkQ2JyckVUZDR2Qk13RHRBbmpQcjNDVkN3d3gyYk
-FRVDZTbHhGSjNmajJoaHlJcHE3cGM4clppYjVqTnlYS3d
-mQnVrVFZZWm96a3NodC1Mb2h5QVNhS3BZVHA4THROWi13
-In0sInByb29mIjoiandzIn0sIm5hbWUiOiJNeUZpcnN0Q
-2xpZW50IiwidXJpIjoiaHR0cDovL2xvY2FsaG9zdC9jbG
-llbnQvY2xpZW50SUQifSwiaW50ZXJhY3QiOnsic3RhcnQ
-iOlsicmVkaXJlY3QiXSwiZmluaXNoIjp7Im1ldGhvZCI6
-InJlZGlyZWN0Iiwibm9uY2UiOiJkOTAyMTM4ODRiODQwO
-TIwNTM4YjVjNTEiLCJ1cmkiOiJodHRwOi8vbG9jYWxob3
-N0L2NsaWVudC9yZXF1ZXN0LWRvbmUifX0sImFjY2Vzc19
-0b2tlbiI6eyJhY2Nlc3MiOlt7ImFjdGlvbnMiOlsicmVh
-ZCIsInByaW50Il0sImxvY2F0aW9ucyI6WyJodHRwOi8vb
-G9jYWxob3N0L3Bob3RvcyJdLCJ0eXBlIjoicGhvdG8tYX
-BpIn1dfSwic3ViamVjdCI6eyJzdWJfaWRzIjpbImlzc19
-zdWIiLCJlbWFpbCJdfX0.LUyZ8_fERmxbYARq8kBYMwzc
-d8GnCAKAlo2ZSYLRRNAYWPrp2XGLJOvg97WK1idf_LB08
-OJmLVsCXxCvn9mgaAkYNL_ZjHcusBvY1mNo0E1sdTEr31
-CVKfC-6WrZCscb8YqE4Ayhh0Te8kzSng3OkLdy7xN4xeK
-uHzpF7yGsM52JZ0cBcTo6WrYEfGdr08AWQJ59ht72n3jT
-smYNy9A6I4Wrvfgj3TNxmwYojpBAicfjnzA1UVcNm9F_x
-iSz1_y2tdH7j5rVqBMQife-k9Ewk95vr3lurthenliYSN
-iUinVfoW1ybnaIBcTtP1_YCxg_h1y-B5uZEvYNGCuoCqa
-6IQ
-~~~
-
-This example's JWS header decodes to:
-
-~~~
-{
-  "typ": "gnap-binding+jws",
-  "alg": "RS256",
-  "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
-  "htm": "POST",
-  "htu": "https://server.example.com/tx",
-  "ts": 1603800783
-}
-~~~
-
-And the JWS body decodes to:
-
-~~~
-{
-  "capabilities": [],
-  "client": {
-    "key": {
-      "jwk": {
-        "kty": "RSA",
-        "e": "AQAB",
-        "kid": "KAgNpWbRyy9Mf2rikl498LThMrvkbZWHVSQOBC4VHU4",
-        "n": "llWmHF8XA2KNLdmxOP3kxD9OY76p0Sr37jfhz94a93xm2FNqoSPc
-        RZAPd0lqDS8N3Uia53dB23Z59OwY4bpM_Vf8GJvvptLWnxo1PyhmPr-ecd
-        SCRQdTc_ZcMF4hRV48qqlvuD0mqtcDbIkSBDvccJmZHwfTpDHinT8ttvcV
-        P8VkAMAq4kVazxOpMoIRsoyEp_eCe5pSwqHo0daCWNKR-EpKm6NiOtedF4
-        Oumt8NLKTVjfYgFHeBDdCbrrETd4vBMwDtAnjPr3CVCwwx2bAQT6SlxFJ3
-        fj2hhyIpq7pc8rZib5jNyXKwfBukTVYZozksht-LohyASaKpYTp8LtNZ-w"
-      },
-      "proof": "jws"
-    },
-    "name": "My First Client",
-    "uri": "http://localhost/client/clientID"
-  },
-  "interact": {
-    "start": ["redirect"],
-    "finish": {
-      "method": "redirect",
-      "nonce": "d90213884b840920538b5c51",
-      "uri": "http://localhost/client/request-done"
-    }
-  },
-  "access_token": {
-    "access": [
-      {
-        "actions": [
-          "read",
-          "print"
-        ],
-        "locations": [
-          "http://localhost/photos"
-        ],
-        "type": "photo-api"
-      }
-    ]
-  }
-  "subject": {
-    "formats": ["iss_sub", "opaque"]
-  }
-}
-~~~
-
 
 If the request being made does not have a message body, such as
 an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
 calculated over an empty payload and passed in the `Detached-JWS`
 header as described in {{detached-jws}}.
 
-\[\[ [See issue #109](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/109) \]\]
-
-### Mutual TLS {#mtls}
-
-This method is indicated by `mtls` in the
-`proof` field. The client instance presents its TLS client
-certificate during TLS negotiation with the server (either AS or RS).
-The AS or RS takes the thumbprint of the TLS client certificate presented
-during mutual TLS negotiation and compares that thumbprint to the
-thumbprint presented by the client instance application as described in 
-{{RFC8705}} section 3.
+In this example, the JOSE header contains the following parameters:
 
 ~~~
-POST /tx HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-SSL_CLIENT_CERT: MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBmjE3MDUGA1UEAwwuQmVz
- cG9rZSBFbmdpbmVlcmluZyBSb290IENlcnRpZmljYXRlIEF1dGhvcml0eTELMAkG
- A1UECAwCTUExCzAJBgNVBAYTAlVTMRkwFwYJKoZIhvcNAQkBFgpjYUBic3BrLmlv
- MRwwGgYDVQQKDBNCZXNwb2tlIEVuZ2luZWVyaW5nMQwwCgYDVQQLDANNVEkwHhcN
- MTkwNDEwMjE0MDI5WhcNMjQwNDA4MjE0MDI5WjB8MRIwEAYDVQQDDAlsb2NhbGhv
- c3QxCzAJBgNVBAgMAk1BMQswCQYDVQQGEwJVUzEgMB4GCSqGSIb3DQEJARYRdGxz
- Y2xpZW50QGJzcGsuaW8xHDAaBgNVBAoME0Jlc3Bva2UgRW5naW5lZXJpbmcxDDAK
- BgNVBAsMA01USTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmaXQHb
- s/wc1RpsQ6Orzf6rN+q2ijaZbQxD8oi+XaaN0P/gnE13JqQduvdq77OmJ4bQLokq
- sd0BexnI07Njsl8nkDDYpe8rNve5TjyUDCfbwgS7U1CluYenXmNQbaYNDOmCdHww
- UjV4kKREg6DGAx22Oq7+VHPTeeFgyw4kQgWRSfDENWY3KUXJlb/vKR6lQ+aOJytk
- vj8kVZQtWupPbvwoJe0na/ISNAOhL74w20DWWoDKoNltXsEtflNljVoi5nqsmZQc
- jfjt6LO0T7O1OX3Cwu2xWx8KZ3n/2ocuRqKEJHqUGfeDtuQNt6Jz79v/OTr8puLW
- aD+uyk6NbtGjoQsCAwEAAaOBiTCBhjAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4DBs
- BgNVHREEZTBjgglsb2NhbGhvc3SCD3Rsc2NsaWVudC5sb2NhbIcEwKgBBIERdGxz
- Y2xpZW50QGJzcGsuaW+GF2h0dHA6Ly90bHNjbGllbnQubG9jYWwvhhNzc2g6dGxz
- Y2xpZW50LmxvY2FsMA0GCSqGSIb3DQEBCwUAA4IBAQCKKv8WlLrT4Z5NazaUrYtl
- TF+2v0tvZBQ7qzJQjlOqAcvxry/d2zyhiRCRS/v318YCJBEv4Iq2W3I3JMMyAYEe
- 2573HzT7rH3xQP12yZyRQnetdiVM1Z1KaXwfrPDLs72hUeELtxIcfZ0M085jLboX
- hufHI6kqm3NCyCCTihe2ck5RmCc5l2KBO/vAHF0ihhFOOOby1v6qbPHQcxAU6rEb
- 907/p6BW/LV1NCgYB1QtFSfGxowqb9FRIMD2kvMSmO0EMxgwZ6k6spa+jk0IsI3k
- lwLW9b+Tfn/daUbIDctxeJneq2anQyU2znBgQl6KILDSF4eaOqlBut/KNZHHazJh
- 
+{
+    "alg": "RS256",
+    "kid": "gnap-rsa",
+    "uri": "https://server.example.com/gnap",
+    "htm": "POST",
+    "typ": "gnap-binding+jwsd",
+    "created": 1618884475
+}
+~~~
+
+The request body, used as the JWS Payload, is the following JSON object:
+
+~~~
 {
     "access_token": {
         "access": [
@@ -3776,50 +3760,181 @@ SSL_CLIENT_CERT: MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBmjE3MDUGA1UEAwwuQmV
         "start": ["redirect"],
         "finish": {
             "method": "redirect",
-            "uri": "https://client.foo",
+            "uri": "https://client.foo/callback",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
         }
     },
     "client": {
+      "proof": "jws",
+      "key": {
+        "jwk": {
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
+        }
+      }
       "display": {
         "name": "My Client Display Name",
-        "uri": "https://example.net/client"
+        "uri": "https://client.foo/"
       },
-      "key": {
-        "proof": "mtls",
-        "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBmjE3
-MDUGA1UEAwwuQmVzcG9rZSBFbmdpbmVlcmluZyBSb290IENlcnRpZmljYXRlIEF1d
-Ghvcml0eTELMAkGA1UECAwCTUExCzAJBgNVBAYTAlVTMRkwFwYJKoZIhvcNAQkBFg
-pjYUBic3BrLmlvMRwwGgYDVQQKDBNCZXNwb2tlIEVuZ2luZWVyaW5nMQwwCgYDVQQ
-LDANNVEkwHhcNMTkwNDEwMjE0MDI5WhcNMjQwNDA4MjE0MDI5WjB8MRIwEAYDVQQD
-DAlsb2NhbGhvc3QxCzAJBgNVBAgMAk1BMQswCQYDVQQGEwJVUzEgMB4GCSqGSIb3D
-QEJARYRdGxzY2xpZW50QGJzcGsuaW8xHDAaBgNVBAoME0Jlc3Bva2UgRW5naW5lZX
-JpbmcxDDAKBgNVBAsMA01USTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggE
-BAMmaXQHbs/wc1RpsQ6Orzf6rN+q2ijaZbQxD8oi+XaaN0P/gnE13JqQduvdq77Om
-J4bQLokqsd0BexnI07Njsl8nkDDYpe8rNve5TjyUDCfbwgS7U1CluYenXmNQbaYND
-OmCdHwwUjV4kKREg6DGAx22Oq7+VHPTeeFgyw4kQgWRSfDENWY3KUXJlb/vKR6lQ+
-aOJytkvj8kVZQtWupPbvwoJe0na/ISNAOhL74w20DWWoDKoNltXsEtflNljVoi5nq
-smZQcjfjt6LO0T7O1OX3Cwu2xWx8KZ3n/2ocuRqKEJHqUGfeDtuQNt6Jz79v/OTr8
-puLWaD+uyk6NbtGjoQsCAwEAAaOBiTCBhjAJBgNVHRMEAjAAMAsGA1UdDwQEAwIF4
-DBsBgNVHREEZTBjgglsb2NhbGhvc3SCD3Rsc2NsaWVudC5sb2NhbIcEwKgBBIERdG
-xzY2xpZW50QGJzcGsuaW+GF2h0dHA6Ly90bHNjbGllbnQubG9jYWwvhhNzc2g6dGx
-zY2xpZW50LmxvY2FsMA0GCSqGSIb3DQEBCwUAA4IBAQCKKv8WlLrT4Z5NazaUrYtl
-TF+2v0tvZBQ7qzJQjlOqAcvxry/d2zyhiRCRS/v318YCJBEv4Iq2W3I3JMMyAYEe2
-573HzT7rH3xQP12yZyRQnetdiVM1Z1KaXwfrPDLs72hUeELtxIcfZ0M085jLboXhu
-fHI6kqm3NCyCCTihe2ck5RmCc5l2KBO/vAHF0ihhFOOOby1v6qbPHQcxAU6rEb907
-/p6BW/LV1NCgYB1QtFSfGxowqb9FRIMD2kvMSmO0EMxgwZ6k6spa+jk0IsI3klwLW
-9b+Tfn/daUbIDctxeJneq2anQyU2znBgQl6KILDSF4eaOqlBut/KNZHHazJh"
+    },
+    "subject": {
+        "formats": ["iss_sub", "opaque"]
     }
 }
 
 ~~~
+
+This leads to the following full HTTP request message:
+
+~~~ http-message
+POST /gnap HTTP/1.1
+Host: server.example.com
+Content-Type: application/jose
+Content-Length: 1047
+
+eyJhbGciOiJSUzI1NiIsImNyZWF0ZWQiOjE2MTg4ODQ0NzUsImh0bSI6IlBPU1QiLCJ\
+raWQiOiJnbmFwLXJzYSIsInR5cCI6ImduYXAtYmluZGluZytqd3NkIiwidXJpIjoiaH\
+R0cHM6Ly9zZXJ2ZXIuZXhhbXBsZS5jb20vZ25hcCJ9.CnsKICAgICJhY2Nlc3NfdG9r\
+ZW4iOiB7CiAgICAgICAgImFjY2VzcyI6IFsKICAgICAgICAgICAgImRvbHBoaW4tbWV\
+0YWRhdGEiCiAgICAgICAgXQogICAgfSwKICAgICJpbnRlcmFjdCI6IHsKICAgICAgIC\
+Aic3RhcnQiOiBbInJlZGlyZWN0Il0sCiAgICAgICAgImZpbmlzaCI6IHsKICAgICAgI\
+CAgICAgIm1ldGhvZCI6ICJyZWRpcmVjdCIsCiAgICAgICAgICAgICJ1cmkiOiAiaHR0\
+cHM6Ly9jbGllbnQuZm9vL2NhbGxiYWNrIiwKICAgICAgICAgICAgIm5vbmNlIjogIlZ\
+KTE82QTRDQVlMQlhIVFIwS1JPIgogICAgICAgIH0KICAgIH0sCiAgICAiY2xpZW50Ij\
+ogewogICAgICAicHJvb2YiOiAiandzIiwKICAgICAgImtleSI6IHsKICAgICAgICAia\
+ndrIjogewogICAgICAgICAgICAia2lkIjogImduYXAtcnNhIiwKICAgICAgICAgICAg\
+Imt0eSI6ICJSU0EiLAogICAgICAgICAgICAiZSI6ICJBUUFCIiwKICAgICAgICAgICA\
+gImFsZyI6ICJSUzI1NiIsCiAgICAgICAgICAgICJuIjogImhZT0otWE9LSVNkTU1TaG\
+5fRzRXOW0yMG1UMFZXdFFCc21CQmtJMmNtUnQ0QWk4QmZZZEhzRnpBdFlLT2pwQlIxU\
+nBLcEptVkt4SUdOeTBnNlozYWQyWFlzaDhLb3dseVZ5OElrWjhOTXdTcmNVSUJaR1lY\
+akhwd2p6dmZHdlhIXzVLSmxuUjNfdVJVcDRaNFVqazJiQ2FLZWdEbjExVjJ2eEU0MWh\
+xYVBVbmhSWnhlMGpSRVRkZHpzRTNtdTFTSzhkVENST2p3VWwxNG1VTm84aVRyVG00bj\
+BxRGFkejhCa1BvLXV2NEJDMGJ1blMwSzNiQV8zVWdWcDd6QmxRRm9GbkxUTzJ1V3Bfb\
+XVMRVdHbDY3Z0JxOU1PM2JyS1hmR2hpM2tPenl3endQVHVxLWNWUUR5RU43YUwwU3hD\
+YjNIYzRJZHFEYU1nOHFIVXlPYnBQaXREUSIKICAgICAgICB9CiAgICAgIH0KICAgICA\
+gImRpc3BsYXkiOiB7CiAgICAgICAgIm5hbWUiOiAiTXkgQ2xpZW50IERpc3BsYXkgTm\
+FtZSIsCiAgICAgICAgInVyaSI6ICJodHRwczovL2NsaWVudC5mb28vIgogICAgICB9L\
+AogICAgfSwKICAgICJzdWJqZWN0IjogewogICAgICAgICJmb3JtYXRzIjogWyJpc3Nf\
+c3ViIiwgIm9wYXF1ZSJdCiAgICB9Cn0K.MwNoVMQp5hVxI0mCs9LlOUdFtkDXaA1_eT\
+vOXq7DOGrtDKH7q4vP2xUq3fH2jRAZqnobo0WdPP3eM3NH5QUjW8pa6_QpwdIWkK7r-\
+u_52puE0lPBp7J4U2w4l9gIbg8iknsmWmXeY5F6wiGT8ptfuEYGgmloAJd9LIeNvD3U\
+LW2h2dz1Pn2eDnbyvgB0Ugae0BoZB4f69fKWj8Z9wvTIjk1LZJN1PcL7_zT8Lrlic9a\
+PyzT7Q9ovkd1s-4whE7TrnGUzFc5mgWUn_gsOpsP5mIIljoEEv-FqOW2RyNYulOZl0Q\
+8EnnDHV_vPzrHlUarbGg4YffgtwkQhdK72-JOxYQ
+~~~
+
+\[\[ [See issue #109](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/109) \]\]
+
+When the verifier receives an attached JWS request, it MUST parse and
+validate the JWS object. The signature MUST be validated against the
+expected key of the signer. All required fields MUST be present
+and their values MUST be valid. If the HTTP message request contains
+a body, the verifier MUST decode the payload of the JWS object and
+treat this as the HTTP message body.
+
+### Mutual TLS {#mtls}
+
+This method is indicated by `mtls` in the
+`proof` field. The signer presents its TLS client
+certificate during TLS negotiation with the verifier.
+
+In this example, the certificate is communicated to the application
+through the `Client-Cert` header from a TLS reverse proxy, leading
+to the following full HTTP request message:
+
+~~~ http-message
+POST /gnap HTTP/1.1
+Host: server.example.com
+Content-Type: application/jose
+Content-Length: 1567
+Client-Cert: \
+  MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMDYxNDAyBgNVBAMM \
+  K05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV6QzY2bVEwHhcN \
+  MjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQDDCtOSVlNeUJq \
+  c0RqeUJDOVA1MzdENklUemtwRDhOdFJqaTl5YXBFekM2Nm1RMIIBIjANBgkqhkiG \
+  9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhYOJ+XOKISdMMShn/G4W9m20mT0VWtQBsmBB \
+  kI2cmRt4Ai8BfYdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8I \
+  kZ8NMwSrcUIBZGYXjHpwjzvfGvXH/5KJlnR3/uRUp4Z4Ujk2bCaKegDn11V2vxE4 \
+  1hqaPUnhRZxe0jRETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo+ \
+  uv4BC0bunS0K3bA/3UgVp7zBlQFoFnLTO2uWp/muLEWGl67gBq9MO3brKXfGhi3k \
+  OzywzwPTuq+cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQIDAQABMA0GCSqG \
+  SIb3DQEBCwUAA4IBAQBnYFK0eYHy+hVf2D58usj39lhL5znb/q9G35GBd/XsWfCE \
+  wHuLOSZSUmG71bZtrOcx0ptle9bp2kKl4HlSTTfbtpuG5onSa3swRNhtKtUy5NH9 \
+  W/FLViKWfoPS3kwoEpC1XqKY6l7evoTCtS+kTQRSrCe4vbNprCAZRxz6z1nEeCgu \
+  NMk38yTRvx8ihZpVOuU+Ih+dOtVe/ex5IAPYxlQsvtfhsUZqc7IyCcy72WHnRHlU \
+  fn3pJm0S5270+Yls3Iv6h3oBAP19i906UjiUTNH3g0xMW+V4uLxgyckt4wD4Mlyv \
+  jnaQ7Z3sR6EsXMocAbXHIAJhwKdtU/fLgdwL5vtx
+
+
+{
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
+    "interact": {
+        "start": ["redirect"],
+        "finish": {
+            "method": "redirect",
+            "uri": "https://client.foo/callback",
+            "nonce": "VJLO6A4CAYLBXHTR0KRO"
+        }
+    },
+    "client": {
+      "proof": "jws",
+      "key": {
+        "cert": "MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMD\
+  YxNDAyBgNVBAMMK05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV\
+  6QzY2bVEwHhcNMjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQD\
+  DCtOSVlNeUJqc0RqeUJDOVA1MzdENklUemtwRDhOdFJqaTl5YXBFekM2Nm1RMIIBI\
+  jANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhYOJ+XOKISdMMShn/G4W9m20mT\
+  0VWtQBsmBBkI2cmRt4Ai8BfYdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8\
+  KowlyVy8IkZ8NMwSrcUIBZGYXjHpwjzvfGvXH/5KJlnR3/uRUp4Z4Ujk2bCaKegDn\
+  11V2vxE41hqaPUnhRZxe0jRETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDad\
+  z8BkPo+uv4BC0bunS0K3bA/3UgVp7zBlQFoFnLTO2uWp/muLEWGl67gBq9MO3brKX\
+  fGhi3kOzywzwPTuq+cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQIDAQABMA0\
+  GCSqGSIb3DQEBCwUAA4IBAQBnYFK0eYHy+hVf2D58usj39lhL5znb/q9G35GBd/Xs\
+  WfCEwHuLOSZSUmG71bZtrOcx0ptle9bp2kKl4HlSTTfbtpuG5onSa3swRNhtKtUy5\
+  NH9W/FLViKWfoPS3kwoEpC1XqKY6l7evoTCtS+kTQRSrCe4vbNprCAZRxz6z1nEeC\
+  guNMk38yTRvx8ihZpVOuU+Ih+dOtVe/ex5IAPYxlQsvtfhsUZqc7IyCcy72WHnRHl\
+  Ufn3pJm0S5270+Yls3Iv6h3oBAP19i906UjiUTNH3g0xMW+V4uLxgyckt4wD4Mlyv\
+  jnaQ7Z3sR6EsXMocAbXHIAJhwKdtU/fLgdwL5vtx"
+      }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
+    },
+    "subject": {
+        "formats": ["iss_sub", "opaque"]
+    }
+}
+~~~
+
+The verifier compares the TLS client certificate presented during 
+mutual TLS negotiation to the expected key of the signer. Since the
+TLS connection covers the entire message, there are no additional
+requirements to check.
+
+Note that in many instances, the verifier will not do a full certificate
+chain validation of the presented TLS client certificate, as the
+means of trust for this certificate could be in something other than
+a PKI system, such as a static registration or trust-on-first-use.
 
 \[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
 
 ### Demonstration of Proof-of-Possession (DPoP) {#dpop-binding}
 
 This method is indicated by `dpop` in the
-`proof` field. The client instance creates a Demonstration of Proof-of-Possession
+`proof` field. The signer creates a Demonstration of Proof-of-Possession
 signature header as described in {{I-D.ietf-oauth-dpop}}
 section 2. In addition, this specification defines the following fields
 to be added to the DPoP payload:
@@ -3829,35 +3944,9 @@ htd (string)
     header defined in {{RFC3230}}. When a request contains a message body, such as a POST or PUT request,
     this field is REQUIRED.
 
-at_hash (string)
-: When a request is bound to an access token, the access token hash value. Its value is the 
-    base64url encoding of the left-most half of the hash of the octets of the ASCII representation of the 
-    `access_token` value, where the hash algorithm used is the hash algorithm used in the `alg` 
-    header parameter of the JWS's JOSE Header. For instance, if the `alg` is `RS256`, hash the `access_token` 
-    value with SHA-256, then take the left-most 128 bits and base64url encode them. 
 
+In this example, the request body is the following JSON object:
 ~~~
-POST /tx HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-DPoP: eyJ0eXAiOiJkcG9wK2p3dCIsImFsZyI6IlJTMjU2IiwiandrIjp7Imt0eSI6Il
-JTQSIsImUiOiJBUUFCIiwia2lkIjoieHl6LWNsaWVudCIsImFsZyI6IlJTMjU2Iiwibi
-I6Inp3Q1RfM2J4LWdsYmJIcmhlWXBZcFJXaVk5SS1uRWFNUnBablJySWpDczZiX2VteV
-RrQmtEREVqU3lzaTM4T0M3M2hqMS1XZ3hjUGRLTkdaeUlvSDNRWmVuMU1LeXloUXBMSk
-cxLW9MTkxxbTdwWFh0ZFl6U2RDOU8zLW9peXk4eWtPNFlVeU5aclJSZlBjaWhkUUNiT1
-9PQzhRdWdtZzlyZ05ET1NxcHBkYU5lYXMxb3Y5UHhZdnhxcnoxLThIYTdna0QwMFlFQ1
-hIYUIwNXVNYVVhZEhxLU9fV0l2WVhpY2c2STVqNlM0NFZOVTY1VkJ3dS1BbHluVHhRZE
-1BV1AzYll4VlZ5NnAzLTdlVEpva3ZqWVRGcWdEVkRaOGxVWGJyNXlDVG5SaG5oSmd2Zj
-NWakRfbWFsTmU4LXRPcUs1T1NEbEhUeTZnRDlOcWRHQ20tUG0zUSJ9fQ.eyJodHRwX21
-ldGhvZCI6IlBPU1QiLCJodHRwX3VyaSI6Imh0dHA6XC9cL2hvc3QuZG9ja2VyLmludGV
-ybmFsOjk4MzRcL2FwaVwvYXNcL3RyYW5zYWN0aW9uIiwiaWF0IjoxNTcyNjQyNjEzLCJ
-qdGkiOiJIam9IcmpnbTJ5QjR4N2pBNXl5RyJ9.aUhftvfw2NoW3M7durkopReTvONng1
-fOzbWjAlKNSLL0qIwDgfG39XUyNvwQ23OBIwe6IuvTQ2UBBPklPAfJhDTKd8KHEAfidN
-B-LzUOzhDetLg30yLFzIpcEBMLCjb0TEsmXadvxuNkEzFRL-Q-QCg0AXSF1h57eAqZV8
-SYF4CQK9OUV6fIWwxLDd3cVTx83MgyCNnvFlG_HDyim1Xx-rxV4ePd1vgDeRubFb6QWj
-iKEO7vj1APv32dsux67gZYiUpjm0wEZprjlG0a07R984KLeK1XPjXgViEwEdlirUmpVy
-T9tyEYqGrTfm5uautELgMls9sgSyE929woZ59elg
- 
 {
     "access_token": {
         "access": [
@@ -3868,58 +3957,171 @@ T9tyEYqGrTfm5uautELgMls9sgSyE929woZ59elg
         "start": ["redirect"],
         "finish": {
             "method": "redirect",
-            "uri": "https://client.foo",
+            "uri": "https://client.foo/callback",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
         }
     },
     "client": {
-      "display": {
-        "name": "My Client Display Name",
-        "uri": "https://example.net/client"
-      },
       "proof": "dpop",
       "key": {
         "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xYJ
-CCNaOKNJn_Oz0YhdHbXTeWO5AoyspDWJbN5w_7bdWDxgpD-y6jnD1u9YhBOCWObNPFvpkTM
-8LC7SdXGRKx2k8Me2r_GssYlyRpqvpBlY5-ejCywKRBfctRcnhTTGNztbbDBUyDSWmFMVCH
-e5mXT4cL0BwrZC6S-uu-LAx06aKwQOPwYOGOslK8WPm1yGdkaA1uF_FpS6LS63WYPHi_Ap2
-B7_8Wbw4ttzbMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFekpdfWdiPQddQ6Y
-1cK2U3obvUg7w"
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
         }
       }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
     }
 }
 ~~~
+
+The JOSE header contains the following parameters, including the public key:
+
+~~~
+{
+    "alg": "RS256",
+    "typ": "dpop+jwt",
+    "jwk": {
+        "kid": "gnap-rsa",
+        "kty": "RSA",
+        "e": "AQAB",
+        "alg": "RS256",
+        "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8BfYdHs\
+  FzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZGYXjH\
+  pwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jRETdd\
+  zsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_3UgV\
+  p7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyEN7aL\
+  0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
+    }
+}
+~~~
+
+The JWS Payload contains the following JWT claims, including a hash of the body:
+
+~~~
+{
+    "htu": "https://server.example.com/gnap",
+    "htm": "POST",
+    "iat": 1618884475,
+    "jti": "HjoHrjgm2yB4x7jA5yyG",
+    "htd": "SHA-256=tnPQ2GXm8r/rTTKdbQ8pc7EjiFFPy1ExSX6OZVG3JVI="
+}
+~~~
+
+This results in the following full HTTP message request:
+
+~~~ http-message
+POST /gnap HTTP/1.1
+Host: server.example.com
+Content-Type: application/json
+Content-Length: 983
+DPoP: eyJhbGciOiJSUzI1NiIsImp3ayI6eyJhbGciOiJSUzI1NiIsImUiOiJBUUFCI\
+  iwia2lkIjoiZ25hcC1yc2EiLCJrdHkiOiJSU0EiLCJuIjoiaFlPSi1YT0tJU2RNTV\
+  Nobl9HNFc5bTIwbVQwVld0UUJzbUJCa0kyY21SdDRBaThCZllkSHNGekF0WUtPanB\
+  CUjFScEtwSm1WS3hJR055MGc2WjNhZDJYWXNoOEtvd2x5Vnk4SWtaOE5Nd1NyY1VJ\
+  QlpHWVhqSHB3anp2Zkd2WEhfNUtKbG5SM191UlVwNFo0VWprMmJDYUtlZ0RuMTFWM\
+  nZ4RTQxaHFhUFVuaFJaeGUwalJFVGRkenNFM211MVNLOGRUQ1JPandVbDE0bVVObz\
+  hpVHJUbTRuMHFEYWR6OEJrUG8tdXY0QkMwYnVuUzBLM2JBXzNVZ1ZwN3pCbFFGb0Z\
+  uTFRPMnVXcF9tdUxFV0dsNjdnQnE5TU8zYnJLWGZHaGkza096eXd6d1BUdXEtY1ZR\
+  RHlFTjdhTDBTeENiM0hjNElkcURhTWc4cUhVeU9icFBpdERRIn0sInR5cCI6ImRwb\
+  3Arand0In0.eyJodHUiOiJodHRwczovL3NlcnZlci5leGFtcGxlLmNvbS9nbmFwIi\
+  wiaHRtIjoiUE9TVCIsImlhdCI6MTYxODg4NDQ3NSwianRpIjoiSGpvSHJqZ20yeUI\
+  0eDdqQTV5eUciLCJodGQiOiJTSEEtMjU2PXRuUFEyR1htOHIvclRUS2RiUThwYzdF\
+  amlGRlB5MUV4U1g2T1pWRzNKVkk9In0.HLRh7n-3uwnSGCBGbSFitNCxgmJnpp6hs\
+  sF8o_u2Xbuzu3pyR4v8SJVP17tjqxuySf91lmC1gjJeK4pXvWOtfeWGuDjD7nr6aw\
+  pBOtiQXeBtoqiiK2ByBZO-mhccJeNkTkRfxGDtU0iJo6iarWjRgQOsPbt69FIwTP4\
+  Abovwv7yBCthQs3TMsBtb8-l4Lu30wNLwXEWcB-o8nFNpT4zgV9ETGoCOcBFwBjjt\
+  0khsCarleTBsOZ2zUuFwZMWi_bQYfd-M0pahWYro9Mdy3Fts-aUqZjS2LwHHNWvjw\
+  rTzz6icCHwnr9dm1Ls6orbM7xMzvHAOA5TZW39yFg_Xr5PNYg
+
+
+{
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
+    "interact": {
+        "start": ["redirect"],
+        "finish": {
+            "method": "redirect",
+            "uri": "https://client.foo/callback",
+            "nonce": "VJLO6A4CAYLBXHTR0KRO"
+        }
+    },
+    "client": {
+      "proof": "dpop",
+      "key": {
+        "jwk": {
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
+        }
+      }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
+    }
+}
+~~~
+
+The verifier MUST parse and validate the DPoP proof header as defined in
+{{I-D.ietf-oauth-dpop}}. If the HTTP message request includes a message body,
+the verifier MUST calculate the digest of the body and compare it to the
+`htd` value. The verifier MUST ensure the key presented in the DPoP
+proof header is the same as the expected key of the signer.
 
 ### HTTP Message Signing {#httpsig-binding}
 
 This method is indicated by `httpsig` in
-the `proof` field. The client instance creates an HTTP
-Signature header as described in {{I-D.ietf-httpbis-message-signatures}} section 4. The client instance MUST
-calculate and present the Digest header as defined in {{RFC3230}} and include
-this header in the signature.
+the `proof` field. The sender creates an HTTP
+Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}. 
+
+The covered content of the signature MUST include the following:
+
+@request-target:
+: the target of the HTTP request 
+
+digest:
+: The Digest header as defined in {{RFC3230}}. When the request message has a body, 
+the signer MUST calculate this header value and the verifier 
+MUST validate this header.
+
+When the request is bound to an access token, the covered content
+MUST also include:
+
+authorization:
+: The Authorization header used to present the access token as discussed in
+{{use-access-token}}.
+
+Other covered content MAY also be included.
+
+If the signer's key presented is a JWK, the `keyid` parameter of the signature MUST be set
+to the `kid` value of the JWK, the signing algorithm used MUST be the JWS
+algorithm denoted by the key's `alg` field, and the explicit `alg` signature 
+parameter MUST NOT be included.
+
+In this example, the message body is the following JSON object:
 
 ~~~
-POST /tx HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-Content-Length: 716
-Signature: keyId="xyz-client", algorithm="rsa-sha256",
- headers="(request-target) digest content-length",
- signature="TkehmgK7GD/z4jGkmcHS67cjVRgm3zVQNlNrrXW32Wv7d
-u0VNEIVI/dMhe0WlHC93NP3ms91i2WOW5r5B6qow6TNx/82/6W84p5jqF
-YuYfTkKYZ69GbfqXkYV9gaT++dl5kvZQjVk+KZT1dzpAzv8hdk9nO87Xi
-rj7qe2mdAGE1LLc3YvXwNxuCQh82sa5rXHqtNT1077fiDvSVYeced0UEm
-rWwErVgr7sijtbTohC4FJLuJ0nG/KJUcIG/FTchW9rd6dHoBnY43+3Dzj
-CIthXpdH5u4VX3TBe6GJDO6Mkzc6vB+67OWzPwhYTplUiFFV6UZCsDEeu
-Sa/Ue1yLEAMg=="]}
-Digest: SHA=oZz2O3kg5SEFAhmr0xEBbc4jEfo=
- 
 {
     "access_token": {
         "access": [
@@ -3929,86 +4131,72 @@ Digest: SHA=oZz2O3kg5SEFAhmr0xEBbc4jEfo=
     "interact": {
         "start": ["redirect"],
         "finish": {
-            "method": "push",
-            "uri": "https://client.foo",
+            "method": "redirect",
+            "uri": "https://client.foo/callback",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
         }
     },
     "client": {
-      "display": {
-        "name": "My Client Display Name",
-        "uri": "https://example.net/client"
-      },
       "proof": "httpsig",
       "key": {
         "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_J
-tffXyaSx8xYJCCNaOKNJn_Oz0YhdHbXTeWO5AoyspDWJbN5w_7bdWDxgpD-
-y6jnD1u9YhBOCWObNPFvpkTM8LC7SdXGRKx2k8Me2r_GssYlyRpqvpBlY5-
-ejCywKRBfctRcnhTTGNztbbDBUyDSWmFMVCHe5mXT4cL0BwrZC6S-uu-LAx
-06aKwQOPwYOGOslK8WPm1yGdkaA1uF_FpS6LS63WYPHi_Ap2B7_8Wbw4ttz
-bMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFekpdfWdiPQddQ6
-Y1cK2U3obvUg7w"
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
         }
       }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
     }
 }
 ~~~
 
-When used to present an access token as in {{use-access-token}},
-the Authorization header MUST be included in the signature.
-
-### OAuth Proof of Possession (PoP) {#oauth-pop-binding}
-
-This method is indicated by `oauthpop` in
-the `proof` field. The client instance creates an HTTP
-Authorization PoP header as described in {{I-D.ietf-oauth-signed-http-request}} section 4, with the
-following additional requirements:
-
-- The `at` (access token) field MUST be omitted
-            unless this method is being used in conjunction with
-            an access token as in {{use-access-token}}.
-            \[\[ [See issue #112](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/112) \]\]
-
-- The `b` (body hash) field MUST be calculated and supplied,
-    unless there is no entity body (such as a GET, OPTIONS, or
-    DELETE request).
-
-- All components of the URL MUST be calculated and supplied
-
-- The m (method) field MUST be supplied
+This body is hashed for the Digest header using SHA-256 into the following encoded value:
 
 ~~~
-POST /tx HTTP/1.1
+SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+~~~
+
+The HTTP message signature input string is calculated to be the following:
+
+~~~
+"@request-target": post /gnap
+"host": server.example.com
+"content-type": application/json
+"digest": SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+"content-length": 986
+"@signature-params": ("@request-target" "host" "content-type" \
+  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
+~~~
+
+This leads to the following full HTTP message request:
+
+~~~ http-message
+POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
-PoP: eyJhbGciOiJSUzI1NiIsImp3ayI6eyJrdHkiOiJSU0EiLCJlIjoi
-QVFBQiIsImtpZCI6Inh5ei1jbGllbnQiLCJhbGciOiJSUzI1NiIsIm4iO
-iJ6d0NUXzNieC1nbGJiSHJoZVlwWXBSV2lZOUktbkVhTVJwWm5ScklqQ3
-M2Yl9lbXlUa0JrRERFalN5c2kzOE9DNzNoajEtV2d4Y1BkS05HWnlJb0g
-zUVplbjFNS3l5aFFwTEpHMS1vTE5McW03cFhYdGRZelNkQzlPMy1vaXl5
-OHlrTzRZVXlOWnJSUmZQY2loZFFDYk9fT0M4UXVnbWc5cmdORE9TcXBwZ
-GFOZWFzMW92OVB4WXZ4cXJ6MS04SGE3Z2tEMDBZRUNYSGFCMDV1TWFVYW
-RIcS1PX1dJdllYaWNnNkk1ajZTNDRWTlU2NVZCd3UtQWx5blR4UWRNQVd
-QM2JZeFZWeTZwMy03ZVRKb2t2allURnFnRFZEWjhsVVhicjV5Q1RuUmhu
-aEpndmYzVmpEX21hbE5lOC10T3FLNU9TRGxIVHk2Z0Q5TnFkR0NtLVBtM
-1EifX0.eyJwIjoiXC9hcGlcL2FzXC90cmFuc2FjdGlvbiIsImIiOiJxa0
-lPYkdOeERhZVBTZnc3NnFjamtqSXNFRmxDb3g5bTU5NFM0M0RkU0xBIiw
-idSI6Imhvc3QuZG9ja2VyLmludGVybmFsIiwiaCI6W1siQWNjZXB0Iiwi
-Q29udGVudC1UeXBlIiwiQ29udGVudC1MZW5ndGgiXSwiVjQ2OUhFWGx6S
-k9kQTZmQU5oMmpKdFhTd3pjSGRqMUloOGk5M0h3bEVHYyJdLCJtIjoiUE
-9TVCIsInRzIjoxNTcyNjQyNjEwfQ.xyQ47qy8bu4fyK1T3Ru1Sway8wp6
-5rfAKnTQQU92AUUU07I2iKoBL2tipBcNCC5zLH5j_WUyjlN15oi_lLHym
-fPdzihtt8_Jibjfjib5J15UlifakjQ0rHX04tPal9PvcjwnyZHFcKn-So
-Y3wsARn-gGwxpzbsPhiKQP70d2eG0CYQMA6rTLslT7GgdQheelhVFW29i
-27NcvqtkJmiAG6Swrq4uUgCY3zRotROkJ13qo86t2DXklV-eES4-2dCxf
-cWFkzBAr6oC4Qp7HnY_5UT6IWkRJt3efwYprWcYouOVjtRan3kEtWkaWr
-G0J4bPVnTI5St9hJYvvh7FE8JirIg
- 
+Content-Length: 986
+Digest: SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+Signature-Input: sig1=("@request-target" "host" "content-type" \
+  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
+Signature: \
+  sig1=:axj8FLOvEWBcwh+Xk6VTTKXxqo4XNygleTDJ8h3ZJfi1sSmWrRtyo9RG/dc\
+  miZmdszRjWbg+/ixVZpA4BL3AOwEOxxtmHAXNB8uJ0I3tfbs6Suyk4sEo8zPr+MJq\
+  MjxdJEUgAQAy2AH+wg5a7CKq4IdLTulFK9njUIeG7MygHumeiumM3DbDQAHgF46dV\
+  q5UC6KJnqhGM1rFC128jd2D0sgWKCUgKGCHtfR159zfKWcEO9krsLoOnCdTzm1UyD\
+  DMjkIjqeN/1j8PdMJaRAwV4On079O0DVu6bl1jVtkzo/e/ZmwPr/X436V4xiw/hZt\
+  w4sfNsSbmsT0+UAQ20X/xaw==:
+
+
 {
     "access_token": {
         "access": [
@@ -4016,39 +4204,197 @@ G0J4bPVnTI5St9hJYvvh7FE8JirIg
         ]
     },
     "interact": {
-        "redirect": true,
-        "callback": {
+        "start": ["redirect"],
+        "finish": {
             "method": "redirect",
-            "uri": "https://client.foo",
+            "uri": "https://client.foo/callback",
             "nonce": "VJLO6A4CAYLBXHTR0KRO"
         }
     },
     "client": {
+      "proof": "httpsig",
+      "key": {
+        "jwk": {
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
+        }
+      }
       "display": {
         "name": "My Client Display Name",
-        "uri": "https://example.net/client"
+        "uri": "https://client.foo/"
       },
+    }
+}
+~~~
+
+If the HTTP Message includes a message body, the verifier MUST
+calculate and verify the value of the `Digest` header. The verifier
+MUST ensure that the signature includes all required covered
+content. The verifier MUST validate the signature against the
+expected key of the signer.
+
+### OAuth Proof of Possession (PoP) {#oauth-pop-binding}
+
+This method is indicated by `oauthpop` in
+the `proof` field. The signer creates an HTTP
+Authorization PoP header as described in {{I-D.ietf-oauth-signed-http-request}} section 4, with the
+following additional requirements:
+
+- The `at` (access token) field MUST be omitted
+    unless this method is being used in conjunction with
+    an access token as in {{use-access-token}}.
+    \[\[ [See issue #112](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/112) \]\]
+
+- The `b` (body hash) field MUST be calculated and included,
+    if the message includes an entity body (such as a PUT or PATCH request).
+
+- All components of the URL MUST be calculated and included,
+    including query parameters `q`, path `p`, and host `u`.
+    
+- The `m` (method) field MUST be included
+
+In this example, the request message body is the following JSON object
+
+~~~
+{
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
+    "interact": {
+        "start": ["redirect"],
+        "finish": {
+            "method": "redirect",
+            "uri": "https://client.foo/callback",
+            "nonce": "VJLO6A4CAYLBXHTR0KRO"
+        }
+    },
+    "client": {
       "proof": "oauthpop",
       "key": {
         "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_J
-tffXyaSx8xYJCCNaOKNJn_Oz0YhdHbXTeWO5AoyspDWJbN5w_7bdWDxgpD-
-y6jnD1u9YhBOCWObNPFvpkTM8LC7SdXGRKx2k8Me2r_GssYlyRpqvpBlY5-
-ejCywKRBfctRcnhTTGNztbbDBUyDSWmFMVCHe5mXT4cL0BwrZC6S-uu-LAx
-06aKwQOPwYOGOslK8WPm1yGdkaA1uF_FpS6LS63WYPHi_Ap2B7_8Wbw4ttz
-bMS_doJvuDagW8A1Ip3fXFAHtRAcKw7rdI4_Xln66hJxFekpdfWdiPQddQ6
-Y1cK2U3obvUg7w"
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
         }
       }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
+    }
+}
+~~~
+
+The JOSE header for the PoP token is the following:
+
+~~~
+{
+    "alg": "RS256",
+    "kid": "gnap-rsa"
+}
+~~~
+
+After calculating the hashes for the body, headers, and URL components, the JWS Payload is the following:
+
+~~~
+{
+    "u": "server.example.com",
+    "p": "/gnap",
+    "m": "POST",
+    "ts": 1618884475,
+    "b": "sCvbP9VqOcq4LHkVDcayon2MoT4xPGc49TEnqsr6WYE",
+    "h": [
+        [
+            "content-type",
+            "content-length"
+        ],
+        "EJit2-669uk8JUzLJbidMFRkATuZOimvCOieXPjtEmU"
+    ]
+}
+~~~
+
+This leads to the following HTTP message request:
+
+~~~ http-message
+POST /gnap HTTP/1.1
+Host: server.example.com
+Content-Type: application/json
+Content-Length: 987
+PoP: eyJhbGciOiJSUzI1NiIsImtpZCI6ImduYXAtcnNhIn0.eyJ1Ijoic2VydmVyLm\
+  V4YW1wbGUuY29tIiwicCI6Ii9nbmFwIiwibSI6IlBPU1QiLCJ0cyI6MTYxODg4NDQ\
+  3NSwiYiI6InNDdmJQOVZxT2NxNExIa1ZEY2F5b24yTW9UNHhQR2M0OVRFbnFzcjZX\
+  WUUiLCJoIjpbWyJjb250ZW50LXR5cGUiLCJjb250ZW50LWxlbmd0aCJdLCJFSml0M\
+  i02Njl1azhKVXpMSmJpZE1GUmtBVHVaT2ltdkNPaWVYUGp0RW1VIl19.doLbW-VA7\
+  HnyeyEbl4qmcPUkiQrXIG53oSZLGrUHhs7CL9X9kd_-1j8lxyT7tWJLtjoIgDtVVn\
+  PN69xP-Vs9-Cx5uV4VfLKRO7O9GmdGUOXx9eP53Q4hf8UPMrfbyAEeluznajC21o9\
+  AriBDMyjmV4A4JkZn3A7v72zE0z1CQfqUsdfomeB_SmFlMhcsO8KsT1vG6iOmuE0x\
+  3rGjJvyohNUQvkzWvaP37nLTZol8VFWinlXGv-4cOx3YWgZUn_RNk7cH6ALHlzgnl\
+  8t1YhA14AFdVmCGaeJMDKmb5Jt7g0UnOp1BYR9j1DeUP64RQU6lH_8A1MMIc5iBwD\
+  yx433wxQ
+
+
+{
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
+    "interact": {
+        "start": ["redirect"],
+        "finish": {
+            "method": "redirect",
+            "uri": "https://client.foo/callback",
+            "nonce": "VJLO6A4CAYLBXHTR0KRO"
+        }
+    },
+    "client": {
+      "proof": "oauthpop",
+      "key": {
+        "jwk": {
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
+        }
+      }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
     }
 }
 ~~~
 
 \[\[ [See issue #113](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/113) \]\]
+
+The verifier MUST parse the JWS object of the PoP header.
+The verifier MUST validate the signature of the header against the expected
+key of the signer. The verifier MUST ensure that all required parts
+of the message are covered by the signature. The verifier MUST ensure that
+all components of the signature contain correct values.
 
 # Resource Access Rights {#resource-access-rights}
 
@@ -4427,6 +4773,9 @@ sure that it has the permission to do so.
     - Add an appendix to provide protocol rationale, compared to OAuth2.
     - Updated subject information definition.
     - Refactored the RS-centric components into a new document. 
+    - Updated cryptographic proof of possession methods to match current reference syntax.
+    - Updated proofing language to use "signer" and "verifier" generically.
+    - Updated cryptographic proof of possession examples.
 
 - -04
     - Updated terminology.
