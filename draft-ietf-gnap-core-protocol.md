@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-latest
+docname: draft-ietf-gnap-core-protocol-05
 category: std
 
 ipr: trust200902
@@ -57,7 +57,6 @@ normative:
     RFC8174:
     RFC8259:
     RFC8705:
-    RFC8693:
     I-D.ietf-httpbis-message-signatures:
     I-D.ietf-oauth-signed-http-request:
     I-D.ietf-oauth-dpop:
@@ -1403,14 +1402,14 @@ the end-user to an arbitrary URL and can receive a [redirect](#request-interact-
 a browser request.
 
 ~~~
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.example.net/return/123455",
-            "nonce": "LKLTI25DK82FX4T4QFZC"
-        }
+"interact": {
+    "start": ["redirect"],
+    "finish": {
+        "method": "redirect",
+        "uri": "https://client.example.net/return/123455",
+        "nonce": "LKLTI25DK82FX4T4QFZC"
     }
+}
 ~~~
 
 In this non-normative example, the client instance is indicating that it can 
@@ -1419,9 +1418,9 @@ to an [arbitrary URL](#request-interact-redirect) on a secondary
 device, but it cannot accept a redirect or push callback.
 
 ~~~
-    "interact": {
-        "start": ["redirect", "user_code"]
-    }
+"interact": {
+    "start": ["redirect", "user_code"]
+}
 ~~~
 
 If the client instance does not provide a suitable interaction mechanism, the
@@ -4767,7 +4766,7 @@ sure that it has the permission to do so.
    
 # Document History {#history}
 
-- -Since 04
+- -05
     - Changed "interaction_methods" to "interaction_methods_supported".
     - Changed "key_proofs" to "key_proofs_supported".
     - Changed "assertions" to "assertions_supported".
