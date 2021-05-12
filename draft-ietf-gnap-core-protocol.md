@@ -4453,8 +4453,8 @@ identifier (string)
     For example, a patient identifier for a medical API or
     a bank account number for a financial API.
 
-access (array of strings)
-: The types or levels of access being requested at the resource. For example, a client
+privileges (array of strings)
+: The types or levels of privilege being requested at the resource. For example, a client
     instance asking for administrative level access, or access when the resource owner
     is no longer online.
 
@@ -4772,7 +4772,7 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - Since -05
-    - Added "access" field to resource access request object.
+    - Added "privileges" field to resource access request object.
 
 - -05
     - Changed "interaction_methods" to "interaction_methods_supported".
