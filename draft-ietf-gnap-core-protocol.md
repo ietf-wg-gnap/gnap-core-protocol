@@ -4765,9 +4765,6 @@ Detached-JWS: ejy0...
 If issued, the resulting access token would contain sufficient access to be used
 at both referenced resources.
 
-\[\[ [See issue #118](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/118) \]\]
-
-
 # Acknowledgements {#Acknowledgements}
 
 The editors would like to thank the feedback of the following individuals for their reviews,
