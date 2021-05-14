@@ -99,7 +99,15 @@ authorize the request.
 
 The process by which the delegation happens is known as a grant, and
 GNAP allows for the negotiation of the grant process
-over time by multiple parties acting in distinct roles.
+over time by multiple parties acting in distinct roles. 
+
+This specification focuses on the portions of the delegation process facing the client instance.
+In particular, this specification defines interoperable methods for a client instance to request, negotiate,
+and receive access to information facilitated by the authorization server. 
+This specification also discusses discovery mechanisms for the client instance to
+configure itself dynamically.
+The means for an authorization server and resource server to interoperate are
+discussed in the companion document, {{I-D.draft-ietf-gnap-resource-servers}}. 
 
 The focus of this protocol is to provide interoperability between the different
 parties acting in each role, and is not to specify implementation details of each.
@@ -259,40 +267,40 @@ AS just to get direct user information and have no need to get
 an access token to call an RS.
 
 ~~~
-        +------------+         +------------+
-        | End-user   | ~ ~ ~ ~ |  Resource  |
-        |            |         | Owner (RO) |
-        +------------+         +------------+
-            +                         +      
-            +                         +      
-           (A)                       (B)       
-            +                         +        
-            +                         +         
-        +--------+                    +          +------------+
-        | Client | (1)                +          |  Resource  |
-        |Instance|                    +          |   Server   |
-        |        |       +---------------+       |    (RS)    |
-        |        |--(2)->| Authorization |       |            |
-        |        |<-(3)--|     Server    |       |            |
-        |        |       |      (AS)     |       |            |
-        |        |--(4)->|               |       |            |
-        |        |<-(5)--|               |       |            |
-        |        |--------------(6)------------->|            |
-        |        |       |               |   (7) |            |
-        |        |<-------------(8)------------->|            |
-        |        |--(9)->|               |       |            |
-        |        |<-(10)-|               |       |            |
-        |        |--------------(11)------------>|            |
-        |        |       |               |  (12) |            |
-        |        |-(13)->|               |       |            |
-        |        |       |               |       |            |
-        +--------+       +---------------+       +------------+
-    
-    Legend
-    + + + indicates a possible interaction with a human
-    ----- indicates an interaction between protocol roles
-    ~ ~ ~ indicates a potential equivalence or out-of-band
-            communication between roles
+    +------------+         +------------+
+    | End-user   | ~ ~ ~ ~ |  Resource  |
+    |            |         | Owner (RO) |
+    +------------+         +------------+
+        +                         +      
+        +                         +      
+       (A)                       (B)       
+        +                         +        
+        +                         +         
+    +--------+                    +          +------------+
+    | Client | (1)                +          |  Resource  |
+    |Instance|                    +          |   Server   |
+    |        |       +---------------+       |    (RS)    |
+    |        |--(2)->| Authorization |       |            |
+    |        |<-(3)--|     Server    |       |            |
+    |        |       |      (AS)     |       |            |
+    |        |--(4)->|               |       |            |
+    |        |<-(5)--|               |       |            |
+    |        |--------------(6)------------->|            |
+    |        |       |               |   (7) |            |
+    |        |<-------------(8)------------->|            |
+    |        |--(9)->|               |       |            |
+    |        |<-(10)-|               |       |            |
+    |        |--------------(11)------------>|            |
+    |        |       |               |  (12) |            |
+    |        |-(13)->|               |       |            |
+    |        |       |               |       |            |
+    +--------+       +---------------+       +------------+
+
+Legend
++ + + indicates a possible interaction with a human
+----- indicates an interaction between protocol roles
+~ ~ ~ indicates a potential equivalence or out-of-band
+        communication between roles
 ~~~
 
 - (A) The end-user interacts with the client instance to indicate a need for resources on
@@ -3307,7 +3315,8 @@ key proof together.
     request is used only for calls to the RS, and only with access tokens that are
     not bound to any key as described in {{response-token-single}}.
 - When neither an access token nor key proof are used, this is an unsecured request. This type
-    of request is not used in the core protocol of GNAP.
+    of request is used optionally for calls to the RS as part of an RS-first discovery
+    process as described in {{rs-request-without-token}}.
 
 ## Key Formats {#key-format}
 
@@ -4703,6 +4712,62 @@ mechanism, but the AS also returns other proofing methods, then the AS
 will deny a request from that client instance using a different proofing
 mechanism.
 
+## RS-first Method of AS Discovery {#rs-request-without-token}
+
+If the client instance calls an RS without an access token, or with an
+invalid access token, the RS MAY respond to the client instance with an
+authentication header indicating that GNAP needs to be used
+to access the resource. The address of the GNAP
+endpoint MUST be sent in the "as_uri" parameter. The RS MAY
+additionally return a resource reference that the client instance MAY use in
+its access token request. This
+resource reference MUST be sufficient for at least the action
+the client instance was attempting to take at the RS and MAY be more
+powerful.
+The means for the RS to determine the resource reference are out of scope
+of this specification, but some dynamic methods are discussed in
+{{I-D.draft-ietf-gnap-resource-servers}}.
+The content of the resource handle is opaque to the client instance.
+
+~~~
+WWW-Authenticate: \
+  GNAP as_uri=https://server.example/tx,access=FWWIKYBQ6U56NL1
+~~~
+
+The client instance then makes a request to the "as_uri" as described in 
+{{request}}, with the value of "access" as one of the members
+of the `access` array in the `access_token` portion of the request. The
+client instance MAY request additional resources and other information.
+The client instance MAY request multiple access tokens.
+
+In this non-normative example, the client instance is requesting a single access 
+token using the resource reference `FWWIKYBQ6U56NL1` received from the RS
+in addition to the `dolphin-metadata` resource reference that the client instance
+has been configured with out of band. 
+
+~~~
+POST /tx HTTP/1.1
+Host: server.example.com
+Content-Type: application/json
+Detached-JWS: ejy0...
+
+{
+    "access_token": {
+        "access": [
+            "FWWIKYBQ6U56NL1",
+            "dolphin-metadata"
+        ]
+    },
+    "client": "KHRS6X63AJ7C7C4AZ9AO"
+}
+~~~
+
+If issued, the resulting access token would contain sufficient access to be used
+at both referenced resources.
+
+\[\[ [See issue #118](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/118) \]\]
+
+
 # Acknowledgements {#Acknowledgements}
 
 The editors would like to thank the feedback of the following individuals for their reviews,
@@ -4767,7 +4832,7 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - Since -05
-    -
+    - Moved client-facing RS response back from GNAP-RS document.
 
 - -05
     - Changed "interaction_methods" to "interaction_methods_supported".
