@@ -153,7 +153,7 @@ on the role by the overall protocol.
  ┌───────────┐      +      ┌────────────┐
  │           │      ++++++►│            │
  │  Resource │             │    End     │
- │   Owner   │ ─────────── │    User    │
+ │   Owner   │ ~ ~ ~ ~ ~ ~ │    User    │
  │           │             │            │
  └───────────┘             └────────────┘
 
