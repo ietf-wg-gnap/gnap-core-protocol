@@ -139,7 +139,7 @@ on the role by the overall protocol.
 │             │◄─┐   ┌────►│            │
 └─────────────┘  │   │     └────────────┘
        ▲         │   │
-       +       SS│   │SS
+       +         │   │
        +         │   │
        +         │   │
        +         ▼   ▼
@@ -154,7 +154,7 @@ on the role by the overall protocol.
  │           │      ++++++►│            │
  │  Resource │             │    End     │
  │   Owner   │ ─────────── │    User    │
- │           │     OE      │            │
+ │           │             │            │
  └───────────┘             └────────────┘
 
 Legend
