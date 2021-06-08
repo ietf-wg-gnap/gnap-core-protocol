@@ -131,7 +131,7 @@ Roles are defined by the actions taken and the expectations leveraged
 on the role by the overall protocol. 
 
 
-```
+~~~
 ┌─────────────┐            ┌────────────┐
 │             │            │            │
 │Authorization│            │  Resource  │
@@ -139,24 +139,31 @@ on the role by the overall protocol.
 │             │◄─┐   ┌────►│            │
 └─────────────┘  │   │     └────────────┘
        ▲         │   │
-       │       SS│   │SS
-       │         │   │
-       │         │   │
-       │         ▼   ▼
-       │HS     ┌──────────┐
-       │       │  Client  │
-       │       └──────────┘
-       │            ▲
-       │            │
-       │            │
-       ▼          HS│
- ┌───────────┐      │      ┌────────────┐
- │           │      └─────►│            │
+       +       SS│   │SS
+       +         │   │
+       +         │   │
+       +         ▼   ▼
+       +       ┌──────────┐
+       +       │  Client  │
+       +       └──────────┘
+       +            ▲
+       +            +
+       +            +
+       ▼            +
+ ┌───────────┐      +      ┌────────────┐
+ │           │      ++++++►│            │
  │  Resource │             │    End     │
  │   Owner   │ ─────────── │    User    │
  │           │     OE      │            │
  └───────────┘             └────────────┘
-```
+
+Legend
+
++ + + indicates interaction between a human and computer
+----- indicates interaction between two pieces of software
+~ ~ ~ indicates a potential equivalence or out-of-band communication between roles
+
+~~~
 
 Authorization Server (AS)
 : server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information). 
@@ -180,18 +187,6 @@ End-user
 : natural person that operates a client instance.
 
     Note: that natural person may or may not be the same entity as the RO. 
-
-
-Diagram Legend
-
-SS
-: Interaction between two pieces of software
-
-HS
-: A human interacting with a piece of software, either operating the software directly, or through a separate device or other piece of software
-
-OE
-: Out of band interaction and/or equivalent roles
 
 
 The design of GNAP does not assume any one deployment architecture,
