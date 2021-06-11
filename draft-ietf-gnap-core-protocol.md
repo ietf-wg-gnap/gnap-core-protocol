@@ -145,8 +145,8 @@ on the role by the overall protocol.
        +         |   |
        +       +----------+
        +       |  Client  |
+       +       | Instance |
        +       +----------+
-       +            +
        +            +
        +            +
        +            +
