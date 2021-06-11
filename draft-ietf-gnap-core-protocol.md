@@ -4462,6 +4462,11 @@ identifier (string)
     For example, a patient identifier for a medical API or
     a bank account number for a financial API.
 
+privileges (array of strings)
+: The types or levels of privilege being requested at the resource. For example, a client
+    instance asking for administrative level access, or access when the resource owner
+    is no longer online.
+
 The following non-normative example is describing three kinds of access (read, write, delete) to each of
 two different locations and two different data types (metadata, images) for a single access token 
 using the fictitious `photo-api` type definition.
@@ -4829,6 +4834,7 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - Since -05
+    - Added "privileges" field to resource access request object.
     - Moved client-facing RS response back from GNAP-RS document.
 
 - -05
