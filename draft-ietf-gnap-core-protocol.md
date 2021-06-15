@@ -4715,7 +4715,9 @@ mechanism.
 
 The editors would like to thank the feedback of the following individuals for their reviews,
 implementations, and contributions:
+Åke Axeland,
 Aaron Parecki,
+Adam Omar Oueidat,
 Annabelle Backman,
 Dick Hardt,
 Dmitri Zagidulin,
