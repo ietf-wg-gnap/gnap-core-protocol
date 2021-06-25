@@ -4777,6 +4777,7 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - Since -05
+    - Added AS endpoint to hash calculation to fix mix-up attack.
     - Added "privileges" field to resource access request object.
 
 - -05
