@@ -1227,24 +1227,11 @@ within the `client` request, and other mechanisms.
 ### Identifying the Client Instance by Reference {#request-instance}
 
 If the client instance has an instance identifier that the AS can use to determine
-appropriate key information, the client instance can send this value in the `instance_id`
-field. The instance identifier MAY be assigned to a client instance at runtime
+appropriate key information, the client instance can send this instance 
+identifier as a direct reference value in lieu of the `client` object.
+The instance identifier MAY be assigned to a client instance at runtime
 through the {{response-dynamic-handles}} or MAY be obtained in another fashion,
 such as a static registration process at the AS.
-
-instance_id (string)
-: An identifier string that the AS can use to identify the
-    particular instance of this client software. The content and structure of
-    this identifier is opaque to the client instance.
-
-~~~
-"client": {
-    "instance_id": "client-541-ab"
-}
-~~~
-
-If there are no additional fields to send, the client instance MAY send the instance 
-identifier as a direct reference value in lieu of the object.
 
 ~~~
 "client": "client-541-ab"
@@ -1253,12 +1240,6 @@ identifier as a direct reference value in lieu of the object.
 When the AS receives a request with an instance identifier, the AS MUST
 ensure that the key used to [sign the request](#binding-keys) is 
 associated with the instance identifier.
-
-If the `instance_id` field is sent, it MUST NOT be accompanied by other fields unless such 
-fields are explicitly marked safe for inclusion alongside the instance
-identifier. 
-
-\[\[ [See issue #45](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/45) \]\]
 
 If the AS does not recognize the instance identifier, the request MUST be rejected
 with an error.
@@ -4829,6 +4810,7 @@ sure that it has the permission to do so.
 
 - Since -05
     - Removed "capabilities" and "existing_grant" protocol fields.
+    - Removed separate "instance_id" field.
     - Added "privileges" field to resource access request object.
     - Moved client-facing RS response back from GNAP-RS document.
 
