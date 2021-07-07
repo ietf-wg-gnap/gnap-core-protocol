@@ -2722,12 +2722,14 @@ several kinds of session fixation and injection attacks. The AS MUST
 always provide this hash, and the client instance MUST validate the hash when received.
 
 To calculate the "hash" value, the party doing the calculation
-first takes the "nonce" value sent by the client instance in the 
-[interaction section of the initial request](#request-interact-finish), the AS's nonce value
-from [the interaction finish response](#response-interact-finish), and the "interact_ref"
-sent to the client instance's callback URL.
-These three values are concatenated to each other in this order
-using a single newline character as a separator between the fields.
+creates a hash string by concatenating the following values in the following order
+using a single newline (`\\n`) character to separate them:
+
+* the "nonce" value sent by the client instance in the [interaction "finish" section of the initial request](#request-interact-finish)
+* the AS's nonce value from [the interaction finish response](#response-interact-finish)
+* the "interact_ref" returned from the AS as part of the [interaction finish method](#interaction-finish)
+* the grant endpoint URL the client instance used to make its [initial request](#request)
+
 There is no padding or whitespace before or after any of the lines,
 and no trailing newline character.
 
@@ -2735,6 +2737,7 @@ and no trailing newline character.
 VJLO6A4CAYLBXHTR0KRO
 MBDOFXG4Y5CVJCX821LH
 4IFWWIKYBC2PQ6U56NL1
+https://server.example.com/tx
 ~~~
 
 The party then hashes this string with the appropriate algorithm
@@ -4813,7 +4816,9 @@ at both referenced resources.
 
 The editors would like to thank the feedback of the following individuals for their reviews,
 implementations, and contributions:
+Åke Axeland,
 Aaron Parecki,
+Adam Omar Oueidat,
 Annabelle Backman,
 Dick Hardt,
 Dmitri Zagidulin,
@@ -4874,6 +4879,7 @@ sure that it has the permission to do so.
 
 - Since -05
     - Split "interaction_methods_supported" into "interaction_start_modes_supported" and "interaction_finish_methods_supported". 
+    - Added AS endpoint to hash calculation to fix mix-up attack.
     - Added "privileges" field to resource access request object.
     - Moved client-facing RS response back from GNAP-RS document.
 
