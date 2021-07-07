@@ -1785,7 +1785,6 @@ a [callback nonce](#response-interact-finish), and a [continuation response](#re
     "continue": {
         "access_token": {
             "value": "80UPRY5NM33OMUKMKSKU",
-            "bound": true
         },
         "uri": "https://server.example.com/tx"
     }
@@ -1800,7 +1799,7 @@ an opaque identifier.
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "bound": false,
+        "flags": ["bearer"],
         "manage": "https://server.example.com/token/PRY5NM33O\
             M4TB8N6BW7OZB8CDFONP219RP1L",
     },
@@ -1853,7 +1852,7 @@ access_token (object)
 : REQUIRED. A unique access token for continuing the request, in the format specified
             in {{response-token-single}}. This access token MUST be bound to the
             client instance's key used in the request and MUST NOT be a `bearer` token. As a consequence,
-            the `bound` field of this access token is always the boolean value `true` and the
+            the `flags` array of this access token MUST NOT contain the string `bearer` and the
             `key` field MUST be omitted.
             This access token MUST NOT be usable at resources outside of the AS.
             The client instance MUST present the access token in all requests to the continuation URI as 
