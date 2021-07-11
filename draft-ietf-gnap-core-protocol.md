@@ -180,7 +180,7 @@ Client
 : application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. 
 
     Example: a client can be a mobile application, a web application, etc.
-
+    
     Note: this specification differentiates between a specific instance (the client instance, identified by its unique key) and the software running the instance (the client software). For some kinds of client software, there could be many instances of that software, each instance with a different key.
 
 Resource Server (RS)
@@ -771,7 +771,7 @@ expired access token at the AS using the token's management URL.
 
 4. The RS validates the access token and returns an appropriate response for the
     API.
- 
+
 5. Time passes and the client instance uses the access token to call the RS again.
    
 6. The RS validates the access token and determines that the access token is expired
@@ -1813,8 +1813,8 @@ an opaque identifier.
 }
 ~~~
 
-In this example, the AS is returning only a pair of [subject identifiers](#response-subject)
-as both an email address and an opaque identifier.
+In this example, the AS is returning only a set of [subject identifiers](#response-subject),
+simultaneously as an opaque identifier, an email address and a decentralized identifier (DID).
 
 ~~~
 {
@@ -1825,6 +1825,9 @@ as both an email address and an opaque identifier.
         }, {
            "format": "email",
            "email": "user@example.com"
+        }, {
+           "format": "did",
+           "url": "did:example:123456"
         } ]
     }
 }
@@ -4871,7 +4874,7 @@ When user information is passed to the client instance, the AS needs to make
 sure that it has the permission to do so.
 
 --- back
-   
+
 # Document History {#history}
 
 - Since -05
