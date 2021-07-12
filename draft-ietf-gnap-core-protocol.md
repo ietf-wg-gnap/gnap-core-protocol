@@ -59,7 +59,6 @@ normative:
     RFC8705:
     I-D.ietf-httpbis-message-signatures:
     I-D.ietf-oauth-signed-http-request:
-    I-D.ietf-oauth-dpop:
     I-D.ietf-secevent-subject-identifiers:
     I-D.ietf-oauth-rar:
     OIDC:
@@ -180,7 +179,7 @@ Client
 : application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. 
 
     Example: a client can be a mobile application, a web application, etc.
-
+    
     Note: this specification differentiates between a specific instance (the client instance, identified by its unique key) and the software running the instance (the client software). For some kinds of client software, there could be many instances of that software, each instance with a different key.
 
 Resource Server (RS)
@@ -771,7 +770,7 @@ expired access token at the AS using the token's management URL.
 
 4. The RS validates the access token and returns an appropriate response for the
     API.
- 
+
 5. Time passes and the client instance uses the access token to call the RS again.
    
 6. The RS validates the access token and determines that the access token is expired
@@ -3436,9 +3435,6 @@ jws
 mtls
 : Mutual TLS certificate verification
 
-dpop
-: OAuth Demonstration of Proof-of-Possession key proof header
-
 httpsig
 : HTTP Signing signature header
 
@@ -3924,164 +3920,6 @@ means of trust for this certificate could be in something other than
 a PKI system, such as a static registration or trust-on-first-use.
 
 \[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
-
-### Demonstration of Proof-of-Possession (DPoP) {#dpop-binding}
-
-This method is indicated by `dpop` in the
-`proof` field. The signer creates a Demonstration of Proof-of-Possession
-signature header as described in {{I-D.ietf-oauth-dpop}}
-section 2. In addition, this specification defines the following fields
-to be added to the DPoP payload:
-
-htd (string)
-: Digest of the request body as the value of the Digest 
-    header defined in {{RFC3230}}. When a request contains a message body, such as a POST or PUT request,
-    this field is REQUIRED.
-
-
-In this example, the request body is the following JSON object:
-~~~
-{
-    "access_token": {
-        "access": [
-            "dolphin-metadata"
-        ]
-    },
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.foo/callback",
-            "nonce": "VJLO6A4CAYLBXHTR0KRO"
-        }
-    },
-    "client": {
-      "proof": "dpop",
-      "key": {
-        "jwk": {
-            "kid": "gnap-rsa",
-            "kty": "RSA",
-            "e": "AQAB",
-            "alg": "RS256",
-            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
-  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
-  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
-  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
-  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
-  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
-        }
-      }
-      "display": {
-        "name": "My Client Display Name",
-        "uri": "https://client.foo/"
-      },
-    }
-}
-~~~
-
-The JOSE header contains the following parameters, including the public key:
-
-~~~
-{
-    "alg": "RS256",
-    "typ": "dpop+jwt",
-    "jwk": {
-        "kid": "gnap-rsa",
-        "kty": "RSA",
-        "e": "AQAB",
-        "alg": "RS256",
-        "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8BfYdHs\
-  FzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZGYXjH\
-  pwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jRETdd\
-  zsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_3UgV\
-  p7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyEN7aL\
-  0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
-    }
-}
-~~~
-
-The JWS Payload contains the following JWT claims, including a hash of the body:
-
-~~~
-{
-    "htu": "https://server.example.com/gnap",
-    "htm": "POST",
-    "iat": 1618884475,
-    "jti": "HjoHrjgm2yB4x7jA5yyG",
-    "htd": "SHA-256=tnPQ2GXm8r/rTTKdbQ8pc7EjiFFPy1ExSX6OZVG3JVI="
-}
-~~~
-
-This results in the following full HTTP message request:
-
-~~~ http-message
-POST /gnap HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-Content-Length: 983
-DPoP: eyJhbGciOiJSUzI1NiIsImp3ayI6eyJhbGciOiJSUzI1NiIsImUiOiJBUUFCI\
-  iwia2lkIjoiZ25hcC1yc2EiLCJrdHkiOiJSU0EiLCJuIjoiaFlPSi1YT0tJU2RNTV\
-  Nobl9HNFc5bTIwbVQwVld0UUJzbUJCa0kyY21SdDRBaThCZllkSHNGekF0WUtPanB\
-  CUjFScEtwSm1WS3hJR055MGc2WjNhZDJYWXNoOEtvd2x5Vnk4SWtaOE5Nd1NyY1VJ\
-  QlpHWVhqSHB3anp2Zkd2WEhfNUtKbG5SM191UlVwNFo0VWprMmJDYUtlZ0RuMTFWM\
-  nZ4RTQxaHFhUFVuaFJaeGUwalJFVGRkenNFM211MVNLOGRUQ1JPandVbDE0bVVObz\
-  hpVHJUbTRuMHFEYWR6OEJrUG8tdXY0QkMwYnVuUzBLM2JBXzNVZ1ZwN3pCbFFGb0Z\
-  uTFRPMnVXcF9tdUxFV0dsNjdnQnE5TU8zYnJLWGZHaGkza096eXd6d1BUdXEtY1ZR\
-  RHlFTjdhTDBTeENiM0hjNElkcURhTWc4cUhVeU9icFBpdERRIn0sInR5cCI6ImRwb\
-  3Arand0In0.eyJodHUiOiJodHRwczovL3NlcnZlci5leGFtcGxlLmNvbS9nbmFwIi\
-  wiaHRtIjoiUE9TVCIsImlhdCI6MTYxODg4NDQ3NSwianRpIjoiSGpvSHJqZ20yeUI\
-  0eDdqQTV5eUciLCJodGQiOiJTSEEtMjU2PXRuUFEyR1htOHIvclRUS2RiUThwYzdF\
-  amlGRlB5MUV4U1g2T1pWRzNKVkk9In0.HLRh7n-3uwnSGCBGbSFitNCxgmJnpp6hs\
-  sF8o_u2Xbuzu3pyR4v8SJVP17tjqxuySf91lmC1gjJeK4pXvWOtfeWGuDjD7nr6aw\
-  pBOtiQXeBtoqiiK2ByBZO-mhccJeNkTkRfxGDtU0iJo6iarWjRgQOsPbt69FIwTP4\
-  Abovwv7yBCthQs3TMsBtb8-l4Lu30wNLwXEWcB-o8nFNpT4zgV9ETGoCOcBFwBjjt\
-  0khsCarleTBsOZ2zUuFwZMWi_bQYfd-M0pahWYro9Mdy3Fts-aUqZjS2LwHHNWvjw\
-  rTzz6icCHwnr9dm1Ls6orbM7xMzvHAOA5TZW39yFg_Xr5PNYg
-
-
-{
-    "access_token": {
-        "access": [
-            "dolphin-metadata"
-        ]
-    },
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.foo/callback",
-            "nonce": "VJLO6A4CAYLBXHTR0KRO"
-        }
-    },
-    "client": {
-      "proof": "dpop",
-      "key": {
-        "jwk": {
-            "kid": "gnap-rsa",
-            "kty": "RSA",
-            "e": "AQAB",
-            "alg": "RS256",
-            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
-  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
-  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
-  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
-  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
-  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
-        }
-      }
-      "display": {
-        "name": "My Client Display Name",
-        "uri": "https://client.foo/"
-      },
-    }
-}
-~~~
-
-The verifier MUST parse and validate the DPoP proof header as defined in
-{{I-D.ietf-oauth-dpop}}. If the HTTP message request includes a message body,
-the verifier MUST calculate the digest of the body and compare it to the
-`htd` value. The verifier MUST ensure the key presented in the DPoP
-proof header is the same as the expected key of the signer.
 
 ### HTTP Message Signing {#httpsig-binding}
 
@@ -4813,7 +4651,7 @@ When user information is passed to the client instance, the AS needs to make
 sure that it has the permission to do so.
 
 --- back
-   
+
 # Document History {#history}
 
 - Since -05
@@ -4823,7 +4661,8 @@ sure that it has the permission to do so.
     - Added AS endpoint to hash calculation to fix mix-up attack.
     - Added "privileges" field to resource access request object.
     - Moved client-facing RS response back from GNAP-RS document.
-
+    - Removed dpop key binding.
+    
 - -05
     - Changed "interaction_methods" to "interaction_methods_supported".
     - Changed "key_proofs" to "key_proofs_supported".
