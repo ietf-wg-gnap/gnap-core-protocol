@@ -908,7 +908,7 @@ A non-normative example of a grant request is below:
         "uri": "https://example.net/client"
       },
       "key": {
-        "proof": "jwsd",
+        "proof": "httpsig",
         "jwk": {
                     "kty": "RSA",
                     "e": "AQAB",
@@ -2754,13 +2754,14 @@ ongoing request for each call within that request.
 \[\[ [See issue #85](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/85) \]\]
 
 For example, here the client instance makes a POST request to a unique URI and signs 
-the request with detached JWS:
+the request with HTTP Message Signatures:
 
 ~~~
 POST /continue/KSKUOMUKM HTTP/1.1
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Host: server.example.com
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
 ~~~
 
 The AS MUST be able to tell from the client instance's request which specific ongoing request
@@ -2776,14 +2777,16 @@ modifying the initial request, and getting the current state of the request.
 All requests to the continuation API are protected by this bound access token. 
 For example, here the client instance makes a POST request to a stable continuation endpoint
 URL with the [interaction reference](#continue-after-interaction), 
-includes the access token, and signs with detached JWS:
+includes the access token, and signs with HTTP Message Signatures:
 
 ~~~
 POST /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
   "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
@@ -2825,7 +2828,9 @@ POST /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
   "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
@@ -2880,7 +2885,8 @@ POST /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
 ~~~
 
 The [response](#response) MAY contain any newly-created [access tokens](#response-token) or
@@ -2976,7 +2982,9 @@ For example, a client instance initially requests a set of resources using refer
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "access_token": {
@@ -3028,7 +3036,9 @@ PATCH /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "access_token": {
@@ -3072,7 +3082,9 @@ needs to step up its access. The initial request could look like this example.
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "access_token": {
@@ -3128,7 +3140,9 @@ PATCH /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "access_token": {
@@ -3164,7 +3178,8 @@ DELETE /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
 ~~~
 
 If the request is successfully cancelled, the AS responds with an HTTP 202.
@@ -3202,7 +3217,9 @@ with the appropriate key.
 POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
 Host: server.example.com
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Detached-JWS: eyj0....
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 ~~~
 
 The AS validates that the token presented is associated with the management
@@ -3276,7 +3293,8 @@ the appropriate key.
 DELETE /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
 Host: server.example.com
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Detached-JWS: eyj0....
+Signature-Input: sig1=...
+Signature: sig1=...
 ~~~
 
 If the key presented is associated with the token (or the client instance, in
@@ -3354,12 +3372,12 @@ cert#S256 (string)
 Additional key formats are defined in [a registry TBD](#IANA).
 
 This non-normative example shows a single key presented in multiple
-formats. This key is intended to be used with the [detached JWS](#detached-jws)
-proofing mechanism, as indicated by the `proof` field.
+formats. This example key is intended to be used with the [HTTP Message Signatures]({{httpsig-binding}})
+proofing mechanism, as indicated by the `httpsig` value of the `proof` field.
 
 ~~~
 "key": {
-    "proof": "jwsd",
+    "proof": "httpsig",
     "jwk": {
                 "kty": "RSA",
                 "e": "AQAB",
@@ -3396,24 +3414,25 @@ with the key. This information is conveyed in the
 `bound` and `key` parameters in [the single](#response-token-single)
 and [multiple access tokens](#response-token-multiple) responses.
 
-If the `bound` value is the boolean `true` and the `key` is absent, the access token
+If the `flags` field does not contain the `bearer` flag and the `key` is absent, the access token
 MUST be sent using the same key and proofing mechanism that the client instance used
 in its initial request (or its most recent rotation).
 
-If the `bound` value is the boolean `true` and the `key` value is an object as
+If the `flags` field does not contain the `bearer` flag and the `key` value is an object as
 described in {{key-format}}, the access token MUST be sent using the key and proofing
 mechanism defined by the value of the `proof` field within the key object.
 
 The access token MUST be sent using the HTTP "Authorization" request header field and
 the "GNAP" authorization scheme along with a key proof as described in {{binding-keys}}
-for the key bound to the access token. For example, a "jwsd"-bound access token is sent as follows:
+for the key bound to the access token. For example, an "httpsig"-bound access token is sent as follows:
 
 ~~~
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Detached-JWS: eyj0....
+Signature-Input: sig1=(authorization);...
+Signature: sig1=...
 ~~~
 
-If the `bound` value is the boolean `false`, the access token is a bearer token
+If the `flags` field contains the `bearer` flag, the access token is a bearer token
 that MUST be sent using the `Authorization Request Header Field` method defined in {{RFC6750}}.
 
 ~~~
@@ -3426,8 +3445,8 @@ be used.
 
 \[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
 
-The client software MUST reject as an error a situation where the `bound` value is
-the boolean `false` and the `key` is present.
+The client software MUST reject as an error a situation where the `flags` field contains the `bearer` flag
+and the `key` field is present with any value.
 
 ## Proving Possession of a Key with a Request {#binding-keys}
 
@@ -3437,17 +3456,17 @@ used is indicated by the proof parameter of the key object in {{key-format}}.
 Values defined by this specification are as follows:
 
 
+httpsig
+: HTTP Signing signature header
+
+mtls
+: Mutual TLS certificate verification
+
 jwsd
 : A detached JWS signature header
 
 jws
 : Attached JWS payload
-
-mtls
-: Mutual TLS certificate verification
-
-httpsig
-: HTTP Signing signature header
 
 
 Additional proofing methods are defined by [a registry TBD](#IANA).
@@ -3522,6 +3541,249 @@ using the following RSA key (presented here in JWK format):
         zywzwPTuq-cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
 }
 ~~~
+
+### HTTP Message Signing {#httpsig-binding}
+
+This method is indicated by `httpsig` in
+the `proof` field. The sender creates an HTTP
+Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}. 
+
+The covered content of the signature MUST include the following:
+
+@request-target:
+: the target of the HTTP request 
+
+digest:
+: The Digest header as defined in {{RFC3230}}. When the request message has a body, 
+the signer MUST calculate this header value and the verifier 
+MUST validate this header.
+
+When the request is bound to an access token, the covered content
+MUST also include:
+
+authorization:
+: The Authorization header used to present the access token as discussed in
+{{use-access-token}}.
+
+Other covered content MAY also be included.
+
+If the signer's key presented is a JWK, the `keyid` parameter of the signature MUST be set
+to the `kid` value of the JWK, the signing algorithm used MUST be the JWS
+algorithm denoted by the key's `alg` field, and the explicit `alg` signature 
+parameter MUST NOT be included.
+
+In this example, the message body is the following JSON object:
+
+~~~
+{
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
+    "interact": {
+        "start": ["redirect"],
+        "finish": {
+            "method": "redirect",
+            "uri": "https://client.foo/callback",
+            "nonce": "VJLO6A4CAYLBXHTR0KRO"
+        }
+    },
+    "client": {
+      "proof": "httpsig",
+      "key": {
+        "jwk": {
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
+        }
+      }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
+    }
+}
+~~~
+
+This body is hashed for the Digest header using SHA-256 into the following encoded value:
+
+~~~
+SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+~~~
+
+The HTTP message signature input string is calculated to be the following:
+
+~~~
+"@request-target": post /gnap
+"host": server.example.com
+"content-type": application/json
+"digest": SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+"content-length": 986
+"@signature-params": ("@request-target" "host" "content-type" \
+  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
+~~~
+
+This leads to the following full HTTP message request:
+
+~~~ http-message
+POST /gnap HTTP/1.1
+Host: server.example.com
+Content-Type: application/json
+Content-Length: 986
+Digest: SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+Signature-Input: sig1=("@request-target" "host" "content-type" \
+  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
+Signature: \
+  sig1=:axj8FLOvEWBcwh+Xk6VTTKXxqo4XNygleTDJ8h3ZJfi1sSmWrRtyo9RG/dc\
+  miZmdszRjWbg+/ixVZpA4BL3AOwEOxxtmHAXNB8uJ0I3tfbs6Suyk4sEo8zPr+MJq\
+  MjxdJEUgAQAy2AH+wg5a7CKq4IdLTulFK9njUIeG7MygHumeiumM3DbDQAHgF46dV\
+  q5UC6KJnqhGM1rFC128jd2D0sgWKCUgKGCHtfR159zfKWcEO9krsLoOnCdTzm1UyD\
+  DMjkIjqeN/1j8PdMJaRAwV4On079O0DVu6bl1jVtkzo/e/ZmwPr/X436V4xiw/hZt\
+  w4sfNsSbmsT0+UAQ20X/xaw==:
+
+
+{
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
+    "interact": {
+        "start": ["redirect"],
+        "finish": {
+            "method": "redirect",
+            "uri": "https://client.foo/callback",
+            "nonce": "VJLO6A4CAYLBXHTR0KRO"
+        }
+    },
+    "client": {
+      "proof": "httpsig",
+      "key": {
+        "jwk": {
+            "kid": "gnap-rsa",
+            "kty": "RSA",
+            "e": "AQAB",
+            "alg": "RS256",
+            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
+  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
+  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
+  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
+  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
+  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
+        }
+      }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
+    }
+}
+~~~
+
+If the HTTP Message includes a message body, the verifier MUST
+calculate and verify the value of the `Digest` header. The verifier
+MUST ensure that the signature includes all required covered
+content. The verifier MUST validate the signature against the
+expected key of the signer.
+
+### Mutual TLS {#mtls}
+
+This method is indicated by `mtls` in the
+`proof` field. The signer presents its TLS client
+certificate during TLS negotiation with the verifier.
+
+In this example, the certificate is communicated to the application
+through the `Client-Cert` header from a TLS reverse proxy, leading
+to the following full HTTP request message:
+
+~~~ http-message
+POST /gnap HTTP/1.1
+Host: server.example.com
+Content-Type: application/jose
+Content-Length: 1567
+Client-Cert: \
+  MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMDYxNDAyBgNVBAMM \
+  K05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV6QzY2bVEwHhcN \
+  MjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQDDCtOSVlNeUJq \
+  c0RqeUJDOVA1MzdENklUemtwRDhOdFJqaTl5YXBFekM2Nm1RMIIBIjANBgkqhkiG \
+  9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhYOJ+XOKISdMMShn/G4W9m20mT0VWtQBsmBB \
+  kI2cmRt4Ai8BfYdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8I \
+  kZ8NMwSrcUIBZGYXjHpwjzvfGvXH/5KJlnR3/uRUp4Z4Ujk2bCaKegDn11V2vxE4 \
+  1hqaPUnhRZxe0jRETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo+ \
+  uv4BC0bunS0K3bA/3UgVp7zBlQFoFnLTO2uWp/muLEWGl67gBq9MO3brKXfGhi3k \
+  OzywzwPTuq+cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQIDAQABMA0GCSqG \
+  SIb3DQEBCwUAA4IBAQBnYFK0eYHy+hVf2D58usj39lhL5znb/q9G35GBd/XsWfCE \
+  wHuLOSZSUmG71bZtrOcx0ptle9bp2kKl4HlSTTfbtpuG5onSa3swRNhtKtUy5NH9 \
+  W/FLViKWfoPS3kwoEpC1XqKY6l7evoTCtS+kTQRSrCe4vbNprCAZRxz6z1nEeCgu \
+  NMk38yTRvx8ihZpVOuU+Ih+dOtVe/ex5IAPYxlQsvtfhsUZqc7IyCcy72WHnRHlU \
+  fn3pJm0S5270+Yls3Iv6h3oBAP19i906UjiUTNH3g0xMW+V4uLxgyckt4wD4Mlyv \
+  jnaQ7Z3sR6EsXMocAbXHIAJhwKdtU/fLgdwL5vtx
+
+
+{
+    "access_token": {
+        "access": [
+            "dolphin-metadata"
+        ]
+    },
+    "interact": {
+        "start": ["redirect"],
+        "finish": {
+            "method": "redirect",
+            "uri": "https://client.foo/callback",
+            "nonce": "VJLO6A4CAYLBXHTR0KRO"
+        }
+    },
+    "client": {
+      "proof": "jws",
+      "key": {
+        "cert": "MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMD\
+  YxNDAyBgNVBAMMK05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV\
+  6QzY2bVEwHhcNMjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQD\
+  DCtOSVlNeUJqc0RqeUJDOVA1MzdENklUemtwRDhOdFJqaTl5YXBFekM2Nm1RMIIBI\
+  jANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhYOJ+XOKISdMMShn/G4W9m20mT\
+  0VWtQBsmBBkI2cmRt4Ai8BfYdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8\
+  KowlyVy8IkZ8NMwSrcUIBZGYXjHpwjzvfGvXH/5KJlnR3/uRUp4Z4Ujk2bCaKegDn\
+  11V2vxE41hqaPUnhRZxe0jRETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDad\
+  z8BkPo+uv4BC0bunS0K3bA/3UgVp7zBlQFoFnLTO2uWp/muLEWGl67gBq9MO3brKX\
+  fGhi3kOzywzwPTuq+cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQIDAQABMA0\
+  GCSqGSIb3DQEBCwUAA4IBAQBnYFK0eYHy+hVf2D58usj39lhL5znb/q9G35GBd/Xs\
+  WfCEwHuLOSZSUmG71bZtrOcx0ptle9bp2kKl4HlSTTfbtpuG5onSa3swRNhtKtUy5\
+  NH9W/FLViKWfoPS3kwoEpC1XqKY6l7evoTCtS+kTQRSrCe4vbNprCAZRxz6z1nEeC\
+  guNMk38yTRvx8ihZpVOuU+Ih+dOtVe/ex5IAPYxlQsvtfhsUZqc7IyCcy72WHnRHl\
+  Ufn3pJm0S5270+Yls3Iv6h3oBAP19i906UjiUTNH3g0xMW+V4uLxgyckt4wD4Mlyv\
+  jnaQ7Z3sR6EsXMocAbXHIAJhwKdtU/fLgdwL5vtx"
+      }
+      "display": {
+        "name": "My Client Display Name",
+        "uri": "https://client.foo/"
+      },
+    },
+    "subject": {
+        "formats": ["iss_sub", "opaque"]
+    }
+}
+~~~
+
+The verifier compares the TLS client certificate presented during 
+mutual TLS negotiation to the expected key of the signer. Since the
+TLS connection covers the entire message, there are no additional
+requirements to check.
+
+Note that in many instances, the verifier will not do a full certificate
+chain validation of the presented TLS client certificate, as the
+means of trust for this certificate could be in something other than
+a PKI system, such as a static registration or trust-on-first-use.
+
+\[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
 
 ### Detached JWS {#detached-jws}
 
@@ -3837,249 +4099,6 @@ expected key of the signer. All required fields MUST be present
 and their values MUST be valid. If the HTTP message request contains
 a body, the verifier MUST decode the payload of the JWS object and
 treat this as the HTTP message body.
-
-### Mutual TLS {#mtls}
-
-This method is indicated by `mtls` in the
-`proof` field. The signer presents its TLS client
-certificate during TLS negotiation with the verifier.
-
-In this example, the certificate is communicated to the application
-through the `Client-Cert` header from a TLS reverse proxy, leading
-to the following full HTTP request message:
-
-~~~ http-message
-POST /gnap HTTP/1.1
-Host: server.example.com
-Content-Type: application/jose
-Content-Length: 1567
-Client-Cert: \
-  MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMDYxNDAyBgNVBAMM \
-  K05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV6QzY2bVEwHhcN \
-  MjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQDDCtOSVlNeUJq \
-  c0RqeUJDOVA1MzdENklUemtwRDhOdFJqaTl5YXBFekM2Nm1RMIIBIjANBgkqhkiG \
-  9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhYOJ+XOKISdMMShn/G4W9m20mT0VWtQBsmBB \
-  kI2cmRt4Ai8BfYdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8I \
-  kZ8NMwSrcUIBZGYXjHpwjzvfGvXH/5KJlnR3/uRUp4Z4Ujk2bCaKegDn11V2vxE4 \
-  1hqaPUnhRZxe0jRETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo+ \
-  uv4BC0bunS0K3bA/3UgVp7zBlQFoFnLTO2uWp/muLEWGl67gBq9MO3brKXfGhi3k \
-  OzywzwPTuq+cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQIDAQABMA0GCSqG \
-  SIb3DQEBCwUAA4IBAQBnYFK0eYHy+hVf2D58usj39lhL5znb/q9G35GBd/XsWfCE \
-  wHuLOSZSUmG71bZtrOcx0ptle9bp2kKl4HlSTTfbtpuG5onSa3swRNhtKtUy5NH9 \
-  W/FLViKWfoPS3kwoEpC1XqKY6l7evoTCtS+kTQRSrCe4vbNprCAZRxz6z1nEeCgu \
-  NMk38yTRvx8ihZpVOuU+Ih+dOtVe/ex5IAPYxlQsvtfhsUZqc7IyCcy72WHnRHlU \
-  fn3pJm0S5270+Yls3Iv6h3oBAP19i906UjiUTNH3g0xMW+V4uLxgyckt4wD4Mlyv \
-  jnaQ7Z3sR6EsXMocAbXHIAJhwKdtU/fLgdwL5vtx
-
-
-{
-    "access_token": {
-        "access": [
-            "dolphin-metadata"
-        ]
-    },
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.foo/callback",
-            "nonce": "VJLO6A4CAYLBXHTR0KRO"
-        }
-    },
-    "client": {
-      "proof": "jws",
-      "key": {
-        "cert": "MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMD\
-  YxNDAyBgNVBAMMK05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV\
-  6QzY2bVEwHhcNMjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQD\
-  DCtOSVlNeUJqc0RqeUJDOVA1MzdENklUemtwRDhOdFJqaTl5YXBFekM2Nm1RMIIBI\
-  jANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhYOJ+XOKISdMMShn/G4W9m20mT\
-  0VWtQBsmBBkI2cmRt4Ai8BfYdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8\
-  KowlyVy8IkZ8NMwSrcUIBZGYXjHpwjzvfGvXH/5KJlnR3/uRUp4Z4Ujk2bCaKegDn\
-  11V2vxE41hqaPUnhRZxe0jRETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDad\
-  z8BkPo+uv4BC0bunS0K3bA/3UgVp7zBlQFoFnLTO2uWp/muLEWGl67gBq9MO3brKX\
-  fGhi3kOzywzwPTuq+cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQIDAQABMA0\
-  GCSqGSIb3DQEBCwUAA4IBAQBnYFK0eYHy+hVf2D58usj39lhL5znb/q9G35GBd/Xs\
-  WfCEwHuLOSZSUmG71bZtrOcx0ptle9bp2kKl4HlSTTfbtpuG5onSa3swRNhtKtUy5\
-  NH9W/FLViKWfoPS3kwoEpC1XqKY6l7evoTCtS+kTQRSrCe4vbNprCAZRxz6z1nEeC\
-  guNMk38yTRvx8ihZpVOuU+Ih+dOtVe/ex5IAPYxlQsvtfhsUZqc7IyCcy72WHnRHl\
-  Ufn3pJm0S5270+Yls3Iv6h3oBAP19i906UjiUTNH3g0xMW+V4uLxgyckt4wD4Mlyv\
-  jnaQ7Z3sR6EsXMocAbXHIAJhwKdtU/fLgdwL5vtx"
-      }
-      "display": {
-        "name": "My Client Display Name",
-        "uri": "https://client.foo/"
-      },
-    },
-    "subject": {
-        "formats": ["iss_sub", "opaque"]
-    }
-}
-~~~
-
-The verifier compares the TLS client certificate presented during 
-mutual TLS negotiation to the expected key of the signer. Since the
-TLS connection covers the entire message, there are no additional
-requirements to check.
-
-Note that in many instances, the verifier will not do a full certificate
-chain validation of the presented TLS client certificate, as the
-means of trust for this certificate could be in something other than
-a PKI system, such as a static registration or trust-on-first-use.
-
-\[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
-
-### HTTP Message Signing {#httpsig-binding}
-
-This method is indicated by `httpsig` in
-the `proof` field. The sender creates an HTTP
-Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}. 
-
-The covered content of the signature MUST include the following:
-
-@request-target:
-: the target of the HTTP request 
-
-digest:
-: The Digest header as defined in {{RFC3230}}. When the request message has a body, 
-the signer MUST calculate this header value and the verifier 
-MUST validate this header.
-
-When the request is bound to an access token, the covered content
-MUST also include:
-
-authorization:
-: The Authorization header used to present the access token as discussed in
-{{use-access-token}}.
-
-Other covered content MAY also be included.
-
-If the signer's key presented is a JWK, the `keyid` parameter of the signature MUST be set
-to the `kid` value of the JWK, the signing algorithm used MUST be the JWS
-algorithm denoted by the key's `alg` field, and the explicit `alg` signature 
-parameter MUST NOT be included.
-
-In this example, the message body is the following JSON object:
-
-~~~
-{
-    "access_token": {
-        "access": [
-            "dolphin-metadata"
-        ]
-    },
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.foo/callback",
-            "nonce": "VJLO6A4CAYLBXHTR0KRO"
-        }
-    },
-    "client": {
-      "proof": "httpsig",
-      "key": {
-        "jwk": {
-            "kid": "gnap-rsa",
-            "kty": "RSA",
-            "e": "AQAB",
-            "alg": "RS256",
-            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
-  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
-  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
-  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
-  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
-  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
-        }
-      }
-      "display": {
-        "name": "My Client Display Name",
-        "uri": "https://client.foo/"
-      },
-    }
-}
-~~~
-
-This body is hashed for the Digest header using SHA-256 into the following encoded value:
-
-~~~
-SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
-~~~
-
-The HTTP message signature input string is calculated to be the following:
-
-~~~
-"@request-target": post /gnap
-"host": server.example.com
-"content-type": application/json
-"digest": SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
-"content-length": 986
-"@signature-params": ("@request-target" "host" "content-type" \
-  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
-~~~
-
-This leads to the following full HTTP message request:
-
-~~~ http-message
-POST /gnap HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-Content-Length: 986
-Digest: SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
-Signature-Input: sig1=("@request-target" "host" "content-type" \
-  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
-Signature: \
-  sig1=:axj8FLOvEWBcwh+Xk6VTTKXxqo4XNygleTDJ8h3ZJfi1sSmWrRtyo9RG/dc\
-  miZmdszRjWbg+/ixVZpA4BL3AOwEOxxtmHAXNB8uJ0I3tfbs6Suyk4sEo8zPr+MJq\
-  MjxdJEUgAQAy2AH+wg5a7CKq4IdLTulFK9njUIeG7MygHumeiumM3DbDQAHgF46dV\
-  q5UC6KJnqhGM1rFC128jd2D0sgWKCUgKGCHtfR159zfKWcEO9krsLoOnCdTzm1UyD\
-  DMjkIjqeN/1j8PdMJaRAwV4On079O0DVu6bl1jVtkzo/e/ZmwPr/X436V4xiw/hZt\
-  w4sfNsSbmsT0+UAQ20X/xaw==:
-
-
-{
-    "access_token": {
-        "access": [
-            "dolphin-metadata"
-        ]
-    },
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.foo/callback",
-            "nonce": "VJLO6A4CAYLBXHTR0KRO"
-        }
-    },
-    "client": {
-      "proof": "httpsig",
-      "key": {
-        "jwk": {
-            "kid": "gnap-rsa",
-            "kty": "RSA",
-            "e": "AQAB",
-            "alg": "RS256",
-            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
-  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
-  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
-  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
-  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
-  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
-        }
-      }
-      "display": {
-        "name": "My Client Display Name",
-        "uri": "https://client.foo/"
-      },
-    }
-}
-~~~
-
-If the HTTP Message includes a message body, the verifier MUST
-calculate and verify the value of the `Digest` header. The verifier
-MUST ensure that the signature includes all required covered
-content. The verifier MUST validate the signature against the
-expected key of the signer.
 
 # Resource Access Rights {#resource-access-rights}
 
@@ -4426,7 +4445,9 @@ has been configured with out of band.
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "access_token": {
@@ -4507,7 +4528,10 @@ sure that it has the permission to do so.
 
 # Document History {#history}
 
-- Since -05
+- Since -06
+    - 
+
+- -06
     - Removed "capabilities" and "existing_grant" protocol fields.
     - Removed separate "instance_id" field.
     - Split "interaction_methods_supported" into "interaction_start_modes_supported" and "interaction_finish_methods_supported". 
@@ -4516,6 +4540,9 @@ sure that it has the permission to do so.
     - Moved client-facing RS response back from GNAP-RS document.
     - Removed oauthpop key binding.
     - Removed dpop key binding.
+    - Added example DID identifier.
+    - Changed token response booleans to flag structure to match request.
+    - Updated signature examples to use HTTP Message Signatures.
     
 - -05
     - Changed "interaction_methods" to "interaction_methods_supported".
@@ -4645,7 +4672,9 @@ identifies itself using its public key.
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "access_token": {
@@ -4669,7 +4698,7 @@ Detached-JWS: ejy0...
     },
     "client": {
       "key": {
-        "proof": "jwsd",
+        "proof": "httpsig",
         "jwk": {
             "kty": "RSA",
             "e": "AQAB",
@@ -4762,7 +4791,9 @@ POST /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
@@ -4826,7 +4857,9 @@ The client instance initiates the request to the AS.
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "access_token": {
@@ -4895,7 +4928,9 @@ same key and method that it did in the first request.
 POST /continue/VGJKPTKC50 HTTP/1.1
 Host: server.example.com
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 ~~~
 
 
@@ -4930,7 +4965,9 @@ continuation URL after a 60 second timeout using this new information.
 POST /continue/ATWHO4Q1WV HTTP/1.1
 Host: server.example.com
 Authorization: GNAP G7YQT4KQQ5TZY9SLSS5E
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 ~~~
 
 
@@ -5020,7 +5057,9 @@ resources. The client instance also identifies a particular user.
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "access_token": {
@@ -5098,7 +5137,8 @@ the continuation URL.
 POST /continue HTTP/1.1
 Host: server.example.com
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
 ~~~
 
 
@@ -5132,7 +5172,8 @@ continuation URL after a 60 second timeout using the new handle.
 POST /continue HTTP/1.1
 Host: server.example.com
 Authorization: GNAP BI9QNW6V9W3XFJK4R02D
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
 ~~~
 
 
@@ -5194,7 +5235,9 @@ places the OAuth 2.0 values in the appropriate places.
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
-Detached-JWS: ejy0...
+Signature-Input: sig1=...
+Signature: sig1=...
+Digest: sha256=...
 
 {
     "access_token": {
