@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-latest
+docname: draft-ietf-gnap-core-protocol-06
 category: std
 
 ipr: trust200902
@@ -4528,7 +4528,7 @@ sure that it has the permission to do so.
 
 # Document History {#history}
 
-- Since -05
+- -06
     - Removed "capabilities" and "existing_grant" protocol fields.
     - Removed separate "instance_id" field.
     - Split "interaction_methods_supported" into "interaction_start_modes_supported" and "interaction_finish_methods_supported". 
