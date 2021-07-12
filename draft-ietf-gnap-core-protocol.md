@@ -4516,6 +4516,8 @@ sure that it has the permission to do so.
     - Moved client-facing RS response back from GNAP-RS document.
     - Removed oauthpop key binding.
     - Removed dpop key binding.
+    - Added example DID identifier.
+    - Changed token response booleans to flag structure to match request.
     
 - -05
     - Changed "interaction_methods" to "interaction_methods_supported".
