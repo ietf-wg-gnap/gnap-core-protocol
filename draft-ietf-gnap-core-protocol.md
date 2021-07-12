@@ -1813,8 +1813,8 @@ an opaque identifier.
 }
 ~~~
 
-In this example, the AS is returning only a set of [subject identifiers](#response-subject),
-simultaneously as an opaque identifier, an email address and a decentralized identifier (DID).
+In this example, the AS is returning set of [subject identifiers](#response-subject),
+simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID).
 
 ~~~
 {
