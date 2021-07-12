@@ -59,7 +59,6 @@ normative:
     RFC8705:
     I-D.ietf-httpbis-message-signatures:
     I-D.ietf-oauth-signed-http-request:
-    I-D.ietf-oauth-dpop:
     I-D.ietf-secevent-subject-identifiers:
     I-D.ietf-oauth-rar:
     OIDC:
@@ -875,13 +874,6 @@ interact (object)
 : Describes the modes that the client instance has for allowing the RO to interact with the
     AS and modes for the client instance to receive updates when interaction is complete. {{request-interact}}
 
-capabilities (array of strings)
-: Identifies named extension capabilities that the client instance can use, signaling to the AS
-    which extensions it can use. {{request-capabilities}}
-
-existing_grant (string)
-: Identifies a previously-existing grant that the client instance is extending with this request. {{request-existing}}
-
 Additional members of this request object can be defined by extensions to this protocol
 as described in {{request-extending}}
 
@@ -934,7 +926,6 @@ A non-normative example of a grant request is below:
             "nonce": "LKLTI25DK82FX4T4QFZC"
         }
     },
-    "capabilities": ["ext1", "ext2"],
     "subject": {
         "formats": ["iss_sub", "opaque"],
         "assertions": ["id_token"]
@@ -1235,24 +1226,11 @@ within the `client` request, and other mechanisms.
 ### Identifying the Client Instance by Reference {#request-instance}
 
 If the client instance has an instance identifier that the AS can use to determine
-appropriate key information, the client instance can send this value in the `instance_id`
-field. The instance identifier MAY be assigned to a client instance at runtime
+appropriate key information, the client instance can send this instance 
+identifier as a direct reference value in lieu of the `client` object.
+The instance identifier MAY be assigned to a client instance at runtime
 through the {{response-dynamic-handles}} or MAY be obtained in another fashion,
 such as a static registration process at the AS.
-
-instance_id (string)
-: An identifier string that the AS can use to identify the
-    particular instance of this client software. The content and structure of
-    this identifier is opaque to the client instance.
-
-~~~
-"client": {
-    "instance_id": "client-541-ab"
-}
-~~~
-
-If there are no additional fields to send, the client instance MAY send the instance 
-identifier as a direct reference value in lieu of the object.
 
 ~~~
 "client": "client-541-ab"
@@ -1261,12 +1239,6 @@ identifier as a direct reference value in lieu of the object.
 When the AS receives a request with an instance identifier, the AS MUST
 ensure that the key used to [sign the request](#binding-keys) is 
 associated with the instance identifier.
-
-If the `instance_id` field is sent, it MUST NOT be accompanied by other fields unless such 
-fields are explicitly marked safe for inclusion alongside the instance
-identifier. 
-
-\[\[ [See issue #45](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/45) \]\]
 
 If the AS does not recognize the instance identifier, the request MUST be rejected
 with an error.
@@ -1704,34 +1676,6 @@ of the given locales are supported, the AS MAY use a default locale.
 ### Extending Interaction Modes {#request-interact-extend}
 
 Additional interaction start modes, finish modes, and hints are defined in [a registry TBD](#IANA).
-
-## Declaring Client Capabilities {#request-capabilities}
-
-If the client software supports extension capabilities, the client instance MAY present them
-to the AS in the "capabilities" field. This field is an array of
-strings representing specific extensions and capabilities, as defined
-by [a registry TBD](#IANA).
-
-~~~
-"capabilities": ["ext1", "ext2"]
-~~~
-
-## Referencing an Existing Grant Request {#request-existing}
-
-If the client instance has a reference handle from a previously granted
-request, it MAY send that reference in the "existing_grant" field. This
-field is a single string consisting of the `value` of the `access_token`
-returned in a previous request's [continuation response](#response-continue).
-
-~~~
-"existing_grant": "80UPRY5NM33OMUKMKSKU"
-~~~
-
-The AS MUST dereference the grant associated with the reference and
-process this request in the context of the referenced one. The AS 
-MUST NOT alter the existing grant associated with the reference.
-
-\[\[ [See issue #62](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/62) \]\]
 
 ## Extending The Grant Request {#request-extending}
 
@@ -2722,12 +2666,14 @@ several kinds of session fixation and injection attacks. The AS MUST
 always provide this hash, and the client instance MUST validate the hash when received.
 
 To calculate the "hash" value, the party doing the calculation
-first takes the "nonce" value sent by the client instance in the 
-[interaction section of the initial request](#request-interact-finish), the AS's nonce value
-from [the interaction finish response](#response-interact-finish), and the "interact_ref"
-sent to the client instance's callback URL.
-These three values are concatenated to each other in this order
-using a single newline character as a separator between the fields.
+creates a hash string by concatenating the following values in the following order
+using a single newline (`\\n`) character to separate them:
+
+* the "nonce" value sent by the client instance in the [interaction "finish" section of the initial request](#request-interact-finish)
+* the AS's nonce value from [the interaction finish response](#response-interact-finish)
+* the "interact_ref" returned from the AS as part of the [interaction finish method](#interaction-finish)
+* the grant endpoint URL the client instance used to make its [initial request](#request)
+
 There is no padding or whitespace before or after any of the lines,
 and no trailing newline character.
 
@@ -2735,6 +2681,7 @@ and no trailing newline character.
 VJLO6A4CAYLBXHTR0KRO
 MBDOFXG4Y5CVJCX821LH
 4IFWWIKYBC2PQ6U56NL1
+https://server.example.com/tx
 ~~~
 
 The party then hashes this string with the appropriate algorithm
@@ -3488,9 +3435,6 @@ jws
 mtls
 : Mutual TLS certificate verification
 
-dpop
-: OAuth Demonstration of Proof-of-Possession key proof header
-
 httpsig
 : HTTP Signing signature header
 
@@ -3974,164 +3918,6 @@ a PKI system, such as a static registration or trust-on-first-use.
 
 \[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
 
-### Demonstration of Proof-of-Possession (DPoP) {#dpop-binding}
-
-This method is indicated by `dpop` in the
-`proof` field. The signer creates a Demonstration of Proof-of-Possession
-signature header as described in {{I-D.ietf-oauth-dpop}}
-section 2. In addition, this specification defines the following fields
-to be added to the DPoP payload:
-
-htd (string)
-: Digest of the request body as the value of the Digest 
-    header defined in {{RFC3230}}. When a request contains a message body, such as a POST or PUT request,
-    this field is REQUIRED.
-
-
-In this example, the request body is the following JSON object:
-~~~
-{
-    "access_token": {
-        "access": [
-            "dolphin-metadata"
-        ]
-    },
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.foo/callback",
-            "nonce": "VJLO6A4CAYLBXHTR0KRO"
-        }
-    },
-    "client": {
-      "proof": "dpop",
-      "key": {
-        "jwk": {
-            "kid": "gnap-rsa",
-            "kty": "RSA",
-            "e": "AQAB",
-            "alg": "RS256",
-            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
-  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
-  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
-  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
-  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
-  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
-        }
-      }
-      "display": {
-        "name": "My Client Display Name",
-        "uri": "https://client.foo/"
-      },
-    }
-}
-~~~
-
-The JOSE header contains the following parameters, including the public key:
-
-~~~
-{
-    "alg": "RS256",
-    "typ": "dpop+jwt",
-    "jwk": {
-        "kid": "gnap-rsa",
-        "kty": "RSA",
-        "e": "AQAB",
-        "alg": "RS256",
-        "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8BfYdHs\
-  FzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZGYXjH\
-  pwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jRETdd\
-  zsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_3UgV\
-  p7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyEN7aL\
-  0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
-    }
-}
-~~~
-
-The JWS Payload contains the following JWT claims, including a hash of the body:
-
-~~~
-{
-    "htu": "https://server.example.com/gnap",
-    "htm": "POST",
-    "iat": 1618884475,
-    "jti": "HjoHrjgm2yB4x7jA5yyG",
-    "htd": "SHA-256=tnPQ2GXm8r/rTTKdbQ8pc7EjiFFPy1ExSX6OZVG3JVI="
-}
-~~~
-
-This results in the following full HTTP message request:
-
-~~~ http-message
-POST /gnap HTTP/1.1
-Host: server.example.com
-Content-Type: application/json
-Content-Length: 983
-DPoP: eyJhbGciOiJSUzI1NiIsImp3ayI6eyJhbGciOiJSUzI1NiIsImUiOiJBUUFCI\
-  iwia2lkIjoiZ25hcC1yc2EiLCJrdHkiOiJSU0EiLCJuIjoiaFlPSi1YT0tJU2RNTV\
-  Nobl9HNFc5bTIwbVQwVld0UUJzbUJCa0kyY21SdDRBaThCZllkSHNGekF0WUtPanB\
-  CUjFScEtwSm1WS3hJR055MGc2WjNhZDJYWXNoOEtvd2x5Vnk4SWtaOE5Nd1NyY1VJ\
-  QlpHWVhqSHB3anp2Zkd2WEhfNUtKbG5SM191UlVwNFo0VWprMmJDYUtlZ0RuMTFWM\
-  nZ4RTQxaHFhUFVuaFJaeGUwalJFVGRkenNFM211MVNLOGRUQ1JPandVbDE0bVVObz\
-  hpVHJUbTRuMHFEYWR6OEJrUG8tdXY0QkMwYnVuUzBLM2JBXzNVZ1ZwN3pCbFFGb0Z\
-  uTFRPMnVXcF9tdUxFV0dsNjdnQnE5TU8zYnJLWGZHaGkza096eXd6d1BUdXEtY1ZR\
-  RHlFTjdhTDBTeENiM0hjNElkcURhTWc4cUhVeU9icFBpdERRIn0sInR5cCI6ImRwb\
-  3Arand0In0.eyJodHUiOiJodHRwczovL3NlcnZlci5leGFtcGxlLmNvbS9nbmFwIi\
-  wiaHRtIjoiUE9TVCIsImlhdCI6MTYxODg4NDQ3NSwianRpIjoiSGpvSHJqZ20yeUI\
-  0eDdqQTV5eUciLCJodGQiOiJTSEEtMjU2PXRuUFEyR1htOHIvclRUS2RiUThwYzdF\
-  amlGRlB5MUV4U1g2T1pWRzNKVkk9In0.HLRh7n-3uwnSGCBGbSFitNCxgmJnpp6hs\
-  sF8o_u2Xbuzu3pyR4v8SJVP17tjqxuySf91lmC1gjJeK4pXvWOtfeWGuDjD7nr6aw\
-  pBOtiQXeBtoqiiK2ByBZO-mhccJeNkTkRfxGDtU0iJo6iarWjRgQOsPbt69FIwTP4\
-  Abovwv7yBCthQs3TMsBtb8-l4Lu30wNLwXEWcB-o8nFNpT4zgV9ETGoCOcBFwBjjt\
-  0khsCarleTBsOZ2zUuFwZMWi_bQYfd-M0pahWYro9Mdy3Fts-aUqZjS2LwHHNWvjw\
-  rTzz6icCHwnr9dm1Ls6orbM7xMzvHAOA5TZW39yFg_Xr5PNYg
-
-
-{
-    "access_token": {
-        "access": [
-            "dolphin-metadata"
-        ]
-    },
-    "interact": {
-        "start": ["redirect"],
-        "finish": {
-            "method": "redirect",
-            "uri": "https://client.foo/callback",
-            "nonce": "VJLO6A4CAYLBXHTR0KRO"
-        }
-    },
-    "client": {
-      "proof": "dpop",
-      "key": {
-        "jwk": {
-            "kid": "gnap-rsa",
-            "kty": "RSA",
-            "e": "AQAB",
-            "alg": "RS256",
-            "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
-  YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
-  YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
-  ETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo-uv4BC0bunS0K3bA_\
-  3UgVp7zBlQFoFnLTO2uWp_muLEWGl67gBq9MO3brKXfGhi3kOzywzwPTuq-cVQDyE\
-  N7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQ"
-        }
-      }
-      "display": {
-        "name": "My Client Display Name",
-        "uri": "https://client.foo/"
-      },
-    }
-}
-~~~
-
-The verifier MUST parse and validate the DPoP proof header as defined in
-{{I-D.ietf-oauth-dpop}}. If the HTTP message request includes a message body,
-the verifier MUST calculate the digest of the body and compare it to the
-`htd` value. The verifier MUST ensure the key presented in the DPoP
-proof header is the same as the expected key of the signer.
-
 ### HTTP Message Signing {#httpsig-binding}
 
 This method is indicated by `httpsig` in
@@ -4559,16 +4345,13 @@ grant_request_endpoint (string)
           port, path and query components and no fragment components. This URL MUST
           match the URL the client instance used to make the discovery request.
 
-capabilities (array of strings)
-: OPTIONAL. A list of the AS's
-          capabilities. The values of this result MAY be used by the client instance in the
-          [capabilities section](#request-capabilities) of
-          the request.
+interaction_start_modes_supported (array of strings)
+: OPTIONAL. A list of the AS's interaction start methods. The values of this list correspond to the
+          possible values for the [interaction start section](#request-interact-start) of the request.
 
-interaction_methods_supported (array of strings)
-: OPTIONAL. A list of the AS's
-          interaction methods. The values of this list correspond to the
-          possible fields in the [interaction section](#request-interact) of the request.
+interaction_finish_methods_supported (array of strings)
+: OPTIONAL. A list of the AS's interaction finish methods. The values of this list correspond to the
+          possible values for the method element of the [interaction finish section](#request-interact-finish) of the request.
 
 key_proofs_supported (array of strings)
 : OPTIONAL. A list of the AS's supported key
@@ -4652,7 +4435,9 @@ at both referenced resources.
 
 The editors would like to thank the feedback of the following individuals for their reviews,
 implementations, and contributions:
+Åke Axeland,
 Aaron Parecki,
+Adam Omar Oueidat,
 Annabelle Backman,
 Dick Hardt,
 Dmitri Zagidulin,
@@ -4712,9 +4497,14 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - Since -05
+    - Removed "capabilities" and "existing_grant" protocol fields.
+    - Removed separate "instance_id" field.
+    - Split "interaction_methods_supported" into "interaction_start_modes_supported" and "interaction_finish_methods_supported". 
+    - Added AS endpoint to hash calculation to fix mix-up attack.
     - Added "privileges" field to resource access request object.
     - Moved client-facing RS response back from GNAP-RS document.
     - Removed oauthpop key binding.
+    - Removed dpop key binding.
     
 - -05
     - Changed "interaction_methods" to "interaction_methods_supported".
