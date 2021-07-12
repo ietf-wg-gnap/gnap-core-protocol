@@ -875,13 +875,6 @@ interact (object)
 : Describes the modes that the client instance has for allowing the RO to interact with the
     AS and modes for the client instance to receive updates when interaction is complete. {{request-interact}}
 
-capabilities (array of strings)
-: Identifies named extension capabilities that the client instance can use, signaling to the AS
-    which extensions it can use. {{request-capabilities}}
-
-existing_grant (string)
-: Identifies a previously-existing grant that the client instance is extending with this request. {{request-existing}}
-
 Additional members of this request object can be defined by extensions to this protocol
 as described in {{request-extending}}
 
@@ -934,7 +927,6 @@ A non-normative example of a grant request is below:
             "nonce": "LKLTI25DK82FX4T4QFZC"
         }
     },
-    "capabilities": ["ext1", "ext2"],
     "subject": {
         "formats": ["iss_sub", "opaque"],
         "assertions": ["id_token"]
@@ -1235,24 +1227,11 @@ within the `client` request, and other mechanisms.
 ### Identifying the Client Instance by Reference {#request-instance}
 
 If the client instance has an instance identifier that the AS can use to determine
-appropriate key information, the client instance can send this value in the `instance_id`
-field. The instance identifier MAY be assigned to a client instance at runtime
+appropriate key information, the client instance can send this instance 
+identifier as a direct reference value in lieu of the `client` object.
+The instance identifier MAY be assigned to a client instance at runtime
 through the {{response-dynamic-handles}} or MAY be obtained in another fashion,
 such as a static registration process at the AS.
-
-instance_id (string)
-: An identifier string that the AS can use to identify the
-    particular instance of this client software. The content and structure of
-    this identifier is opaque to the client instance.
-
-~~~
-"client": {
-    "instance_id": "client-541-ab"
-}
-~~~
-
-If there are no additional fields to send, the client instance MAY send the instance 
-identifier as a direct reference value in lieu of the object.
 
 ~~~
 "client": "client-541-ab"
@@ -1261,12 +1240,6 @@ identifier as a direct reference value in lieu of the object.
 When the AS receives a request with an instance identifier, the AS MUST
 ensure that the key used to [sign the request](#binding-keys) is 
 associated with the instance identifier.
-
-If the `instance_id` field is sent, it MUST NOT be accompanied by other fields unless such 
-fields are explicitly marked safe for inclusion alongside the instance
-identifier. 
-
-\[\[ [See issue #45](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/45) \]\]
 
 If the AS does not recognize the instance identifier, the request MUST be rejected
 with an error.
@@ -1704,34 +1677,6 @@ of the given locales are supported, the AS MAY use a default locale.
 ### Extending Interaction Modes {#request-interact-extend}
 
 Additional interaction start modes, finish modes, and hints are defined in [a registry TBD](#IANA).
-
-## Declaring Client Capabilities {#request-capabilities}
-
-If the client software supports extension capabilities, the client instance MAY present them
-to the AS in the "capabilities" field. This field is an array of
-strings representing specific extensions and capabilities, as defined
-by [a registry TBD](#IANA).
-
-~~~
-"capabilities": ["ext1", "ext2"]
-~~~
-
-## Referencing an Existing Grant Request {#request-existing}
-
-If the client instance has a reference handle from a previously granted
-request, it MAY send that reference in the "existing_grant" field. This
-field is a single string consisting of the `value` of the `access_token`
-returned in a previous request's [continuation response](#response-continue).
-
-~~~
-"existing_grant": "80UPRY5NM33OMUKMKSKU"
-~~~
-
-The AS MUST dereference the grant associated with the reference and
-process this request in the context of the referenced one. The AS 
-MUST NOT alter the existing grant associated with the reference.
-
-\[\[ [See issue #62](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/62) \]\]
 
 ## Extending The Grant Request {#request-extending}
 
@@ -4720,12 +4665,6 @@ grant_request_endpoint (string)
           port, path and query components and no fragment components. This URL MUST
           match the URL the client instance used to make the discovery request.
 
-capabilities (array of strings)
-: OPTIONAL. A list of the AS's
-          capabilities. The values of this result MAY be used by the client instance in the
-          [capabilities section](#request-capabilities) of
-          the request.
-
 interaction_start_modes_supported (array of strings)
 : OPTIONAL. A list of the AS's interaction start methods. The values of this list correspond to the
           possible values for the [interaction start section](#request-interact-start) of the request.
@@ -4878,6 +4817,8 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - Since -05
+    - Removed "capabilities" and "existing_grant" protocol fields.
+    - Removed separate "instance_id" field.
     - Split "interaction_methods_supported" into "interaction_start_modes_supported" and "interaction_finish_methods_supported". 
     - Added AS endpoint to hash calculation to fix mix-up attack.
     - Added "privileges" field to resource access request object.
