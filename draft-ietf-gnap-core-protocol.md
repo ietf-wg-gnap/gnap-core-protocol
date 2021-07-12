@@ -1756,8 +1756,8 @@ an opaque identifier.
 }
 ~~~
 
-In this example, the AS is returning only a pair of [subject identifiers](#response-subject)
-as both an email address and an opaque identifier.
+In this example, the AS is returning set of [subject identifiers](#response-subject),
+simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID).
 
 ~~~
 {
@@ -1768,6 +1768,9 @@ as both an email address and an opaque identifier.
         }, {
            "format": "email",
            "email": "user@example.com"
+        }, {
+           "format": "did",
+           "url": "did:example:123456"
         } ]
     }
 }
