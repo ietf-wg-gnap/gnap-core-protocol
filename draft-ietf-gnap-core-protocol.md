@@ -4726,10 +4726,13 @@ capabilities (array of strings)
           [capabilities section](#request-capabilities) of
           the request.
 
-interaction_methods_supported (array of strings)
-: OPTIONAL. A list of the AS's
-          interaction methods. The values of this list correspond to the
-          possible fields in the [interaction section](#request-interact) of the request.
+interaction_start_modes_supported (array of strings)
+: OPTIONAL. A list of the AS's interaction start methods. The values of this list correspond to the
+          possible values for the [interaction start section](#request-interact-start) of the request.
+
+interaction_finish_methods_supported (array of strings)
+: OPTIONAL. A list of the AS's interaction finish methods. The values of this list correspond to the
+          possible values for the method element of the [interaction finish section](#request-interact-finish) of the request.
 
 key_proofs_supported (array of strings)
 : OPTIONAL. A list of the AS's supported key
@@ -4875,6 +4878,7 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - Since -05
+    - Split "interaction_methods_supported" into "interaction_start_modes_supported" and "interaction_finish_methods_supported". 
     - Added AS endpoint to hash calculation to fix mix-up attack.
     - Added "privileges" field to resource access request object.
     - Moved client-facing RS response back from GNAP-RS document.
