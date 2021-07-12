@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-06
+docname: draft-ietf-gnap-core-protocol-latest
 category: std
 
 ipr: trust200902
@@ -4527,6 +4527,9 @@ sure that it has the permission to do so.
 --- back
 
 # Document History {#history}
+
+- Since -06
+    - 
 
 - -06
     - Removed "capabilities" and "existing_grant" protocol fields.
