@@ -1,0 +1,9 @@
+name: Editorconfig
+on:
+  pull_request:
+    types: [opened, push]
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: zbeekman/EditorConfig-Action@v1.1.0
