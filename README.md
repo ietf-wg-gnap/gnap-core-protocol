@@ -13,6 +13,11 @@ A rendered version of the editors' copy (reflecting the current state of this re
 
 Discussion takes place on the [IETF GNAP mailing list (txauth)](https://www.ietf.org/mailman/listinfo/txauth).
 
+## Editing
+
+Please configure your text editor to support [EditorConfig](https://editorconfig.org/) so that the indentation and newline styles will match. Many editors have support for this built in already.
+
+
 ## Building Instructions
 
 This document is written using the `kramdown-rfc2629` variant of Markdown. To build using the included Docker image,
