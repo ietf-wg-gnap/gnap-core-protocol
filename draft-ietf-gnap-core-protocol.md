@@ -4507,12 +4507,357 @@ through the use of value registries. \]\]
 
 # Security Considerations {#Security}
 
-\[\[ TBD: There are a lot of security considerations to add. \]\]
+## TLS Protection in Transit
 
-All requests have to be over TLS or equivalent as per {{BCP195}}. Many handles act as
-shared secrets, though they can be combined with a requirement to
-provide proof of a key as well.
+All requests in GNAP have to be made over TLS or equivalent as outlined in {{BCP195}}
+to protect the contents of the request and response from manipulation and interception by an attacker. 
+This includes all requests from a client instance to the AS, all requests from the client instance to
+an RS, and any requests back to a client instance such as the push-based interaction finish method.
+Additionally, all requests between a browser and other components, such as during redirect-based 
+interaction, need to be made over TLS or use equivalent protection. 
 
+Even though requests from the client instance to the AS are signed, the signature method alone does not protect
+the request from interception by an attacker. TLS protects the response as well as the request, 
+preventing an attacker from intercepting requested information as it is returned. This is particularly
+important in the core protocol for security artifacts such as nonces and for
+personal information such as subject data. 
+
+The use of key-bound access tokens does not negate the requirement for protecting calls to the RS with TLS. 
+While the keys and signatures associated a bound access token will prevent an attacker from using a stolen 
+token, without TLS an attacker would be able to watch the data being sent to the RS and returned from the RS
+during legitimate use of the client instance under attack. Additionally, without TLS an attacker would be
+able to profile the calls made between the client instance and RS, possibly gaining information about the functioning
+of the API between the client software and RS software that would be otherwise unknown to the attacker.
+
+TLS or equivalent protection also needs to be used between the browser and any other components. This applies during initial
+redirects to an AS during interaction, during any prolonged interaction with the resource owner, and during
+any redirect back to the client instance. Without TLS protection on these portions of the process, an
+attacker could wait for a valid request to start and then take over the resource owner's interaction session.
+
+## Protection of Client Instance Key Material
+
+Client instances are identified by their unique keys, and anyone with access to a client instance's key material 
+will be able to impersonate that client instance to all parties. This is true for both calls to the AS
+as well as calls to an RS using a key-bound access token.
+
+Different types of client software have different methods available for creating, managing, and registering
+keys. GNAP explicitly allows for ephemeral clients, such as SPAs, and single-user clients, such as
+mobile applications, to create and present their own keys during the initial grant request. The client
+software can securely generate a keypair and present the public key, along with proof of holding that
+public key, to the AS as part of the initial request. To facilitate trust in these ephemeral keys,
+GNAP further allows for an extensible set of client information to be passed with the request. This
+information can include device posture and third-party attestations of the client software's provenance
+and authenticity. 
+
+From GNAP's perspective, each distinct key is a different client instance. However, multiple client
+instances can be grouped together by an AS policy and treated similarly to each other. For instance,
+if an AS knows of several different keys for different servers within a cluster, the AS can
+decide that authorization of one of these servers applies to all other servers within the cluster. An AS
+that chooses to do this needs to be careful with how it groups different client keys together in its policy,
+since the breach of one instance would have direct effects on the others in the cluster.
+
+## Protection of Authorization Server
+
+The AS performs critical functions in GNAP, including authenticating client software, managing interactions
+with end-users to gather consent and provide notice, and issuing access tokens for client instances
+to present to resource servers. As such, protecting the AS is central to any GNAP deployment. 
+
+If an attacker is able to gain control over an AS, they would be able to create fraudulent tokens and
+manipulate registration information to allow for malicious clients. These tokens and clients would
+be trusted by other components in the ecosystem under the protection of the AS.
+
+If the AS is using signed access tokens, an attacker in control of the AS's signing keys would
+be able to manufacture fraudulent tokens for use at RS's under the protection of the AS.
+
+If an attacker is able to impersonate an AS, they would be able to trick legitimate client instances
+into making signed requests for information which could potentially be proxied to a real AS. To combat
+this, all communications to the AS need to be made over TLS or its equivalent, and the software
+making the connection has to validate the certificate chain of the host it is connecting to.
+
+Consequently, protecting, monitoring, and auditing the AS is paramount to preserving the security
+of a GNAP-protected ecosystem.
+
+## Symmetric and Asymmetric Client Instance Keys
+
+The cryptographic methods used by GNAP for key-proofing can support both asymmetric and symmetric
+cryptography, and can be extended to use a wide variety of mechanisms. While symmetric
+cryptographic systems have some benefits in speed and simplicity, they have a distinct drawback
+that both parties need access to the same key in order to do both signing and verification of
+the message. This means that when the client instance calls the AS to request a token, the
+AS needs to know the exact value of the client instance's key (or be able to derive it) in
+order to validate the key proof signature. With asymmetric keys, the client needs only to
+send its public key to the AS to allow for verification that the client holds the associated
+private key, regardless of whether that key was pre-registered or not with the AS.
+
+When used to bind to an access token, a key value must be known by the RS in order
+to validate the proof signature on the request. Common methods for communicating these proofing
+keys include putting information in a structured access token and allowing the RS to look 
+up the associated key material against the value of the access token. With symmetric cryptography,
+both of these methods would expose the signing key to the RS, and in the case of an structured
+access token, potentially to any party that can see the access token itself unless the token's
+payload has been encrypted. Any of these parties would then be able to make calls using the
+access token by creating a valid signature. With asymmetric cryptography, the RS only needs
+to know the public key associated with the token in order to validate, and therefore cannot
+create any new calls.
+
+While both signing approaches are allowed, GNAP treats these two classes of keys somewhat
+differently. Only the public portion of asymmetric keys are allowed to be sent by value
+in requests to the AS when establishing a connection. Since sending a symmetric key (or
+the private portion of an asymmetric key) would expose the signing material to any parties
+on the request path, including any attackers, sending these kinds of keys is prohibited.
+Symmetric keys can still be used by client instances, but only a reference to the key and
+not its value can be sent. This allows the AS to use pre-registered symmetric keys as well
+as key derivation schemes to take advantage of symmetric cryptography but without requiring
+key distribution at runtime, which is problematic.
+
+## Generation of Access Tokens
+
+The content of access tokens need to be such that only the generating AS would be able to
+create them, and the contents cannot be manipulated by an attacker to gain different or additional
+access rights.
+
+One method for accomplishing this is to use a cryptographically random value for the access token,
+generated by the AS using a secure randomization function with sufficiently high entropy. The odds of
+an attacker guessing the output of the randomization function it collide with a valid access token
+are exceedingly small, and even then the attacker would not have any control over what the
+access token would represent as that information would be held close by the AS.
+
+Another method for accomplishing this is to use a structured token that is cryptographically signed.
+In this case, the payload of the access token declares to the RS what the token is good for, but
+the signature applied by the AS during token generation covers this payload. Only the AS can create
+such a signature and therefore only the AS can create such a signed token. The odds of an attacker
+being able to guess a signature value with a useful payload are exceedingly small.
+
+## Key-Bound and Bearer Access Tokens
+
+Bearer access tokens can be used by any party that has access to the token itself, without any additional
+information. As a natural consequence, any RS that a bearer token is presented to has the technical
+capability of presenting that bearer token to another RS, as long as the token is valid. It also
+means that any party that is able capture of the token value in storage or in transit is able to
+use the access token.
+
+Key-bound access tokens, as the name suggests, are bound to a specific key and must be
+presented along with proof of that key during use. The key itself is not presented at the same
+time as the token, so even if a token value is captured, it cannot be used to make a new request. This
+is particularly true for an RS, which will see the token value but will not see the keys used
+to make the request.
+
+## Key-Bound Token Replay
+
+Some key-bound tokens are susceptible to replay attacks, depending on the details of the signing method
+used. If a signature method covers only portions of a given request, that same signature proof can
+be used by an attacker to make a similar call, potentially even varying elements that are outside of
+the protection of the signature. Key proofing mechanisms used with access tokens therefore need
+to use replay protection mechanisms covered under the signature such as a per-message nonce, a
+reasonably short time validity window, or other uniqueness constraints. The details of using these
+will vary depending on the key proofing mechanism in use, but for example, HTTP Message Signatures
+has both a `created` and `nonce` signature parameter as well as the ability to cover significant
+portions of the HTTP message.
+
+## Exposure of End-user Credentials to Client Instance
+
+As a delegation protocol, one of the main goals of GNAP is to prevent the client software from being
+exposed to any credentials or information about the end-user and resource owner as a requirement
+of the delegation process. By using the variety of interaction mechanisms, the resource owner can
+interact with the AS without ever authenticating to the client software, and without the client
+software having to impersonate the resource owner through replay of their credentials.
+
+Consequently, no interaction methods defined in the GNAP core require the end-user to enter their 
+credentials, but it is technologically possible for an extension to be defined to carry such values.
+Such an extension would be dangerous as it would allow rogue client software to directly collect, store,
+and replay the end-user's credentials outside of any legitimate use within a GNAP request.
+
+The concerns of such an extension could be mitigated through use of a challenge and response
+unlocked by the end user's credentials. For example, the AS presents a challenge as part of
+an interaction start method, and the client instance signs that challenge using a key derived
+from a password presented by the end user. It would be possible for the client software to
+collect this password in a secure software enclave without exposing the password to the rest
+of the client software or putting it across the wire to the AS. The AS can validate this challenge
+response against a known password for the identified end user. While an approach such as this does
+not remove all of the concerns surrounding such a password-based scheme, it is at least
+possible to implement in a more secure fashion than simply collecting and replaying
+the password. Even so, such schemes should only ever be used by trusted clients due to
+the ease of abusing them.
+
+## Support for Multiple Authorization Servers
+
+If a client instance is able to work with multiple AS's simultaneously, it is more possible
+for an attacker to add a compromised AS to the client instance's configuration and cause the
+client software to start a request at the compromised AS. This AS could then proxy the client's
+request to a valid AS in order to attempt to get the resource owner to approve access for
+the legitimate client instance. 
+
+A client instance needs to always be aware of which AS it is talking to, and ensure that the
+callback for one AS does not get conflated with the callback to different AS. The interaction finish
+hash calculate allows a client instance to protect against this kind of substitution, but only if
+the client instance validates the hash. If the client instance does not use an interaction finish method
+or does not check the interaction finish hash value, the compromised AS can be granted a valid
+access token on behalf of the resource owner.
+
+## Processing of Client-Presented User Information
+
+GNAP allows the client instance to present assertions and identifiers of the current user to the AS as
+part of the initial request. This information should only ever be taken by the AS as a hint, since the
+AS has no way to tell if the represented person is present at the client software, without using
+an interaction mechanism. This information does not guarantee the given user is there, but it does
+constitute a statement by the client software that the AS can take into account.
+
+For example, if a specific user is claimed to be present prior to interaction, but a different user
+is shown to be present during interaction, the AS can either determine this to be an error or signal
+to the client instance through returned subject information that the current user has changed from
+what the client instance thought. This user information can also be used by the AS to streamline the
+interaction process when the user is present. For example, instead of having the user type in their
+account identifier during interaction at a redirected URL, the AS can immediately challenge the user
+for their account credentials. Alternatively, if an existing session is detected, the AS can
+determine that it matches the identifier provided by the client and subsequently skip an explicit
+authentication event by the resource owner.
+
+In cases where the AS trusts the client software more completely, due to policy
+or by previous approval of a given client instance, the AS can take this user information as a
+statement that the user is present and could issue access tokens and release subject information
+without interaction. The AS should only take such action in very limited circumstances, as a
+client instance could assert whatever it likes for the user's identifiers in its request.
+
+When a client instance presents an assertion to the AS, the AS needs to evaluate that assertion. Since
+the AS is unlikely to be the intended audience of an assertion held by the client software, the AS will
+need to evaluate the assertion in a different context. Even in this case, the AS can still evaluate
+that the assertion was generated by a trusted party, was appropriately signed, and is within
+any time validity windows stated by the assertion. If the client instance's audience identifier
+is known to the AS and can be associated with the client instance's presented key, the AS can also
+evaluate that the appropriate client instance is presenting the claimed assertion. All of this
+will prevent an attacker from presenting a manufactured assertion, or one captured from an
+untrusted system. However, without validating the audience of the assertion, a captured assertion
+could be presented by the client instance to impersonate a given end user. In such cases, the assertion
+offers little more protection than a simple identifier would.
+
+A special case exists where the AS is the generator of the assertion being presented by the
+client instance. In these cases, the AS can validate that it did issue the assertion and
+it is associated with the client instance presenting the assertion.
+
+## Client Instance Pre-registration
+
+Each client instance is identified by its own unique key, and for some kinds of client software such as a
+web server or backend system, this identification be facilitated by registering a single key for a piece
+of client software ahead of time. This registration can be associated with a set of display attributes to
+be used during the authorization process, identifying the client software to the user. In these cases,
+it can be assumed that only one instance of client software will exist, likely to serve many different
+users.
+
+However, it does not make sense to pre-register many types of clients. Single-page applications (SPAs) and
+mobile/desktop applications in particular present problems with pre-registration. For SPAs, the instances
+are ephemeral in nature and long-term registration of a single instance leads to significant storage and
+management overhead at the AS. For mobile applications, each installation of the client software is
+a separate instance, and sharing a key among all instances would be detrimental to security.
+
+An AS can treat these classes of client software differently from each other, perhaps by allowing access
+to certain high-value APIs only to pre-registered known clients, or by requiring an active end-user
+delegation of authority to any client software not pre-registered.
+
+An AS can also provide warnings and caveats to resource owners during the authorization process, allowing
+the user to make an informed decision regarding the software they are authorizing. For example, if the AS
+has done vetting of the client software and this specific instance, it can present a different authorization
+screen compared to a client instance that is presenting all of its information at runtime.
+
+## Client Instance Impersonation
+
+If client instances are allowed to set their own user-facing display information, such as a display name and website
+URL, a malicious client instance could impersonate legitimate client software for the purposes of tricking
+users into authorizing the malicious client.
+
+Requiring clients to pre-register does not fully mitigate this problem since many pre-registration
+systems have self-service portals for management of client registration, allowing authenticated developers
+to enter self-asserted information into the management portal.
+
+An AS can mitigate this by actively filtering all self-asserted values presented by client software,
+both dynamically as part of GNAP and through a registration portal, to limit the kinds of impersonation that
+would be done.
+
+An AS can also warn the resource owner about the provenance of the information it is displaying, allowing
+the resource owner to make a more informed delegation decision. For example, an AS can visually differentiate
+between a client instance that can be traced back to a specific developer's registration and an 
+instance that has self-asserted its own key and display information.
+
+## Interception of Information in the Browser
+
+Most information passed through the web-browser is susceptible to interception and possible manipulation by
+elements within the browser such as scripts loaded within pages. Information in the URL is exposed 
+through browser and server logs, and can also leak to other parties through HTTP `Referrer` headers.
+
+GNAP's design limits the information passed directly through the browser, allowing for opaque URLs in most circumstances. 
+For the redirect-based interaction finish mechanism, named query parameters are used to carry
+unguessable opaque values. For these, GNAP requires creation and validation of a cryptographic 
+hash to protect the query parameters added to the URL and associate them with an ongoing grant
+process. The client instance has to properly validate this hash to prevent an attacker from
+injecting an interaction reference intended for a different AS or client instance.
+
+Several interaction start mechanisms use URLs created by the AS and passed to the client instance.
+While these URLs are opaque to the client instance, it's possible for the AS to include parameters,
+paths, and other pieces of information that could leak security data or be manipulated by a party
+in the middle of the transaction.
+
+## Callback URL Manipulation
+
+The callback URL used in interaction finish mechanisms is defined by the client instance. This URL is
+opaque to the AS, but can contain information relevant to the client instance's operations. In
+particular, the client instance can include state information to allow the callback request to
+be associated with an ongoing grant request.
+
+Since this URL is exposed to the end-user's browser, it is susceptible to both logging and manipulation
+in transit before the request is made to the client software. As such, a client instance should
+never put security-critical or private information into the callback URL in a cleartext form. For example,
+if the client software includes a post-redirect target URL in its callback URL to the AS, this target URL
+could be manipulated by an attacker, creating an open redirector at the client. Instead,
+a client instance can use an unguessable identifier into the URL that can then be used by the client
+software to look up the details of the pending request. Since this approach requires some form of statefulness
+by the client software during the redirection process, clients that are not capable of holding state
+through a redirect should not use redirect-based interaction mechanisms.
+
+## MTLS Deployment Patterns
+
+GNAP does not specify how a client instance's keys could be made known to the AS ahead of time. 
+Public Key Infrastructure (PKI) can be used to manage the keys used by client instances when calling
+the AS, allowing the AS to trust a root key from a trusted authority. This method is particularly 
+relevant to the MTLS signature method, where the client instance
+presents its certificate to the AS as part of the TLS connection. An AS using PKI to validate the
+MTLS connection would need to ensure that the presented certificate was issued by a trusted certificate
+authority before allowing the connection to continue. PKI-based certificates would allow a key to be revoked
+and rotated through management at the certificate authority without requiring additional registration
+or management at the AS. PKI has historically been difficult to deploy, especially at scale, but it
+remains an appropriate solution for systems where the required overhead is not an impediment.
+
+MTLS need not use a PKI backing, as self-signed certificates and certificates from untrusted
+authorities can still be presented as part of a TLS connection. In this case, the AS or RS would
+validate the connection but accept whatever certificate was presented by the client software. This
+specific certificate would then be bound to all future connections from that client software by
+being bound to the resulting access tokens.
+
+## Interception of Responses from the AS
+
+Responses from the AS contain information vital to both the security and privacy operations of
+GNAP. This information includes nonces used in cryptographic calculations, subject identifiers,
+assertions, public keys, and information about what client software is requesting and was granted.
+
+In addition, if bearer tokens are used or keys are issued alongside a bound access token, the
+response from the AS contains all information necessary for use of the contained access token. Any
+party that is capable of viewing such a response, such as an intermediary proxy, would be able
+to exfiltrate and use this token. If the access token is instead bound to the client instance's
+presented key, intermediaries no longer have sufficient information to use the token. They can
+still, however, gain information about the end user as well as the actions of the client software.
+
+## Key Distribution
+
+The keys for client instances could be distributed as part of the deployment process of instances
+of the client software. For example, an application installation framework could generate
+a keypair for each copy of client software, then both install it into the client software
+upon installation and registering that instance with the AS. 
+
+Additionally, it's possible for the AS to generate keys to be used with access tokens that
+are separate from the keys used by the client instance to request tokens. In this method,
+the AS would generate the asymmetric keypair or symmetric key and return the entire key,
+including all private signing information, to the client instance alongside the access
+token itself. This approach would make interception of the return from the token endpoint
+equivalent to that of a bearer token, since all information required to use the access token
+would be present in the request.
 
 # Privacy Considerations {#Privacy}
 
@@ -4529,7 +4874,7 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - Since -06
-    -
+    - Added security considerations.
 
 - -06
     - Removed "capabilities" and "existing_grant" protocol fields.
