@@ -4859,6 +4859,35 @@ token itself. This approach would make interception of the return from the token
 equivalent to that of a bearer token, since all information required to use the access token
 would be present in the request.
 
+## Interaction Finish Modes and Polling
+
+During the interaction process, the client instance usually hands control of the user experience
+over to another component, beit the system browser, another application, or some action
+the resource owner is instructed to take on another device. By using an interaction finish
+method, the client instance can be securely notified by the AS when the interaction is completed
+and the next phase of the protocol should occur. This process includes information that the
+client instance can use to validate the finish call from the AS and prevent some injection,
+session hijacking, and phishing attacks.
+
+Some types of client deployment are unable to receive an interaction finish message.
+Without an interaction finish method to notify it, the client instance will need to poll the
+grant continuation API while waiting for the resource owner to approve or deny the request.
+An attacker could take advantage of this situation by capturing the interaction start
+parameters and phishing a legitimate user into authorizing the attacker's waiting
+client instance, which would in turn have no way of associating the completed interaction
+with the start of the request. 
+
+However, it is important to note that this pattern is practically indistinguishable
+from some legitimate use cases. For example, a smart device emits a code for
+the resource owner to enter on a separate device. The smart device has to poll
+because the expected behavior is that the interaction will take place on the separate
+device, without a way to return information to the original device's context.
+
+As such, developers need to weigh the risks of forgoing an interaction finish
+method against the deployment capabilities of the client software and its
+environment. Due to the increased security, an interaction finish method should
+be employed whenever possible.
+
 # Privacy Considerations {#Privacy}
 
 \[\[ TBD: There are a lot of privacy considerations to add. \]\]
