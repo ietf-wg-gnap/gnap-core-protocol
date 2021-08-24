@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [opened, synchronize]
 jobs:
-  label:
+  editorconfig:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
