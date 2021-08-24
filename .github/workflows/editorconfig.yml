@@ -6,4 +6,5 @@ jobs:
   label:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: greut/eclint-action@v0
