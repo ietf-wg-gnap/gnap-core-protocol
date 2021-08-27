@@ -77,6 +77,20 @@ normative:
         -
           ins: C. Mortimore
 
+
+
+informative:
+    promise-theory:
+       target: 'http://markburgess.org/promises.html'
+       title: Promise theory
+       date: January 2014
+       author:
+         -
+           ins: M. Burguess
+         -
+           ins: J. Bergstra
+        
+
 --- abstract
 
 GNAP defines a mechanism for delegating authorization to a
@@ -179,7 +193,7 @@ Client
 : application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs.
 
     Example: a client can be a mobile application, a web application, etc.
-
+    
     Note: this specification differentiates between a specific instance (the client instance, identified by its unique key) and the software running the instance (the client software). For some kinds of client software, there could be many instances of that software, each instance with a different key.
 
 Resource Server (RS)
@@ -276,6 +290,29 @@ Subject
 
 Subject Information
 : statement asserted by an AS about a subject.
+
+
+
+## Trust relationships {#trust}
+
+GNAP defines its trust objective as: "the RO trusts the AS to ensure access validation and delegation of protected resources to end-users, through third party clients."
+
+This trust objective can be decomposed into trust relationships between software elements and roles, especially the pairs end-user/RO, end-user/client, client/AS, RS/RO, AS/RO, AS/RS. Trust of an agent by its pair can exist if the pair is informed that the agent has made a promise to follow the protocol in the past (e.g. pre-registration, uncompromised cryptographic components) or if the pair is able to infer by indirect means that the agent has made such a promise (e.g. a compliant client request). Each agent defines its own valuation function of promises given or received. Examples of such valuations can be the benefits from interacting with other agents (e.g. safety in client access, interoperability with identity standards), the cost of following the protocol (including its security and privacy requirements and recommendations), a ranking of promise importance (e.g. a policy decision made by the AS), the assessment of one's vulnerability or risk of not being able to defend against threats, etc. Those valuations may depend on the context of the request. For instance, the AS may decide to either take into account or discard hints provided by the client, the RS may refuse bearer tokens, etc. depending on the specific case in which GNAP is used. Some promises can be conditional of some previous interactions (e.g. repeated requests). 
+
+Looking back on each trust relationship:
+
+- end-user/RO: this relationship exists only when the end-user and the RO are different, in which case the end-user needs some out of band mechanism of getting the RO consent (see {{authorization}}). GNAP generally assumes that humans can be authenticated thanks to identity protocols (for instance, through an id_token assertion in {{request-subject}}). 
+
+- end-user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers promise to implement requirements and generally some recommendations or best practices, so that the end-users may confidently use their software. However, end-users might also be facing some attacker's client software, without even realizing it. 
+- client/AS: An honest AS may be facing an attacker's client (as discussed just above), or the reverse, and GNAP aims at making common attacks impractical. The core specification makes access tokens opaque to the client and defines the request/response scheme in detail, therefore avoiding extra trust hypotheses from this critical piece of software. Yet the AS may further define cryptographic attestations or optional rules to simplify the access of clients it already trusts, due to past behavior or organizational policies (see {{request-client}}). 
+
+- RS/RO: the RS promises it protects its resources from unauthorized access, and only accepts valid access tokens issued by a trusted AS. In case tokens are key bound, proper validation is expected from the RS. 
+- AS/RO: the AS is expected to follow the decisions made by the RO, either through interactive consent requests, repeated interactions or automated rules (as described in {{sequence}}). Privacy considerations aim to reduce the risk of an honest but too curious AS, or the consequences of an unexpected user data exposure. 
+- AS/RS: the AS promises to issue valid access tokens to legitimate client requests (i.e. after carrying out appropriate due diligence, as defined in the GNAP protocol). Some optional configurations are covered by {{I-D.draft-ietf-gnap-resource-servers}}. 
+
+A global assumption made by GNAP is that authorization requests are security and privacy sensitive, and appropriate measures are respectively detailed in {{Security}} and {{Privacy}}. 
+
+A formal trust model is out of scope of this specification, but might be carried out thanks to {{promise-theory}}.
 
 ## Sequences {#sequence}
 
@@ -1545,7 +1582,7 @@ method (string)
     "redirect"
     : Indicates that the client instance can receive a redirect from the end-user's device
     after interaction with the RO has concluded. {{request-interact-callback-redirect}}
-
+    
     "push"
     : Indicates that the client instance can receive an HTTP POST request from the AS
     after interaction with the RO has concluded. {{request-interact-callback-push}}
