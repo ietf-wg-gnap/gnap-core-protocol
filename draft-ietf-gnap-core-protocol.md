@@ -86,7 +86,7 @@ informative:
        date: January 2014
        author:
          -
-           ins: M. Burguess
+           ins: M. Burgess
          -
            ins: J. Bergstra
         
