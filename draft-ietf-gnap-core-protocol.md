@@ -77,6 +77,17 @@ normative:
         -
           ins: C. Mortimore
 
+informative:
+    attack-surfaces:
+        target: 'https://odr.chalmers.se/handle/20.500.12380/304105'
+        title: Security Analysis of Attack Surfaces on the Grant Negotiation and Authorization Protocol
+        date: 2021
+        author:
+            - 
+                ins: Å. Axeland
+            -
+                ins: O. Oueidat
+
 --- abstract
 
 GNAP defines a mechanism for delegating authorization to a
@@ -4734,7 +4745,7 @@ possible to implement in a more secure fashion than simply collecting and replay
 the password. Even so, such schemes should only ever be used by trusted clients due to
 the ease of abusing them.
 
-## One Client with Multiple Authorization Servers
+## Mixing Up Authorization Servers
 
 If a client instance is able to work with multiple AS's simultaneously, it is more possible
 for an attacker to add a compromised AS to the client instance's configuration and cause the
@@ -4743,11 +4754,13 @@ request to a valid AS in order to attempt to get the resource owner to approve a
 the legitimate client instance. 
 
 A client instance needs to always be aware of which AS it is talking to throughout a grant process, and ensure
-that the callback for one AS does not get conflated with the callback to different AS. The interaction finish
+that any callback for one AS does not get conflated with the callback to different AS. The interaction finish
 hash calculate allows a client instance to protect against this kind of substitution, but only if
 the client instance validates the hash. If the client instance does not use an interaction finish method
 or does not check the interaction finish hash value, the compromised AS can be granted a valid
-access token on behalf of the resource owner.
+access token on behalf of the resource owner. See {{attack-surfaces}} for details
+of one such attack, which has been since addressed in this document by the definition of the interaction finish
+hash value and the 
 
 ## Processing of Client-Presented User Information
 
@@ -4979,6 +4992,46 @@ storage. Since this URL is passed to other parties and often used through a brow
 this URL should not contain any security-sensitive information that would be
 valuable to an attacker, such as any token identifier, nonce, or user information. Instead, a
 cryptographically random value is suggested.
+
+## Denial of Service (DoS) through Grant Continuation
+
+When a client instance starts off an interactive process, it will eventually need to continue the grant
+request in a subsequent message to the AS. It's possible for a naive client implementation to continuously
+send continuation requests to the AS while waiting for approval, especially if no interaction
+finish method is used. Such constant requests could overwhelm the AS's ability to respond to both
+these and other requests.
+
+To mitigate this for well-behaved client software, the continuation response contains a `wait` parameter
+that is intended to tell the client instance how long it should wait until making its next request.
+This value can be used to back off client software that is checking too quickly by returning increasing
+wait times for a single client instance.
+
+If client software ignores the `wait` value and makes its continuation calls too quickly, or if the
+client software assumes the absence of the `wait` values means it should poll immediately, the AS
+can choose to return errors to the offending client instance, including possibly canceling the
+ongoing grant request. With well-meaning client software these errors can indicate a need to change
+the client software's programmed behavior.
+
+## Exhaustion of Random Value Space
+
+Several parts of the GNAP process make use of unguessable randomized values, such as nonces,
+tokens, and randomized URLs. Since these values are intended to be unique, a sufficiently
+powerful attacker could make a large number of requests to trigger generation of randomized
+values in an attempt to exhaust the random number generation space. While this attack is 
+particularly applicable to the AS, client software could likewise be targeted by an attacker
+triggering new grant requests against an AS.
+
+To mitigate this, software can ensure that its random values are chosen from a significantly
+large pool that exhaustion of that pool is prohibitive for an attacker. Additionally, the
+random values can be time-boxed in such a way as their validity windows are reasonably short.
+Since many of the random values used within GNAP are used within limited portions of the protocol,
+it is reasonable for a particular random value to be valid for only a small amount of time.
+For example, the nonces used for interaction finish hash calculation need only to be valid while
+the client instance is waiting for the finish callback and can be functionally expired
+when the interaction has completed. Similarly, artifacts like access tokens and the interaction
+reference can be limited to have lifetimes tied to their functional utility. Finally, each
+different category of artifact (nonce, token, reference, identifier, etc.) can be
+generated from a separate random pool of values instead of a single global value space.
 
 # Privacy Considerations {#Privacy}
 
