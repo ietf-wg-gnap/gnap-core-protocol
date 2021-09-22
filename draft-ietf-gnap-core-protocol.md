@@ -4533,7 +4533,7 @@ The purpose of GNAP is to authorize clients to be able to access information on 
 
 ### Surveillance by the Authorization Server
 
-The role of the authorization server is to manage the authorization of client instances to protect access to the user's data. In this role, the authorization server is by definition aware of each authorization of a client instance by a user.
+The role of the authorization server is to manage the authorization of client instances to protect access to the user's data. In this role, the authorization server is by definition aware of each authorization of a client instance by a user. When the authorization server shares user information with the client instance, it needs to make sure that it has the permission from that user to do so.
 
 Additionally, as part of the authorization grant process, the authorization server may be aware of which resource servers the client intends to use an access token at. However, it is possible to design a system using GNAP in which this knowledge is not made available to the authorization server, such as by avoiding the use of the `locations` object in the authorization request.
 
@@ -4581,23 +4581,18 @@ In some cases a resource server may not actually need to be able to identify use
 Clients are expected to be identified by their client instance key. If a particular client instance key is used at more than one authorization server, this could open up the possibility for multiple unrelated authorization servers to correlate client instances. This is especially a problem in the common case where a client instance is used by a single individual, as it would allow the authorization servers to correlate that individual between them. If this is a concern of a client, the client should use distinct keys with each authorization server.
 
 
+## Disclosure in Shared References
+
+Throughout many parts of GNAP, the parties pass shared references between each other, sometimes in place of the values themselves. For example the `interact_ref` value used throughout the flow. These references are intended to be random strings and should not contain any private or sensitive data that would potentially leak information between parties.
 
 
-
----
-
-Handles are passed between parties and therefore should not contain
-any private data.
-
-When user information is passed to the client instance, the AS needs to make
-sure that it has the permission to do so.
 
 --- back
 
 # Document History {#history}
 
 - Since -06
-    -
+    - Added privacy considerations section
 
 - -06
     - Removed "capabilities" and "existing_grant" protocol fields.
