@@ -189,8 +189,8 @@ Legend
 
 + + + indicates interaction between a human and computer
 ----- indicates interaction between two pieces of software
-~ ~ ~ indicates a potential equivalence or out-of-band communication between roles
-
+~ ~ ~ indicates a potential equivalence or out-of-band
+          communication between roles
 ~~~
 
 Authorization Server (AS)
@@ -1313,14 +1313,10 @@ logo_uri (string)
 
 
 ~~~
-
-
-    "display": {
-        "name": "My Client Display Name",
-        "uri": "https://example.net/client"
-    }
-
-
+"display": {
+    "name": "My Client Display Name",
+    "uri": "https://example.net/client"
+}
 ~~~
 
 \[\[ [See issue #48](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/48) \]\]
@@ -1768,6 +1764,8 @@ In this example, the AS is returning an [interaction URL](#response-interact-red
 a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 {
     "interact": {
         "redirect": "https://server.example.com/interact/4CF492ML\
@@ -1787,6 +1785,8 @@ In this example, the AS is returning a bearer [access token](#response-token-sin
 an opaque identifier.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
@@ -1979,6 +1979,8 @@ used in the initial request, with a management URL, and that has access to three
 (one using an object and two described by reference strings).
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 "access_token": {
     "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
     "manage": "https://server.example.com/token/PRY5NM33O\
@@ -2041,6 +2043,8 @@ names `token1` and `token2`, and only the first token has a management
 URL associated with it.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 "access_token": [
     {
         "label": "token1",
@@ -2651,6 +2655,8 @@ RO from a web page and launching the system browser with the
 target URL.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 https://client.example.net/return/123455\
   ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2\
     HZT8BOWYHcLmObM7XHPAdJzTZMtKBsaraJ64A\
@@ -2688,6 +2694,8 @@ interact_ref (string)
 
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 POST /push/554321 HTTP/1.1
 Host: client.example.net
 Content-Type: application/json
@@ -2749,6 +2757,8 @@ using URL Safe Base64 with no padding. The resulting string is the
 hash value.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM\
   7XHPAdJzTZMtKBsaraJ64A
 ~~~
@@ -2761,6 +2771,8 @@ using URL Safe Base64 with no padding. The resulting string is the
 hash value.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 62SbcD3Xs7L40rjgALA-ymQujoh2LB2hPJyX9vlcr1H6ecChZ8BNKkG_HrOKP_Bp\
   j84rh4mC9aE9x7HPBFcIHw
 ~~~
@@ -2892,6 +2904,8 @@ For example, if the request is successful in causing the AS to issue access toke
 release opaque subject claims, the response could look like this:
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
@@ -2959,6 +2973,8 @@ If the request is successful in causing the AS to issue access tokens and
 release subject claims, the response could look like this example:
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
@@ -3286,6 +3302,8 @@ MUST use this new URL to manage the new access token.
 \[\[ [See issue #102](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/102) \]\]
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 {
     "access_token": {
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
@@ -3546,6 +3564,8 @@ In the following sections, unless otherwise noted, the `RS256` JOSE Signature Al
 using the following RSA key (presented here in JWK format):
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 {
     "kid": "gnap-rsa",
     "p": "xS4-YbQ0SgrsmcA7xDzZKuVNxJe3pCYwdAe6efSy4hdDgF9-vhC5gjaRk\
@@ -3614,6 +3634,8 @@ parameter MUST NOT be included.
 In this example, the message body is the following JSON object:
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 {
     "access_token": {
         "access": [
@@ -3661,6 +3683,8 @@ SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
 The HTTP message signature input string is calculated to be the following:
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 "@request-target": post /gnap
 "host": server.example.com
 "content-type": application/json
@@ -3673,6 +3697,8 @@ The HTTP message signature input string is calculated to be the following:
 This leads to the following full HTTP message request:
 
 ~~~ http-message
+NOTE: '\' line wrapping per RFC 8792
+
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3749,22 +3775,22 @@ Host: server.example.com
 Content-Type: application/jose
 Content-Length: 1567
 Client-Cert: \
-  MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMDYxNDAyBgNVBAMM \
-  K05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV6QzY2bVEwHhcN \
-  MjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQDDCtOSVlNeUJq \
-  c0RqeUJDOVA1MzdENklUemtwRDhOdFJqaTl5YXBFekM2Nm1RMIIBIjANBgkqhkiG \
-  9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhYOJ+XOKISdMMShn/G4W9m20mT0VWtQBsmBB \
-  kI2cmRt4Ai8BfYdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8I \
-  kZ8NMwSrcUIBZGYXjHpwjzvfGvXH/5KJlnR3/uRUp4Z4Ujk2bCaKegDn11V2vxE4 \
-  1hqaPUnhRZxe0jRETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo+ \
-  uv4BC0bunS0K3bA/3UgVp7zBlQFoFnLTO2uWp/muLEWGl67gBq9MO3brKXfGhi3k \
-  OzywzwPTuq+cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQIDAQABMA0GCSqG \
-  SIb3DQEBCwUAA4IBAQBnYFK0eYHy+hVf2D58usj39lhL5znb/q9G35GBd/XsWfCE \
-  wHuLOSZSUmG71bZtrOcx0ptle9bp2kKl4HlSTTfbtpuG5onSa3swRNhtKtUy5NH9 \
-  W/FLViKWfoPS3kwoEpC1XqKY6l7evoTCtS+kTQRSrCe4vbNprCAZRxz6z1nEeCgu \
-  NMk38yTRvx8ihZpVOuU+Ih+dOtVe/ex5IAPYxlQsvtfhsUZqc7IyCcy72WHnRHlU \
-  fn3pJm0S5270+Yls3Iv6h3oBAP19i906UjiUTNH3g0xMW+V4uLxgyckt4wD4Mlyv \
-  jnaQ7Z3sR6EsXMocAbXHIAJhwKdtU/fLgdwL5vtx
+  :MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMDYxNDAyBgNVBAMM\
+  K05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV6QzY2bVEwHhcN\
+  MjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQDDCtOSVlNeUJq\
+  c0RqeUJDOVA1MzdENklUemtwRDhOdFJqaTl5YXBFekM2Nm1RMIIBIjANBgkqhkiG\
+  9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhYOJ+XOKISdMMShn/G4W9m20mT0VWtQBsmBB\
+  kI2cmRt4Ai8BfYdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8I\
+  kZ8NMwSrcUIBZGYXjHpwjzvfGvXH/5KJlnR3/uRUp4Z4Ujk2bCaKegDn11V2vxE4\
+  1hqaPUnhRZxe0jRETddzsE3mu1SK8dTCROjwUl14mUNo8iTrTm4n0qDadz8BkPo+\
+  uv4BC0bunS0K3bA/3UgVp7zBlQFoFnLTO2uWp/muLEWGl67gBq9MO3brKXfGhi3k\
+  OzywzwPTuq+cVQDyEN7aL0SxCb3Hc4IdqDaMg8qHUyObpPitDQIDAQABMA0GCSqG\
+  SIb3DQEBCwUAA4IBAQBnYFK0eYHy+hVf2D58usj39lhL5znb/q9G35GBd/XsWfCE\
+  wHuLOSZSUmG71bZtrOcx0ptle9bp2kKl4HlSTTfbtpuG5onSa3swRNhtKtUy5NH9\
+  W/FLViKWfoPS3kwoEpC1XqKY6l7evoTCtS+kTQRSrCe4vbNprCAZRxz6z1nEeCgu\
+  NMk38yTRvx8ihZpVOuU+Ih+dOtVe/ex5IAPYxlQsvtfhsUZqc7IyCcy72WHnRHlU\
+  fn3pJm0S5270+Yls3Iv6h3oBAP19i906UjiUTNH3g0xMW+V4uLxgyckt4wD4Mlyv\
+  jnaQ7Z3sR6EsXMocAbXHIAJhwKdtU/fLgdwL5vtx:
 
 
 {
@@ -3884,6 +3910,8 @@ In this example, the JOSE Header contains the following parameters:
 The request body is the following JSON object:
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 {
     "access_token": {
         "access": [
@@ -3931,6 +3959,8 @@ PGiVuOZUcN1tRtUS6tx2b4cBgw9mPgXG3IPB3wY7ctc
 This leads to the following full HTTP request message:
 
 ~~~ http-message
+NOTE: '\' line wrapping per RFC 8792
+
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -4049,6 +4079,8 @@ In this example, the JOSE header contains the following parameters:
 The request body, used as the JWS Payload, is the following JSON object:
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 {
     "access_token": {
         "access": [
@@ -4094,6 +4126,8 @@ The request body, used as the JWS Payload, is the following JSON object:
 This leads to the following full HTTP request message:
 
 ~~~ http-message
+NOTE: '\' line wrapping per RFC 8792
+
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/jose
@@ -4465,6 +4499,8 @@ of this specification, but some dynamic methods are discussed in
 The content of the resource reference is opaque to the client instance.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 WWW-Authenticate: \
   GNAP as_uri=https://server.example/tx,access=FWWIKYBQ6U56NL1
 ~~~
@@ -5380,6 +5416,8 @@ redirects the user back to the client instance with these additional values
 added as query parameters.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 HTTP 302 Found
 Location: https://client.example.net/return/123455\
   ?hash=p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2\
@@ -5417,6 +5455,8 @@ The AS retrieves the pending request based on the handle and issues
 a bearer access token and returns this to the client instance.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 HTTP/1.1 200 OK
 Content-Type: application/json
 Cache-Control: no-store
@@ -5588,6 +5628,8 @@ determines that it has been approved, and issues an access
 token for the client to use at the RS.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 HTTP/1.1 200 OK
 Content-Type: application/json
 Cache-Control: no-store
@@ -5794,6 +5836,8 @@ determines that it has been approved and it issues an access
 token.
 
 ~~~
+NOTE: '\' line wrapping per RFC 8792
+
 HTTP/1.1 200 OK
 Content-Type: application/json
 Cache-Control: no-store
@@ -5826,14 +5870,15 @@ their `client_id` and `scope` values as parameters into a redirect request
 to the authorization endpoint.
 
 ~~~
-HTTP 302 Found
-Location: https://server.example.com/authorize
-  ?client_id=7C7C4AZ9KHRS6X63AJAO
-  &scope=read%20write%20dolphin
-  &redirect_uri=https://client.example.net/return
-  &response_type=code
-  &state=123455
+NOTE: '\' line wrapping per RFC 8792
 
+HTTP 302 Found
+Location: https://server.example.com/authorize\
+  ?client_id=7C7C4AZ9KHRS6X63AJAO\
+  &scope=read%20write%20dolphin\
+  &redirect_uri=https://client.example.net/return\
+  &response_type=code\
+  &state=123455
 ~~~
 
 
