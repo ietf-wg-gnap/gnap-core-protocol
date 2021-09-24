@@ -1150,6 +1150,7 @@ separate access tokens, `token1` and `token2`.
         "flags": [ "bearer" ]
     }
 ]
+
 ~~~
 
 All approved access requests are returned in the
@@ -1312,10 +1313,14 @@ logo_uri (string)
 
 
 ~~~
+
+
     "display": {
         "name": "My Client Display Name",
         "uri": "https://example.net/client"
     }
+
+
 ~~~
 
 \[\[ [See issue #48](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/48) \]\]
@@ -1380,6 +1385,7 @@ assertions (object)
      "id_token": "eyj..."
    }
 }
+
 ~~~
 
 
@@ -1747,15 +1753,11 @@ interact (object)
     needs to take place. {{response-interact}}
 
 subject (object)
-: Claims about the RO as known and declared by the AS. {{response-subject}}
+: Claims about the RO as known and declared by the AS, as described in {{response-subject}}. 
 
 instance_id (string)
 : An identifier this client instance can use to identify itself when making
     future requests. {{response-dynamic-handles}}
-
-user_handle (string)
-: An identifier this client instance can use to identify its current end-user when
-    making future requests. {{response-dynamic-handles}}
 
 error (object)
 : An error code indicating that something has gone wrong. {{response-error}}
@@ -1779,8 +1781,7 @@ a [callback nonce](#response-interact-finish), and a [continuation response](#re
 }
 ~~~
 
-In this example, the AS is returning a bearer [access token](#response-token-single)
-with a management URL and a [subject identifier](#response-subject) in the form of
+In this example, the AS is returning a bearer [access token](#response-token-single) with a management URL and a [subject identifier](#response-subject) in the form of
 an opaque identifier.
 
 ~~~
@@ -2273,12 +2274,15 @@ mode responses in [a registry TBD](#IANA). Extensions MUST
 document the corresponding interaction request.
 
 
-## Returning User Information {#response-subject}
+## Returning Subject Information {#response-subject}
 
 If information about the RO is requested and the AS
 grants the client instance access to that data, the AS returns the approved
-information in the "subject" response field. This field is an object
-with the following OPTIONAL properties.
+information in the "subject" response field. The AS MUST return the `subject` field only in cases where the AS is sure that
+the RO and the end-user are the same party. This can be accomplished through some forms of
+[interaction with the RO](#authorization).
+
+This field is an object with the following OPTIONAL properties.
 
 
 sub_ids (array of objects)
@@ -2303,17 +2307,13 @@ updated_at (string)
 "subject": {
    "sub_ids": [ {
      "format": "opaque",
-     "id": "J2G8G8O4AZ"
+     "id": "XUT2MFM1XBIKJKSDU8QM"
    } ],
    "assertions": {
      "id_token": "eyj..."
    }
 }
 ~~~
-
-The AS MUST return the `subject` field only in cases where the AS is sure that
-the RO and the end-user are the same party. This can be accomplished through some forms of
-[interaction with the RO](#authorization).
 
 Subject identifiers returned by the AS SHOULD uniquely identify the RO at the
 AS. Some forms of subject identifier are opaque to the client instance (such as the subject of an
@@ -2356,7 +2356,7 @@ opaque to the client instance.
 
 All dynamically generated handles are returned as fields in the
 root JSON object of the response. This specification defines the
-following dynamic handle returns, additional handles can be defined in
+following dynamic handle return, additional handles can be defined in
 [a registry TBD](#IANA).
 
 
@@ -2365,23 +2365,16 @@ instance_id (string)
             in the `client` object that the client instance can use in a future request, as
             described in {{request-instance}}.
 
-user_handle (string)
-: A string value used to represent the current
-            user. The client instance can use in a future request, as described in
-            {{request-user-reference}}.
-
-
-This non-normative example shows two handles along side an issued
-access token.
+This non-normative example shows one handle along side an issued access token.
 
 ~~~
 {
-    "user_handle": "XUT2MFM1XBIKJKSDU8QM",
     "instance_id": "7C7C4AZ9KHRS6X63AJAO",
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0"
     }
 }
+
 ~~~
 
 \[\[ [See issue #77](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/77) \]\]
@@ -5142,6 +5135,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 - Since -06
+    * Replace user handle by opaque identifier 
     - Added trust relationships
     - Added privacy considerations section
     - Added security considerations.
