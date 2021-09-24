@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-latest
+docname: draft-ietf-gnap-core-protocol-07
 category: std
 
 ipr: trust200902
@@ -5172,8 +5172,8 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 # Document History {#history}
 
-- Since -06
-    * Replace user handle by opaque identifier 
+- -07
+    - Replace user handle by opaque identifier 
     - Added trust relationships
     - Added privacy considerations section
     - Added security considerations.
