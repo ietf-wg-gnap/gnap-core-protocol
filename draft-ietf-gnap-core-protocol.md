@@ -91,7 +91,7 @@ informative:
            ins: J. Bergstra
         
 
-​--- abstract
+--- abstract
 
 GNAP defines a mechanism for delegating authorization to a
 piece of software, and conveying that delegation to the software. This
@@ -99,7 +99,7 @@ delegation can include access to a set of APIs as well as information
 passed directly to the software.
 
 
-​--- middle
+--- middle
 
 # Introduction
 
@@ -181,7 +181,7 @@ on the role by the overall protocol.
 Legend
 
 + + + indicates interaction between a human and computer
-​----- indicates interaction between two pieces of software
+----- indicates interaction between two pieces of software
 ~ ~ ~ indicates a potential equivalence or out-of-band communication between roles
 
 ~~~
@@ -370,7 +370,7 @@ an access token to call an RS.
 
 Legend
 + + + indicates a possible interaction with a human
-​----- indicates an interaction between protocol roles
+----- indicates an interaction between protocol roles
 ~ ~ ~ indicates a potential equivalence or out-of-band
         communication between roles
 ~~~
