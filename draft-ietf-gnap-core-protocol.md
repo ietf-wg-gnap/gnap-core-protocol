@@ -4435,7 +4435,7 @@ powerful.
 The means for the RS to determine the resource reference are out of scope
 of this specification, but some dynamic methods are discussed in
 {{I-D.draft-ietf-gnap-resource-servers}}.
-The content of the resource handle is opaque to the client instance.
+The content of the resource reference is opaque to the client instance.
 
 ~~~
 WWW-Authenticate: \
