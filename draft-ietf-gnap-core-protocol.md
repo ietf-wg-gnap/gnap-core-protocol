@@ -77,7 +77,7 @@ normative:
         -
           ins: C. Mortimore
 
---- abstract
+​--- abstract
 
 GNAP defines a mechanism for delegating authorization to a
 piece of software, and conveying that delegation to the software. This
@@ -85,7 +85,7 @@ delegation can include access to a set of APIs as well as information
 passed directly to the software.
 
 
---- middle
+​--- middle
 
 # Introduction
 
@@ -167,7 +167,7 @@ on the role by the overall protocol.
 Legend
 
 + + + indicates interaction between a human and computer
------ indicates interaction between two pieces of software
+​----- indicates interaction between two pieces of software
 ~ ~ ~ indicates a potential equivalence or out-of-band communication between roles
 
 ~~~
@@ -333,7 +333,7 @@ an access token to call an RS.
 
 Legend
 + + + indicates a possible interaction with a human
------ indicates an interaction between protocol roles
+​----- indicates an interaction between protocol roles
 ~ ~ ~ indicates a potential equivalence or out-of-band
         communication between roles
 ~~~
@@ -1106,6 +1106,7 @@ separate access tokens, `token1` and `token2`.
         "flags": [ "bearer" ]
     }
 ]
+
 ~~~
 
 All approved access requests are returned in the
@@ -1268,10 +1269,14 @@ logo_uri (string)
 
 
 ~~~
+
+
     "display": {
         "name": "My Client Display Name",
         "uri": "https://example.net/client"
     }
+
+
 ~~~
 
 \[\[ [See issue #48](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/48) \]\]
@@ -1336,6 +1341,7 @@ assertions (object)
      "id_token": "eyj..."
    }
 }
+
 ~~~
 
 
@@ -2306,7 +2312,7 @@ opaque to the client instance.
 
 All dynamically generated handles are returned as fields in the
 root JSON object of the response. This specification defines the
-following dynamic handle returns, additional handles can be defined in
+following dynamic handle return, additional handles can be defined in
 [a registry TBD](#IANA).
 
 
@@ -2315,20 +2321,16 @@ instance_id (string)
             in the `client` object that the client instance can use in a future request, as
             described in {{request-instance}}.
 
-user (string)
-: A string value used to represent the current user, that can be provided to a future request, as described in
-            {{request-user-reference}}. When the end-user is the RO, the handle is equivalent to the opaque subject identifier.   
-
-This non-normative example shows two handles along side an issued access token.
+This non-normative example shows one handle along side an issued access token.
 
 ~~~
 {
-    "user": "XUT2MFM1XBIKJKSDU8QM",
     "instance_id": "7C7C4AZ9KHRS6X63AJAO",
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0"
     }
 }
+
 ~~~
 
 \[\[ [See issue #77](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/77) \]\]
@@ -4520,7 +4522,7 @@ sure that it has the permission to do so.
 # Document History {#history}
 
 - Since -06
-    -
+    * Replace user handle by opaque identifier 
 
 - -06
     - Removed "capabilities" and "existing_grant" protocol fields.
