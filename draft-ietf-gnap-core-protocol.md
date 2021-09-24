@@ -1401,10 +1401,9 @@ if the client instance provides one or more interaction modes in its request.
 
 ### Identifying the User by Reference {#request-user-reference}
 
-User reference identifiers can be dynamically
-[issued by the AS](#response-dynamic-handles) to allow the client instance
-to represent the same end-user to the AS over subsequent requests.
-
+The AS can identify the current end-user to the client instance with a reference
+which can be used by the client instance to refer to the end-user across
+multiple requests.
 If the client instance has a reference for the end-user at this AS, the
 client instance MAY pass that reference as a string. The format of this string
 is opaque to the client instance.
@@ -1413,11 +1412,14 @@ is opaque to the client instance.
 "user": "XUT2MFM1XBIKJKSDU8QM"
 ~~~
 
+One means of dynamically obtaining such a user reference is from the AS returning 
+an `opaque` subject identifier as described in {{response-subject}}.
+Other means of configuring a client instance with a user identifier are out
+of scope of this specification.
+
 User reference identifiers are not intended to be human-readable
 user identifiers or structured assertions. For the client instance to send
 either of these, use the full [user request object](#request-user) instead.
-
-\[\[ [See issue #51](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/51) \]\]
 
 If the AS does not recognize the user reference, it MUST
 return an error.
