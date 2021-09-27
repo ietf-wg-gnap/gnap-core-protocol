@@ -846,7 +846,7 @@ the abstract as functions of the AS here.
 |Instance|                                  |        |         |      |
 |        |--(1)--- Request Access --------->|        |         |      |
 |        |                                  |        |         |      |
-|        |<-(2)--- Request Access ----------|        |         |      |
+|        |<-(2)-- Interaction Needed -------|        |         |      |
 |        |                                  |        |         |      |
 |        |+ (3) + Facilitate Interaction + + + + + + + + + + > |      |
 |        |                                  |        |         |      |
