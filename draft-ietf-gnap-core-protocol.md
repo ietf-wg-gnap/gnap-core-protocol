@@ -5386,7 +5386,7 @@ Cache-Control: no-store
     "interact": {
        "redirect":
          "https://server.example.com/interact/4CF492MLVMSW9MKM",
-       "push": "MBDOFXG4Y5CVJCX821LH"
+       "finish": "MBDOFXG4Y5CVJCX821LH"
     }
     "continue": {
         "access_token": {
