@@ -1516,8 +1516,8 @@ This specification defines the following interaction start modes as an array of 
 #### Redirect to an Arbitrary URL {#request-interact-redirect}
 
 If the client instance is capable of directing the end-user to a URL defined
-by the AS at runtime, the client instance indicates this by sending the
-"redirect" field with the boolean value "true". The means by which
+by the AS at runtime, the client instance indicates this by including
+`redirect` in the array under the `start` key. The means by which
 the client instance will activate this URL is out of scope of this
 specification, but common methods include an HTTP redirect,
 launching a browser on the end-user's device, providing a scannable
@@ -1539,8 +1539,8 @@ The client instance manages this interaction method as described in {{interactio
 #### Open an Application-specific URL {#request-interact-app}
 
 If the client instance can open a URL associated with an application on
-the end-user's device, the client instance indicates this by sending the "app"
-field with boolean value "true". The means by which the client instance
+the end-user's device, the client instance indicates this by including `app`
+in the array under the `start` key. The means by which the client instance
 determines the application to open with this URL are out of scope of
 this specification.
 
@@ -1561,7 +1561,7 @@ this interaction method as described in {{interaction-app}}.
 
 If the client instance is capable of displaying or otherwise communicating
 a short, human-entered code to the RO, the client instance indicates this
-by sending the "user_code" field with the boolean value "true". This
+by including `user_code` in the array under the `start` key. This
 code is to be entered at a static URL that does not change at
 runtime. While this URL is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
