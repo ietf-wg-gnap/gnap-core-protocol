@@ -4610,6 +4610,49 @@ redirects to an AS's components during interaction, during any interaction with 
 any redirect back to the client instance. Without TLS protection on these portions of the process, an
 attacker could wait for a valid request to start and then take over the resource owner's interaction session.
 
+## Signing Requests from the Client Software
+
+Even though all requests in GNAP need to be transmitted over TLS or its equivalent, the use of TLS
+alone is not sufficient to protect all parts of a multi-party and multi-stage protocol like GNAP,
+and TLS is particularly ill-suited at tying multiple requests to each other over time.
+To account for this, GNAP makes use of message-level protection and key presentation mechanisms
+that strongly associate a request with a key held by the client instance (see {{secure-requests}}).
+
+During the initial request from a client instance to the AS, the client instance has to identify and
+prove possession of a cryptographic key. If the key is known to the AS, such as if it is previously
+registered or dereferenceable to a trusted source, the AS can associate a set of policies to the
+client instance identified by the key. If the client instance did not prove that it holds
+that key, the AS could not trust that the connection came from any particular client and could
+not apply any associated policies.
+
+Even more importantly, the client instance proving possession of a key on the first request allows
+the AS to associate future requests with each other. The access token used for grant continuation
+is bound to the same key and proofing mechanism used by the client instance in its initial request,
+which means that the client instance needs to prove possession of that same key in future requests
+allowing the AS to be sure that the same client instance is executing the follow-ups for a given
+ongoing grant request. Therefore, the AS has to ensure that all subsequent requests for a grant are
+associated with the same key that started the grant, or the most recent rotation of that key.
+This need holds true even if the initial key is previously unknown to the AS, such as would be
+the case when a client instance creates an ephemeral key for its request.
+Without this ongoing association, an attacker would be able to impersonate a client instance
+in the midst of a grant request, potentially stealing access tokens and subject information
+with impunity.
+
+Additionally, all access tokens in GNAP default to be associated with the key that was presented
+during the grant request that created the access token. This association allows an RS to know that
+the presenter of the access token is the same party that the token was issued to, as identified
+by their keys. While non-bound bearer tokens are an option in GNAP, these types of tokens
+have their own tradeoffs discussed elsewhere in this section.
+
+TLS functions at the socket layer, ensuring that only the parties on either end of that socket
+connection can read the information passed along that connection. Each time a new socket connection
+is made, such as for a new HTTP request, a new trust is re-established that is unrelated to previous
+connections. As such, it is not possible with TLS alone to know that the same party is making
+a set of calls, and therefore TLS alone cannot provide the continuity of security needed
+for GNAP. However, mutual TLS (MTLS) does provide such security characteristics through the
+use of the TLS client certificate, and thus MTLS is acceptable as a key-presentation mechanism
+when applied as described in {{mtls}}.
+
 ## Protection of Client Instance Key Material
 
 Client instances are identified by their unique keys, and anyone with access to a client instance's key material
