@@ -4614,14 +4614,14 @@ attacker could wait for a valid request to start and then take over the resource
 
 Even though all requests in GNAP need to be transmitted over TLS or its equivalent, the use of TLS
 alone is not sufficient to protect all parts of a multi-party and multi-stage protocol like GNAP,
-and TLS is particularly ill-suited at tying multiple requests to each other over time.
+and TLS is not targeted at tying multiple requests to each other over time.
 To account for this, GNAP makes use of message-level protection and key presentation mechanisms
 that strongly associate a request with a key held by the client instance (see {{secure-requests}}).
 
 During the initial request from a client instance to the AS, the client instance has to identify and
 prove possession of a cryptographic key. If the key is known to the AS, such as if it is previously
 registered or dereferenceable to a trusted source, the AS can associate a set of policies to the
-client instance identified by the key. If the client instance did not prove that it holds
+client instance identified by the key. Without the requirement that the client instance prove that it holds
 that key, the AS could not trust that the connection came from any particular client and could
 not apply any associated policies.
 
