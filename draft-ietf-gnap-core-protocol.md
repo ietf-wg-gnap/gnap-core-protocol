@@ -3374,7 +3374,7 @@ not being usable.
 # Securing Requests from the Client Instance {#secure-requests}
 
 In GNAP, the client instance secures its requests to the AS and RS by presenting an access
-token, presenting proof of a key that it possesses, or both an access token and
+token, presenting proof of a key that it possesses (aka, a "key proof"), or both an access token and
 key proof together.
 
 - When an access token is used with a key proof, this is a bound token request. This type of
