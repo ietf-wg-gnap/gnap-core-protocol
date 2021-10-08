@@ -396,7 +396,8 @@ Legend
 - (2) The client instance [requests access at the AS](#request).
 
 - (3) The AS processes the request and determines what is needed to fulfill
-    the request. The AS sends its [response to the client instance](#response).
+    the request. (See {{authorization}}.)
+    The AS sends its [response to the client instance](#response).
 
 - (B) If interaction is required, the
     AS [interacts with the RO](#authorization) to gather authorization.
