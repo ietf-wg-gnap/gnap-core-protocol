@@ -4546,6 +4546,7 @@ implementations, and contributions:
 Åke Axeland,
 Aaron Parecki,
 Adam Omar Oueidat,
+Andrii Deinega,
 Annabelle Backman,
 Dick Hardt,
 Dmitri Zagidulin,
