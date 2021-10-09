@@ -2675,8 +2675,7 @@ reference value received here.
 
 ### Completing Interaction with a Direct HTTP Request Callback {#interaction-pushback}
 
-When using the
-["callback" interaction mode](#response-interact-finish) with the `push` method,
+When using the [`push` interaction finish method](#response-interact-finish),
 the AS signals to the client instance that interaction is
 complete and the request can be continued by sending an HTTP POST
 request to the client instance's callback URL sent in [the callback request](#request-interact-callback-push).
@@ -2744,7 +2743,7 @@ https://server.example.com/tx
 ~~~
 
 The party then hashes this string with the appropriate algorithm
-based on the "hash_method" parameter of the "callback".
+based on the "hash_method" parameter under the "finish" key.
 If the "hash_method" value is not present in the client instance's
 request, the algorithm defaults to "sha3".
 
@@ -5576,7 +5575,7 @@ Digest: sha256=...
 
 The AS processes this and determines that the RO needs to interact.
 The AS supports both redirect URIs and user codes for interaction, so
-it includes both. Since there is no "callback" the AS does not include
+it includes both. Since there is no interaction finish mode, the AS does not include
 a nonce, but does include a "wait" parameter on the continuation
 section because it expects the client instance to poll for results.
 
