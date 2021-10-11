@@ -1811,7 +1811,7 @@ simultaneously as an opaque identifier, an email address, and a decentralized id
 {
     "subject": {
         "sub_ids": [ {
-           "subject_type": "opaque",
+           "format": "opaque",
            "id": "J2G8G8O4AZ"
         }, {
            "format": "email",
