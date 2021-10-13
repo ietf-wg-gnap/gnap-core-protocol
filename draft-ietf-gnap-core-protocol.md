@@ -3546,8 +3546,8 @@ by the signature method of the proofing mechanism.
 The key binding methods in this section MAY be used by other components making calls
 as part of GNAP, such as the extensions allowing the RS to make calls to the
 AS defined in \{\{I-D.ietf-gnap-resource-servers\}\}. To facilitate this extended use, the
-sections below are defined in generic terms of the "sender" and "verifier" of the HTTP message.
-In the core functions of GNAP, the "sender" is the client instance and the "verifier"
+sections below are defined in generic terms of the "signer" and "verifier" of the HTTP message.
+In the core functions of GNAP, the "signer" is the client instance and the "verifier"
 is the AS or RS, as appropriate.
 
 When used for delegation in GNAP, these key binding mechanisms allow
@@ -3605,7 +3605,7 @@ NOTE: '\' line wrapping per RFC 8792
 ### HTTP Message Signing {#httpsig-binding}
 
 This method is indicated by `httpsig` in
-the `proof` field. The sender creates an HTTP
+the `proof` field. The signer creates an HTTP
 Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}.
 
 The covered content of the signature MUST include the following:
@@ -3892,7 +3892,7 @@ If the request being made does not have a message body, such as
 an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
 calculated over an empty payload.
 
-The client instance presents the signed object in compact form
+The signer presents the signed object in compact form
 {{RFC7515}} in the Detached-JWS HTTP Header field.
 
 In this example, the JOSE Header contains the following parameters:
@@ -4027,9 +4027,9 @@ the signer does, with no normalization or transformation of the request.
 This method is indicated by `jws` in the
 `proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The JOSE header MUST contain the `kid` parameter of the key bound to this client
-instance for this request. The `alg` parameter MUST be set to a value appropriate
-for the key identified by kid and MUST NOT be `none`.
+The JOSE header MUST contain the `kid` parameter of the key bound to this
+signer for this request. The `alg` parameter MUST be set to a value appropriate
+for the key identified by `kid` and MUST NOT be `none`.
 
 To protect the request, the JWS header MUST contain the following
 additional parameters.
@@ -4054,8 +4054,8 @@ ath (string)
 If the HTTP request has a message body, such as an HTTP POST or PUT method,
 the payload of the JWS object is the JSON serialized body of the request, and
 the object is signed according to JWS and serialized into compact form {{RFC7515}}.
-The client instance presents the JWS as the body of the request along with a
-content type of `application/jose`. The AS
+The signer presents the JWS as the body of the request along with a
+content type of `application/jose`. The verifier
 MUST extract the payload of the JWS and treat it as the request body
 for further processing.
 
