@@ -1834,8 +1834,8 @@ contains a JSON object with the following properties.
 uri (string)
 : REQUIRED. The URI at which the client instance can make
             continuation requests. This URI MAY vary per
-            request, or MAY be stable at the AS if the AS includes
-            an access token. The client instance MUST use this
+            request, or MAY be stable at the AS.
+            The client instance MUST use this
             value exactly as given when making a [continuation request](#continue-request).
 
 wait (integer)
