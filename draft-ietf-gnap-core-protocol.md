@@ -3467,8 +3467,8 @@ The means of dereferencing this value are out of scope for this specification.
 
 The method the client instance uses to send an access token depends on whether
 the token is bound to a key, and if so which proofing method is associated
-with the key. This information is conveyed in the
-`bound` and `key` parameters in [the single](#response-token-single)
+with the key. This information is conveyed by the
+`key` parameter and the `bearer` flag in [the single](#response-token-single)
 and [multiple access tokens](#response-token-multiple) responses.
 
 If the `flags` field does not contain the `bearer` flag and the `key` is absent, the access token
