@@ -1907,7 +1907,7 @@ label (string)
     The value of the `label` the client instance provided in the associated
     [token request](#request-token), if present. If the token has been split
     by the AS, the value of the `label` field is chosen by the AS and the
-    `split` field is included and set to `true`.
+    `split` flag is used.
 
 manage (string)
 : OPTIONAL. The management URI for this
