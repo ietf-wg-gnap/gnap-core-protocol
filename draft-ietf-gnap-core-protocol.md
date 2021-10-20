@@ -5499,7 +5499,7 @@ Digest: sha256=...
 
 
 The AS retrieves the pending request based on the handle and issues
-a bearer access token and returns this to the client instance.
+an access token and returns this to the client instance.
 
 ~~~
 NOTE: '\' line wrapping per RFC 8792
