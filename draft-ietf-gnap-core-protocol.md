@@ -2726,7 +2726,7 @@ always provide this hash, and the client instance MUST validate the hash when re
 
 To calculate the "hash" value, the party doing the calculation
 creates a hash string by concatenating the following values in the following order
-using a single newline (`\\n`) character to separate them:
+using a single newline (`\n`) character to separate them:
 
 * the "nonce" value sent by the client instance in the [interaction "finish" section of the initial request](#request-interact-finish)
 * the AS's nonce value from [the interaction finish response](#response-interact-finish)
