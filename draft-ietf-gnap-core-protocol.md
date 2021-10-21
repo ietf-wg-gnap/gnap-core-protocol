@@ -43,7 +43,6 @@ normative:
            ins: R. Holz
          -
            ins: P. Saint-Andre
-    I-D.draft-ietf-gnap-resource-servers:
     RFC2119:
     RFC3230:
     RFC3986:
@@ -57,9 +56,8 @@ normative:
     RFC8174:
     RFC8259:
     RFC8705:
+    I-D.draft-ietf-gnap-resource-servers:
     I-D.ietf-httpbis-message-signatures:
-    I-D.ietf-httpbis-client-cert-field:
-    I-D.ietf-oauth-signed-http-request:
     I-D.ietf-secevent-subject-identifiers:
     I-D.ietf-oauth-rar:
     OIDC:
@@ -79,6 +77,8 @@ normative:
           ins: C. Mortimore
 
 informative:
+    RFC6973:
+    I-D.ietf-httpbis-client-cert-field:
     promise-theory:
        target: 'http://markburgess.org/promises.html'
        title: Promise theory
@@ -88,7 +88,6 @@ informative:
            ins: M. Burgess
          -
            ins: J. Bergstra
-    RFC6973:
     attack-surfaces:
         target: 'https://odr.chalmers.se/handle/20.500.12380/304105'
         title: Security Analysis of Attack Surfaces on the Grant Negotiation and Authorization Protocol
@@ -1020,10 +1019,11 @@ The values of the `flags` field defined by this specification are as follows:
 "bearer"
 : If this flag is included, the access token being requested is a bearer token.
     If this flag is omitted, the access token is bound to the key used
-    by the client instance in this request, or the key's most recent rotation.
+    by the client instance in this request (or that key's most recent rotation)
+    and the access token MUST be presented using the same key and proofing method.
     Methods for presenting bound and bearer access tokens are described
-    in {{use-access-token}}.
-    \[\[ [See issue #38](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/38) \]\]
+    in {{use-access-token}}. See {{security-bearer-tokens}} for additional
+    considerations on the use of bearer tokens.
 
 "split"
 : If this flag is included, the client instance is capable of
@@ -1948,12 +1948,13 @@ flags (array of strings)
 The values of the `flags` field defined by this specification are as follows:
 
 "bearer"
-: This flag indicates whether the token is bound to the client instance's key.
+: This flag indicates whether the token is a bearer token, not bound to a key and proofing mechanism.
     If the `bearer` flag is present, the access token is a bearer token, and the `key`
     field in this response MUST be omitted. If the `bearer` flag is omitted and the `key` field
     in this response is omitted, the token is bound the [key used by the client instance](#request-client)
     in its request for access. If the `bearer` flag is omitted, and the `key` field is present,
     the token is bound to the key and proofing mechanism indicated in the `key` field.
+    See {{security-bearer-tokens}} for additional considerations on the use of bearer tokens.
 
 "durable"
 : OPTIONAL. Flag indicating a hint of AS behavior on token rotation.
@@ -3545,7 +3546,7 @@ by the signature method of the proofing mechanism.
 
 The key binding methods in this section MAY be used by other components making calls
 as part of GNAP, such as the extensions allowing the RS to make calls to the
-AS defined in \{\{I-D.ietf-gnap-resource-servers\}\}. To facilitate this extended use, the
+AS defined in {{I-D.ietf-gnap-resource-servers}}. To facilitate this extended use, the
 sections below are defined in generic terms of the "signer" and "verifier" of the HTTP message.
 In the core functions of GNAP, the "signer" is the client instance and the "verifier"
 is the AS or RS, as appropriate.
@@ -5012,7 +5013,10 @@ between the two. However, since TLS is functioning at a separate layer from HTTP
 direct connection between the TLS key presentation and the message itself, other than the fact that
 the message was presented over the TLS channel. That is to say, any HTTP message can be presented
 over the TLS channel in question with the same level of trust. The verifier is responsible for
-ensuring the key in the TLS client certificate is the one expected for a particular request.
+ensuring the key in the TLS client certificate is the one expected for a particular request. For
+example, if the request is a [grant request](request), the AS needs to compare the TLS client
+certificate presented at the TLS layer to the key identified in the request body itself (either
+by value or through a referenced identifier).
 
 Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern in deployments adds
 a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system 
