@@ -1258,10 +1258,7 @@ associated with the key in the request.  Proof types
 are defined in [a registry TBD](#IANA) and an initial set of methods
 is described in {{binding-keys}}.
 
-Note that the AS MAY know the client instance's public key ahead of time, and
-the AS MAY apply different policies to the request depending on what
-has been registered against that key.
-If the same public key is sent by value on subsequent access requests, the AS SHOULD
+If the same public key is sent by value on different access requests, the AS MUST
 treat these requests as coming from the same client instance for purposes
 of identification, authentication, and policy application.
 If the AS does not know the client instance's public key ahead of time, the AS
@@ -1269,6 +1266,18 @@ MAY accept or reject the request based on AS policy, attestations
 within the `client` request, and other mechanisms.
 
 \[\[ [See issue #44](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/44) \]\]
+
+The client instance MUST NOT send a symmetric key by value in the request, as doing so would expose
+the key directly instead of simply proving possession of it. See considerations on symmetric keys
+in {{security-symmetric}}.
+
+The client instance's key MAY be pre-registered with the AS ahead of time and associated
+with a set of policies and allowable actions pertaining to that client. If this pre-registration
+includes other fields that can occur in the `client` request object described in this section,
+such as `class_id` or `display`, the pre-registered values MUST take precedence over any values
+given at runtime. Additional fields sent during a request but not present in a pre-registered 
+client instance record at the AS SHOULD NOT be added to the client's pre-registered record.
+See additional considerations regarding client instance impersonation in {{security-impersonation}}.
 
 ### Identifying the Client Instance by Reference {#request-instance}
 
@@ -1291,9 +1300,8 @@ If the AS does not recognize the instance identifier, the request MUST be reject
 with an error.
 
 If the client instance is identified in this manner, the registered key for the client instance
-MAY be a symmetric key known to the AS. The client instance MUST NOT send a
-symmetric key by value in the request, as doing so would expose
-the key directly instead of proving possession of it.
+MAY be a symmetric key known to the AS. See considerations on symmetric keys
+in {{security-symmetric}}.
 
 ### Providing Displayable Client Instance Information {#request-display}
 
@@ -1329,7 +1337,8 @@ The AS SHOULD use these values during interaction with the RO.
 The values are for informational purposes only and MUST NOT
 be taken as authentic proof of the client instance's identity or source.
 The AS MAY restrict display values to specific client instances, as identified
-by their keys in {{request-client}}.
+by their keys in {{request-client}}. See additional considerations for displayed
+client information in {{security-impersonation}}.
 
 ### Authenticating the Client Instance {#request-key-authenticate}
 
