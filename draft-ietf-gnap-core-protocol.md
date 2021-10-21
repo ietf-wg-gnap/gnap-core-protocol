@@ -1547,6 +1547,9 @@ If this interaction mode is supported for this client instance and
 request, the AS returns a redirect interaction response {{response-interact-redirect}}.
 The client instance manages this interaction method as described in {{interaction-redirect}}.
 
+See {{security-front-channel}} for more considerations regarding the use of front-channel
+communication techniques such as this.
+
 #### Open an Application-specific URL {#request-interact-app}
 
 If the client instance can open a URL associated with an application on
@@ -1646,8 +1649,6 @@ presentation of an interaction callback reference as described in
 
 \[\[ [See issue #58](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/58) \]\]
 
-\[\[ [See issue #59](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/59) \]\]
-
 #### Receive an HTTP Callback Through the Browser {#request-interact-callback-redirect}
 
 A finish `method` value of `redirect` indicates that the client instance
@@ -1672,6 +1673,9 @@ browser, this method is usually used when the RO and end-user are the
 same entity. As such, the client instance MUST ensure the end-user is present on the request to
 prevent substitution attacks.
 
+See {{security-front-channel}} for more considerations regarding the use of front-channel
+communication techniques such as this.
+
 #### Receive an HTTP Direct Callback {#request-interact-callback-push}
 
 A finish `method` value of `push` indicates that the client instance will
@@ -1694,8 +1698,6 @@ Requests to the callback URI MUST be processed by the client instance as describ
 Since the incoming request to the callback URL is from the AS and
 not from the RO's browser, the client instance MUST NOT require the end-user to
 be present on the incoming HTTP request.
-
-\[\[ [See issue #60](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/60) \]\]
 
 ### Hints {#request-interact-hint}
 
@@ -3000,6 +3002,9 @@ NOTE: '\' line wrapping per RFC 8792
     }
 }
 ~~~
+
+See {{security-polling}} for considerations on polling for continuation without an interaction
+`finish` method.
 
 ## Modifying an Existing Request {#continue-modify}
 
@@ -5183,6 +5188,41 @@ when the interaction has completed. Similarly, artifacts like access tokens and 
 reference can be limited to have lifetimes tied to their functional utility. Finally, each
 different category of artifact (nonce, token, reference, identifier, etc.) can be
 generated from a separate random pool of values instead of a single global value space.
+
+## Front-channel URLs {#security-front-channel}
+
+Some interaction methods in GNAP make use of URLs accessed through the end-user's browser,
+known collectively as front-channel communication. These URLs are most notably present in
+the `redirect` interaction `start` method and the `redirect` interaction `finish` mode. Since
+these URLs are intended to be given to the end-user, the end user and their browser will be
+subjected to anything hosted at that URL including viruses, malware, and phishing scams. This
+kind of risk is inherent to all redirection-based protocols, including GNAP when used in this way.
+
+When talking to a new or unknown AS, a client instance might want to check the URL from the
+interaction `start` against a blocklist and warn the end-user before redirecting them. Many
+client instances will provide an interstitial message prior to redirection in order to prepare
+the user for control of the user experience being handed to the domain of the AS, and such a
+method could be used to warn the user of potential threats. For instance, a rogue AS impersonating
+a well-known service provider. Client software can also prevent this by managing an allowlist
+of known and trusted AS's.
+
+Alternatively, an attacker could start a GNAP request with a known and trusted AS but include
+their own attack site URL as the callback for the `finish` method. The attacker would then send
+the interaction `start` URL to the victim and get them to click on it. Since the URL is at
+the known AS, the victim is inclined to do so. The victim will then be prompted to approve the
+attacker's application, and in most circumstances the victim will then be redirected to the
+attacker's site whether or not the user approved the request. The AS could mitigate this partially
+by using a blocklist and  allowlist of interaction `finish` URLs during the client instance's
+initial request, but this approach can be  especially difficult if the URL has any dynamic portion
+chosen by the client software. The AS can couple these checks with policies associated with the
+client instance that has been authenticated in the request. If the AS has any doubt about the
+interaction finish URL, the AS can provide an interstitial warning to the end-user before
+processing the redirect.
+
+Ultimately, all protocols that use redirect-based communication through the user's browser are
+susceptible to having an attacker try to co-opt one or more of those URLs in order to harm the
+user. It is the responsibility of the AS and the client software to provide appropriate warnings,
+education, and mitigation to protect end users.
 
 # Privacy Considerations {#Privacy}
 
