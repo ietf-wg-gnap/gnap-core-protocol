@@ -3500,9 +3500,19 @@ the "GNAP" authorization scheme along with a key proof as described in {{binding
 for the key bound to the access token. For example, an "httpsig"-bound access token is sent as follows:
 
 ~~~
-Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Signature-Input: sig1=(authorization);...
-Signature: sig1=...
+NOTE: '\' line wrapping per RFC 8792
+
+GET /stuff HTTP/1.1
+Host: resource.example.com
+Authorization: GNAP 80UPRY5NM33OMUKMKSKU
+Signature-Input: sig1=("@method" "@target-uri" "authorization")\
+  ;created=1618884475;keyid="gnap-rsa"
+Signature: sig1=:KymTn1/++nwWsNHdc48sguMjnVSnvqQNrijQT0/kXDfljaIgHl\
+  o12NkEt4e5qZeCFutzRxWpHKtjVEDldIUSsktxj4Li7PgUNJtIkJkdA1EoebGz1X/\
+  AD3coqYpoaFsOcPyfXjYHYWFd8HxLOUz3imA8xbxS+J9GZAjyDjTfG6yfsMsfd10f\
+  nrDRJqalPNDEgOOwwyEtjht4MnzpV1Wf43YWwgEJOC2rvxPIeuNxWbUc5v/o3s3Zr\
+  ywo2sunUcwXwlmbgyiGY0vgGFWjdHfgKvjda7eNLTr7r3jPgo/GlOB3jyadD4xcKs\
+  S/idS3RGk1+e9jbGHK5cRTp0ZzF94kWw==:
 ~~~
 
 If the `flags` field contains the `bearer` flag, the access token is a bearer token
@@ -3623,15 +3633,19 @@ This method is indicated by `httpsig` in
 the `proof` field. The signer creates an HTTP
 Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}.
 
-The covered content of the signature MUST include the following:
+The message components of the signature MUST include the following:
 
-@request-target:
-: the target of the HTTP request
+@method:
+: the method used in the HTTP request
 
-digest:
-: The Digest header as defined in {{RFC3230}}. When the request message has a body,
-the signer MUST calculate this header value and the verifier
-MUST validate this header.
+@target-uri:
+: the full request URL of the HTTP request
+
+content-digest or digest:
+: The Content-Digest or Digest header as defined in {{I-D.ietf-httpbis-digest-headers}}. When the
+request message has a body, the signer MUST calculate this header value and the verifier
+MUST validate this field value. Use of Content-Digest is RECOMMENDED. Use of content-encoding
+agnostic digest methods (such as `id-sha-256`) is RECOMMENDED.
 
 When the request is bound to an access token, the covered content
 MUST also include:
@@ -3640,7 +3654,7 @@ authorization:
 : The Authorization header used to present the access token as discussed in
 {{use-access-token}}.
 
-Other covered content MAY also be included.
+Other message components MAY also be included.
 
 If the signer's key presented is a JWK, the `keyid` parameter of the signature MUST be set
 to the `kid` value of the JWK, the signing algorithm used MUST be the JWS
@@ -3690,10 +3704,10 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-This body is hashed for the Digest header using SHA-256 into the following encoded value:
+This body is hashed for the Content-Digest header using `id-sha-256` into the following encoded value:
 
 ~~~
-SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+id-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
 ~~~
 
 The HTTP message signature input string is calculated to be the following:
@@ -3701,13 +3715,15 @@ The HTTP message signature input string is calculated to be the following:
 ~~~
 NOTE: '\' line wrapping per RFC 8792
 
-"@request-target": post /gnap
-"host": server.example.com
+"@method": POST
+"@target-uri": https://server.example.com/gnap
 "content-type": application/json
-"digest": SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+"content-digest": id-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+Crwwv\
+  UoiaDCSjKxw=
 "content-length": 986
-"@signature-params": ("@request-target" "host" "content-type" \
-  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
+"@signature-params": ("@method" "@target-uri" "content-type" \
+  "content-digest" "content-length");created=1618884475\
+  ;keyid="gnap-rsa"
 ~~~
 
 This leads to the following full HTTP message request:
@@ -3719,16 +3735,17 @@ POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Content-Length: 986
-Digest: SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
-Signature-Input: sig1=("@request-target" "host" "content-type" \
-  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
-Signature: \
-  sig1=:axj8FLOvEWBcwh+Xk6VTTKXxqo4XNygleTDJ8h3ZJfi1sSmWrRtyo9RG/dc\
-  miZmdszRjWbg+/ixVZpA4BL3AOwEOxxtmHAXNB8uJ0I3tfbs6Suyk4sEo8zPr+MJq\
-  MjxdJEUgAQAy2AH+wg5a7CKq4IdLTulFK9njUIeG7MygHumeiumM3DbDQAHgF46dV\
-  q5UC6KJnqhGM1rFC128jd2D0sgWKCUgKGCHtfR159zfKWcEO9krsLoOnCdTzm1UyD\
-  DMjkIjqeN/1j8PdMJaRAwV4On079O0DVu6bl1jVtkzo/e/ZmwPr/X436V4xiw/hZt\
-  w4sfNsSbmsT0+UAQ20X/xaw==:
+Content-Digest: id-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSj\
+  Kxw=
+Signature-Input: sig1=("@method" "@target-uri" "content-type" \
+  "content-digest" "content-length");created=1618884475\
+  ;keyid="gnap-rsa"
+Signature: sig1=:SatKrAh2qNxbDBY6H3XUtpWn07aSrukpi3202L4DIPLLGgKdSu\
+  XyObjdCK/agmEx36xyn40iiCAqYskXugpNARianBiWKOkcWHhSs31FSTSoJ8vvGpJ\
+  4GxemDPvI6BXmLZtJvYBehoXtfcRFKGLzYOtbbtefzw2vP+k19W4PrhNmxFEUCepT\
+  KRk0sBoz4zIYK6FqEAHir0oRjwdCcXHFqI9U6+/DgpuxjFFX+OSZehmN6Q1quJgu0\
+  FITmsC9OANs5hwIAkXGJNdv3FuxAZAVrSnUScuGutSJXAn1daXToewVgBA+IrQ86m\
+  lsXtWgvmTTXENUvOELV6qTV2nenwr/UQ==:
 
 
 {
@@ -3770,10 +3787,9 @@ Signature: \
 ~~~
 
 If the HTTP Message includes a message body, the verifier MUST
-calculate and verify the value of the `Digest` header. The verifier
-MUST ensure that the signature includes all required covered
-content. The verifier MUST validate the signature against the
-expected key of the signer.
+calculate and verify the value of the `Digest` or `Content-Digest` header. The verifier
+MUST ensure that the signature covers all required message components. The verifier MUST validate
+the signature against the expected key of the signer.
 
 ### Mutual TLS {#mtls}
 
