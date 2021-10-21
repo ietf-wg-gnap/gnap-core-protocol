@@ -58,6 +58,7 @@ normative:
     RFC8259:
     RFC8705:
     I-D.ietf-httpbis-message-signatures:
+    I-D.ietf-httpbis-client-cert-field:
     I-D.ietf-oauth-signed-http-request:
     I-D.ietf-secevent-subject-identifiers:
     I-D.ietf-oauth-rar:
@@ -3847,8 +3848,8 @@ Note that in many instances, the verifier will not do a full certificate
 chain validation of the presented TLS client certificate, as the
 means of trust for this certificate could be in something other than
 a PKI system, such as a static registration or trust-on-first-use.
-
-\[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
+See {{security-mtls}} and {{security-mtls-patterns}} for some additional
+considerations for this key proofing method.
 
 ### Detached JWS {#detached-jws}
 
@@ -4582,9 +4583,9 @@ for feedback and development of early versions of the XYZ protocol that fed into
 through the use of value registries. \]\]
 
 
-# Security Considerations {#Security}
+# Security Considerations {#security}
 
-## TLS Protection in Transit
+## TLS Protection in Transit {#security-tls}
 
 All requests in GNAP have to be made over TLS or equivalent as outlined in {{BCP195}}
 to protect the contents of the request and response from manipulation and interception by an attacker.
@@ -4612,7 +4613,7 @@ redirects to an AS's components during interaction, during any interaction with 
 any redirect back to the client instance. Without TLS protection on these portions of the process, an
 attacker could wait for a valid request to start and then take over the resource owner's interaction session.
 
-## Signing Requests from the Client Software
+## Signing Requests from the Client Software {#security-signing}
 
 Even though all requests in GNAP need to be transmitted over TLS or its equivalent, the use of TLS
 alone is not sufficient to protect all parts of a multi-party and multi-stage protocol like GNAP,
@@ -4655,7 +4656,7 @@ for GNAP. However, mutual TLS (MTLS) does provide such security characteristics 
 use of the TLS client certificate, and thus MTLS is acceptable as a key-presentation mechanism
 when applied as described in {{mtls}}.
 
-## Protection of Client Instance Key Material
+## Protection of Client Instance Key Material {#security-keys}
 
 Client instances are identified by their unique keys, and anyone with access to a client instance's key material
 will be able to impersonate that client instance to all parties. This is true for both calls to the AS
@@ -4697,7 +4698,7 @@ copies of software unless they are very tightly integrated with each other and c
 It is particularly bad practice to allow an end-user to copy keys between client instances and to
 willingly use the same key in multiple instances.
 
-## Protection of Authorization Server
+## Protection of Authorization Server {#security-as}
 
 The AS performs critical functions in GNAP, including authenticating client software, managing interactions
 with end-users to gather consent and provide notice, and issuing access tokens for client instances
@@ -4718,7 +4719,7 @@ making the connection has to validate the certificate chain of the host it is co
 Consequently, protecting, monitoring, and auditing the AS is paramount to preserving the security
 of a GNAP-protected ecosystem.
 
-## Symmetric and Asymmetric Client Instance Keys
+## Symmetric and Asymmetric Client Instance Keys {#security-symmetric}
 
 The cryptographic methods used by GNAP for key-proofing can support both asymmetric and symmetric
 cryptography, and can be extended to use a wide variety of mechanisms. While symmetric
@@ -4758,7 +4759,7 @@ key distribution at runtime, which would expose the keys in transit.
 Both the AS and client software can use systems such as hardware security modules to strengthen
 their key security storage and generation for both asymmetric and symmetric keys.
 
-## Generation of Access Tokens
+## Generation of Access Tokens {#security-access-tokens}
 
 The content of access tokens need to be such that only the generating AS would be able to
 create them, and the contents cannot be manipulated by an attacker to gain different or additional
@@ -4781,7 +4782,7 @@ or falsified token. Furthermore, an AS has to carefully protect the keys used to
 tokens, since anyone with access to these signing keys would be able to create seemingly-valid
 access tokens using them.
 
-## Bearer Access Tokens
+## Bearer Access Tokens {#security-bearer-tokens}
 
 Bearer access tokens can be used by any party that has access to the token itself, without any additional
 information. As a natural consequence, any RS that a bearer token is presented to has the technical
@@ -4794,7 +4795,7 @@ In GNAP, key-bound access tokens are the default due to their higher security pr
 bearer tokens can be used in GNAP, their use should be limited onto to cases where the simplicity
 benefits outweigh the significant security downsides.
 
-## Key-Bound Token Access Tokens
+## Key-Bound Token Access Tokens {#security-bound-tokens}
 
 Key-bound access tokens, as the name suggests, are bound to a specific key and must be
 presented along with proof of that key during use. The key itself is not presented at the same
@@ -4829,7 +4830,7 @@ will vary depending on the key proofing mechanism in use, but for example, HTTP 
 has both a `created` and `nonce` signature parameter as well as the ability to cover significant
 portions of the HTTP message.
 
-## Exposure of End-user Credentials to Client Instance
+## Exposure of End-user Credentials to Client Instance {#security-credentials}
 
 As a delegation protocol, one of the main goals of GNAP is to prevent the client software from being
 exposed to any credentials or information about the end-user or resource owner as a requirement
@@ -4854,7 +4855,7 @@ possible to implement in a more secure fashion than simply collecting and replay
 the password. Even so, such schemes should only ever be used by trusted clients due to
 the ease of abusing them.
 
-## Mixing Up Authorization Servers
+## Mixing Up Authorization Servers {#security-mixup}
 
 If a client instance is able to work with multiple AS's simultaneously, it is more possible
 for an attacker to add a compromised AS to the client instance's configuration and cause the
@@ -4872,7 +4873,7 @@ of one such attack, which has been since addressed in this document by including
 in the interaction hash calculation. The client instance still needs to validate the hash for
 the attack to be prevented.
 
-## Processing of Client-Presented User Information
+## Processing of Client-Presented User Information {#security-client-userinfo}
 
 GNAP allows the client instance to present assertions and identifiers of the current user to the AS as
 part of the initial request. This information should only ever be taken by the AS as a hint, since the
@@ -4912,7 +4913,7 @@ A special case exists where the AS is the generator of the assertion being prese
 client instance. In these cases, the AS can validate that it did issue the assertion and
 it is associated with the client instance presenting the assertion.
 
-## Client Instance Pre-registration
+## Client Instance Pre-registration {#security-registration}
 
 Each client instance is identified by its own unique key, and for some kinds of client software such as a
 web server or backend system, this identification can be facilitated by registering a single key for a piece
@@ -4948,7 +4949,7 @@ the user to make an informed decision regarding the software they are authorizin
 has done vetting of the client software and this specific instance, it can present a different authorization
 screen compared to a client instance that is presenting all of its information at runtime.
 
-## Client Instance Impersonation
+## Client Instance Impersonation {#security-impersonation}
 
 If client instances are allowed to set their own user-facing display information, such as a display name and website
 URL, a malicious client instance could impersonate legitimate client software for the purposes of tricking
@@ -4967,7 +4968,7 @@ the resource owner to make a more informed delegation decision. For example, an 
 between a client instance that can be traced back to a specific developer's registration and an
 instance that has self-asserted its own key and display information.
 
-## Interception of Information in the Browser
+## Interception of Information in the Browser {#security-browser-interception}
 
 Most information passed through the web-browser is susceptible to interception and possible manipulation by
 elements within the browser such as scripts loaded within pages. Information in the URL is exposed
@@ -4985,7 +4986,7 @@ While these URLs are opaque to the client instance, it's possible for the AS to 
 paths, and other pieces of information that could leak security data or be manipulated by a party
 in the middle of the transaction.
 
-## Callback URL Manipulation
+## Callback URL Manipulation {#security-callback-url}
 
 The callback URL used in interaction finish mechanisms is defined by the client instance. This URL is
 opaque to the AS, but can contain information relevant to the client instance's operations. In
@@ -5002,12 +5003,38 @@ software to look up the details of the pending request. Since this approach requ
 by the client software during the redirection process, clients that are not capable of holding state
 through a redirect should not use redirect-based interaction mechanisms.
 
-## MTLS Deployment Patterns
+## MTLS Message Integrity {#security-mtls}
+
+The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key 
+using a certificate the TLS layer. Since TLS protects the entire HTTP message in transit, 
+verification of the TLS client certificate presented with the message provides a sufficient binding
+between the two. However, since TLS is functioning at a separate layer from HTTP, there is no
+direct connection between the TLS key presentation and the message itself, other than the fact that
+the message was presented over the TLS channel. That is to say, any HTTP message can be presented
+over the TLS channel in question with the same level of trust. The verifier is responsible for
+ensuring the key in the TLS client certificate is the one expected for a particular request.
+
+Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern in deployments adds
+a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system 
+processing the HTTP message no longer has access to the original TLS connection's information and
+context. To compensate for this, the TTRP could inject the TLS client certificate into the forwarded
+request as a header parameter using {{I-D.ietf-httpbis-client-cert-field}}, giving the downstream
+system access to the certificate information. The TTRP has to be trusted to provide accurate 
+certificate information, and the connection between the TTRP and the downstream system also has to
+be protected. The TTRP could provide some additional assurance, for example, by adding its own
+signature to the `Client-Cert` header field using {{I-D.ietf-httpbis-message-signatures}}. This
+signature would be effectively ignored by GNAP but understood by the downstream service as part
+of its deployment.
+
+Additional considerations for different types of deployment patterns and key distribution 
+mechanisms for MTLS are found in {{security-mtls-patterns}}.
+
+## MTLS Deployment Patterns {#security-mtls-patterns}
 
 GNAP does not specify how a client instance's keys could be made known to the AS ahead of time.
 Public Key Infrastructure (PKI) can be used to manage the keys used by client instances when calling
 the AS, allowing the AS to trust a root key from a trusted authority. This method is particularly
-relevant to the MTLS signature method, where the client instance
+relevant to the [MTLS key proofing method, where the client instance
 presents its certificate to the AS as part of the TLS connection. An AS using PKI to validate the
 MTLS connection would need to ensure that the presented certificate was issued by a trusted certificate
 authority before allowing the connection to continue. PKI-based certificates would allow a key to be revoked
@@ -5015,13 +5042,14 @@ and rotated through management at the certificate authority without requiring ad
 or management at the AS. PKI has historically been difficult to deploy, especially at scale, but it
 remains an appropriate solution for systems where the required overhead is not an impediment.
 
-MTLS need not use a PKI backing, as self-signed certificates and certificates from untrusted
-authorities can still be presented as part of a TLS connection. In this case, the AS or RS would
+MTLS in GNAP need not use a PKI backing, as self-signed certificates and certificates from untrusted
+authorities can still be presented as part of a TLS connection. In this case, the verifier would
 validate the connection but accept whatever certificate was presented by the client software. This
 specific certificate would then be bound to all future connections from that client software by
-being bound to the resulting access tokens.
+being bound to the resulting access tokens. See {{security-mtls}} for more considerations on MTLS
+as a key proofing mechanism.
 
-## Interception of Responses from the AS
+## Interception of Responses from the AS {#security-as-response}
 
 Responses from the AS contain information vital to both the security and privacy operations of
 GNAP. This information includes nonces used in cryptographic calculations, subject identifiers,
@@ -5034,7 +5062,7 @@ to exfiltrate and use this token. If the access token is instead bound to the cl
 presented key, intermediaries no longer have sufficient information to use the token. They can
 still, however, gain information about the end user as well as the actions of the client software.
 
-## Key Distribution
+## Key Distribution {#security-key-distribution}
 
 The keys for client instances could be distributed as part of the deployment process of instances
 of the client software. For example, an application installation framework could generate
@@ -5049,7 +5077,7 @@ token itself. This approach would make interception of the return from the token
 equivalent to that of a bearer token, since all information required to use the access token
 would be present in the request.
 
-## Interaction Finish Modes and Polling
+## Interaction Finish Modes and Polling {#security-polling}
 
 During the interaction process, the client instance usually hands control of the user experience
 over to another component, beit the system browser, another application, or some action
@@ -5078,7 +5106,7 @@ method against the deployment capabilities of the client software and its
 environment. Due to the increased security, an interaction finish method should
 be employed whenever possible.
 
-## Storage of Information During Interaction and Continuation
+## Storage of Information During Interaction and Continuation {#security-client-storage}
 
 When starting an interactive grant request, a client application has a number of protocol elements
 that it needs to manage, including nonces, references, keys, access tokens, and other elements.
@@ -5103,7 +5131,7 @@ this URL should not contain any security-sensitive information that would be
 valuable to an attacker, such as any token identifier, nonce, or user information. Instead, a
 cryptographically random value is suggested.
 
-## Denial of Service (DoS) through Grant Continuation
+## Denial of Service (DoS) through Grant Continuation {#security-continuation}
 
 When a client instance starts off an interactive process, it will eventually need to continue the grant
 request in a subsequent message to the AS. It's possible for a naive client implementation to continuously
@@ -5122,7 +5150,7 @@ can choose to return errors to the offending client instance, including possibly
 ongoing grant request. With well-meaning client software these errors can indicate a need to change
 the client software's programmed behavior.
 
-## Exhaustion of Random Value Space
+## Exhaustion of Random Value Space {#security-random-exhaustion}
 
 Several parts of the GNAP process make use of unguessable randomized values, such as nonces,
 tokens, and randomized URLs. Since these values are intended to be unique, a sufficiently
