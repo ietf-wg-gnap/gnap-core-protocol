@@ -56,8 +56,9 @@ normative:
     RFC8174:
     RFC8259:
     RFC8705:
-    I-D.draft-ietf-gnap-resource-servers:
+    I-D.ietf-gnap-resource-servers:
     I-D.ietf-httpbis-message-signatures:
+    I-D.ietf-httpbis-digest-headers:
     I-D.ietf-secevent-subject-identifiers:
     I-D.ietf-oauth-rar:
     OIDC:
@@ -127,7 +128,7 @@ and receive access to information facilitated by the authorization server.
 This specification also discusses discovery mechanisms for the client instance to
 configure itself dynamically.
 The means for an authorization server and resource server to interoperate are
-discussed in the companion document, {{I-D.draft-ietf-gnap-resource-servers}}.
+discussed in the companion document, {{I-D.ietf-gnap-resource-servers}}.
 
 The focus of this protocol is to provide interoperability between the different
 parties acting in each role, and is not to specify implementation details of each.
@@ -315,9 +316,9 @@ Looking back on each trust relationship:
 
 - RS/RO: the RS promises it protects its resources from unauthorized access, and only accepts valid access tokens issued by a trusted AS. In case tokens are key bound, proper validation is expected from the RS. 
 - AS/RO: the AS is expected to follow the decisions made by the RO, either through interactive consent requests, repeated interactions or automated rules (as described in {{sequence}}). Privacy considerations aim to reduce the risk of an honest but too curious AS, or the consequences of an unexpected user data exposure. 
-- AS/RS: the AS promises to issue valid access tokens to legitimate client requests (i.e. after carrying out appropriate due diligence, as defined in the GNAP protocol). Some optional configurations are covered by {{I-D.draft-ietf-gnap-resource-servers}}. 
+- AS/RS: the AS promises to issue valid access tokens to legitimate client requests (i.e. after carrying out appropriate due diligence, as defined in the GNAP protocol). Some optional configurations are covered by {{I-D.ietf-gnap-resource-servers}}. 
 
-A global assumption made by GNAP is that authorization requests are security and privacy sensitive, and appropriate measures are respectively detailed in {{Security}} and {{Privacy}}. 
+A global assumption made by GNAP is that authorization requests are security and privacy sensitive, and appropriate measures are respectively detailed in {{security}} and {{privacy}}. 
 
 A formal trust model is out of scope of this specification, but might be carried out thanks to {{promise-theory}}.
 
@@ -387,7 +388,7 @@ Legend
     the resources needed, or the RO that is needed to approve the
     request. Note that the RO and end-user are often
     the same entity in practice, but some more dynamic processes are discussed in
-    {{I-D.draft-ietf-gnap-resource-servers}}.
+    {{I-D.ietf-gnap-resource-servers}}.
 
 - (1) The client instance determines what access is needed and which AS to approach for access. Note that
     for most situations, the client instance is pre-configured with which AS to talk to and which
@@ -419,7 +420,7 @@ Legend
 - (7) The RS determines if the token is sufficient for the request by
     examining the token. The means of the RS determining this access are
     out of scope of this specification, but some options are discussed in
-    {{I-D.draft-ietf-gnap-resource-servers}}.
+    {{I-D.ietf-gnap-resource-servers}}.
 
 - (8) The client instance [calls the RS](#use-access-token) using the access token
     until the RS or client instance determine that the token is no longer valid.
@@ -435,7 +436,7 @@ Legend
 - (12) The RS determines if the new token is sufficient for the request.
     The means of the RS determining this access are
     out of scope of this specification, but some options are discussed in
-    {{I-D.draft-ietf-gnap-resource-servers}}.
+    {{I-D.ietf-gnap-resource-servers}}.
 
 - (13) The client instance [disposes of the token](#revoke-access-token) once the client instance
     has completed its access of the RS and no longer needs the token.
@@ -4527,7 +4528,7 @@ the client instance was attempting to take at the RS and MAY be more
 powerful.
 The means for the RS to determine the resource reference are out of scope
 of this specification, but some dynamic methods are discussed in
-{{I-D.draft-ietf-gnap-resource-servers}}.
+{{I-D.ietf-gnap-resource-servers}}.
 The content of the resource reference is opaque to the client instance.
 
 ~~~
@@ -4622,7 +4623,7 @@ All requests in GNAP have to be made over TLS or equivalent as outlined in {{BCP
 to protect the contents of the request and response from manipulation and interception by an attacker.
 This includes all requests from a client instance to the AS, all requests from the client instance to
 an RS, any requests back to a client instance such as the push-based interaction finish method, and
-any back-end communications such as from an RS to an AS as described in {{I-D.draft-ietf-gnap-resource-servers}}.
+any back-end communications such as from an RS to an AS as described in {{I-D.ietf-gnap-resource-servers}}.
 Additionally, all requests between a browser and other components, such as during redirect-based
 interaction, need to be made over TLS or use equivalent protection.
 
@@ -5240,7 +5241,7 @@ susceptible to having an attacker try to co-opt one or more of those URLs in ord
 user. It is the responsibility of the AS and the client software to provide appropriate warnings,
 education, and mitigation to protect end users.
 
-# Privacy Considerations {#Privacy}
+# Privacy Considerations {#privacy}
 
 The privacy considerations in this section are modeled after the list of privacy threats in [[RFC6973]], "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
 
