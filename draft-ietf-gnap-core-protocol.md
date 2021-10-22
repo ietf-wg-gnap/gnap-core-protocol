@@ -1827,7 +1827,7 @@ simultaneously as an opaque identifier, an email address, and a decentralized id
 ## Request Continuation {#response-continue}
 
 If the AS determines that the request can be continued with
-additional requests, it responds with the "continue" field. This field
+additional requests, it responds with the `continue` field. This field
 contains a JSON object with the following properties.
 
 
@@ -1844,15 +1844,13 @@ wait (integer)
             handle and calling the URI.
 
 access_token (object)
-: REQUIRED. A unique access token for continuing the request, in the format specified
+: REQUIRED. A unique access token for continuing the request, called the "continuation access token".
+            The value of this property MUST be in the format specified
             in {{response-token-single}}. This access token MUST be bound to the
-            client instance's key used in the request and MUST NOT be a `bearer` token. As a consequence,
+            client instance's key used in the request and MUST NOT be a bearer token. As a consequence,
             the `flags` array of this access token MUST NOT contain the string `bearer` and the
             `key` field MUST be omitted.
-            This access token MUST NOT be usable at resources outside of the AS.
-            The client instance MUST present the access token in all requests to the continuation URI as
-            described in {{use-access-token}}.
-            \[\[ [See issue #66](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/66) \]\]
+            The client instance MUST present the continuation access token in all requests to the continuation URI as described in {{use-access-token}}.
 
 ~~~
 {
@@ -2791,16 +2789,18 @@ To enable this ongoing negotiation, the AS provides a continuation API to the cl
 The AS returns a `continue` field
 [in the response](#response-continue) that contains information the client instance needs to
 access this API, including a URI to access
-as well as an access token to use during the continued requests.
+as well as a continuation access token to use during the requests.
 
-The access token is initially bound to the same key and method the client instance used to make
+The continuation access token is initially bound to the same key and method the client instance used to make
 the initial request. As a consequence,
 when the client instance makes any calls to the continuation URL, the client instance MUST present
-the access token as described in {{use-access-token}} and present
+the continuation access token as described in {{use-access-token}} and present
 proof of the client instance's key (or its most recent rotation)
 by signing the request as described in {{binding-keys}}.
 The AS MUST validate all keys presented by the client instance or referenced in an
 ongoing request for each call within that request.
+
+Access tokens other than the continuation access tokens MUST NOT be usable for continuation requests.
 
 \[\[ [See issue #85](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/85) \]\]
 
@@ -2817,7 +2817,7 @@ Signature: sig1=...
 
 The AS MUST be able to tell from the client instance's request which specific ongoing request
 is being accessed, using a combination of the continuation URL,
-the provided access token, and the client instance identified by the key signature.
+the provided continuation access token, and the client instance identified by the key signature.
 If the AS cannot determine a single active grant request to map the
 continuation request to, the AS MUST return an error.
 
@@ -2825,7 +2825,7 @@ The ability to continue an already-started request allows the client instance to
 important functions, including presenting additional information from interaction,
 modifying the initial request, and getting the current state of the request.
 
-All requests to the continuation API are protected by this bound access token.
+All requests to the continuation API are protected by this bound continuation access token.
 For example, here the client instance makes a POST request to a stable continuation endpoint
 URL with the [interaction reference](#continue-after-interaction),
 includes the access token, and signs with HTTP Message Signatures:
@@ -2844,9 +2844,9 @@ Digest: sha256=...
 }
 ~~~
 
-If a "wait" parameter was included in the [continuation response](#response-continue), the
+If a `wait` parameter was included in the [continuation response](#response-continue), the
 client instance MUST NOT call the continuation URI prior to waiting the number of
-seconds indicated. If no "wait" period is indicated, the client instance SHOULD
+seconds indicated. If no `wait` period is indicated, the client instance SHOULD
 wait at least 5 seconds. If the client instance does not respect the
 given wait period, the AS MUST return an error.
 \[\[ [See issue #86](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/86) \]\]
@@ -2858,7 +2858,7 @@ sections below.
 If the AS determines that the client instance can
 make a further continuation request, the AS MUST include a new
 ["continue" response](#response-continue).
-The new `continue` response MUST include a bound access token as well, and
+The new `continue` response MUST include a continuation access token as well, and
 this token SHOULD be a new access token, invalidating the previous access token.
 If the AS does not return a new `continue` response, the client instance
 MUST NOT make an additional continuation request. If a client instance does so,
