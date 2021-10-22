@@ -1197,8 +1197,11 @@ channels by the client instance, as discussed in {{response-subject}}.
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
 Note: the "formats" and "assertions" request fields are independent of
-each other, and a returned assertion MAY omit a requested subject
+each other, and a returned assertion MAY use a different subject
 identifier.
+
+See {{security-assertions}} for considerations that the AS has to make when accepting and
+processing assertions from the client instance.
 
 \[\[ [See issue #43](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/43) \]\]
 
@@ -1379,9 +1382,11 @@ sub_ids (array of objects)
 assertions (object)
 : An object containing assertions as values keyed on the assertion
     type defined by [a registry TBD](#IANA). Possible keys include
-    `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
-    assertion values are defined by [a registry TBD](#IANA).
+    `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
+    values are the string serialization of the assertion format, encoded as a plain
+    JSON string. Additional assertion types are defined by [a registry TBD](#IANA).
     \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
+
 
 ~~~
 "user": {
@@ -1411,6 +1416,9 @@ during an interaction step, the AS SHOULD reject the request with an error.
 If the AS trusts the client instance to present verifiable assertions, the AS MAY
 decide, based on its policy, to skip interaction with the RO, even
 if the client instance provides one or more interaction modes in its request.
+
+See {{security-assertions}} for considerations that the AS has to make when accepting and
+processing assertions from the client instance.
 
 
 ### Identifying the User by Reference {#request-user-reference}
@@ -2311,10 +2319,12 @@ sub_ids (array of objects)
             RO, as defined by
             {{I-D.ietf-secevent-subject-identifiers}}.
 
-assertions (object)
-: An object containing assertions as values
-            keyed on the assertion type defined by [a registry TBD](#IANA).
-            \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
+: An object containing assertions as values keyed on the assertion
+    type defined by [a registry TBD](#IANA). Possible keys include
+    `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
+    values are the string serialization of the assertion format, encoded as a plain
+    JSON string. Additional assertion types are defined by [a registry TBD](#IANA).
+    \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
 updated_at (string)
 : Timestamp as an ISO8610 date string, indicating
@@ -5240,6 +5250,28 @@ Ultimately, all protocols that use redirect-based communication through the user
 susceptible to having an attacker try to co-opt one or more of those URLs in order to harm the
 user. It is the responsibility of the AS and the client software to provide appropriate warnings,
 education, and mitigation to protect end users.
+
+## Processing Assertions {#security-assertions}
+
+Identity assertions can be used in GNAP to convey subject information, both from the AS to the
+client instance in a [response](#response-subject) and from the client instance to the AS in
+a [request](#request-subject). In both of these circumstances, when an assertion is passed in
+GNAP, the receiver of the assertion needs to parse and process the assertion. As assertions are
+complex artifacts with their own syntax and security, special care needs to be taken to prevent the
+assertion values from being used as an attack vector.
+
+All assertion processing needs to account for the security aspects of the assertion format in
+use. In particular, the processor needs to parse the assertion from a JSON string object,
+and apply the appropriate cryptographic processes to ensure the integrity of the assertion.
+
+For example, when SAML assertions are used, the receiver hast to parse an XML document. There are
+many well-known security vulnerabilities in XML parsers, and the XML standard itself can be
+attacked through the use of processing instructions and entity expansions to cause problems
+with the processor. Therefore, any system capable of processing SAML assertions also needs to
+have a secure and correct XML parser. In addition to this, the SAML specification uses XML
+Signatures, which have their own implementation problems that need to be accounted for. Similar 
+requirements exist for OpenID Connect's ID token, which is based on the JSON Web Token (JWT) format 
+and the related JSON Object Signing And Encryption (JOSE) cryptography suite.
 
 # Privacy Considerations {#privacy}
 
