@@ -5218,7 +5218,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 - -08
-    - Update definition for "Client" to account for the case of end-user absence
+    - Update definition for "Client" to account for the case of no end-user 
 
 - -07
     - Replace user handle by opaque identifier 
