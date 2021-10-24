@@ -293,7 +293,7 @@ Right
 : ability given to a subject to perform a given operation on a resource under the control of an RS.
 
 Subject
-: person, organization or device.
+: person, organization or device. It decides whether and under which conditions its attributes can be disclosed to other parties.
 
 Subject Information
 : statement asserted by an AS about a subject.
@@ -5218,7 +5218,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 - -08
-    - 
+    - Change definition for "Subject"
 
 - -07
     - Replace user handle by opaque identifier 
