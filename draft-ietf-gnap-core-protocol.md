@@ -197,7 +197,7 @@ Authorization Server (AS)
 : server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information).
 
 Client
-: application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs.
+: application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end-user, or it runs on behalf of a resource owner.
 
     Example: a client can be a mobile application, a web application, etc.
     
@@ -4927,7 +4927,7 @@ The registration should also include any information that would aid in the autho
 a display name and logo. The registration record can also limit a given client to ask for certain
 kinds of information and access, or be limited to specific interaction mechanisms at runtime.
 
-It also is sensible to pre-register client instances when the software is acting on its own behalf, without
+It also is sensible to pre-register client instances when the software is acting autonomously, without
 the need for a runtime approval by a resource owner or any interaction with an end-user. In these cases,
 an AS needs to rest on the trust decisions that have been determined prior to runtime in determining
 what rights and tokens to grant to a given client instance.
