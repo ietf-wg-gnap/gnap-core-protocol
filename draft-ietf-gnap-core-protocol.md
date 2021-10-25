@@ -197,7 +197,7 @@ Authorization Server (AS)
 : server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information).
 
 Client
-: application operated by an end-user that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end-user or it runs autonomously on behalf of a resource owner.
+: application that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end-user or it runs autonomously on behalf of a resource owner.
 
     Example: a client can be a mobile application, a web application, etc.
     
