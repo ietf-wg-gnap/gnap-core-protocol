@@ -5079,7 +5079,7 @@ mechanisms for MTLS are found in {{security-mtls-patterns}}.
 GNAP does not specify how a client instance's keys could be made known to the AS ahead of time.
 Public Key Infrastructure (PKI) can be used to manage the keys used by client instances when calling
 the AS, allowing the AS to trust a root key from a trusted authority. This method is particularly
-relevant to the [MTLS key proofing method, where the client instance
+relevant to the MTLS key proofing method, where the client instance
 presents its certificate to the AS as part of the TLS connection. An AS using PKI to validate the
 MTLS connection would need to ensure that the presented certificate was issued by a trusted certificate
 authority before allowing the connection to continue. PKI-based certificates would allow a key to be revoked
