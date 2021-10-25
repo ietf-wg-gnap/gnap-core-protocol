@@ -1201,9 +1201,6 @@ Note: the "formats" and "assertions" request fields are independent of
 each other, and a returned assertion MAY use a different subject
 identifier.
 
-See {{security-assertions}} for considerations that the AS has to make when accepting and
-processing assertions from the client instance.
-
 \[\[ [See issue #43](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/43) \]\]
 
 ## Identifying the Client Instance {#request-client}
@@ -2360,6 +2357,9 @@ are outside the scope of this specification.
 
 Extensions to this specification MAY define additional response
 properties in [a registry TBD](#IANA).
+
+See {{security-assertions}} for considerations that the client instance has to make when accepting 
+and processing assertions from the AS.
 
 ## Returning a Dynamically-bound Client Instance Identifier {#response-dynamic-handles}
 
