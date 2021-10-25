@@ -2360,7 +2360,7 @@ are outside the scope of this specification.
 Extensions to this specification MAY define additional response
 properties in [a registry TBD](#IANA).
 
-## Returning Dynamically-bound Reference Handles {#response-dynamic-handles}
+## Returning a Dynamically-bound Client Instance Identifier {#response-dynamic-handles}
 
 Many parts of the client instance's request can be passed as either a value
 or a reference. The use of a reference in place of a value allows
@@ -2372,29 +2372,23 @@ admin console or developer portal provided by the AS or RS. The developer
 of the client software can include these values in their code for a more
 efficient and compact request.
 
-If desired, the AS MAY also generate and return some of these references
-dynamically to the client instance in its response to facilitate multiple
-interactions with the same software. The client instance SHOULD use these
-references in future requests in lieu of sending the associated data
-value. These handles are intended to be used on future requests.
+If desired, the AS MAY also generate and return an instance identifier
+dynamically to the client instance in the response to facilitate multiple
+interactions with the same client instance over time. The client instance SHOULD use this
+instance identifier in future requests in lieu of sending the associated data
+values in the `client` field.
 
-Dynamically generated handles are string values that MUST be
-protected by the client instance as secrets. Handle values MUST be unguessable
-and MUST NOT contain any sensitive information. Handle values are
+Dynamically generated client instance identifiers are string values that MUST be
+protected by the client instance as secrets. Instance identifier values MUST be unguessable
+and MUST NOT contain any sensitive information. Instance identifier values are
 opaque to the client instance.
-
-All dynamically generated handles are returned as fields in the
-root JSON object of the response. This specification defines the
-following dynamic handle return, additional handles can be defined in
-[a registry TBD](#IANA).
-
 
 instance_id (string)
 : A string value used to represent the information
             in the `client` object that the client instance can use in a future request, as
             described in {{request-instance}}.
 
-This non-normative example shows one handle along side an issued access token.
+This non-normative example shows an instance identifier along side an issued access token.
 
 ~~~
 {
