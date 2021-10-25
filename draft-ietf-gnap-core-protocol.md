@@ -2448,7 +2448,7 @@ the grant response in [a registry TBD](#IANA).
 
 # Determining Authorization and Consent {#authorization}
 
-When the client instance makes its [request](#request) to the AS for delegated access, it
+When the client instance makes its [initial request](#request) to the AS for delegated access, it
 is capable of asking for several different kinds of information in response:
 
 - the access being requested in the `access_token` request parameter
@@ -2472,7 +2472,7 @@ if the requested delegation can be granted immediately. The client instance can 
 The AS will verify this presented information in the context of the client instance's request and
 can only trust the information as much as it trusts the presentation and context of the information.
 If the AS determines that the information presented in the initial request is sufficient for granting the requested
-access, the AS MAY return the positive results immediately in its [response](#response) with
+access, the AS MAY return the positive results [immediately in its response](#response) with
 access tokens and subject information.
 
 If the AS determines that additional runtime authorization is required, the AS can either deny the request
@@ -2796,7 +2796,7 @@ NOTE: '\' line wrapping per RFC 8792
 
 # Continuing a Grant Request {#continue-request}
 
-While it is possible for the AS to return a [response](#response) with all the
+While it is possible for the AS to return a [grant response](#response) with all the
 client instance's requested information (including [access tokens](#response-token) and
 [direct user information](#response-subject)), it's more common that the AS and
 the client instance will need to communicate several times over the lifetime of an access grant.
@@ -2913,7 +2913,7 @@ MUST NOT include the interaction reference. If the AS detects a client instance 
 interaction reference multiple times, the AS MUST return an error and SHOULD invalidate
 the ongoing request.
 
-The [response](#response) MAY contain any newly-created [access tokens](#response-token) or
+The [grant response](#response) MAY contain any newly-created [access tokens](#response-token) or
 newly-released [subject claims](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. The response
 SHOULD NOT contain any [interaction responses](#response-interact).
@@ -2961,7 +2961,7 @@ Signature-Input: sig1=...
 Signature: sig1=...
 ~~~
 
-The [response](#response) MAY contain any newly-created [access tokens](#response-token) or
+The [grant response](#response) MAY contain any newly-created [access tokens](#response-token) or
 newly-released [subject claims](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. If a `continue`
 field is included, it SHOULD include a `wait` field to facilitate a reasonable polling rate by
@@ -3048,7 +3048,7 @@ MAY revoke existing access tokens after a modification has occurred.
 \[\[ [See issue #96](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/96) \]\]
 
 If the modified request can be granted immediately by the AS,
-the [response](#response) MAY contain any newly-created [access tokens](#response-token) or
+the [grant response](#response) MAY contain any newly-created [access tokens](#response-token) or
 newly-released [subject claims](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. If interaction
 can occur, the response SHOULD contain [interaction responses](#response-interact) as well.
