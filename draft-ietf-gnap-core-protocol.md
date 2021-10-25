@@ -309,15 +309,19 @@ This trust objective can be decomposed into trust relationships between software
 
 Looking back on each trust relationship:
 
-- end-user/RO: this relationship exists only when the end-user and the RO are different, in which case the end-user needs some out of band mechanism of getting the RO consent (see {{authorization}}). GNAP generally assumes that humans can be authenticated thanks to identity protocols (for instance, through an id_token assertion in {{request-subject}}). 
+- end-user/RO: this relationship exists only when the end-user and the RO are different, in which case the end-user needs some out of band mechanism of getting the RO consent (see {{authorization}}). GNAP generally assumes that humans can be authenticated thanks to identity protocols (for instance, through an id_token assertion in {{request-subject}}).
 
-- end-user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers promise to implement requirements and generally some recommendations or best practices, so that the end-users may confidently use their software. However, end-users might also be facing some attacker's client software, without even realizing it. 
-- end-user / AS: when the client supports it (see {{response-interact}}), the end-user gets to interact with front-channel URLs provided by the AS.   
-- client/AS: An honest AS may be facing an attacker's client (as discussed just above), or the reverse, and GNAP aims at making common attacks impractical. The core specification makes access tokens opaque to the client and defines the request/response scheme in detail, therefore avoiding extra trust hypotheses from this critical piece of software. Yet the AS may further define cryptographic attestations or optional rules to simplify the access of clients it already trusts, due to past behavior or organizational policies (see {{request-client}}). 
+- end-user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers promise to implement requirements and generally some recommendations or best practices, so that the end-users may confidently use their software. However, end-users might also be facing some attacker's client software, without even realizing it.
 
-- RS/RO: the RS promises it protects its resources from unauthorized access, and only accepts valid access tokens issued by a trusted AS. In case tokens are key bound, proper validation is expected from the RS. 
-- AS/RO: the AS is expected to follow the decisions made by the RO, either through interactive consent requests, repeated interactions or automated rules (as described in {{sequence}}). Privacy considerations aim to reduce the risk of an honest but too curious AS, or the consequences of an unexpected user data exposure. 
-- AS/RS: the AS promises to issue valid access tokens to legitimate client requests (i.e. after carrying out appropriate due diligence, as defined in the GNAP protocol). Some optional configurations are covered by {{I-D.ietf-gnap-resource-servers}}. 
+- end-user / AS: when the client supports it (see {{response-interact}}), the end-user gets to interact with front-channel URLs provided by the AS. See {{security-front-channel}} for some considerations in trusting these interactions.
+
+- client/AS: An honest AS may be facing an attacker's client (as discussed just above), or the reverse, and GNAP aims at making common attacks impractical. The core specification makes access tokens opaque to the client and defines the request/response scheme in detail, therefore avoiding extra trust hypotheses from this critical piece of software. Yet the AS may further define cryptographic attestations or optional rules to simplify the access of clients it already trusts, due to past behavior or organizational policies (see {{request-client}}).
+
+- RS/RO: the RS promises it protects its resources from unauthorized access, and only accepts valid access tokens issued by a trusted AS. In case tokens are key bound, proper validation is expected from the RS.
+
+- AS/RO: the AS is expected to follow the decisions made by the RO, either through interactive consent requests, repeated interactions or automated rules (as described in {{sequence}}). Privacy considerations aim to reduce the risk of an honest but too curious AS, or the consequences of an unexpected user data exposure.
+
+- AS/RS: the AS promises to issue valid access tokens to legitimate client requests (i.e. after carrying out appropriate due diligence, as defined in the GNAP protocol). Some optional configurations are covered by {{I-D.ietf-gnap-resource-servers}}.
 
 A global assumption made by GNAP is that authorization requests are security and privacy sensitive, and appropriate measures are respectively detailed in {{security}} and {{privacy}}. 
 
@@ -388,12 +392,12 @@ Legend
     behalf of the RO. This could identify the RS the client instance needs to call,
     the resources needed, or the RO that is needed to approve the
     request. Note that the RO and end-user are often
-    the same entity in practice, but some more dynamic processes are discussed in
-    {{I-D.ietf-gnap-resource-servers}}.
+    the same entity in practice, but GNAP makes no general assumption that they are.
 
 - (1) The client instance determines what access is needed and which AS to approach for access. Note that
     for most situations, the client instance is pre-configured with which AS to talk to and which
-    kinds of access it needs.
+    kinds of access it needs, but some more dynamic processes are discussed in
+    {{rs-request-without-token}}.
 
 - (2) The client instance [requests access at the AS](#request).
 
@@ -408,7 +412,9 @@ Legend
     redirects, applications, challenge/response protocols, or
     other methods. The RO approves the request for the client instance
     being operated by the end-user. Note that the RO and end-user are often
-    the same entity in practice.
+    the same entity in practice, and many of GNAP's interaction methods allow
+    the client instance to facilitate the end user interacting with the AS
+    in order to fulfill the role of the RO.
 
 - (4) The client instance [continues the grant at the AS](#continue-request).
 
@@ -2868,7 +2874,6 @@ client instance MUST NOT call the continuation URI prior to waiting the number o
 seconds indicated. If no `wait` period is indicated, the client instance SHOULD
 wait at least 5 seconds. If the client instance does not respect the
 given wait period, the AS MUST return an error.
-\[\[ [See issue #86](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/86) \]\]
 
 The response from the AS is a JSON object and MAY contain any of the
 fields described in {{response}}, as described in more detail in the
@@ -5270,7 +5275,7 @@ and the related JSON Object Signing And Encryption (JOSE) cryptography suite.
 
 # Privacy Considerations {#privacy}
 
-The privacy considerations in this section are modeled after the list of privacy threats in [[RFC6973]], "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
+The privacy considerations in this section are modeled after the list of privacy threats in {{RFC6973}}, "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
 
 ## Surveillance
 
@@ -5346,8 +5351,11 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 - -08
-    - Update definition for "Client" to account for the case of no end-user 
-    - Change definition for "Subject"
+    - Update definition for "Client" to account for the case of no end-user.
+    - Change definition for "Subject".
+    - Expanded security and privacy considerations for more situations.
+    - Added cross-links from security and privacy considerations.
+    - Editorial updates.
 
 - -07
     - Replace user handle by opaque identifier 
