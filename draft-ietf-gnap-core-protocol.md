@@ -43,7 +43,6 @@ normative:
            ins: R. Holz
          -
            ins: P. Saint-Andre
-    I-D.draft-ietf-gnap-resource-servers:
     RFC2119:
     RFC3230:
     RFC3986:
@@ -57,8 +56,9 @@ normative:
     RFC8174:
     RFC8259:
     RFC8705:
+    I-D.ietf-gnap-resource-servers:
     I-D.ietf-httpbis-message-signatures:
-    I-D.ietf-oauth-signed-http-request:
+    I-D.ietf-httpbis-digest-headers:
     I-D.ietf-secevent-subject-identifiers:
     I-D.ietf-oauth-rar:
     OIDC:
@@ -78,6 +78,8 @@ normative:
           ins: C. Mortimore
 
 informative:
+    RFC6973:
+    I-D.ietf-httpbis-client-cert-field:
     promise-theory:
        target: 'http://markburgess.org/promises.html'
        title: Promise theory
@@ -87,7 +89,6 @@ informative:
            ins: M. Burgess
          -
            ins: J. Bergstra
-    RFC6973:
     attack-surfaces:
         target: 'https://odr.chalmers.se/handle/20.500.12380/304105'
         title: Security Analysis of Attack Surfaces on the Grant Negotiation and Authorization Protocol
@@ -127,7 +128,7 @@ and receive access to information facilitated by the authorization server.
 This specification also discusses discovery mechanisms for the client instance to
 configure itself dynamically.
 The means for an authorization server and resource server to interoperate are
-discussed in the companion document, {{I-D.draft-ietf-gnap-resource-servers}}.
+discussed in the companion document, {{I-D.ietf-gnap-resource-servers}}.
 
 The focus of this protocol is to provide interoperability between the different
 parties acting in each role, and is not to specify implementation details of each.
@@ -315,9 +316,9 @@ Looking back on each trust relationship:
 
 - RS/RO: the RS promises it protects its resources from unauthorized access, and only accepts valid access tokens issued by a trusted AS. In case tokens are key bound, proper validation is expected from the RS. 
 - AS/RO: the AS is expected to follow the decisions made by the RO, either through interactive consent requests, repeated interactions or automated rules (as described in {{sequence}}). Privacy considerations aim to reduce the risk of an honest but too curious AS, or the consequences of an unexpected user data exposure. 
-- AS/RS: the AS promises to issue valid access tokens to legitimate client requests (i.e. after carrying out appropriate due diligence, as defined in the GNAP protocol). Some optional configurations are covered by {{I-D.draft-ietf-gnap-resource-servers}}. 
+- AS/RS: the AS promises to issue valid access tokens to legitimate client requests (i.e. after carrying out appropriate due diligence, as defined in the GNAP protocol). Some optional configurations are covered by {{I-D.ietf-gnap-resource-servers}}. 
 
-A global assumption made by GNAP is that authorization requests are security and privacy sensitive, and appropriate measures are respectively detailed in {{Security}} and {{Privacy}}. 
+A global assumption made by GNAP is that authorization requests are security and privacy sensitive, and appropriate measures are respectively detailed in {{security}} and {{privacy}}. 
 
 A formal trust model is out of scope of this specification, but might be carried out thanks to {{promise-theory}}.
 
@@ -387,7 +388,7 @@ Legend
     the resources needed, or the RO that is needed to approve the
     request. Note that the RO and end-user are often
     the same entity in practice, but some more dynamic processes are discussed in
-    {{I-D.draft-ietf-gnap-resource-servers}}.
+    {{I-D.ietf-gnap-resource-servers}}.
 
 - (1) The client instance determines what access is needed and which AS to approach for access. Note that
     for most situations, the client instance is pre-configured with which AS to talk to and which
@@ -419,7 +420,7 @@ Legend
 - (7) The RS determines if the token is sufficient for the request by
     examining the token. The means of the RS determining this access are
     out of scope of this specification, but some options are discussed in
-    {{I-D.draft-ietf-gnap-resource-servers}}.
+    {{I-D.ietf-gnap-resource-servers}}.
 
 - (8) The client instance [calls the RS](#use-access-token) using the access token
     until the RS or client instance determine that the token is no longer valid.
@@ -435,7 +436,7 @@ Legend
 - (12) The RS determines if the new token is sufficient for the request.
     The means of the RS determining this access are
     out of scope of this specification, but some options are discussed in
-    {{I-D.draft-ietf-gnap-resource-servers}}.
+    {{I-D.ietf-gnap-resource-servers}}.
 
 - (13) The client instance [disposes of the token](#revoke-access-token) once the client instance
     has completed its access of the RS and no longer needs the token.
@@ -1019,10 +1020,11 @@ The values of the `flags` field defined by this specification are as follows:
 "bearer"
 : If this flag is included, the access token being requested is a bearer token.
     If this flag is omitted, the access token is bound to the key used
-    by the client instance in this request, or the key's most recent rotation.
+    by the client instance in this request (or that key's most recent rotation)
+    and the access token MUST be presented using the same key and proofing method.
     Methods for presenting bound and bearer access tokens are described
-    in {{use-access-token}}.
-    \[\[ [See issue #38](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/38) \]\]
+    in {{use-access-token}}. See {{security-bearer-tokens}} for additional
+    considerations on the use of bearer tokens.
 
 "split"
 : If this flag is included, the client instance is capable of
@@ -1195,8 +1197,11 @@ channels by the client instance, as discussed in {{response-subject}}.
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
 Note: the "formats" and "assertions" request fields are independent of
-each other, and a returned assertion MAY omit a requested subject
+each other, and a returned assertion MAY use a different subject
 identifier.
+
+See {{security-assertions}} for considerations that the AS has to make when accepting and
+processing assertions from the client instance.
 
 \[\[ [See issue #43](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/43) \]\]
 
@@ -1257,10 +1262,7 @@ associated with the key in the request.  Proof types
 are defined in [a registry TBD](#IANA) and an initial set of methods
 is described in {{binding-keys}}.
 
-Note that the AS MAY know the client instance's public key ahead of time, and
-the AS MAY apply different policies to the request depending on what
-has been registered against that key.
-If the same public key is sent by value on subsequent access requests, the AS SHOULD
+If the same public key is sent by value on different access requests, the AS MUST
 treat these requests as coming from the same client instance for purposes
 of identification, authentication, and policy application.
 If the AS does not know the client instance's public key ahead of time, the AS
@@ -1268,6 +1270,18 @@ MAY accept or reject the request based on AS policy, attestations
 within the `client` request, and other mechanisms.
 
 \[\[ [See issue #44](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/44) \]\]
+
+The client instance MUST NOT send a symmetric key by value in the request, as doing so would expose
+the key directly instead of simply proving possession of it. See considerations on symmetric keys
+in {{security-symmetric}}.
+
+The client instance's key MAY be pre-registered with the AS ahead of time and associated
+with a set of policies and allowable actions pertaining to that client. If this pre-registration
+includes other fields that can occur in the `client` request object described in this section,
+such as `class_id` or `display`, the pre-registered values MUST take precedence over any values
+given at runtime. Additional fields sent during a request but not present in a pre-registered 
+client instance record at the AS SHOULD NOT be added to the client's pre-registered record.
+See additional considerations regarding client instance impersonation in {{security-impersonation}}.
 
 ### Identifying the Client Instance by Reference {#request-instance}
 
@@ -1290,9 +1304,8 @@ If the AS does not recognize the instance identifier, the request MUST be reject
 with an error.
 
 If the client instance is identified in this manner, the registered key for the client instance
-MAY be a symmetric key known to the AS. The client instance MUST NOT send a
-symmetric key by value in the request, as doing so would expose
-the key directly instead of proving possession of it.
+MAY be a symmetric key known to the AS. See considerations on symmetric keys
+in {{security-symmetric}}.
 
 ### Providing Displayable Client Instance Information {#request-display}
 
@@ -1328,7 +1341,8 @@ The AS SHOULD use these values during interaction with the RO.
 The values are for informational purposes only and MUST NOT
 be taken as authentic proof of the client instance's identity or source.
 The AS MAY restrict display values to specific client instances, as identified
-by their keys in {{request-client}}.
+by their keys in {{request-client}}. See additional considerations for displayed
+client information in {{security-impersonation}}.
 
 ### Authenticating the Client Instance {#request-key-authenticate}
 
@@ -1368,9 +1382,11 @@ sub_ids (array of objects)
 assertions (object)
 : An object containing assertions as values keyed on the assertion
     type defined by [a registry TBD](#IANA). Possible keys include
-    `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
-    assertion values are defined by [a registry TBD](#IANA).
+    `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
+    values are the string serialization of the assertion format, encoded as a plain
+    JSON string. Additional assertion types are defined by [a registry TBD](#IANA).
     \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
+
 
 ~~~
 "user": {
@@ -1400,6 +1416,9 @@ during an interaction step, the AS SHOULD reject the request with an error.
 If the AS trusts the client instance to present verifiable assertions, the AS MAY
 decide, based on its policy, to skip interaction with the RO, even
 if the client instance provides one or more interaction modes in its request.
+
+See {{security-assertions}} for considerations that the AS has to make when accepting and
+processing assertions from the client instance.
 
 
 ### Identifying the User by Reference {#request-user-reference}
@@ -1537,6 +1556,9 @@ If this interaction mode is supported for this client instance and
 request, the AS returns a redirect interaction response {{response-interact-redirect}}.
 The client instance manages this interaction method as described in {{interaction-redirect}}.
 
+See {{security-front-channel}} for more considerations regarding the use of front-channel
+communication techniques such as this.
+
 #### Open an Application-specific URL {#request-interact-app}
 
 If the client instance can open a URL associated with an application on
@@ -1636,8 +1658,6 @@ presentation of an interaction callback reference as described in
 
 \[\[ [See issue #58](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/58) \]\]
 
-\[\[ [See issue #59](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/59) \]\]
-
 #### Receive an HTTP Callback Through the Browser {#request-interact-callback-redirect}
 
 A finish `method` value of `redirect` indicates that the client instance
@@ -1662,6 +1682,9 @@ browser, this method is usually used when the RO and end-user are the
 same entity. As such, the client instance MUST ensure the end-user is present on the request to
 prevent substitution attacks.
 
+See {{security-front-channel}} for more considerations regarding the use of front-channel
+communication techniques such as this.
+
 #### Receive an HTTP Direct Callback {#request-interact-callback-push}
 
 A finish `method` value of `push` indicates that the client instance will
@@ -1684,8 +1707,6 @@ Requests to the callback URI MUST be processed by the client instance as describ
 Since the incoming request to the callback URL is from the AS and
 not from the RO's browser, the client instance MUST NOT require the end-user to
 be present on the incoming HTTP request.
-
-\[\[ [See issue #60](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/60) \]\]
 
 ### Hints {#request-interact-hint}
 
@@ -1947,12 +1968,13 @@ flags (array of strings)
 The values of the `flags` field defined by this specification are as follows:
 
 "bearer"
-: This flag indicates whether the token is bound to the client instance's key.
+: This flag indicates whether the token is a bearer token, not bound to a key and proofing mechanism.
     If the `bearer` flag is present, the access token is a bearer token, and the `key`
     field in this response MUST be omitted. If the `bearer` flag is omitted and the `key` field
     in this response is omitted, the token is bound the [key used by the client instance](#request-client)
     in its request for access. If the `bearer` flag is omitted, and the `key` field is present,
     the token is bound to the key and proofing mechanism indicated in the `key` field.
+    See {{security-bearer-tokens}} for additional considerations on the use of bearer tokens.
 
 "durable"
 : OPTIONAL. Flag indicating a hint of AS behavior on token rotation.
@@ -2297,10 +2319,12 @@ sub_ids (array of objects)
             RO, as defined by
             {{I-D.ietf-secevent-subject-identifiers}}.
 
-assertions (object)
-: An object containing assertions as values
-            keyed on the assertion type defined by [a registry TBD](#IANA).
-            \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
+: An object containing assertions as values keyed on the assertion
+    type defined by [a registry TBD](#IANA). Possible keys include
+    `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
+    values are the string serialization of the assertion format, encoded as a plain
+    JSON string. Additional assertion types are defined by [a registry TBD](#IANA).
+    \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
 updated_at (string)
 : Timestamp as an ISO8610 date string, indicating
@@ -2990,6 +3014,9 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
+See {{security-polling}} for considerations on polling for continuation without an interaction
+`finish` method.
+
 ## Modifying an Existing Request {#continue-modify}
 
 The client instance might need to modify an ongoing request, whether or not tokens have already been
@@ -3484,9 +3511,19 @@ the "GNAP" authorization scheme along with a key proof as described in {{binding
 for the key bound to the access token. For example, an "httpsig"-bound access token is sent as follows:
 
 ~~~
-Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Signature-Input: sig1=(authorization);...
-Signature: sig1=...
+NOTE: '\' line wrapping per RFC 8792
+
+GET /stuff HTTP/1.1
+Host: resource.example.com
+Authorization: GNAP 80UPRY5NM33OMUKMKSKU
+Signature-Input: sig1=("@method" "@target-uri" "authorization")\
+  ;created=1618884475;keyid="gnap-rsa"
+Signature: sig1=:KymTn1/++nwWsNHdc48sguMjnVSnvqQNrijQT0/kXDfljaIgHl\
+  o12NkEt4e5qZeCFutzRxWpHKtjVEDldIUSsktxj4Li7PgUNJtIkJkdA1EoebGz1X/\
+  AD3coqYpoaFsOcPyfXjYHYWFd8HxLOUz3imA8xbxS+J9GZAjyDjTfG6yfsMsfd10f\
+  nrDRJqalPNDEgOOwwyEtjht4MnzpV1Wf43YWwgEJOC2rvxPIeuNxWbUc5v/o3s3Zr\
+  ywo2sunUcwXwlmbgyiGY0vgGFWjdHfgKvjda7eNLTr7r3jPgo/GlOB3jyadD4xcKs\
+  S/idS3RGk1+e9jbGHK5cRTp0ZzF94kWw==:
 ~~~
 
 If the `flags` field contains the `bearer` flag, the access token is a bearer token
@@ -3544,7 +3581,7 @@ by the signature method of the proofing mechanism.
 
 The key binding methods in this section MAY be used by other components making calls
 as part of GNAP, such as the extensions allowing the RS to make calls to the
-AS defined in \{\{I-D.ietf-gnap-resource-servers\}\}. To facilitate this extended use, the
+AS defined in {{I-D.ietf-gnap-resource-servers}}. To facilitate this extended use, the
 sections below are defined in generic terms of the "signer" and "verifier" of the HTTP message.
 In the core functions of GNAP, the "signer" is the client instance and the "verifier"
 is the AS or RS, as appropriate.
@@ -3607,15 +3644,19 @@ This method is indicated by `httpsig` in
 the `proof` field. The signer creates an HTTP
 Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}.
 
-The covered content of the signature MUST include the following:
+The message components of the signature MUST include the following:
 
-@request-target:
-: the target of the HTTP request
+@method:
+: the method used in the HTTP request
 
-digest:
-: The Digest header as defined in {{RFC3230}}. When the request message has a body,
-the signer MUST calculate this header value and the verifier
-MUST validate this header.
+@target-uri:
+: the full request URL of the HTTP request
+
+content-digest or digest:
+: The Content-Digest or Digest header as defined in {{I-D.ietf-httpbis-digest-headers}}. When the
+request message has a body, the signer MUST calculate this header value and the verifier
+MUST validate this field value. Use of Content-Digest is RECOMMENDED. Use of content-encoding
+agnostic digest methods (such as `id-sha-256`) is RECOMMENDED.
 
 When the request is bound to an access token, the covered content
 MUST also include:
@@ -3624,7 +3665,7 @@ authorization:
 : The Authorization header used to present the access token as discussed in
 {{use-access-token}}.
 
-Other covered content MAY also be included.
+Other message components MAY also be included.
 
 If the signer's key presented is a JWK, the `keyid` parameter of the signature MUST be set
 to the `kid` value of the JWK, the signing algorithm used MUST be the JWS
@@ -3674,10 +3715,10 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-This body is hashed for the Digest header using SHA-256 into the following encoded value:
+This body is hashed for the Content-Digest header using `id-sha-256` into the following encoded value:
 
 ~~~
-SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+id-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
 ~~~
 
 The HTTP message signature input string is calculated to be the following:
@@ -3685,13 +3726,15 @@ The HTTP message signature input string is calculated to be the following:
 ~~~
 NOTE: '\' line wrapping per RFC 8792
 
-"@request-target": post /gnap
-"host": server.example.com
+"@method": POST
+"@target-uri": https://server.example.com/gnap
 "content-type": application/json
-"digest": SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+"content-digest": id-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+Crwwv\
+  UoiaDCSjKxw=
 "content-length": 986
-"@signature-params": ("@request-target" "host" "content-type" \
-  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
+"@signature-params": ("@method" "@target-uri" "content-type" \
+  "content-digest" "content-length");created=1618884475\
+  ;keyid="gnap-rsa"
 ~~~
 
 This leads to the following full HTTP message request:
@@ -3703,16 +3746,17 @@ POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Content-Length: 986
-Digest: SHA-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
-Signature-Input: sig1=("@request-target" "host" "content-type" \
-  "digest" "content-length");created=1618884475;keyid="gnap-rsa"
-Signature: \
-  sig1=:axj8FLOvEWBcwh+Xk6VTTKXxqo4XNygleTDJ8h3ZJfi1sSmWrRtyo9RG/dc\
-  miZmdszRjWbg+/ixVZpA4BL3AOwEOxxtmHAXNB8uJ0I3tfbs6Suyk4sEo8zPr+MJq\
-  MjxdJEUgAQAy2AH+wg5a7CKq4IdLTulFK9njUIeG7MygHumeiumM3DbDQAHgF46dV\
-  q5UC6KJnqhGM1rFC128jd2D0sgWKCUgKGCHtfR159zfKWcEO9krsLoOnCdTzm1UyD\
-  DMjkIjqeN/1j8PdMJaRAwV4On079O0DVu6bl1jVtkzo/e/ZmwPr/X436V4xiw/hZt\
-  w4sfNsSbmsT0+UAQ20X/xaw==:
+Content-Digest: id-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSj\
+  Kxw=
+Signature-Input: sig1=("@method" "@target-uri" "content-type" \
+  "content-digest" "content-length");created=1618884475\
+  ;keyid="gnap-rsa"
+Signature: sig1=:SatKrAh2qNxbDBY6H3XUtpWn07aSrukpi3202L4DIPLLGgKdSu\
+  XyObjdCK/agmEx36xyn40iiCAqYskXugpNARianBiWKOkcWHhSs31FSTSoJ8vvGpJ\
+  4GxemDPvI6BXmLZtJvYBehoXtfcRFKGLzYOtbbtefzw2vP+k19W4PrhNmxFEUCepT\
+  KRk0sBoz4zIYK6FqEAHir0oRjwdCcXHFqI9U6+/DgpuxjFFX+OSZehmN6Q1quJgu0\
+  FITmsC9OANs5hwIAkXGJNdv3FuxAZAVrSnUScuGutSJXAn1daXToewVgBA+IrQ86m\
+  lsXtWgvmTTXENUvOELV6qTV2nenwr/UQ==:
 
 
 {
@@ -3754,10 +3798,9 @@ Signature: \
 ~~~
 
 If the HTTP Message includes a message body, the verifier MUST
-calculate and verify the value of the `Digest` header. The verifier
-MUST ensure that the signature includes all required covered
-content. The verifier MUST validate the signature against the
-expected key of the signer.
+calculate and verify the value of the `Digest` or `Content-Digest` header. The verifier
+MUST ensure that the signature covers all required message components. The verifier MUST validate
+the signature against the expected key of the signer.
 
 ### Mutual TLS {#mtls}
 
@@ -3847,8 +3890,8 @@ Note that in many instances, the verifier will not do a full certificate
 chain validation of the presented TLS client certificate, as the
 means of trust for this certificate could be in something other than
 a PKI system, such as a static registration or trust-on-first-use.
-
-\[\[ [See issue #110](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/110) \]\]
+See {{security-mtls}} and {{security-mtls-patterns}} for some additional
+considerations for this key proofing method.
 
 ### Detached JWS {#detached-jws}
 
@@ -4495,7 +4538,7 @@ the client instance was attempting to take at the RS and MAY be more
 powerful.
 The means for the RS to determine the resource reference are out of scope
 of this specification, but some dynamic methods are discussed in
-{{I-D.draft-ietf-gnap-resource-servers}}.
+{{I-D.ietf-gnap-resource-servers}}.
 The content of the resource reference is opaque to the client instance.
 
 ~~~
@@ -4582,15 +4625,15 @@ for feedback and development of early versions of the XYZ protocol that fed into
 through the use of value registries. \]\]
 
 
-# Security Considerations {#Security}
+# Security Considerations {#security}
 
-## TLS Protection in Transit
+## TLS Protection in Transit {#security-tls}
 
 All requests in GNAP have to be made over TLS or equivalent as outlined in {{BCP195}}
 to protect the contents of the request and response from manipulation and interception by an attacker.
 This includes all requests from a client instance to the AS, all requests from the client instance to
 an RS, any requests back to a client instance such as the push-based interaction finish method, and
-any back-end communications such as from an RS to an AS as described in {{I-D.draft-ietf-gnap-resource-servers}}.
+any back-end communications such as from an RS to an AS as described in {{I-D.ietf-gnap-resource-servers}}.
 Additionally, all requests between a browser and other components, such as during redirect-based
 interaction, need to be made over TLS or use equivalent protection.
 
@@ -4612,7 +4655,7 @@ redirects to an AS's components during interaction, during any interaction with 
 any redirect back to the client instance. Without TLS protection on these portions of the process, an
 attacker could wait for a valid request to start and then take over the resource owner's interaction session.
 
-## Signing Requests from the Client Software
+## Signing Requests from the Client Software {#security-signing}
 
 Even though all requests in GNAP need to be transmitted over TLS or its equivalent, the use of TLS
 alone is not sufficient to protect all parts of a multi-party and multi-stage protocol like GNAP,
@@ -4655,7 +4698,7 @@ for GNAP. However, mutual TLS (MTLS) does provide such security characteristics 
 use of the TLS client certificate, and thus MTLS is acceptable as a key-presentation mechanism
 when applied as described in {{mtls}}.
 
-## Protection of Client Instance Key Material
+## Protection of Client Instance Key Material {#security-keys}
 
 Client instances are identified by their unique keys, and anyone with access to a client instance's key material
 will be able to impersonate that client instance to all parties. This is true for both calls to the AS
@@ -4697,7 +4740,7 @@ copies of software unless they are very tightly integrated with each other and c
 It is particularly bad practice to allow an end-user to copy keys between client instances and to
 willingly use the same key in multiple instances.
 
-## Protection of Authorization Server
+## Protection of Authorization Server {#security-as}
 
 The AS performs critical functions in GNAP, including authenticating client software, managing interactions
 with end-users to gather consent and provide notice, and issuing access tokens for client instances
@@ -4718,7 +4761,7 @@ making the connection has to validate the certificate chain of the host it is co
 Consequently, protecting, monitoring, and auditing the AS is paramount to preserving the security
 of a GNAP-protected ecosystem.
 
-## Symmetric and Asymmetric Client Instance Keys
+## Symmetric and Asymmetric Client Instance Keys {#security-symmetric}
 
 The cryptographic methods used by GNAP for key-proofing can support both asymmetric and symmetric
 cryptography, and can be extended to use a wide variety of mechanisms. While symmetric
@@ -4758,7 +4801,7 @@ key distribution at runtime, which would expose the keys in transit.
 Both the AS and client software can use systems such as hardware security modules to strengthen
 their key security storage and generation for both asymmetric and symmetric keys.
 
-## Generation of Access Tokens
+## Generation of Access Tokens {#security-access-tokens}
 
 The content of access tokens need to be such that only the generating AS would be able to
 create them, and the contents cannot be manipulated by an attacker to gain different or additional
@@ -4781,7 +4824,7 @@ or falsified token. Furthermore, an AS has to carefully protect the keys used to
 tokens, since anyone with access to these signing keys would be able to create seemingly-valid
 access tokens using them.
 
-## Bearer Access Tokens
+## Bearer Access Tokens {#security-bearer-tokens}
 
 Bearer access tokens can be used by any party that has access to the token itself, without any additional
 information. As a natural consequence, any RS that a bearer token is presented to has the technical
@@ -4794,7 +4837,7 @@ In GNAP, key-bound access tokens are the default due to their higher security pr
 bearer tokens can be used in GNAP, their use should be limited onto to cases where the simplicity
 benefits outweigh the significant security downsides.
 
-## Key-Bound Token Access Tokens
+## Key-Bound Token Access Tokens {#security-bound-tokens}
 
 Key-bound access tokens, as the name suggests, are bound to a specific key and must be
 presented along with proof of that key during use. The key itself is not presented at the same
@@ -4829,7 +4872,7 @@ will vary depending on the key proofing mechanism in use, but for example, HTTP 
 has both a `created` and `nonce` signature parameter as well as the ability to cover significant
 portions of the HTTP message.
 
-## Exposure of End-user Credentials to Client Instance
+## Exposure of End-user Credentials to Client Instance {#security-credentials}
 
 As a delegation protocol, one of the main goals of GNAP is to prevent the client software from being
 exposed to any credentials or information about the end-user or resource owner as a requirement
@@ -4854,7 +4897,7 @@ possible to implement in a more secure fashion than simply collecting and replay
 the password. Even so, such schemes should only ever be used by trusted clients due to
 the ease of abusing them.
 
-## Mixing Up Authorization Servers
+## Mixing Up Authorization Servers {#security-mixup}
 
 If a client instance is able to work with multiple AS's simultaneously, it is more possible
 for an attacker to add a compromised AS to the client instance's configuration and cause the
@@ -4872,7 +4915,7 @@ of one such attack, which has been since addressed in this document by including
 in the interaction hash calculation. The client instance still needs to validate the hash for
 the attack to be prevented.
 
-## Processing of Client-Presented User Information
+## Processing of Client-Presented User Information {#security-client-userinfo}
 
 GNAP allows the client instance to present assertions and identifiers of the current user to the AS as
 part of the initial request. This information should only ever be taken by the AS as a hint, since the
@@ -4912,7 +4955,7 @@ A special case exists where the AS is the generator of the assertion being prese
 client instance. In these cases, the AS can validate that it did issue the assertion and
 it is associated with the client instance presenting the assertion.
 
-## Client Instance Pre-registration
+## Client Instance Pre-registration {#security-registration}
 
 Each client instance is identified by its own unique key, and for some kinds of client software such as a
 web server or backend system, this identification can be facilitated by registering a single key for a piece
@@ -4948,7 +4991,7 @@ the user to make an informed decision regarding the software they are authorizin
 has done vetting of the client software and this specific instance, it can present a different authorization
 screen compared to a client instance that is presenting all of its information at runtime.
 
-## Client Instance Impersonation
+## Client Instance Impersonation {#security-impersonation}
 
 If client instances are allowed to set their own user-facing display information, such as a display name and website
 URL, a malicious client instance could impersonate legitimate client software for the purposes of tricking
@@ -4967,7 +5010,7 @@ the resource owner to make a more informed delegation decision. For example, an 
 between a client instance that can be traced back to a specific developer's registration and an
 instance that has self-asserted its own key and display information.
 
-## Interception of Information in the Browser
+## Interception of Information in the Browser {#security-browser-interception}
 
 Most information passed through the web-browser is susceptible to interception and possible manipulation by
 elements within the browser such as scripts loaded within pages. Information in the URL is exposed
@@ -4985,7 +5028,7 @@ While these URLs are opaque to the client instance, it's possible for the AS to 
 paths, and other pieces of information that could leak security data or be manipulated by a party
 in the middle of the transaction.
 
-## Callback URL Manipulation
+## Callback URL Manipulation {#security-callback-url}
 
 The callback URL used in interaction finish mechanisms is defined by the client instance. This URL is
 opaque to the AS, but can contain information relevant to the client instance's operations. In
@@ -5002,12 +5045,41 @@ software to look up the details of the pending request. Since this approach requ
 by the client software during the redirection process, clients that are not capable of holding state
 through a redirect should not use redirect-based interaction mechanisms.
 
-## MTLS Deployment Patterns
+## MTLS Message Integrity {#security-mtls}
+
+The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key 
+using a certificate the TLS layer. Since TLS protects the entire HTTP message in transit, 
+verification of the TLS client certificate presented with the message provides a sufficient binding
+between the two. However, since TLS is functioning at a separate layer from HTTP, there is no
+direct connection between the TLS key presentation and the message itself, other than the fact that
+the message was presented over the TLS channel. That is to say, any HTTP message can be presented
+over the TLS channel in question with the same level of trust. The verifier is responsible for
+ensuring the key in the TLS client certificate is the one expected for a particular request. For
+example, if the request is a [grant request](request), the AS needs to compare the TLS client
+certificate presented at the TLS layer to the key identified in the request body itself (either
+by value or through a referenced identifier).
+
+Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern in deployments adds
+a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system 
+processing the HTTP message no longer has access to the original TLS connection's information and
+context. To compensate for this, the TTRP could inject the TLS client certificate into the forwarded
+request as a header parameter using {{I-D.ietf-httpbis-client-cert-field}}, giving the downstream
+system access to the certificate information. The TTRP has to be trusted to provide accurate 
+certificate information, and the connection between the TTRP and the downstream system also has to
+be protected. The TTRP could provide some additional assurance, for example, by adding its own
+signature to the `Client-Cert` header field using {{I-D.ietf-httpbis-message-signatures}}. This
+signature would be effectively ignored by GNAP but understood by the downstream service as part
+of its deployment.
+
+Additional considerations for different types of deployment patterns and key distribution 
+mechanisms for MTLS are found in {{security-mtls-patterns}}.
+
+## MTLS Deployment Patterns {#security-mtls-patterns}
 
 GNAP does not specify how a client instance's keys could be made known to the AS ahead of time.
 Public Key Infrastructure (PKI) can be used to manage the keys used by client instances when calling
 the AS, allowing the AS to trust a root key from a trusted authority. This method is particularly
-relevant to the MTLS signature method, where the client instance
+relevant to the MTLS key proofing method, where the client instance
 presents its certificate to the AS as part of the TLS connection. An AS using PKI to validate the
 MTLS connection would need to ensure that the presented certificate was issued by a trusted certificate
 authority before allowing the connection to continue. PKI-based certificates would allow a key to be revoked
@@ -5015,13 +5087,14 @@ and rotated through management at the certificate authority without requiring ad
 or management at the AS. PKI has historically been difficult to deploy, especially at scale, but it
 remains an appropriate solution for systems where the required overhead is not an impediment.
 
-MTLS need not use a PKI backing, as self-signed certificates and certificates from untrusted
-authorities can still be presented as part of a TLS connection. In this case, the AS or RS would
+MTLS in GNAP need not use a PKI backing, as self-signed certificates and certificates from untrusted
+authorities can still be presented as part of a TLS connection. In this case, the verifier would
 validate the connection but accept whatever certificate was presented by the client software. This
 specific certificate would then be bound to all future connections from that client software by
-being bound to the resulting access tokens.
+being bound to the resulting access tokens. See {{security-mtls}} for more considerations on MTLS
+as a key proofing mechanism.
 
-## Interception of Responses from the AS
+## Interception of Responses from the AS {#security-as-response}
 
 Responses from the AS contain information vital to both the security and privacy operations of
 GNAP. This information includes nonces used in cryptographic calculations, subject identifiers,
@@ -5034,7 +5107,7 @@ to exfiltrate and use this token. If the access token is instead bound to the cl
 presented key, intermediaries no longer have sufficient information to use the token. They can
 still, however, gain information about the end user as well as the actions of the client software.
 
-## Key Distribution
+## Key Distribution {#security-key-distribution}
 
 The keys for client instances could be distributed as part of the deployment process of instances
 of the client software. For example, an application installation framework could generate
@@ -5049,7 +5122,7 @@ token itself. This approach would make interception of the return from the token
 equivalent to that of a bearer token, since all information required to use the access token
 would be present in the request.
 
-## Interaction Finish Modes and Polling
+## Interaction Finish Modes and Polling {#security-polling}
 
 During the interaction process, the client instance usually hands control of the user experience
 over to another component, beit the system browser, another application, or some action
@@ -5078,7 +5151,7 @@ method against the deployment capabilities of the client software and its
 environment. Due to the increased security, an interaction finish method should
 be employed whenever possible.
 
-## Storage of Information During Interaction and Continuation
+## Storage of Information During Interaction and Continuation {#security-client-storage}
 
 When starting an interactive grant request, a client application has a number of protocol elements
 that it needs to manage, including nonces, references, keys, access tokens, and other elements.
@@ -5103,7 +5176,7 @@ this URL should not contain any security-sensitive information that would be
 valuable to an attacker, such as any token identifier, nonce, or user information. Instead, a
 cryptographically random value is suggested.
 
-## Denial of Service (DoS) through Grant Continuation
+## Denial of Service (DoS) through Grant Continuation {#security-continuation}
 
 When a client instance starts off an interactive process, it will eventually need to continue the grant
 request in a subsequent message to the AS. It's possible for a naive client implementation to continuously
@@ -5122,7 +5195,7 @@ can choose to return errors to the offending client instance, including possibly
 ongoing grant request. With well-meaning client software these errors can indicate a need to change
 the client software's programmed behavior.
 
-## Exhaustion of Random Value Space
+## Exhaustion of Random Value Space {#security-random-exhaustion}
 
 Several parts of the GNAP process make use of unguessable randomized values, such as nonces,
 tokens, and randomized URLs. Since these values are intended to be unique, a sufficiently
@@ -5143,7 +5216,64 @@ reference can be limited to have lifetimes tied to their functional utility. Fin
 different category of artifact (nonce, token, reference, identifier, etc.) can be
 generated from a separate random pool of values instead of a single global value space.
 
-# Privacy Considerations {#Privacy}
+## Front-channel URLs {#security-front-channel}
+
+Some interaction methods in GNAP make use of URLs accessed through the end-user's browser,
+known collectively as front-channel communication. These URLs are most notably present in
+the `redirect` interaction `start` method and the `redirect` interaction `finish` mode. Since
+these URLs are intended to be given to the end-user, the end user and their browser will be
+subjected to anything hosted at that URL including viruses, malware, and phishing scams. This
+kind of risk is inherent to all redirection-based protocols, including GNAP when used in this way.
+
+When talking to a new or unknown AS, a client instance might want to check the URL from the
+interaction `start` against a blocklist and warn the end-user before redirecting them. Many
+client instances will provide an interstitial message prior to redirection in order to prepare
+the user for control of the user experience being handed to the domain of the AS, and such a
+method could be used to warn the user of potential threats. For instance, a rogue AS impersonating
+a well-known service provider. Client software can also prevent this by managing an allowlist
+of known and trusted AS's.
+
+Alternatively, an attacker could start a GNAP request with a known and trusted AS but include
+their own attack site URL as the callback for the `finish` method. The attacker would then send
+the interaction `start` URL to the victim and get them to click on it. Since the URL is at
+the known AS, the victim is inclined to do so. The victim will then be prompted to approve the
+attacker's application, and in most circumstances the victim will then be redirected to the
+attacker's site whether or not the user approved the request. The AS could mitigate this partially
+by using a blocklist and  allowlist of interaction `finish` URLs during the client instance's
+initial request, but this approach can be  especially difficult if the URL has any dynamic portion
+chosen by the client software. The AS can couple these checks with policies associated with the
+client instance that has been authenticated in the request. If the AS has any doubt about the
+interaction finish URL, the AS can provide an interstitial warning to the end-user before
+processing the redirect.
+
+Ultimately, all protocols that use redirect-based communication through the user's browser are
+susceptible to having an attacker try to co-opt one or more of those URLs in order to harm the
+user. It is the responsibility of the AS and the client software to provide appropriate warnings,
+education, and mitigation to protect end users.
+
+## Processing Assertions {#security-assertions}
+
+Identity assertions can be used in GNAP to convey subject information, both from the AS to the
+client instance in a [response](#response-subject) and from the client instance to the AS in
+a [request](#request-subject). In both of these circumstances, when an assertion is passed in
+GNAP, the receiver of the assertion needs to parse and process the assertion. As assertions are
+complex artifacts with their own syntax and security, special care needs to be taken to prevent the
+assertion values from being used as an attack vector.
+
+All assertion processing needs to account for the security aspects of the assertion format in
+use. In particular, the processor needs to parse the assertion from a JSON string object,
+and apply the appropriate cryptographic processes to ensure the integrity of the assertion.
+
+For example, when SAML 2 assertions are used, the receiver hast to parse an XML document. There are
+many well-known security vulnerabilities in XML parsers, and the XML standard itself can be
+attacked through the use of processing instructions and entity expansions to cause problems
+with the processor. Therefore, any system capable of processing SAML 2 assertions also needs to
+have a secure and correct XML parser. In addition to this, the SAML 2 specification uses XML
+Signatures, which have their own implementation problems that need to be accounted for. Similar 
+requirements exist for OpenID Connect's ID token, which is based on the JSON Web Token (JWT) format 
+and the related JSON Object Signing And Encryption (JOSE) cryptography suite.
+
+# Privacy Considerations {#privacy}
 
 The privacy considerations in this section are modeled after the list of privacy threats in [[RFC6973]], "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
 
