@@ -47,6 +47,7 @@ normative:
     RFC3230:
     RFC3986:
     RFC5646:
+    RFC7231:
     RFC7234:
     RFC7468:
     RFC7515:
@@ -80,6 +81,7 @@ normative:
 informative:
     RFC6973:
     I-D.ietf-httpbis-client-cert-field:
+    I-D.ietf-oauth-security-topics:
     promise-theory:
        target: 'http://markburgess.org/promises.html'
        title: Promise theory
@@ -2676,7 +2678,9 @@ interact_ref
 The means of directing the RO to this URL are outside the scope
 of this specification, but common options include redirecting the
 RO from a web page and launching the system browser with the
-target URL.
+target URL. See {{security-redirect-status-codes}} for considerations on
+which HTTP status code to use when redirecting a request that
+potentially contains credentials.
 
 ~~~
 NOTE: '\' line wrapping per RFC 8792
@@ -5044,6 +5048,27 @@ a client instance can use an unguessable identifier into the URL that can then b
 software to look up the details of the pending request. Since this approach requires some form of statefulness
 by the client software during the redirection process, clients that are not capable of holding state
 through a redirect should not use redirect-based interaction mechanisms.
+
+## Redirection Status Codes {#security-redirect-status-codes}
+
+As already described in {{I-D.ietf-oauth-security-topics}}, a server should never use the HTTP 307
+status code to redirect a request that potentially contains user credentials. If an HTTP redirect
+is used for such a request, the HTTP status code 303 "See Other" should be used instead.
+
+The status code 307, as defined in the HTTP standard {{RFC7231}}, does not require the user agent
+to rewrite a POST request into a GET request, thus preserving the form data in the body of the POST
+request. In the HTTP standard {{RFC7231}}, only the status code 303 unambiguously enforces
+rewriting the HTTP POST request to an HTTP GET request. For all other status codes, including
+status code 302, user agents are allowed not to rewrite a POST request into a GET request and thus
+to resubmit the body.
+
+The use of status code 307 results in a vulnerability when using the
+[`redirect` interaction finish method](#response-interact-finish). With this method, the AS
+potentially prompts the RO to enter their credentials in a form that is then submitted back to the
+AS (using an HTTP POST request). The AS checks the credentials and, if successful, may directly
+redirect the RO to the client instance's redirect URI. Due to the use of status code 307, the RO's
+user agent now transmits the RO's credentials to the client instance. A malicious client instance
+can then use the obtained credentials to impersonate the RO at the AS.
 
 ## MTLS Message Integrity {#security-mtls}
 
