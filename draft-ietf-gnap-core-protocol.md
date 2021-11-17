@@ -5375,6 +5375,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 # Document History {#history}
 
+- -09
+    - Added security considerations on redirection status codes.
+
 - -08
     - Update definition for "Client" to account for the case of no end-user.
     - Change definition for "Subject".
