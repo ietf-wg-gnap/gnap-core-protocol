@@ -5058,7 +5058,7 @@ is used for such a request, the HTTP status code 303 "See Other" should be used 
 The status code 307, as defined in the HTTP standard {{RFC7231}}, requires the user agent
 to preserve the method and body of a request, thus submitting the body of the POST
 request to the redirect target. In the HTTP standard {{RFC7231}}, only the status code 303 unambiguously enforces
-rewriting the HTTP POST request to an HTTP GET request. For all other status codes, including
+rewriting the HTTP POST request to an HTTP GET request, which eliminates the POST body from the redirected request. For all other status codes, including
 status code 302, user agents are allowed not to rewrite a POST request into a GET request and thus
 to resubmit the body.
 
