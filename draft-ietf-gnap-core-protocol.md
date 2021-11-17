@@ -44,7 +44,6 @@ normative:
          -
            ins: P. Saint-Andre
     RFC2119:
-    RFC3230:
     RFC3986:
     RFC5646:
     RFC7234:
