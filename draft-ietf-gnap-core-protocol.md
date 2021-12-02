@@ -5070,6 +5070,12 @@ redirect the RO to the client instance's redirect URI. Due to the use of status 
 user agent now transmits the RO's credentials to the client instance. A malicious client instance
 can then use the obtained credentials to impersonate the RO at the AS.
 
+Redirection away from the initial URL in an interaction session could also leak information found in that
+initial URL through the HTTP `Referer` header field, which would be sent by the user agent to the redirect
+target. To avoid such leakage, a server can first redirect to an internal interstitial page without any identifying
+or sensitive information on the URL before processing the request. When the user agent is ultimately 
+redirected from this page, no part of the original interaction URL will be found in the Referrer header.
+
 ## MTLS Message Integrity {#security-mtls}
 
 The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key 
