@@ -46,6 +46,7 @@ normative:
     RFC2119:
     RFC3986:
     RFC5646:
+    RFC7231:
     RFC7234:
     RFC7468:
     RFC7515:
@@ -79,6 +80,7 @@ normative:
 informative:
     RFC6973:
     I-D.ietf-httpbis-client-cert-field:
+    I-D.ietf-oauth-security-topics:
     promise-theory:
        target: 'http://markburgess.org/promises.html'
        title: Promise theory
@@ -2675,7 +2677,9 @@ interact_ref
 The means of directing the RO to this URL are outside the scope
 of this specification, but common options include redirecting the
 RO from a web page and launching the system browser with the
-target URL.
+target URL. See {{security-redirect-status-codes}} for considerations on
+which HTTP status code to use when redirecting a request that
+potentially contains credentials.
 
 ~~~
 NOTE: '\' line wrapping per RFC 8792
@@ -5044,6 +5048,33 @@ software to look up the details of the pending request. Since this approach requ
 by the client software during the redirection process, clients that are not capable of holding state
 through a redirect should not use redirect-based interaction mechanisms.
 
+## Redirection Status Codes {#security-redirect-status-codes}
+
+As already described in {{I-D.ietf-oauth-security-topics}}, a server should never use the HTTP 307
+status code to redirect a request that potentially contains user credentials. If an HTTP redirect
+is used for such a request, the HTTP status code 303 "See Other" should be used instead.
+
+The status code 307, as defined in the HTTP standard {{RFC7231}}, requires the user agent
+to preserve the method and body of a request, thus submitting the body of the POST
+request to the redirect target. In the HTTP standard {{RFC7231}}, only the status code 303 unambiguously enforces
+rewriting the HTTP POST request to an HTTP GET request, which eliminates the POST body from the redirected request. For all other status codes, including
+status code 302, user agents are allowed not to rewrite a POST request into a GET request and thus
+to resubmit the body.
+
+The use of status code 307 results in a vulnerability when using the
+[`redirect` interaction finish method](#response-interact-finish). With this method, the AS
+potentially prompts the RO to enter their credentials in a form that is then submitted back to the
+AS (using an HTTP POST request). The AS checks the credentials and, if successful, may directly
+redirect the RO to the client instance's redirect URI. Due to the use of status code 307, the RO's
+user agent now transmits the RO's credentials to the client instance. A malicious client instance
+can then use the obtained credentials to impersonate the RO at the AS.
+
+Redirection away from the initial URL in an interaction session could also leak information found in that
+initial URL through the HTTP `Referer` header field, which would be sent by the user agent to the redirect
+target. To avoid such leakage, a server can first redirect to an internal interstitial page without any identifying
+or sensitive information on the URL before processing the request. When the user agent is ultimately 
+redirected from this page, no part of the original interaction URL will be found in the Referrer header.
+
 ## MTLS Message Integrity {#security-mtls}
 
 The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key 
@@ -5348,6 +5379,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 --- back
 
 # Document History {#history}
+
+- -09
+    - Added security considerations on redirection status codes.
 
 - -08
     - Update definition for "Client" to account for the case of no end-user.
