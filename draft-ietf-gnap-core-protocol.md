@@ -414,7 +414,7 @@ Legend
     other methods. The RO approves the request for the client instance
     being operated by the end-user. Note that the RO and end-user are often
     the same entity in practice, and many of GNAP's interaction methods allow
-    the client instance to facilitate the end user interacting with the AS
+    the client instance to facilitate the end-user interacting with the AS
     in order to fulfill the role of the RO.
 
 - (4) The client instance [continues the grant at the AS](#continue-request).
@@ -1456,7 +1456,7 @@ return an error.
 Often, the AS will require [interaction with the RO](#authorization) in order to
 approve a requested delegation to the client instance for both access to resources and direct
 subject information. Many times the end-user using the client instance is the same person as
-the RO, and the client instance can directly drive interaction with the end user by facilitating
+the RO, and the client instance can directly drive interaction with the end-user by facilitating
 the process through means such as redirection to a URL or launching an application. Other times, the
 client instance can provide information to start the RO's interaction on a secondary
 device, or the client instance will wait for the RO to approve the request asynchronously.
@@ -2353,7 +2353,7 @@ Subject identifiers returned by the AS SHOULD uniquely identify the RO at the
 AS. Some forms of subject identifier are opaque to the client instance (such as the subject of an
 issuer and subject pair), while others forms (such as email address and phone number) are
 intended to allow the client instance to correlate the identifier with other account information
-at the client instance. The AS MUST ensure that the returned subject identifiers only apply to the authenticated end user. The client instance MUST NOT request or use any returned subject identifiers for communication
+at the client instance. The AS MUST ensure that the returned subject identifiers only apply to the authenticated end-user. The client instance MUST NOT request or use any returned subject identifiers for communication
 purposes (see {{request-subject}}). That is, a subject identifier returned in the format of an email address or
 a phone number only identifies the RO to the AS and does not indicate that the
 AS has validated that the represented email address or phone number in the identifier
@@ -2473,7 +2473,7 @@ The client instance can supply information directly to the AS in its request. Fr
 if the requested delegation can be granted immediately. The client instance can send several kinds of things, including:
 
 - the identity of the client instance, known from the presented keys or associated identifiers
-- the identity of the end user presented in the `user` request parameter
+- the identity of the end-user presented in the `user` request parameter
 - any additional information presented by the client instance in the request, including any extensions
 
 The AS will verify this presented information in the context of the client instance's request and
@@ -2486,7 +2486,7 @@ If the AS determines that additional runtime authorization is required, the AS c
 outright or use a number of means at its disposal to gather that authorization from the appropriate ROs,
 including for example:
 
-- starting interaction with the end user facilitated by the client software, such as a redirection or user code
+- starting interaction with the end-user facilitated by the client software, such as a redirection or user code
 - challenging the client instance through a challenge-response mechanism
 - requesting that the client instance present specific additional information, such as a user's credential or an assertion
 - contacting a RO through an out-of-band mechanism, such as a push notification
@@ -2517,15 +2517,15 @@ including:
 The AS is also allowed to request authorization from more than one RO, if the AS deems fit. For example, a medical
 record might need to be released by both an attending nurse and a physician, or both owners of a bank account
 need to sign off on a transfer request. Alternatively, the AS could require N of M possible RO's
-to approve a given request in order. The AS could also determine that the end user is not the appropriate RO
+to approve a given request in order. The AS could also determine that the end-user is not the appropriate RO
 for a given request and reach out to the appropriate RO asynchronously. The details of determining which RO's are required for a given
 request are out of scope for this specification.
 
-The client instance can also indicate that it is capable of facilitating interaction with the end user,
+The client instance can also indicate that it is capable of facilitating interaction with the end-user,
 another party, or another piece of software through its [interaction start](#request-interact-start) request.
-In many cases, the end user is delegating their own access as RO to the client instance. Here, the
-AS needs to determine the identity of the end user and will often need to interact directly with
-the end user to determine their status as an RO and collect their consent. If the AS has determined
+In many cases, the end-user is delegating their own access as RO to the client instance. Here, the
+AS needs to determine the identity of the end-user and will often need to interact directly with
+the end-user to determine their status as an RO and collect their consent. If the AS has determined
 that authorization is required and the AS can support one or more of the requested interaction start
 methods, the AS returns the associated [interaction start responses](#response-interact). The client
 instance SHOULD [initiate one or more of these interaction methods](#interaction-start) in order to
@@ -2551,16 +2551,16 @@ in the following sections.
 
 ### Interaction at a Redirected URI {#interaction-redirect}
 
-When the end user is directed to an arbitrary URI through the ["redirect"](#response-interact-redirect)
-mode, the client instance facilitates opening the URI through the end user's web browser.
+When the end-user is directed to an arbitrary URI through the ["redirect"](#response-interact-redirect)
+mode, the client instance facilitates opening the URI through the end-user's web browser.
 The client instance could launch the URI through the system browser, provide a clickable
 link, redirect the user through HTTP response codes, or display the URI in a form
-the end user can use to launch such as a multidimensional barcode.
+the end-user can use to launch such as a multidimensional barcode.
 With this method, it is common (though not required) for the RO to be the same party as the end-user, since
 the client instance has to communicate the redirection URI to the end-user.
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
-AS to authenticate the end user as the RO and interactively provide consent.
+AS to authenticate the end-user as the RO and interactively provide consent.
 If the URI is hosted by the AS,
 the AS MUST determine the grant request being referenced from the URL
 value itself. If the URL cannot be associated with a currently active
@@ -2571,23 +2571,23 @@ the AS and this URI are out of scope for this specification.
 
 The client instance MUST NOT modify the URI when launching it,
 in particular the client instance MUST NOT add any parameters to the URI.
-The URI MUST be reachable from the end user's browser, though
+The URI MUST be reachable from the end-user's browser, though
 the URI MAY be opened on a separate device from the client instance
 itself. The URI MUST be accessible from an HTTP GET
 request and MUST be protected by HTTPS or equivalent means.
 
 ### Interaction at the User Code URI {#interaction-usercode}
 
-When the end user is directed to enter a short code through the ["user_code"](#response-interact-usercode)
+When the end-user is directed to enter a short code through the ["user_code"](#response-interact-usercode)
 mode, the client instance communicates the user code to the end-user and
-directs the end user to enter that code at an associated URI.
+directs the end-user to enter that code at an associated URI.
 This mode is used when the client instance is not able to facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
 communicated in the response from the AS, but the client instance
-communicates that URL to the end user. As a consequence, these URIs SHOULD be short.
+communicates that URL to the end-user. As a consequence, these URIs SHOULD be short.
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
-AS to authenticate the end user as the RO and interactively provide consent.
+AS to authenticate the end-user as the RO and interactively provide consent.
 If the URI is hosted by the AS,
 the AS MUST determine the grant request being referenced from the user code.
 If the user code cannot be associated with a currently active
@@ -2606,7 +2606,7 @@ The user should be warned as such an error state is approached, if possible.
 
 The client instance MUST NOT modify the URI when launching it,
 in particular the client instance MUST NOT add any parameters to the URI.
-The user code URI MUST be reachable from the end user's browser, though
+The user code URI MUST be reachable from the end-user's browser, though
 the URI is usually be opened on a separate device from the client instance
 itself. The URI MUST be accessible from an HTTP GET
 request and MUST be protected by HTTPS or equivalent means.
@@ -4723,7 +4723,7 @@ decide that authorization of one of these servers applies to all other servers w
 that chooses to do this needs to be careful with how it groups different client keys together in its policy,
 since the breach of one instance would have direct effects on the others in the cluster.
 
-Additionally, if an end user controls multiple instances of a single type of client software, such as
+Additionally, if an end-user controls multiple instances of a single type of client software, such as
 having an application installed on multiple devices, each of these instances is expected to have a
 separate key and be issued separate access tokens. However, if the AS is able to group these separate
 instances together as described above, it can streamline the authorization process for new instances
@@ -4889,12 +4889,12 @@ Such an extension would be dangerous as it would allow rogue client software to 
 and replay the end-user's credentials outside of any legitimate use within a GNAP request.
 
 The concerns of such an extension could be mitigated through use of a challenge and response
-unlocked by the end user's credentials. For example, the AS presents a challenge as part of
+unlocked by the end-user's credentials. For example, the AS presents a challenge as part of
 an interaction start method, and the client instance signs that challenge using a key derived
-from a password presented by the end user. It would be possible for the client software to
+from a password presented by the end-user. It would be possible for the client software to
 collect this password in a secure software enclave without exposing the password to the rest
 of the client software or putting it across the wire to the AS. The AS can validate this challenge
-response against a known password for the identified end user. While an approach such as this does
+response against a known password for the identified end-user. While an approach such as this does
 not remove all of the concerns surrounding such a password-based scheme, it is at least
 possible to implement in a more secure fashion than simply collecting and replaying
 the password. Even so, such schemes should only ever be used by trusted clients due to
@@ -4951,7 +4951,7 @@ is known to the AS and can be associated with the client instance's presented ke
 evaluate that the appropriate client instance is presenting the claimed assertion. All of this
 will prevent an attacker from presenting a manufactured assertion, or one captured from an
 untrusted system. However, without validating the audience of the assertion, a captured assertion
-could be presented by the client instance to impersonate a given end user. In such cases, the assertion
+could be presented by the client instance to impersonate a given end-user. In such cases, the assertion
 offers little more protection than a simple identifier would.
 
 A special case exists where the AS is the generator of the assertion being presented by the
@@ -5135,7 +5135,7 @@ response from the AS contains all information necessary for use of the contained
 party that is capable of viewing such a response, such as an intermediary proxy, would be able
 to exfiltrate and use this token. If the access token is instead bound to the client instance's
 presented key, intermediaries no longer have sufficient information to use the token. They can
-still, however, gain information about the end user as well as the actions of the client software.
+still, however, gain information about the end-user as well as the actions of the client software.
 
 ## Key Distribution {#security-key-distribution}
 
@@ -5251,7 +5251,7 @@ generated from a separate random pool of values instead of a single global value
 Some interaction methods in GNAP make use of URLs accessed through the end-user's browser,
 known collectively as front-channel communication. These URLs are most notably present in
 the `redirect` interaction `start` method and the `redirect` interaction `finish` mode. Since
-these URLs are intended to be given to the end-user, the end user and their browser will be
+these URLs are intended to be given to the end-user, the end-user and their browser will be
 subjected to anything hosted at that URL including viruses, malware, and phishing scams. This
 kind of risk is inherent to all redirection-based protocols, including GNAP when used in this way.
 
@@ -5279,7 +5279,7 @@ processing the redirect.
 Ultimately, all protocols that use redirect-based communication through the user's browser are
 susceptible to having an attacker try to co-opt one or more of those URLs in order to harm the
 user. It is the responsibility of the AS and the client software to provide appropriate warnings,
-education, and mitigation to protect end users.
+education, and mitigation to protect end-users.
 
 ## Processing Assertions {#security-assertions}
 
@@ -5341,7 +5341,7 @@ The resource server is not required to store any state for its normal operation.
 
 Intrusion refers to the ability of various parties to send unsolicited messages or cause denial of service for unrelated parties.
 
-If the resource owner is different from the end user, there is an opportunity for the end user to cause unsolicited messages to be sent to the resource owner if the system prompts the resource owner for consent when an end user attempts to access their data.
+If the resource owner is different from the end-user, there is an opportunity for the end-user to cause unsolicited messages to be sent to the resource owner if the system prompts the resource owner for consent when an end-user attempts to access their data.
 
 The format and contents of subject identifiers are intentionally not defined by GNAP. If the authorization server uses values for subject identifiers that are also identifiers for communication channels, (e.g. an email address or phone number), this opens up the possibility for a client to learn this information when it was not otherwise authorized to access this kind of data about the user.
 
