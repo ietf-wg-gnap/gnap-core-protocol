@@ -202,7 +202,7 @@ Client
 : application that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end-user or it runs autonomously on behalf of a resource owner.
 
     Example: a client can be a mobile application, a web application, etc.
-    
+
     Note: this specification differentiates between a specific instance (the client instance, identified by its unique key) and the software running the instance (the client software). For some kinds of client software, there could be many instances of that software, each instance with a different key.
 
 Resource Server (RS)
@@ -306,7 +306,7 @@ Subject Information
 
 GNAP defines its trust objective as: "the RO trusts the AS to ensure access validation and delegation of protected resources to end-users, through third party clients."
 
-This trust objective can be decomposed into trust relationships between software elements and roles, especially the pairs end-user/RO, end-user/client, client/AS, RS/RO, AS/RO, AS/RS. Trust of an agent by its pair can exist if the pair is informed that the agent has made a promise to follow the protocol in the past (e.g. pre-registration, uncompromised cryptographic components) or if the pair is able to infer by indirect means that the agent has made such a promise (e.g. a compliant client request). Each agent defines its own valuation function of promises given or received. Examples of such valuations can be the benefits from interacting with other agents (e.g. safety in client access, interoperability with identity standards), the cost of following the protocol (including its security and privacy requirements and recommendations), a ranking of promise importance (e.g. a policy decision made by the AS), the assessment of one's vulnerability or risk of not being able to defend against threats, etc. Those valuations may depend on the context of the request. For instance, the AS may decide to either take into account or discard hints provided by the client, the RS may refuse bearer tokens, etc. depending on the specific case in which GNAP is used. Some promises can be conditional of some previous interactions (e.g. repeated requests). 
+This trust objective can be decomposed into trust relationships between software elements and roles, especially the pairs end-user/RO, end-user/client, client/AS, RS/RO, AS/RO, AS/RS. Trust of an agent by its pair can exist if the pair is informed that the agent has made a promise to follow the protocol in the past (e.g. pre-registration, uncompromised cryptographic components) or if the pair is able to infer by indirect means that the agent has made such a promise (e.g. a compliant client request). Each agent defines its own valuation function of promises given or received. Examples of such valuations can be the benefits from interacting with other agents (e.g. safety in client access, interoperability with identity standards), the cost of following the protocol (including its security and privacy requirements and recommendations), a ranking of promise importance (e.g. a policy decision made by the AS), the assessment of one's vulnerability or risk of not being able to defend against threats, etc. Those valuations may depend on the context of the request. For instance, the AS may decide to either take into account or discard hints provided by the client, the RS may refuse bearer tokens, etc. depending on the specific case in which GNAP is used. Some promises can be conditional of some previous interactions (e.g. repeated requests).
 
 Looking back on each trust relationship:
 
@@ -324,7 +324,7 @@ Looking back on each trust relationship:
 
 - AS/RS: the AS promises to issue valid access tokens to legitimate client requests (i.e. after carrying out appropriate due diligence, as defined in the GNAP protocol). Some optional configurations are covered by {{I-D.ietf-gnap-resource-servers}}.
 
-A global assumption made by GNAP is that authorization requests are security and privacy sensitive, and appropriate measures are respectively detailed in {{security}} and {{privacy}}. 
+A global assumption made by GNAP is that authorization requests are security and privacy sensitive, and appropriate measures are respectively detailed in {{security}} and {{privacy}}.
 
 A formal trust model is out of scope of this specification, but might be carried out thanks to {{promise-theory}}.
 
@@ -1284,7 +1284,7 @@ The client instance's key MAY be pre-registered with the AS ahead of time and as
 with a set of policies and allowable actions pertaining to that client. If this pre-registration
 includes other fields that can occur in the `client` request object described in this section,
 such as `class_id` or `display`, the pre-registered values MUST take precedence over any values
-given at runtime. Additional fields sent during a request but not present in a pre-registered 
+given at runtime. Additional fields sent during a request but not present in a pre-registered
 client instance record at the AS SHOULD NOT be added to the client's pre-registered record.
 See additional considerations regarding client instance impersonation in {{security-impersonation}}.
 
@@ -1439,7 +1439,7 @@ is opaque to the client instance.
 "user": "XUT2MFM1XBIKJKSDU8QM"
 ~~~
 
-One means of dynamically obtaining such a user reference is from the AS returning 
+One means of dynamically obtaining such a user reference is from the AS returning
 an `opaque` subject identifier as described in {{response-subject}}.
 Other means of configuring a client instance with a user identifier are out
 of scope of this specification.
@@ -1621,7 +1621,7 @@ method (string)
     "redirect"
     : Indicates that the client instance can receive a redirect from the end-user's device
     after interaction with the RO has concluded. {{request-interact-callback-redirect}}
-    
+
     "push"
     : Indicates that the client instance can receive an HTTP POST request from the AS
     after interaction with the RO has concluded. {{request-interact-callback-push}}
@@ -1778,7 +1778,7 @@ interact (object)
     needs to take place. {{response-interact}}
 
 subject (object)
-: Claims about the RO as known and declared by the AS, as described in {{response-subject}}. 
+: Claims about the RO as known and declared by the AS, as described in {{response-subject}}.
 
 instance_id (string)
 : An identifier this client instance can use to identify itself when making
@@ -2365,7 +2365,7 @@ are outside the scope of this specification.
 Extensions to this specification MAY define additional response
 properties in [a registry TBD](#IANA).
 
-See {{security-assertions}} for considerations that the client instance has to make when accepting 
+See {{security-assertions}} for considerations that the client instance has to make when accepting
 and processing assertions from the AS.
 
 ## Returning a Dynamically-bound Client Instance Identifier {#response-dynamic-handles}
@@ -5072,13 +5072,13 @@ can then use the obtained credentials to impersonate the RO at the AS.
 Redirection away from the initial URL in an interaction session could also leak information found in that
 initial URL through the HTTP `Referer` header field, which would be sent by the user agent to the redirect
 target. To avoid such leakage, a server can first redirect to an internal interstitial page without any identifying
-or sensitive information on the URL before processing the request. When the user agent is ultimately 
+or sensitive information on the URL before processing the request. When the user agent is ultimately
 redirected from this page, no part of the original interaction URL will be found in the Referrer header.
 
 ## MTLS Message Integrity {#security-mtls}
 
-The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key 
-using a certificate the TLS layer. Since TLS protects the entire HTTP message in transit, 
+The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key
+using a certificate the TLS layer. Since TLS protects the entire HTTP message in transit,
 verification of the TLS client certificate presented with the message provides a sufficient binding
 between the two. However, since TLS is functioning at a separate layer from HTTP, there is no
 direct connection between the TLS key presentation and the message itself, other than the fact that
@@ -5090,18 +5090,18 @@ certificate presented at the TLS layer to the key identified in the request body
 by value or through a referenced identifier).
 
 Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern in deployments adds
-a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system 
+a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system
 processing the HTTP message no longer has access to the original TLS connection's information and
 context. To compensate for this, the TTRP could inject the TLS client certificate into the forwarded
 request as a header parameter using {{I-D.ietf-httpbis-client-cert-field}}, giving the downstream
-system access to the certificate information. The TTRP has to be trusted to provide accurate 
+system access to the certificate information. The TTRP has to be trusted to provide accurate
 certificate information, and the connection between the TTRP and the downstream system also has to
 be protected. The TTRP could provide some additional assurance, for example, by adding its own
 signature to the `Client-Cert` header field using {{I-D.ietf-httpbis-message-signatures}}. This
 signature would be effectively ignored by GNAP but understood by the downstream service as part
 of its deployment.
 
-Additional considerations for different types of deployment patterns and key distribution 
+Additional considerations for different types of deployment patterns and key distribution
 mechanisms for MTLS are found in {{security-mtls-patterns}}.
 
 ## MTLS Deployment Patterns {#security-mtls-patterns}
@@ -5299,8 +5299,8 @@ many well-known security vulnerabilities in XML parsers, and the XML standard it
 attacked through the use of processing instructions and entity expansions to cause problems
 with the processor. Therefore, any system capable of processing SAML 2 assertions also needs to
 have a secure and correct XML parser. In addition to this, the SAML 2 specification uses XML
-Signatures, which have their own implementation problems that need to be accounted for. Similar 
-requirements exist for OpenID Connect's ID token, which is based on the JSON Web Token (JWT) format 
+Signatures, which have their own implementation problems that need to be accounted for. Similar
+requirements exist for OpenID Connect's ID token, which is based on the JSON Web Token (JWT) format
 and the related JSON Object Signing And Encryption (JOSE) cryptography suite.
 
 # Privacy Considerations {#privacy}
@@ -5391,7 +5391,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Editorial updates.
 
 - -07
-    - Replace user handle by opaque identifier 
+    - Replace user handle by opaque identifier
     - Added trust relationships
     - Added privacy considerations section
     - Added security considerations.
