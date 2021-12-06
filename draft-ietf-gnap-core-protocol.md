@@ -695,7 +695,7 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
-    send any interactions modes to the server, indicating that
+    send any interaction modes to the server, indicating that
     it does not expect to interact with the RO. The client instance can also signal
     which RO it requires authorization from, if known, by using the
     [user request section](#request-user).
@@ -748,7 +748,7 @@ An example set of protocol messages for this method can be found in {{example-as
 ### Software-only Authorization {#sequence-no-user}
 
 In this example flow, the AS policy allows the client instance to make a call on its own behalf,
-without the need for a RO to be involved at runtime to approve the decision.
+without the need for an RO to be involved at runtime to approve the decision.
 Since there is no explicit RO, the client instance does not interact with an RO.
 
 ~~~
@@ -766,7 +766,7 @@ Since there is no explicit RO, the client instance does not interact with an RO.
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
-    send any interactions modes to the server.
+    send any interaction modes to the server.
 
 2. The AS determines that the request is been authorized,
     the AS grants access to the information
@@ -2489,7 +2489,7 @@ including for example:
 - starting interaction with the end user facilitated by the client software, such as a redirection or user code
 - challenging the client instance through a challenge-response mechanism
 - requesting that the client instance present specific additional information, such as a user's credential or an assertion
-- contacting a RO through an out-of-band mechanism, such as a push notification
+- contacting an RO through an out-of-band mechanism, such as a push notification
 - contacting an auxiliary software process through an out-of-band mechanism, such as querying a digital wallet
 
 The authorization and consent gathering process in GNAP is left deliberately flexible to allow for a
@@ -4837,10 +4837,10 @@ use the access token. While bearer tokens are inherently simpler, this simplicit
 and abused in making needlessly insecure systems.
 
 In GNAP, key-bound access tokens are the default due to their higher security properties. While
-bearer tokens can be used in GNAP, their use should be limited onto to cases where the simplicity
+bearer tokens can be used in GNAP, their use should be limited to cases where the simplicity
 benefits outweigh the significant security downsides.
 
-## Key-Bound Token Access Tokens {#security-bound-tokens}
+## Key-Bound Access Tokens {#security-bound-tokens}
 
 Key-bound access tokens, as the name suggests, are bound to a specific key and must be
 presented along with proof of that key during use. The key itself is not presented at the same
@@ -4859,7 +4859,7 @@ If an RS does not ensure that the right keys were used to sign a message with a 
 token, an attacker would be able to capture an access token and sign the request with their own
 keys, thereby negating the benefits of using key-bound access tokens.
 
-The RS also needs to ensure that a sufficient portions of the message are covered by the
+The RS also needs to ensure that sufficient portions of the message are covered by the
 signature. Any items outside the signature could still affect the API's processing decisions,
 but these items would not be strongly bound to the token presentation. As such, an attacker
 could capture a valid request, then manipulate portions of the request outside of the
@@ -5017,7 +5017,7 @@ instance that has self-asserted its own key and display information.
 
 Most information passed through the web-browser is susceptible to interception and possible manipulation by
 elements within the browser such as scripts loaded within pages. Information in the URL is exposed
-through browser and server logs, and can also leak to other parties through HTTP `Referrer` headers.
+through browser and server logs, and can also leak to other parties through HTTP `Referer` headers.
 
 GNAP's design limits the information passed directly through the browser, allowing for opaque URLs in most circumstances.
 For the redirect-based interaction finish mechanism, named query parameters are used to carry
@@ -5078,14 +5078,14 @@ redirected from this page, no part of the original interaction URL will be found
 ## MTLS Message Integrity {#security-mtls}
 
 The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key
-using a certificate the TLS layer. Since TLS protects the entire HTTP message in transit,
+using a certificate at the TLS layer. Since TLS protects the entire HTTP message in transit,
 verification of the TLS client certificate presented with the message provides a sufficient binding
 between the two. However, since TLS is functioning at a separate layer from HTTP, there is no
 direct connection between the TLS key presentation and the message itself, other than the fact that
 the message was presented over the TLS channel. That is to say, any HTTP message can be presented
 over the TLS channel in question with the same level of trust. The verifier is responsible for
 ensuring the key in the TLS client certificate is the one expected for a particular request. For
-example, if the request is a [grant request](request), the AS needs to compare the TLS client
+example, if the request is a [grant request](#request), the AS needs to compare the TLS client
 certificate presented at the TLS layer to the key identified in the request body itself (either
 by value or through a referenced identifier).
 
@@ -5330,7 +5330,7 @@ If the authorization server's implementation of access tokens is such that it re
 
 Several parties in the GNAP process are expected to persist data at least temporarily, if not semi-permanently, for the normal functioning of the system. If compromised, this could lead to exposure of sensitive information. This section documents the potentially sensitive information each party in GNAP is expected to store for normal operation. Naturally it is possible that any party is storing information for longer than technically necessary of the protocol mechanics (such as audit logs, etc).
 
-The authorization server is expected to store subject identifiers for user indefinitely, in order to be able to include them in the responses to clients. The authorization server is also expected to store client key identifiers associated with display information about the client such as its name and logo.
+The authorization server is expected to store subject identifiers for users indefinitely, in order to be able to include them in the responses to clients. The authorization server is also expected to store client key identifiers associated with display information about the client such as its name and logo.
 
 The client is expected to store its client instance key indefinitely, in order to authenticate to the authorization server for the normal functioning of the GNAP flows. Additionally, the client will be temporarily storing artifacts issued by the authorization server during a flow, and these artifacts SHOULD be discarded by the client when the transaction is complete.
 
