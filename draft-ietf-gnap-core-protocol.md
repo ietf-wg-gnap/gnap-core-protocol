@@ -33,16 +33,16 @@ author:
 
 normative:
     BCP195:
-       target: 'https://www.rfc-editor.org/info/bcp195'
-       title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
-       date: May 2015
-       author:
-         -
-           ins: Y. Sheffer
-         -
-           ins: R. Holz
-         -
-           ins: P. Saint-Andre
+      target: 'https://www.rfc-editor.org/info/bcp195'
+      title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
+      date: May 2015
+      author:
+        -
+          ins: Y. Sheffer
+        -
+          ins: R. Holz
+        -
+          ins: P. Saint-Andre
     RFC2119:
     RFC3986:
     RFC5646:
@@ -82,14 +82,14 @@ informative:
     I-D.ietf-httpbis-client-cert-field:
     I-D.ietf-oauth-security-topics:
     promise-theory:
-       target: 'http://markburgess.org/promises.html'
-       title: Promise theory
-       date: January 2014
-       author:
-         -
-           ins: M. Burgess
-         -
-           ins: J. Bergstra
+      target: 'http://markburgess.org/promises.html'
+      title: Promise theory
+      date: January 2014
+      author:
+        -
+          ins: M. Burgess
+        -
+          ins: J. Bergstra
     attack-surfaces:
         target: 'https://odr.chalmers.se/handle/20.500.12380/304105'
         title: Security Analysis of Attack Surfaces on the Grant Negotiation and Authorization Protocol
@@ -166,26 +166,26 @@ on the role by the overall protocol.
 |             |            |            |
 |Authorization|            |  Resource  |
 |   Server    |            |   Server   |
-|             |<-+   +---->|            |
-+-------------+  |   |     +------------+
-       +         |   |
-       +         |   |
-       +         |   |
-       +         |   |
-       +         |   |
-       +       +----------+
-       +       |  Client  |
-       +       | Instance |
-       +       +----------+
-       +            +
-       +            +
-       +            +
- +-----------+      +      +------------+
- |           |      + + + +|            |
- |  Resource |             |    End     |
- |   Owner   | ~ ~ ~ ~ ~ ~ |    User    |
- |           |             |            |
- +-----------+             +------------+
+|             |<--+   +--->|            |
++-------------+   |   |    +------------+
+        +         |   |
+        +         |   |
+        +         |   |
+        +         |   |
+        +         |   |
+        +      +----------+
+        +      |  Client  |
+        +      | Instance |
+        +      +----------+
+        +           +
+        +           +
+        +           +
++-----------+       +     +------------+
+|           |       + + + |            |
+|  Resource |             |    End     |
+|   Owner   | ~ ~ ~ ~ ~ ~ |    User    |
+|           |             |            |
++-----------+             +------------+
 
 Legend
 
@@ -357,11 +357,11 @@ an access token to call an RS.
     | End-user   | ~ ~ ~ ~ |  Resource  |
     |            |         | Owner (RO) |
     +------------+         +------------+
-        +                         +
-        +                         +
-       (A)                       (B)
-        +                         +
-        +                         +
+          +                       +
+          +                       +
+          (A)                     (B)
+          +                       +
+          +                       +
     +--------+                    +          +------------+
     | Client | (1)                +          |  Resource  |
     |Instance|                    +          |   Server   |
@@ -1187,8 +1187,8 @@ assertions (array of strings)
 
 ~~~
 "subject": {
-   "formats": [ "iss_sub", "opaque" ],
-   "assertions": [ "id_token", "saml2" ]
+  "formats": [ "iss_sub", "opaque" ],
+  "assertions": [ "id_token", "saml2" ]
 }
 ~~~
 
@@ -1395,13 +1395,13 @@ assertions (object)
 
 ~~~
 "user": {
-   "sub_ids": [ {
-     "format": "opaque",
-     "id": "J2G8G8O4AZ"
-   } ],
-   "assertions": {
-     "id_token": "eyj..."
-   }
+  "sub_ids": [ {
+    "format": "opaque",
+    "id": "J2G8G8O4AZ"
+  } ],
+  "assertions": {
+    "id_token": "eyj..."
+  }
 }
 
 ~~~
@@ -1574,7 +1574,7 @@ this specification.
 
 ~~~
 "interact": {
-   "start": ["app"]
+  "start": ["app"]
 }
 ~~~
 
@@ -1823,8 +1823,8 @@ NOTE: '\' line wrapping per RFC 8792
     },
     "subject": {
         "sub_ids": [ {
-           "format": "opaque",
-           "id": "J2G8G8O4AZ"
+          "format": "opaque",
+          "id": "J2G8G8O4AZ"
         } ]
     }
 }
@@ -1837,14 +1837,14 @@ simultaneously as an opaque identifier, an email address, and a decentralized id
 {
     "subject": {
         "sub_ids": [ {
-           "format": "opaque",
-           "id": "J2G8G8O4AZ"
+          "format": "opaque",
+          "id": "J2G8G8O4AZ"
         }, {
-           "format": "email",
-           "email": "user@example.com"
+          "format": "email",
+          "email": "user@example.com"
         }, {
-           "format": "did",
-           "url": "did:example:123456"
+          "format": "did",
+          "url": "did:example:123456"
         } ]
     }
 }
@@ -2339,13 +2339,13 @@ updated_at (string)
 
 ~~~
 "subject": {
-   "sub_ids": [ {
-     "format": "opaque",
-     "id": "XUT2MFM1XBIKJKSDU8QM"
-   } ],
-   "assertions": {
-     "id_token": "eyj..."
-   }
+  "sub_ids": [ {
+    "format": "opaque",
+    "id": "XUT2MFM1XBIKJKSDU8QM"
+  } ],
+  "assertions": {
+    "id_token": "eyj..."
+  }
 }
 ~~~
 
@@ -2941,8 +2941,8 @@ NOTE: '\' line wrapping per RFC 8792
     },
     "subject": {
         "sub_ids": [ {
-           "format": "opaque",
-           "id": "J2G8G8O4AZ"
+          "format": "opaque",
+          "id": "J2G8G8O4AZ"
         } ]
     }
 }
@@ -3010,8 +3010,8 @@ NOTE: '\' line wrapping per RFC 8792
     },
     "subject": {
         "sub_ids": [ {
-           "format": "opaque",
-           "id": "J2G8G8O4AZ"
+          "format": "opaque",
+          "id": "J2G8G8O4AZ"
         } ]
     }
 }
@@ -5599,9 +5599,9 @@ Cache-Control: no-store
 
 {
     "interact": {
-       "redirect":
-         "https://server.example.com/interact/4CF492MLVMSW9MKM",
-       "finish": "MBDOFXG4Y5CVJCX821LH"
+      "redirect":
+        "https://server.example.com/interact/4CF492MLVMSW9MKM",
+      "finish": "MBDOFXG4Y5CVJCX821LH"
     }
     "continue": {
         "access_token": {
@@ -5969,7 +5969,7 @@ Digest: sha256=...
             "format": "opaque",
             "id": "J2G8G8O4AZ"
         } ]
-   }
+  }
 }
 ~~~
 
