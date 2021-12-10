@@ -5494,7 +5494,7 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
     OAuth 2.0's deployment model assumes a strong binding between the AS and the RS.
 
-    GNAP is designed to be interoperable with decentralized identity standards and to provide a human-centric authorization layer. In addition to the core protocol, GNAP that supports various patterns of communication between RSs and ASs through extensions. GNAP tries to limit the odds of a consolidation to just a handful of super-popular AS services.
+    GNAP is designed to be interoperable with decentralized identity standards and to provide a human-centric authorization layer. In addition to the core protocol, GNAP supports various patterns of communication between RSs and ASs through extensions. GNAP tries to limit the odds of a consolidation to just a handful of super-popular AS services.
 
 # Component Data Models {#data-models}
 
