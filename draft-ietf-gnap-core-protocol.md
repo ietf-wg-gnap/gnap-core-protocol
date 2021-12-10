@@ -1295,6 +1295,9 @@ given at runtime. Additional fields sent during a request but not present in a p
 client instance record at the AS SHOULD NOT be added to the client's pre-registered record.
 See additional considerations regarding client instance impersonation in {{security-impersonation}}.
 
+A client instance that is capable of talking to multiple AS's SHOULD use a different key for each
+AS to prevent a class of mix-up attacks as described in {{security-cuckoo}}.
+
 ### Identifying the Client Instance by Reference {#request-instance}
 
 If the client instance has an instance identifier that the AS can use to determine
