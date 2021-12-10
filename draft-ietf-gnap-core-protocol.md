@@ -5422,6 +5422,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -09
     - Added security considerations on redirection status codes.
+    - Added security considerations on cuckoo token attack.
 
 - -08
     - Update definition for "Client" to account for the case of no end-user.
