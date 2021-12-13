@@ -99,10 +99,10 @@ informative:
                 ins: Å. Axeland
             -
                 ins: O. Oueidat
-    HELMSCHMIDT2021:
+    HELMSCHMIDT2022:
         target: 'tbd'
         title: 'tbd'
-        date: 2021
+        date: 2022
         author:
             -
                 ins: F. Helmschmidt
@@ -5315,7 +5315,7 @@ and the related JSON Object Signing And Encryption (JOSE) cryptography suite.
 
 ## Stolen Token Replay {#security-cuckoo}
 
-If a client instance cam request tokens at multiple AS's, and the client instance uses the same keys
+If a client instance can request tokens at multiple AS's, and the client instance uses the same keys
 to make its requests across those different AS's, then it is possible for an attacker to replay a
 stolen token issued by an honest AS from a compromised AS, thereby binding the stolen token to
 the client instance's key in a different context. The attacker can manipulate the client instance
@@ -5330,10 +5330,13 @@ talk to multiple AS's, including the attacker's controlled AS. Finally, the clie
 to be able to be manipulated by the attacker to call the RS while using a token issued from the
 stolen AS. The RS does not need to be compromised or made to trust the attacker's AS.
 
-To protect agains this attack, the client instance can use a different key for each AS that it
+To protect against this attack, the client instance can use a different key for each AS that it
 talks to. Since the replayed token will be bound to the key used at the honest AS, the
 uncompromised RS will reject the call since the client instance will be using the key used at
 the attacker's AS instead with the same token.
+When the MTLS key proofing method is used, a client instance can use self-signed
+certificates to use a different key for each AS that it talks to, as discussed in
+{{security-mtls-patterns}}.
 
 Additionally, the client instance can keep a strong association between the RS and a specific AS
 that it trusts to issue tokens for that RS. This strong binding also helps against some forms of
@@ -5341,7 +5344,7 @@ that it trusts to issue tokens for that RS. This strong binding also helps again
 but it can be managed either as a configuration element for the client instance or dynamically
 through [discovering the AS from the RS](#rs-request-without-token).
 
-The details of this attack are available in {{HELMSCHMIDT2021}} with additional discussion and considerations.
+The details of this attack are available in {{HELMSCHMIDT2022}} with additional discussion and considerations.
 
 # Privacy Considerations {#privacy}
 
