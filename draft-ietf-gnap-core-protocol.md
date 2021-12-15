@@ -90,7 +90,7 @@ informative:
           ins: M. Burgess
         -
           ins: J. Bergstra
-    attack-surfaces:
+    AXELAND2021:
         target: 'https://odr.chalmers.se/handle/20.500.12380/304105'
         title: Security Analysis of Attack Surfaces on the Grant Negotiation and Authorization Protocol
         date: 2021
@@ -4588,7 +4588,7 @@ at both referenced resources.
 
 The editors would like to thank the feedback of the following individuals for their reviews,
 implementations, and contributions:
-Åke Axeland,
+{{{Åke Axeland}{Ake Axeland}}},
 Aaron Parecki,
 Adam Omar Oueidat,
 Andrii Deinega,
@@ -4913,7 +4913,7 @@ that any callback for one AS does not get conflated with the callback to differe
 hash calculate allows a client instance to protect against this kind of substitution, but only if
 the client instance validates the hash. If the client instance does not use an interaction finish method
 or does not check the interaction finish hash value, the compromised AS can be granted a valid
-access token on behalf of the resource owner. See {{attack-surfaces}} for details
+access token on behalf of the resource owner. See {{AXELAND2021}} for details
 of one such attack, which has been since addressed in this document by including the grant endpoint
 in the interaction hash calculation. The client instance still needs to validate the hash for
 the attack to be prevented.
