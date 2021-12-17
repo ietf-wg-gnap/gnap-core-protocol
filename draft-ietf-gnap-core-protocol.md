@@ -314,7 +314,7 @@ Looking back on each trust relationship:
 
 - end user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers promise to implement requirements and generally some recommendations or best practices, so that the end users may confidently use their software. However, end users might also be facing some attacker's client software, without even realizing it.
 
-- end user / AS: when the client supports it (see {{response-interact}}), the end user gets to interact with front-channel URLs provided by the AS. See {{security-front-channel}} for some considerations in trusting these interactions.
+- end user/AS: when the client supports it (see {{response-interact}}), the end user gets to interact with front-channel URLs provided by the AS. See {{security-front-channel}} for some considerations in trusting these interactions.
 
 - client/AS: An honest AS may be facing an attacker's client (as discussed just above), or the reverse, and GNAP aims at making common attacks impractical. The core specification makes access tokens opaque to the client and defines the request/response scheme in detail, therefore avoiding extra trust hypotheses from this critical piece of software. Yet the AS may further define cryptographic attestations or optional rules to simplify the access of clients it already trusts, due to past behavior or organizational policies (see {{request-client}}).
 
