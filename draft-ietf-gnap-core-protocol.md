@@ -122,7 +122,7 @@ passed directly to the software.
 This protocol allows a piece of software, the client instance, to request delegated
 authorization to resource servers and to request direct information. This delegation is
 facilitated by an authorization server usually on
-behalf of a resource owner. The end-user operating the software may interact
+behalf of a resource owner. The end user operating the software may interact
 with the authorization server to authenticate, provide consent, and
 authorize the request.
 
@@ -206,7 +206,7 @@ Authorization Server (AS)
 : server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information).
 
 Client
-: application that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end-user or it runs autonomously on behalf of a resource owner.
+: application that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end user or it runs autonomously on behalf of a resource owner.
 
     Example: a client can be a mobile application, a web application, etc.
 
@@ -220,7 +220,7 @@ Resource Owner (RO)
 
     Note: the act of granting or denying an operation may be manual (i.e. through an interaction with a physical person) or automatic (i.e. through predefined organizational rules).
 
-End-user
+End user
 : natural person that operates a client instance.
 
     Note: that natural person may or may not be the same entity as the RO.
@@ -234,7 +234,7 @@ not make additional requirements on its structure or setup.
 
 Multiple roles can be fulfilled by the same party, and a given party
 can switch roles in different instances of the protocol. For example,
-the RO and end-user in many instances are the same person, where a user is
+the RO and end user in many instances are the same person, where a user is
 authorizing the client instance to act on their own behalf at the RS. In this case,
 one party fulfills both of the RO and end-user roles, but the roles themselves
 are still defined separately from each other to allow for other
@@ -248,7 +248,7 @@ RS and a client instance from different perspectives, and it fulfills these
 roles separately as far as the overall protocol is concerned.
 
 A single role need not be deployed as a monolithic service. For example,
-A client instance could have components that are installed on the end-user's device as
+A client instance could have components that are installed on the end user's device as
 well as a back-end system that it communicates with. If both of these
 components participate in the delegation protocol, they are both considered
 part of the client instance. If there are several copies of the client software
@@ -291,7 +291,7 @@ Grant
 Privilege
 : right or attribute associated with a subject.
 
-    Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end-user. This process is refered to as privilege delegation.
+    Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end user. This process is refered to as privilege delegation.
 
 Protected Resource
 : protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid access token is provided.
@@ -311,17 +311,17 @@ Subject Information
 
 ## Trust relationships {#trust}
 
-GNAP defines its trust objective as: "the RO trusts the AS to ensure access validation and delegation of protected resources to end-users, through third party clients."
+GNAP defines its trust objective as: "the RO trusts the AS to ensure access validation and delegation of protected resources to end users, through third party clients."
 
-This trust objective can be decomposed into trust relationships between software elements and roles, especially the pairs end-user/RO, end-user/client, client/AS, RS/RO, AS/RO, AS/RS. Trust of an agent by its pair can exist if the pair is informed that the agent has made a promise to follow the protocol in the past (e.g. pre-registration, uncompromised cryptographic components) or if the pair is able to infer by indirect means that the agent has made such a promise (e.g. a compliant client request). Each agent defines its own valuation function of promises given or received. Examples of such valuations can be the benefits from interacting with other agents (e.g. safety in client access, interoperability with identity standards), the cost of following the protocol (including its security and privacy requirements and recommendations), a ranking of promise importance (e.g. a policy decision made by the AS), the assessment of one's vulnerability or risk of not being able to defend against threats, etc. Those valuations may depend on the context of the request. For instance, the AS may decide to either take into account or discard hints provided by the client, the RS may refuse bearer tokens, etc. depending on the specific case in which GNAP is used. Some promises can be conditional of some previous interactions (e.g. repeated requests).
+This trust objective can be decomposed into trust relationships between software elements and roles, especially the pairs end user/RO, end user/client, client/AS, RS/RO, AS/RO, AS/RS. Trust of an agent by its pair can exist if the pair is informed that the agent has made a promise to follow the protocol in the past (e.g. pre-registration, uncompromised cryptographic components) or if the pair is able to infer by indirect means that the agent has made such a promise (e.g. a compliant client request). Each agent defines its own valuation function of promises given or received. Examples of such valuations can be the benefits from interacting with other agents (e.g. safety in client access, interoperability with identity standards), the cost of following the protocol (including its security and privacy requirements and recommendations), a ranking of promise importance (e.g. a policy decision made by the AS), the assessment of one's vulnerability or risk of not being able to defend against threats, etc. Those valuations may depend on the context of the request. For instance, the AS may decide to either take into account or discard hints provided by the client, the RS may refuse bearer tokens, etc. depending on the specific case in which GNAP is used. Some promises can be conditional of some previous interactions (e.g. repeated requests).
 
 Looking back on each trust relationship:
 
-- end-user/RO: this relationship exists only when the end-user and the RO are different, in which case the end-user needs some out of band mechanism of getting the RO consent (see {{authorization}}). GNAP generally assumes that humans can be authenticated thanks to identity protocols (for instance, through an id_token assertion in {{request-subject}}).
+- end user/RO: this relationship exists only when the end user and the RO are different, in which case the end user needs some out of band mechanism of getting the RO consent (see {{authorization}}). GNAP generally assumes that humans can be authenticated thanks to identity protocols (for instance, through an id_token assertion in {{request-subject}}).
 
-- end-user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers promise to implement requirements and generally some recommendations or best practices, so that the end-users may confidently use their software. However, end-users might also be facing some attacker's client software, without even realizing it.
+- end user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers promise to implement requirements and generally some recommendations or best practices, so that the end users may confidently use their software. However, end users might also be facing some attacker's client software, without even realizing it.
 
-- end-user / AS: when the client supports it (see {{response-interact}}), the end-user gets to interact with front-channel URLs provided by the AS. See {{security-front-channel}} for some considerations in trusting these interactions.
+- end user/AS: when the client supports it (see {{response-interact}}), the end user gets to interact with front-channel URLs provided by the AS. See {{security-front-channel}} for some considerations in trusting these interactions.
 
 - client/AS: An honest AS may be facing an attacker's client (as discussed just above), or the reverse, and GNAP aims at making common attacks impractical. The core specification makes access tokens opaque to the client and defines the request/response scheme in detail, therefore avoiding extra trust hypotheses from this critical piece of software. Yet the AS may further define cryptographic attestations or optional rules to simplify the access of clients it already trusts, due to past behavior or organizational policies (see {{request-client}}).
 
@@ -361,7 +361,7 @@ an access token to call an RS.
 
 ~~~
     +------------+         +------------+
-    | End-user   | ~ ~ ~ ~ |  Resource  |
+    | End user   | ~ ~ ~ ~ |  Resource  |
     |            |         | Owner (RO) |
     +------------+         +------------+
           +                       +
@@ -396,10 +396,10 @@ Legend
         communication between roles
 ~~~
 
-- (A) The end-user interacts with the client instance to indicate a need for resources on
+- (A) The end user interacts with the client instance to indicate a need for resources on
     behalf of the RO. This could identify the RS the client instance needs to call,
     the resources needed, or the RO that is needed to approve the
-    request. Note that the RO and end-user are often
+    request. Note that the RO and end user are often
     the same entity in practice, but GNAP makes no general assumption that they are.
 
 - (1) The client instance determines what access is needed and which AS to approach for access. Note that
@@ -419,7 +419,7 @@ Legend
     using a variety of possible mechanisms including web page
     redirects, applications, challenge/response protocols, or
     other methods. The RO approves the request for the client instance
-    being operated by the end-user. Note that the RO and end-user are often
+    being operated by the end user. Note that the RO and end user are often
     the same entity in practice, and many of GNAP's interaction methods allow
     the client instance to facilitate the end user interacting with the AS
     in order to fulfill the role of the RO.
@@ -464,7 +464,7 @@ possible for there not to be a user involved in the delegation process.
 ### Redirect-based Interaction {#sequence-redirect}
 
 In this example flow, the client instance is a web application that wants access to resources on behalf
-of the current user, who acts as both the end-user and the resource
+of the current user, who acts as both the end user and the resource
 owner (RO). Since the client instance is capable of directing the user to an arbitrary URL and
 receiving responses from the user's browser, interaction here is handled through
 front-channel redirects using the user's browser. The redirection URL used for interaction is
@@ -504,7 +504,7 @@ that returns from the interaction.
 +--------+                                  +--------+
 ~~~
 
-1. The client instance establishes a verifiable session to the user, in the role of the end-user.
+1. The client instance establishes a verifiable session to the user, in the role of the end user.
 
 2. The client instance [requests access to the resource](#request). The client instance indicates that
     it can [redirect to an arbitrary URL](#request-interact-redirect) and
@@ -539,7 +539,7 @@ that returns from the interaction.
     based on this information and continues only if the hash validates.
     Note that the client instance needs to ensure that the parameters for the incoming
     request match those that it is expecting from the session created
-    in (1). The client instance also needs to be prepared for the end-user never being returned
+    in (1). The client instance also needs to be prepared for the end user never being returned
     to the client instance and handle timeouts appropriately.
 
 8. The client instance loads the continuation information from (3) and sends the
@@ -568,7 +568,7 @@ AS in this example. The client instance is not capable of presenting an arbitrar
 nor is it capable of accepting incoming HTTP requests from the user's browser.
 The client instance polls the AS while it is waiting for the RO to authorize the request.
 The user's interaction is assumed to occur on a secondary device. In this example
-it is assumed that the user is both the end-user and RO, though the user is not assumed
+it is assumed that the user is both the end user and RO, though the user is not assumed
 to be interacting with the client instance through the same web browser used for interaction at
 the AS.
 
@@ -628,7 +628,7 @@ the AS.
     with the AS through a secondary device, the client instance does not provide a mechanism to
     launch the RO's browser at this URL.
 
-5. The end-user authenticates at the AS, taking on the role of the RO.
+5. The end user authenticates at the AS, taking on the role of the RO.
 
 6.  The RO enters the code communicated in (3) to the AS. The AS validates this code
     against a current request in process.
@@ -668,7 +668,7 @@ An example set of protocol messages for this method can be found in {{example-de
 
 ### Asynchronous Authorization {#sequence-async}
 
-In this example flow, the end-user and RO roles are fulfilled by different parties, and
+In this example flow, the end user and RO roles are fulfilled by different parties, and
 the RO does not interact with the client instance. The AS reaches out asynchronously to the RO
 during the request process to gather the RO's authorization for the client instance's request.
 The client instance polls the AS while it is waiting for the RO to authorize the request.
@@ -928,8 +928,8 @@ client (object / string)
     interactions. {{request-client}}
 
 user (object / string)
-: Identifies the end-user to the AS in a manner that the AS can verify, either directly or
-    by interacting with the end-user to determine their status as the RO. {{request-user}}
+: Identifies the end user to the AS in a manner that the AS can verify, either directly or
+    by interacting with the end user to determine their status as the RO. {{request-user}}
 
 interact (object)
 : Describes the modes that the client instance has for allowing the RO to interact with the
@@ -1385,14 +1385,14 @@ client instances with unknown keys have to be interactively approved by an RO.
 
 ## Identifying the User {#request-user}
 
-If the client instance knows the identity of the end-user through one or more
+If the client instance knows the identity of the end user through one or more
 identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
 or by reference.
 
 sub_ids (array of objects)
 : An array of subject identifiers for the
-            end-user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+            end user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
 assertions (object)
 : An object containing assertions as values keyed on the assertion
@@ -1420,10 +1420,10 @@ assertions (object)
 
 Subject identifiers are hints to the AS in determining the
 RO and MUST NOT be taken as declarative statements that a particular
-RO is present at the client instance and acting as the end-user. Assertions SHOULD be validated by the AS.
+RO is present at the client instance and acting as the end user. Assertions SHOULD be validated by the AS.
 \[\[ [See issue #49](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/49) \]\]
 
-If the identified end-user does not match the RO present at the AS
+If the identified end user does not match the RO present at the AS
 during an interaction step, the AS SHOULD reject the request with an error.
 
 \[\[ [See issue #50](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/50) \]\]
@@ -1438,10 +1438,10 @@ processing assertions from the client instance.
 
 ### Identifying the User by Reference {#request-user-reference}
 
-The AS can identify the current end-user to the client instance with a reference
-which can be used by the client instance to refer to the end-user across
+The AS can identify the current end user to the client instance with a reference
+which can be used by the client instance to refer to the end user across
 multiple requests.
-If the client instance has a reference for the end-user at this AS, the
+If the client instance has a reference for the end user at this AS, the
 client instance MAY pass that reference as a string. The format of this string
 is opaque to the client instance.
 
@@ -1465,7 +1465,7 @@ return an error.
 
 Often, the AS will require [interaction with the RO](#authorization) in order to
 approve a requested delegation to the client instance for both access to resources and direct
-subject information. Many times the end-user using the client instance is the same person as
+subject information. Many times the end user using the client instance is the same person as
 the RO, and the client instance can directly drive interaction with the end user by facilitating
 the process through means such as redirection to a URL or launching an application. Other times, the
 client instance can provide information to start the RO's interaction on a secondary
@@ -1497,7 +1497,7 @@ The `interact` field MUST contain the `start` key, and MAY contain the `finish` 
 of each key is an array which contains strings or JSON objects as defined below.
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
-the end-user to an arbitrary URL and can receive a [redirect](#request-interact-callback-redirect) through
+the end user to an arbitrary URL and can receive a [redirect](#request-interact-callback-redirect) through
 a browser request.
 
 ~~~
@@ -1512,7 +1512,7 @@ a browser request.
 ~~~
 
 In this non-normative example, the client instance is indicating that it can
-display a [user code](#request-interact-usercode) and direct the end-user
+display a [user code](#request-interact-usercode) and direct the end user
 to an [arbitrary URL](#request-interact-redirect) on a secondary
 device, but it cannot accept a redirect or push callback.
 
@@ -1537,25 +1537,25 @@ apply suitable timeouts to any callback URLs.
 This specification defines the following interaction start modes as an array of string values under the `start` key:
 
 "redirect"
-: Indicates that the client instance can direct the end-user to an arbitrary URL
+: Indicates that the client instance can direct the end user to an arbitrary URL
     for interaction. {{request-interact-redirect}}
 
 "app"
-: Indicates that the client instance can launch an application on the end-user's
+: Indicates that the client instance can launch an application on the end user's
     device for interaction. {{request-interact-app}}
 
 "user_code"
 : Indicates that the client instance can communicate a human-readable short
-    code to the end-user for use with a stable URL. {{request-interact-usercode}}
+    code to the end user for use with a stable URL. {{request-interact-usercode}}
 
 #### Redirect to an Arbitrary URL {#request-interact-redirect}
 
-If the client instance is capable of directing the end-user to a URL defined
+If the client instance is capable of directing the end user to a URL defined
 by the AS at runtime, the client instance indicates this by including
 `redirect` in the array under the `start` key. The means by which
 the client instance will activate this URL is out of scope of this
 specification, but common methods include an HTTP redirect,
-launching a browser on the end-user's device, providing a scannable
+launching a browser on the end user's device, providing a scannable
 image encoding, and printing out a URL to an interactive
 console. While this URL is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
@@ -1577,7 +1577,7 @@ communication techniques such as this.
 #### Open an Application-specific URL {#request-interact-app}
 
 If the client instance can open a URL associated with an application on
-the end-user's device, the client instance indicates this by including `app`
+the end user's device, the client instance indicates this by including `app`
 in the array under the `start` key. The means by which the client instance
 determines the application to open with this URL are out of scope of
 this specification.
@@ -1629,7 +1629,7 @@ method (string)
     with other values defined by [a registry TBD](#IANA):
 
     "redirect"
-    : Indicates that the client instance can receive a redirect from the end-user's device
+    : Indicates that the client instance can receive a redirect from the end user's device
     after interaction with the RO has concluded. {{request-interact-callback-redirect}}
 
     "push"
@@ -1693,8 +1693,8 @@ Requests to the callback URI MUST be processed by the client instance as describ
 {{interaction-callback}}.
 
 Since the incoming request to the callback URL is from the RO's
-browser, this method is usually used when the RO and end-user are the
-same entity. As such, the client instance MUST ensure the end-user is present on the request to
+browser, this method is usually used when the RO and end user are the
+same entity. As such, the client instance MUST ensure the end user is present on the request to
 prevent substitution attacks.
 
 See {{security-front-channel}} for more considerations regarding the use of front-channel
@@ -1720,7 +1720,7 @@ Requests to the callback URI MUST be processed by the client instance as describ
 {{interaction-pushback}}.
 
 Since the incoming request to the callback URL is from the AS and
-not from the RO's browser, the client instance MUST NOT require the end-user to
+not from the RO's browser, the client instance MUST NOT require the end user to
 be present on the incoming HTTP request.
 
 ### Hints {#request-interact-hint}
@@ -1731,7 +1731,7 @@ instance that the AS can use to help drive user interaction.
 This specification defines the following properties under the `hints` key:
 
 ui_locales (array of strings)
-: Indicates the end-user's preferred locales that the AS can use
+: Indicates the end user's preferred locales that the AS can use
     during interaction, particularly before the RO has
     authenticated. {{request-interact-locale}}
 
@@ -1742,7 +1742,7 @@ modes. Additional interaction modes are defined in
 
 #### Indicate Desired Interaction Locales {#request-interact-locale}
 
-If the client instance knows the end-user's locale and language preferences, the
+If the client instance knows the end user's locale and language preferences, the
 client instance can send this information to the AS using the `ui_locales` field
 with an array of locale strings as defined by {{RFC5646}}.
 
@@ -2173,7 +2173,7 @@ particularly if the client instance [modifies its request](#continue-modify).
 
 If the client instance indicates that it can [redirect to an arbitrary URL](#request-interact-redirect) and the AS supports this mode for the client instance's
 request, the AS responds with the "redirect" field, which is
-a string containing the URL to direct the end-user to. This URL MUST be
+a string containing the URL to direct the end user to. This URL MUST be
 unique for the request and MUST NOT contain any security-sensitive
 information such as user identifiers or access tokens.
 
@@ -2192,9 +2192,9 @@ with the rest of the AS are out of scope for this specification.
 
 \[\[ [See issue #72](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/72) \]\]
 
-The client instance sends the end-user to the URL to interact with the AS. The
+The client instance sends the end user to the URL to interact with the AS. The
 client instance MUST NOT alter the URL in any way. The means for the client instance
-to send the end-user to this URL is out of scope of this specification,
+to send the end user to this URL is out of scope of this specification,
 but common methods include an HTTP redirect, launching the system
 browser, displaying a scannable code, or printing out the URL in an
 interactive console. See details of the interaction in {{interaction-redirect}}.
@@ -2258,7 +2258,7 @@ url (string)
 }
 ~~~
 
-The client instance MUST communicate the "code" to the end-user in some
+The client instance MUST communicate the "code" to the end user in some
 fashion, such as displaying it on a screen or reading it out
 audibly.
 
@@ -2267,11 +2267,11 @@ to facilitate user interaction, but since the URL should be stable,
 the client instance should be able to safely decide to not display this value.
 As this interaction mode is designed to facilitate interaction
 via a secondary device, it is not expected that the client instance redirect
-the end-user to the URL given here at runtime. Consequently, the URL needs to
+the end user to the URL given here at runtime. Consequently, the URL needs to
 be stable enough that a client instance could be statically configured with it, perhaps
-referring the end-user to the URL via documentation instead of through an
+referring the end user to the URL via documentation instead of through an
 interactive means. If the client instance is capable of communicating an
-arbitrary URL to the end-user, such as through a scannable code, the
+arbitrary URL to the end user, such as through a scannable code, the
 client instance can use the ["redirect"](#request-interact-redirect) mode
 for this purpose instead of or in addition to the user code mode.
 
@@ -2321,7 +2321,7 @@ document the corresponding interaction request.
 If information about the RO is requested and the AS
 grants the client instance access to that data, the AS returns the approved
 information in the "subject" response field. The AS MUST return the `subject` field only in cases where the AS is sure that
-the RO and the end-user are the same party. This can be accomplished through some forms of
+the RO and the end user are the same party. This can be accomplished through some forms of
 [interaction with the RO](#authorization).
 
 This field is an object with the following OPTIONAL properties.
@@ -2566,8 +2566,8 @@ mode, the client instance facilitates opening the URI through the end user's web
 The client instance could launch the URI through the system browser, provide a clickable
 link, redirect the user through HTTP response codes, or display the URI in a form
 the end user can use to launch such as a multidimensional barcode.
-With this method, it is common (though not required) for the RO to be the same party as the end-user, since
-the client instance has to communicate the redirection URI to the end-user.
+With this method, it is common (though not required) for the RO to be the same party as the end user, since
+the client instance has to communicate the redirection URI to the end user.
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
@@ -2589,7 +2589,7 @@ request and MUST be protected by HTTPS or equivalent means.
 ### Interaction at the User Code URI {#interaction-usercode}
 
 When the end user is directed to enter a short code through the ["user_code"](#response-interact-usercode)
-mode, the client instance communicates the user code to the end-user and
+mode, the client instance communicates the user code to the end user and
 directs the end user to enter that code at an associated URI.
 This mode is used when the client instance is not able to facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
@@ -3051,7 +3051,7 @@ replaces any values from a previous request. The AS MAY respond to any of the in
 responses as described in {{response-interact}}, just like it would to a new request.
 
 The client instance MAY include the `user` field as described in {{request-user}} to present new assertions
-or information about the end-user.
+or information about the end user.
 \[\[ [See issue #93](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/93) \]\]
 
 The client instance MUST NOT include the `client` section of the request.
@@ -4758,13 +4758,13 @@ them. This situation could happen if multiple instances within a cluster can sec
 information among themselves. Even though there are multiple copies of the software, the shared key
 makes these copies all present as a single instance. It is considered bad practice to share keys between
 copies of software unless they are very tightly integrated with each other and can be closely managed.
-It is particularly bad practice to allow an end-user to copy keys between client instances and to
+It is particularly bad practice to allow an end user to copy keys between client instances and to
 willingly use the same key in multiple instances.
 
 ## Protection of Authorization Server {#security-as}
 
 The AS performs critical functions in GNAP, including authenticating client software, managing interactions
-with end-users to gather consent and provide notice, and issuing access tokens for client instances
+with end users to gather consent and provide notice, and issuing access tokens for client instances
 to present to resource servers. As such, protecting the AS is central to any GNAP deployment.
 
 If an attacker is able to gain control over an AS, they would be able to create fraudulent tokens and
@@ -4896,15 +4896,15 @@ portions of the HTTP message.
 ## Exposure of End-user Credentials to Client Instance {#security-credentials}
 
 As a delegation protocol, one of the main goals of GNAP is to prevent the client software from being
-exposed to any credentials or information about the end-user or resource owner as a requirement
+exposed to any credentials or information about the end user or resource owner as a requirement
 of the delegation process. By using the variety of interaction mechanisms, the resource owner can
 interact with the AS without ever authenticating to the client software, and without the client
 software having to impersonate the resource owner through replay of their credentials.
 
-Consequently, no interaction methods defined in the GNAP core require the end-user to enter their
+Consequently, no interaction methods defined in the GNAP core require the end user to enter their
 credentials, but it is technologically possible for an extension to be defined to carry such values.
 Such an extension would be dangerous as it would allow rogue client software to directly collect, store,
-and replay the end-user's credentials outside of any legitimate use within a GNAP request.
+and replay the end user's credentials outside of any legitimate use within a GNAP request.
 
 The concerns of such an extension could be mitigated through use of a challenge and response
 unlocked by the end user's credentials. For example, the AS presents a challenge as part of
@@ -4992,7 +4992,7 @@ a display name and logo. The registration record can also limit a given client t
 kinds of information and access, or be limited to specific interaction mechanisms at runtime.
 
 It also is sensible to pre-register client instances when the software is acting autonomously, without
-the need for a runtime approval by a resource owner or any interaction with an end-user. In these cases,
+the need for a runtime approval by a resource owner or any interaction with an end user. In these cases,
 an AS needs to rest on the trust decisions that have been determined prior to runtime in determining
 what rights and tokens to grant to a given client instance.
 
@@ -5004,7 +5004,7 @@ a separate instance, and sharing a key among all instances would be detrimental 
 compromise of any single installation would compromise all copies for all users.
 
 An AS can treat these classes of client software differently from each other, perhaps by allowing access
-to certain high-value APIs only to pre-registered known clients, or by requiring an active end-user
+to certain high-value APIs only to pre-registered known clients, or by requiring an active end user
 delegation of authority to any client software not pre-registered.
 
 An AS can also provide warnings and caveats to resource owners during the authorization process, allowing
@@ -5056,7 +5056,7 @@ opaque to the AS, but can contain information relevant to the client instance's 
 particular, the client instance can include state information to allow the callback request to
 be associated with an ongoing grant request.
 
-Since this URL is exposed to the end-user's browser, it is susceptible to both logging and manipulation
+Since this URL is exposed to the end user's browser, it is susceptible to both logging and manipulation
 in transit before the request is made to the client software. As such, a client instance should
 never put security-critical or private information into the callback URL in a cleartext form. For example,
 if the client software includes a post-redirect target URL in its callback URL to the AS, this target URL
@@ -5210,7 +5210,7 @@ to make its continuation call, it will need to recall all of these protocol elem
 this means the client instance will need to store these protocol elements in some retrievable
 fashion.
 
-If the security protocol elements are stored on the end-user's device, such as in browser
+If the security protocol elements are stored on the end user's device, such as in browser
 storage or in local application data stores, capture and exfiltration of this information could
 allow an attacker to continue a pending transaction instead of the client instance. Client
 software can make use of secure storage mechanisms, including hardware-based key and data
@@ -5266,15 +5266,15 @@ generated from a separate random pool of values instead of a single global value
 
 ## Front-channel URLs {#security-front-channel}
 
-Some interaction methods in GNAP make use of URLs accessed through the end-user's browser,
+Some interaction methods in GNAP make use of URLs accessed through the end user's browser,
 known collectively as front-channel communication. These URLs are most notably present in
 the `redirect` interaction `start` method and the `redirect` interaction `finish` mode. Since
-these URLs are intended to be given to the end-user, the end user and their browser will be
+these URLs are intended to be given to the end user, the end user and their browser will be
 subjected to anything hosted at that URL including viruses, malware, and phishing scams. This
 kind of risk is inherent to all redirection-based protocols, including GNAP when used in this way.
 
 When talking to a new or unknown AS, a client instance might want to check the URL from the
-interaction `start` against a blocklist and warn the end-user before redirecting them. Many
+interaction `start` against a blocklist and warn the end user before redirecting them. Many
 client instances will provide an interstitial message prior to redirection in order to prepare
 the user for control of the user experience being handed to the domain of the AS, and such a
 method could be used to warn the user of potential threats. For instance, a rogue AS impersonating
@@ -5291,7 +5291,7 @@ by using a blocklist and  allowlist of interaction `finish` URLs during the clie
 initial request, but this approach can be  especially difficult if the URL has any dynamic portion
 chosen by the client software. The AS can couple these checks with policies associated with the
 client instance that has been authenticated in the request. If the AS has any doubt about the
-interaction finish URL, the AS can provide an interstitial warning to the end-user before
+interaction finish URL, the AS can provide an interstitial warning to the end user before
 processing the redirect.
 
 Ultimately, all protocols that use redirect-based communication through the user's browser are
@@ -5436,7 +5436,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Added security considerations on cuckoo token attack.
 
 - -08
-    - Update definition for "Client" to account for the case of no end-user.
+    - Update definition for "Client" to account for the case of no end user.
     - Change definition for "Subject".
     - Expanded security and privacy considerations for more situations.
     - Added cross-links from security and privacy considerations.
@@ -5516,7 +5516,7 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
     OAuth 2.0 generally assumes the user has access to the a web browser. The type of interaction available is fixed by the grant type, and the most common interactive grant types start in the browser. OAuth 2.0 assumes that the user using the client software is the same user that will interact with the AS to approve access.
 
-    GNAP allows various patterns to manage authorizations and consents required to fulfill this requested delegation, including information sent by the client instance, information supplied by external parties, and information gathered through the interaction process. GNAP allows a client instance to list different ways that it can start and finish an interaction, and these can be mixed together as needed for different use cases. GNAP interactions can use a browser, but don’t have to. Methods can use inter-application messaging protocols, out-of-band data transfer, or anything else. GNAP allows extensions to define new ways to start and finish an interaction, as new methods and platforms are expected to become available over time. GNAP is designed to allow the end-user and the resource owner to be two different people, but still works in the optimized case of them being the same party.
+    GNAP allows various patterns to manage authorizations and consents required to fulfill this requested delegation, including information sent by the client instance, information supplied by external parties, and information gathered through the interaction process. GNAP allows a client instance to list different ways that it can start and finish an interaction, and these can be mixed together as needed for different use cases. GNAP interactions can use a browser, but don’t have to. Methods can use inter-application messaging protocols, out-of-band data transfer, or anything else. GNAP allows extensions to define new ways to start and finish an interaction, as new methods and platforms are expected to become available over time. GNAP is designed to allow the end user and the resource owner to be two different people, but still works in the optimized case of them being the same party.
 
 2. **Intent registration and inline negotiation:**
 
