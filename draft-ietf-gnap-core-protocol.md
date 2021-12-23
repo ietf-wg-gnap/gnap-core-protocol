@@ -3423,7 +3423,7 @@ the token management URL as valid, since the end result is still the token
 not being usable.
 
 Note that some deployment decisions like self-contained stateless access tokens can make
-propagating revocation difficult, see {{security-stateless-token}}.
+propagating revocation difficult, see {{security-stateless-tokens}}.
 
 # Securing Requests from the Client Instance {#secure-requests}
 
