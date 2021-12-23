@@ -3282,7 +3282,7 @@ The AS SHOULD revoke all associated access tokens.
 
 # Token Management {#token-management}
 
-If an access token response includes the "manage" parameter as
+If an access token response includes the `manage` parameter as
 described in {{response-token-single}}, the client instance MAY call
 this URL to manage the access token with any of the actions defined in
 the following sections. Other actions are undefined by this
@@ -3304,8 +3304,14 @@ appropriate for the token's presentation type.
 
 ## Rotating the Access Token {#rotate-access-token}
 
-The client instance makes an HTTP POST to the token management URI, sending
-the access token in the appropriate header and signing the request
+If the client instance has an access token and that access token expires, the
+client instance might want to rotate the access token.
+Rotating an access token consists of issuing a new access token in place of an
+existing access token, with the same rights and properties as the original token,
+apart from an updated expiration time.
+
+To rotate an access token, the client instance makes an HTTP POST to the token management URI,
+sending the access token in the appropriate header and signing the request
 with the appropriate key.
 
 ~~~
@@ -3321,25 +3327,31 @@ The AS validates that the token presented is associated with the management
 URL, that the AS issued the token to the given client instance, and that
 the presented key is appropriate to the token.
 
-If the access token has expired, the AS SHOULD honor the rotation request to
-the token management URL since it is likely that the client instance is attempting to
+Note that in many cases, the access token will have expired for regular use. To facilitate
+token rotation, the AS SHOULD honor the rotation request of the expired access token
+since it is likely that the client instance is attempting to
 refresh the expired token. To support this, the AS MAY apply different lifetimes for
 the use of the token in management vs. its use at an RS. An AS MUST NOT
-honor a rotation request for an access token that has been revoked, either by
-the AS or by the client instance through the [token management URI](#revoke-access-token).
+honor a rotation request for an access token that has been revoked or otherwise disabled.
 
 If the token is validated and the key is appropriate for the
 request, the AS MUST invalidate the current access token associated
-with this URL, if possible, and return a new access token response as
-described in {{response-token-single}}, unless the `multi_token` flag
-is specified in the request. The value of the
-access token MUST NOT be the same as the current value of the access
-token used to access the management API. The response MAY include an
-updated access token management URL as well, and if so, the client instance
-MUST use this new URL to manage the new access token.
+with this URL, if possible.
 \[\[ [See issue #101](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/101) \]\]
 
-\[\[ [See issue #102](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/102) \]\]
+The AS responds with an HTTP 200 with a JSON body consisting of the rotated access token
+in the `access_token` field described in {{response-token-single}}. The value of the
+access token MUST NOT be the same as the current value of the access
+token used to access the management API. The response MUST include an
+access token management URL, and the value of this URL MAY be different
+from the URL used by the client instance to make the rotation call. The client instance
+MUST use this new URL to manage the rotated access token.
+
+The access rights in the `access` array for the rotated access token MUST
+be included in the response and MUST be the same
+as the token before rotation. If the client instance requires different access rights,
+the client instance can request a new access token by creating [a new request](#request) or
+by [updating an existing grant request](#continue-modify).
 
 ~~~
 NOTE: '\' line wrapping per RFC 8792
@@ -3349,6 +3361,7 @@ NOTE: '\' line wrapping per RFC 8792
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
         "manage": "https://server.example.com/token/PRY5NM33O\
             M4TB8N6BW7OZB8CDFONP219RP1L",
+        "expires_in": 3600,
         "access": [
             {
                 "type": "photo-api",
@@ -5434,6 +5447,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 - -09
     - Added security considerations on redirection status codes.
     - Added security considerations on cuckoo token attack.
+    - Made token management URL required on token rotation.
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
