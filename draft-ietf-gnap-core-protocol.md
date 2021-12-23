@@ -3336,8 +3336,8 @@ honor a rotation request for an access token that has been revoked or otherwise 
 
 If the token is validated and the key is appropriate for the
 request, the AS MUST invalidate the current access token associated
-with this URL, if possible.
-\[\[ [See issue #101](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/101) \]\]
+with this URL, if possible. Note that stateless access tokens can make proactive
+revocation difficult within a system, see {{security-stateless-tokens}}.
 
 The AS responds with an HTTP 200 with a JSON body consisting of the rotated access token
 in the `access_token` field described in {{response-token-single}}. The value of the
@@ -3422,6 +3422,8 @@ means, the AS SHOULD honor the revocation request to
 the token management URL as valid, since the end result is still the token
 not being usable.
 
+Note that some deployment decisions like self-contained stateless access tokens can make
+propagating revocation difficult, see {{security-stateless-token}}.
 
 # Securing Requests from the Client Instance {#secure-requests}
 
@@ -5366,6 +5368,34 @@ but it can be managed either as a configuration element for the client instance 
 through [discovering the AS from the RS](#rs-request-without-token).
 
 The details of this attack are available in {{HELMSCHMIDT2022}} with additional discussion and considerations.
+
+## Self-contained Stateless Access Tokens {#security-stateless-tokens}
+
+The contents and format of the access token are at the discretion of the AS, and are opaque
+to the client instance within GNAP. As discussed in the companion document,
+{{I-D.ietf-gnap-resource-servers}}, the AS and RS can make use of stateless access tokens
+with an internal structure and format. These access tokens allow an RS to validate the token without
+having to make any external calls at runtime, allowing for benefits in some deployments, the
+discussion of which are outside the scope of this specification.
+
+However, the use of such self-contained access tokens has an effect on the ability of the AS to
+provide certain functionality defined within this specification. Specifically, since the access
+token is self-contained, it is difficult or impossible for an AS to signal to all RS's within an
+ecosystem when a specific access token has been revoked. Therefore, an AS in such an ecosystem
+should probably not offer token revocation functionality to client instances, since the client
+instance's calls to such an endpoint is effectively meaningless. However, a client instance calling
+the token revocation function will also throw out its copy of the token, so such a placebo endpoint
+might not be completely meaningless. Token rotation similarly difficult because the AS has to
+revoke the old access token after a rotation call has been made. If the access tokens are
+completely self-contained and non-revocable, this means that there will be a period of time during
+which both the old and new access tokens are valid and usable, which is an increased security risk
+for the environment.
+
+These problems can be mitigated by keeping the validity time windows of self-contained access tokens
+reasonably short, limiting the time after a revocation event that a revoked token could be used.
+Additionally, the AS could proactively signal to RS's under its control identifiers for revoked
+tokens that have yet to expire. This type of information push would be expected to be relatively
+small and infrequent, and its implementation is outside the scope of this specification.
 
 # Privacy Considerations {#privacy}
 
