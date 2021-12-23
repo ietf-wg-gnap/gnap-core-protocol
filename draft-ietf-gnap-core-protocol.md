@@ -3502,6 +3502,14 @@ MUST NOT contain any unencrypted private or shared symmetric key information.
 Keys referenced in this manner MUST be bound to a single proofing mechanism.
 
 The means of dereferencing this value are out of scope for this specification.
+Commonly, key references are created by the AS and are not necessarily needed
+to be dereferencable by the client. These types of key references are an
+internal reference to the AS, such as an identifier of a record in a database.
+In other applications, it can be useful to use key references that are resolvable
+by both clients and ASs, which could be accomplished by e.g. a client publishing
+a public key at a URL. For interoperability, this method could later be described
+as an extension.
+
 
 ## Presenting Access Tokens {#use-access-token}
 
