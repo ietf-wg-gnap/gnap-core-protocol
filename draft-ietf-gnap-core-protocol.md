@@ -5397,6 +5397,33 @@ Additionally, the AS could proactively signal to RS's under its control identifi
 tokens that have yet to expire. This type of information push would be expected to be relatively
 small and infrequent, and its implementation is outside the scope of this specification.
 
+## Network Problems and Token and Grant Management {#security-network-management}
+
+If a client instance makes a call to rotate an access token but the network connection is dropped
+before the client instance receives the response with the new access token, the system as a whole
+can end up in an inconsistent state, where the AS has already rotated the old access token and
+invalidated it, but the client instance only has access to the invalidated access token and not the
+newly rotated token value. If the client instance retries the rotation request, it would fail
+because the client is no longer presenting a valid and current access token. A similar situation
+can occur during grant continuation, where the same client instance calls to continue or update
+a grant request without successfully receiving the results of the update.
+
+To combat this, both
+[grant Management](#continue-request) and [token management](#token-management) are designed to be
+idempotent, where subsequent calls to the same function with the same credentials are meant to
+produce the same results. For example, multiple calls to rotate the same access token need to
+result in the same rotated token value.
+
+In practice, an AS can hold on to an old token value for such limited purposes. For example, to
+support rotating access tokens over unreliable networks, the AS receives the initial request to
+rotate an access token and creates a new token value and returns it. The AS also marks the old
+token value as having been used to create the newly-rotated token value. If the AS sees the old
+token value within a small enough time window, such as a few seconds since the first rotation
+attempt, the AS can return the same rotated access token. Furthermore, once the system has seen the
+newly-rotated token in use, the original token can be discarded because the client instance has
+proved that it did receive the token. The result of this is a system that is
+eventually self-consistent without placing an undue complexity burden on the client instance.
+
 # Privacy Considerations {#privacy}
 
 The privacy considerations in this section are modeled after the list of privacy threats in {{RFC6973}}, "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
@@ -5478,6 +5505,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Added security considerations on redirection status codes.
     - Added security considerations on cuckoo token attack.
     - Made token management URL required on token rotation.
+    - Added considerations on token rotation and self-contained tokens.
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
