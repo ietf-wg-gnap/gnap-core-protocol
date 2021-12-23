@@ -99,6 +99,13 @@ informative:
                 ins: Å. Axeland
             -
                 ins: O. Oueidat
+    HELMSCHMIDT2022:
+        target: 'tbd'
+        title: 'tbd'
+        date: 2022
+        author:
+            -
+                ins: F. Helmschmidt
 
 --- abstract
 
@@ -1287,6 +1294,9 @@ such as `class_id` or `display`, the pre-registered values MUST take precedence 
 given at runtime. Additional fields sent during a request but not present in a pre-registered
 client instance record at the AS SHOULD NOT be added to the client's pre-registered record.
 See additional considerations regarding client instance impersonation in {{security-impersonation}}.
+
+A client instance that is capable of talking to multiple AS's SHOULD use a different key for each
+AS to prevent a class of mix-up attacks as described in {{security-cuckoo}}.
 
 ### Identifying the Client Instance by Reference {#request-instance}
 
@@ -5303,6 +5313,39 @@ Signatures, which have their own implementation problems that need to be account
 requirements exist for OpenID Connect's ID token, which is based on the JSON Web Token (JWT) format
 and the related JSON Object Signing And Encryption (JOSE) cryptography suite.
 
+## Stolen Token Replay {#security-cuckoo}
+
+If a client instance can request tokens at multiple AS's, and the client instance uses the same keys
+to make its requests across those different AS's, then it is possible for an attacker to replay a
+stolen token issued by an honest AS from a compromised AS, thereby binding the stolen token to
+the client instance's key in a different context. The attacker can manipulate the client instance
+into using the stolen token at an RS, particularly at an RS that is expecting a token from the
+honest AS. Since the honest AS issued the token and the client instance presents the token with
+its expected bound key, the attack succeeds.
+
+This attack has several preconditions. In this attack, the attacker does not need access to the
+client instance's key and cannot use the stolen token directly at the RS, but the attacker is able
+to get the access token value in some fashion. The client instance also needs to be configured to
+talk to multiple AS's, including the attacker's controlled AS. Finally, the client instance needs
+to be able to be manipulated by the attacker to call the RS while using a token issued from the
+stolen AS. The RS does not need to be compromised or made to trust the attacker's AS.
+
+To protect against this attack, the client instance can use a different key for each AS that it
+talks to. Since the replayed token will be bound to the key used at the honest AS, the
+uncompromised RS will reject the call since the client instance will be using the key used at
+the attacker's AS instead with the same token.
+When the MTLS key proofing method is used, a client instance can use self-signed
+certificates to use a different key for each AS that it talks to, as discussed in
+{{security-mtls-patterns}}.
+
+Additionally, the client instance can keep a strong association between the RS and a specific AS
+that it trusts to issue tokens for that RS. This strong binding also helps against some forms of
+[AS mix-up attacks](#security-mixup). Managing this binding is outside the scope of GNAP core,
+but it can be managed either as a configuration element for the client instance or dynamically
+through [discovering the AS from the RS](#rs-request-without-token).
+
+The details of this attack are available in {{HELMSCHMIDT2022}} with additional discussion and considerations.
+
 # Privacy Considerations {#privacy}
 
 The privacy considerations in this section are modeled after the list of privacy threats in {{RFC6973}}, "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
@@ -5382,6 +5425,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -09
     - Added security considerations on redirection status codes.
+    - Added security considerations on cuckoo token attack.
 
 - -08
     - Update definition for "Client" to account for the case of no end-user.
