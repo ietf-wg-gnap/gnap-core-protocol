@@ -2743,7 +2743,8 @@ Content-Type: application/json
 }
 ~~~
 
-
+When processing such a call, the AS MUST protect itself against SSRF attacks as discussed in
+{{security-ssrf}}.
 
 When receiving the request, the client instance MUST parse the JSON object
 and validate the hash value as described in
@@ -5282,12 +5283,12 @@ a well-known service provider. Client software can also prevent this by managing
 of known and trusted AS's.
 
 Alternatively, an attacker could start a GNAP request with a known and trusted AS but include
-their own attack site URL as the callback for the `finish` method. The attacker would then send
+their own attack site URL as the callback for the redirect `finish` method. The attacker would then send
 the interaction `start` URL to the victim and get them to click on it. Since the URL is at
 the known AS, the victim is inclined to do so. The victim will then be prompted to approve the
 attacker's application, and in most circumstances the victim will then be redirected to the
 attacker's site whether or not the user approved the request. The AS could mitigate this partially
-by using a blocklist and  allowlist of interaction `finish` URLs during the client instance's
+by using a blocklist and allowlist of interaction `finish` URLs during the client instance's
 initial request, but this approach can be  especially difficult if the URL has any dynamic portion
 chosen by the client software. The AS can couple these checks with policies associated with the
 client instance that has been authenticated in the request. If the AS has any doubt about the
@@ -5353,6 +5354,40 @@ but it can be managed either as a configuration element for the client instance 
 through [discovering the AS from the RS](#rs-request-without-token).
 
 The details of this attack are available in {{HELMSCHMIDT2022}} with additional discussion and considerations.
+
+## Server-side Request Forgery (SSRF) {#security-ssrf}
+
+There are several places within GNAP where a URL can be given to a party causing it to fetch that
+URL during normal operation of the protocol. If an attacker is able to control the value of one of
+these URLs within the protocol, the attacker could cause the target system to execute a request on
+a URL that is within reach of the target system but normally unavailable to the attacker. For
+example, an attacker sending a URL of `http://localhost/admin` to cause the server to access an
+internal function on itself, or `https://192.168.0.14/` to call a service behind a firewall.
+Even if the attacker does not gain access to the results of the call, the side effects of such
+requests coming from a trusted host can be problematic to the security and sanctity of such
+otherwise unexposed endpoints.
+
+In GNAP, the most vulnerable place in the core protocol is the
+[push-based post-interaction finish method](#interaction-pushback), as the client instance is
+less trusted than the AS and can use this method to make the AS call an arbitrary URL. While it is
+not required by the protocol, the AS can fetch other client-instance provided URLs such as the logo
+image or home page, for verification or privacy-preserving purposes before displaying them to the
+resource owner as part of a consent screen. Furthermore, extensions to GNAP that allow or require
+URL fetch could also be similarly susceptible, such as a system for having the AS fetch a client
+instance's keys from a presented URL instead of the client instance presenting the key by value.
+Such extensions are outside the scope of this specification, but any system deploying such an
+extension would need to be aware of this issue.
+
+To help mitigate this problem, similar approaches to protecting parties against
+[malicious redirects](#security-front-channel) can be used. For example, all URLs that can result
+in a direct request being made by a party in the protocol can be filtered through an allowlist or
+blocklist. For example, an AS that supports the `push` based interaction `finish` can compare the
+callback URL in the interaction request to a known URL for a pre-registered client instance, or it
+can ensure that the URL is not on a blocklist of sensitive URLs such as internal network addresses.
+However, note that because these types of calls happen outside of the view of human interaction,
+it is not usually feasible to provide notification and warning to someone before the request
+needs to be executed, as is the case with redirection URLs. As such, SSRF is somewhat more difficult
+to manage at runtime, and systems should generally refuse to fetch a URL if unsure.
 
 # Privacy Considerations {#privacy}
 
@@ -5434,6 +5469,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 - -09
     - Added security considerations on redirection status codes.
     - Added security considerations on cuckoo token attack.
+    - Added security considerations for SSRF.
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
