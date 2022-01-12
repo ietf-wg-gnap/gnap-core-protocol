@@ -3330,8 +3330,8 @@ the presented key is appropriate to the token.
 Note that in many cases, the access token will have expired for regular use. To facilitate
 token rotation, the AS SHOULD honor the rotation request of the expired access token
 since it is likely that the client instance is attempting to
-refresh the expired token. To support this, the AS MAY apply different lifetimes for
-the use of the token in management vs. its use at an RS. An AS MUST NOT
+refresh the expired token. To support this, the AS MAY allow a longer lifetime for
+token management compared to its use at an RS. An AS MUST NOT
 honor a rotation request for an access token that has been revoked or otherwise disabled.
 
 If the token is validated and the key is appropriate for the
@@ -3422,8 +3422,6 @@ means, the AS SHOULD honor the revocation request to
 the token management URL as valid, since the end result is still the token
 not being usable.
 
-Note that some deployment decisions like self-contained stateless access tokens can make
-propagating revocation difficult, see {{security-stateless-tokens}}.
 
 # Securing Requests from the Client Instance {#secure-requests}
 
