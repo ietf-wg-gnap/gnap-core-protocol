@@ -3283,7 +3283,7 @@ The AS SHOULD revoke all associated access tokens.
 
 # Token Management {#token-management}
 
-If an access token response includes the "manage" parameter as
+If an access token response includes the `manage` parameter as
 described in {{response-token-single}}, the client instance MAY call
 this URL to manage the access token with any of the actions defined in
 the following sections. Other actions are undefined by this
@@ -3305,8 +3305,14 @@ appropriate for the token's presentation type.
 
 ## Rotating the Access Token {#rotate-access-token}
 
-The client instance makes an HTTP POST to the token management URI, sending
-the access token in the appropriate header and signing the request
+If the client instance has an access token and that access token expires, the
+client instance might want to rotate the access token.
+Rotating an access token consists of issuing a new access token in place of an
+existing access token, with the same rights and properties as the original token,
+apart from an updated expiration time.
+
+To rotate an access token, the client instance makes an HTTP POST to the token management URI,
+sending the access token in the appropriate header and signing the request
 with the appropriate key.
 
 ~~~
@@ -3322,25 +3328,31 @@ The AS validates that the token presented is associated with the management
 URL, that the AS issued the token to the given client instance, and that
 the presented key is appropriate to the token.
 
-If the access token has expired, the AS SHOULD honor the rotation request to
-the token management URL since it is likely that the client instance is attempting to
-refresh the expired token. To support this, the AS MAY apply different lifetimes for
-the use of the token in management vs. its use at an RS. An AS MUST NOT
-honor a rotation request for an access token that has been revoked, either by
-the AS or by the client instance through the [token management URI](#revoke-access-token).
+Note that in many cases, the access token will have expired for regular use. To facilitate
+token rotation, the AS SHOULD honor the rotation request of the expired access token
+since it is likely that the client instance is attempting to
+refresh the expired token. To support this, the AS MAY allow a longer lifetime for
+token management compared to its use at an RS. An AS MUST NOT
+honor a rotation request for an access token that has been revoked or otherwise disabled.
 
 If the token is validated and the key is appropriate for the
 request, the AS MUST invalidate the current access token associated
-with this URL, if possible, and return a new access token response as
-described in {{response-token-single}}, unless the `multi_token` flag
-is specified in the request. The value of the
-access token MUST NOT be the same as the current value of the access
-token used to access the management API. The response MAY include an
-updated access token management URL as well, and if so, the client instance
-MUST use this new URL to manage the new access token.
-\[\[ [See issue #101](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/101) \]\]
+with this URL, if possible. Note that stateless access tokens can make proactive
+revocation difficult within a system, see {{security-stateless-tokens}}.
 
-\[\[ [See issue #102](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/102) \]\]
+The AS responds with an HTTP 200 with a JSON body consisting of the rotated access token
+in the `access_token` field described in {{response-token-single}}. The value of the
+access token MUST NOT be the same as the current value of the access
+token used to access the management API. The response MUST include an
+access token management URL, and the value of this URL MAY be different
+from the URL used by the client instance to make the rotation call. The client instance
+MUST use this new URL to manage the rotated access token.
+
+The access rights in the `access` array for the rotated access token MUST
+be included in the response and MUST be the same
+as the token before rotation. If the client instance requires different access rights,
+the client instance can request a new access token by creating [a new request](#request) or
+by [updating an existing grant request](#continue-modify).
 
 ~~~
 NOTE: '\' line wrapping per RFC 8792
@@ -3350,6 +3362,7 @@ NOTE: '\' line wrapping per RFC 8792
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
         "manage": "https://server.example.com/token/PRY5NM33O\
             M4TB8N6BW7OZB8CDFONP219RP1L",
+        "expires_in": 3600,
         "access": [
             {
                 "type": "photo-api",
@@ -5355,6 +5368,61 @@ through [discovering the AS from the RS](#rs-request-without-token).
 
 The details of this attack are available in {{HELMSCHMIDT2022}} with additional discussion and considerations.
 
+## Self-contained Stateless Access Tokens {#security-stateless-tokens}
+
+The contents and format of the access token are at the discretion of the AS, and are opaque
+to the client instance within GNAP. As discussed in the companion document,
+{{I-D.ietf-gnap-resource-servers}}, the AS and RS can make use of stateless access tokens
+with an internal structure and format. These access tokens allow an RS to validate the token without
+having to make any external calls at runtime, allowing for benefits in some deployments, the
+discussion of which are outside the scope of this specification.
+
+However, the use of such self-contained access tokens has an effect on the ability of the AS to
+provide certain functionality defined within this specification. Specifically, since the access
+token is self-contained, it is difficult or impossible for an AS to signal to all RS's within an
+ecosystem when a specific access token has been revoked. Therefore, an AS in such an ecosystem
+should probably not offer token revocation functionality to client instances, since the client
+instance's calls to such an endpoint is effectively meaningless. However, a client instance calling
+the token revocation function will also throw out its copy of the token, so such a placebo endpoint
+might not be completely meaningless. Token rotation similarly difficult because the AS has to
+revoke the old access token after a rotation call has been made. If the access tokens are
+completely self-contained and non-revocable, this means that there will be a period of time during
+which both the old and new access tokens are valid and usable, which is an increased security risk
+for the environment.
+
+These problems can be mitigated by keeping the validity time windows of self-contained access tokens
+reasonably short, limiting the time after a revocation event that a revoked token could be used.
+Additionally, the AS could proactively signal to RS's under its control identifiers for revoked
+tokens that have yet to expire. This type of information push would be expected to be relatively
+small and infrequent, and its implementation is outside the scope of this specification.
+
+## Network Problems and Token and Grant Management {#security-network-management}
+
+If a client instance makes a call to rotate an access token but the network connection is dropped
+before the client instance receives the response with the new access token, the system as a whole
+can end up in an inconsistent state, where the AS has already rotated the old access token and
+invalidated it, but the client instance only has access to the invalidated access token and not the
+newly rotated token value. If the client instance retries the rotation request, it would fail
+because the client is no longer presenting a valid and current access token. A similar situation
+can occur during grant continuation, where the same client instance calls to continue or update
+a grant request without successfully receiving the results of the update.
+
+To combat this, both
+[grant Management](#continue-request) and [token management](#token-management) are designed to be
+idempotent, where subsequent calls to the same function with the same credentials are meant to
+produce the same results. For example, multiple calls to rotate the same access token need to
+result in the same rotated token value.
+
+In practice, an AS can hold on to an old token value for such limited purposes. For example, to
+support rotating access tokens over unreliable networks, the AS receives the initial request to
+rotate an access token and creates a new token value and returns it. The AS also marks the old
+token value as having been used to create the newly-rotated token value. If the AS sees the old
+token value within a small enough time window, such as a few seconds since the first rotation
+attempt, the AS can return the same rotated access token. Furthermore, once the system has seen the
+newly-rotated token in use, the original token can be discarded because the client instance has
+proved that it did receive the token. The result of this is a system that is
+eventually self-consistent without placing an undue complexity burden on the client instance.
+
 ## Server-side Request Forgery (SSRF) {#security-ssrf}
 
 There are several places within GNAP where a URL can be given to a party causing it to fetch that
@@ -5469,6 +5537,8 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 - -09
     - Added security considerations on redirection status codes.
     - Added security considerations on cuckoo token attack.
+    - Made token management URL required on token rotation.
+    - Added considerations on token rotation and self-contained tokens.
     - Added security considerations for SSRF.
 
 - -08
