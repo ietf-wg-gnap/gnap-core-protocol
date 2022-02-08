@@ -1,6 +1,6 @@
 root = true
 
-[*.md]
+[draft-ietf-gnap-core-protocol.md]
 charset = utf-8
 indent_style = space
 indent_size = 2
