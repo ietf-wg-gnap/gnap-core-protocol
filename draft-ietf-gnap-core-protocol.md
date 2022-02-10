@@ -1394,8 +1394,8 @@ sub_ids (array of objects)
 : An array of subject identifiers for the
             end user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
-assertions (object)
-: An object containing assertions as values keyed on the assertion
+assertions (array of objects/strings)
+: An array containing assertions as values keyed on the assertion
     type defined by [a registry TBD](#IANA). Possible keys include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
     values are the string serialization of the assertion format, encoded as a plain
@@ -1409,9 +1409,9 @@ assertions (object)
     "format": "opaque",
     "id": "J2G8G8O4AZ"
   } ],
-  "assertions": {
+  "assertions": [ {
     "id_token": "eyj..."
-  }
+  } ]
 }
 
 ~~~
@@ -2332,7 +2332,7 @@ sub_ids (array of objects)
             RO, as defined by
             {{I-D.ietf-secevent-subject-identifiers}}.
 
-: An object containing assertions as values keyed on the assertion
+: An array containing assertions as values keyed on the assertion
     type defined by [a registry TBD](#IANA). Possible keys include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
     values are the string serialization of the assertion format, encoded as a plain
@@ -2353,9 +2353,9 @@ updated_at (string)
     "format": "opaque",
     "id": "XUT2MFM1XBIKJKSDU8QM"
   } ],
-  "assertions": {
+  "assertions": [ {
     "id_token": "eyj..."
-  }
+  } ]
 }
 ~~~
 
