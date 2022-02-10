@@ -4819,7 +4819,7 @@ access token by creating a valid signature. With asymmetric cryptography, the RS
 to know the public key associated with the token in order to validate, and therefore cannot
 create any new calls.
 
-Symmetric keys also have the expected advantage of providing better protection against quantum
+Symmetric keys may have the expected advantage of providing better protection against quantum
 threats in the future. Also, these types of keys (and their secure derivations) are widely
 supported among many cloud-based key management systems.
 
@@ -4832,6 +4832,8 @@ Symmetric keys can still be used by client instances, but only a reference to th
 not its value can be sent. This allows the AS to use pre-registered symmetric keys as well
 as key derivation schemes to take advantage of symmetric cryptography but without requiring
 key distribution at runtime, which would expose the keys in transit.
+
+The security of GNAP when in use with symmetric keys relies on the cryptographic security of the keys themselves. Therefore, a key management system MUST be used to supply the keys. Moreover, the symmetric key MUST NOT be a human memorable password or a value derived from one.
 
 Both the AS and client software can use systems such as hardware security modules to strengthen
 their key security storage and generation for both asymmetric and symmetric keys.
