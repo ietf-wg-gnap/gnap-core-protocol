@@ -2438,7 +2438,7 @@ reason, it responds to the client instance with an error message.
 
     "invalid_client":
     :     The request was made from a client that was not recognized
-          or allowed by the AS, or the client's signaure validation failed.
+          or allowed by the AS, or the client's signature validation failed.
 
     "user_denied":
     : The RO denied the request.
