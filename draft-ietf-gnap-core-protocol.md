@@ -2134,7 +2134,7 @@ If the AS has split the access token response, the response MUST include the `sp
 
 Each access token MAY be bound to different keys with different proofing mechanisms.
 
-If [token management](#token-management) is allowed, each access token SHOULD have different `manage` URIs.
+The `manage` URI MUST NOT contain the access token `value`.
 
 \[\[ [See issue #70](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/70) \]\]
 
