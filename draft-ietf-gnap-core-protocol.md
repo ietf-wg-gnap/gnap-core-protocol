@@ -3294,7 +3294,7 @@ management API. The client instance MUST present proof of an appropriate key
 along with the access token.
 
 If the token is sender-constrained (i.e., not a bearer token), it
-MUST be sent [with the appropriate binding for the access token](#use-access-token). 
+MUST be sent [with the appropriate binding for the access token](#use-access-token).
 
 If the token is a bearer token, the client instance MUST present proof of the
 same [key identified in the initial request](#request-client) as described in {{binding-keys}}.
