@@ -2429,30 +2429,29 @@ reason, it responds to the client instance with an error message.
 
 
 "error" (string)
-:    REQUIRED.  A single ASCII error code from the
-     following, with additional values available in [a registry TBD](#IANA):
+:   REQUIRED.  A single ASCII error code from the
+    following, with additional values available in [a registry TBD](#IANA):
 
-     "invalid_request":
-     :     The request is missing a required parameter, includes an
-           invalid parameter value or is otherwise malformed.
+    "invalid_request":
+    :     The request is missing a required parameter, includes an
+          invalid parameter value or is otherwise malformed.
 
-     "invalid_client":
-     :     The request was made from a client that was not recognized
-           or allowed by the AS, or the client's signaure validation failed.
+    "invalid_client":
+    :     The request was made from a client that was not recognized
+          or allowed by the AS, or the client's signaure validation failed.
 
-     "user_denied":
-     : The RO denied the request.
+    "user_denied":
+    : The RO denied the request.
 
-     "too_fast":
-     : The client instance did not respect the timeout in the
-                wait response.
+    "too_fast":
+    : The client instance did not respect the timeout in the wait response.
 
-     "unknown_request":
-     : The request referenced an unknown ongoing access request.
+    "unknown_request":
+    : The request referenced an unknown ongoing access request.
 
 "error_description" (string)
-:    OPTIONAL. A human-readable string description of the error intended for the
-     developer of the client.
+:   OPTIONAL. A human-readable string description of the error intended for the
+    developer of the client.
 
 ~~~
 {
