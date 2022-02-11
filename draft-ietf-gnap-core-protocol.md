@@ -3286,7 +3286,7 @@ The AS SHOULD revoke all associated access tokens.
 If an access token response includes the `manage` parameter as
 described in {{response-token-single}}, the client instance MAY call
 this URL to manage the access token with any of the actions defined in
-the following sections. Other actions are undefined by this
+the following sections: rotate and revoke. Other actions are undefined by this
 specification.
 
 The access token being managed acts as the access element for its own
