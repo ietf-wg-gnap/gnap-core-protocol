@@ -1694,9 +1694,8 @@ Requests to the callback URI MUST be processed by the client instance as describ
 
 Since the incoming request to the callback URL is from the RO's
 browser, this method is usually used when the RO and end user are the
-same entity. As such, the client instance MUST ensure the end user is present on the request to
-prevent substitution attacks.
-
+same entity. See {{security-sessions}} for considerations on ensuring the incoming HTTP message
+matches the expected context of the request.
 See {{security-front-channel}} for more considerations regarding the use of front-channel
 communication techniques such as this.
 
@@ -1720,8 +1719,9 @@ Requests to the callback URI MUST be processed by the client instance as describ
 {{interaction-pushback}}.
 
 Since the incoming request to the callback URL is from the AS and
-not from the RO's browser, the client instance MUST NOT require the end user to
-be present on the incoming HTTP request.
+not from the RO's browser, this request is not expected to have any shared
+session information from the start method. See {{security-sessions}} and {{security-polling}} for
+more considerations regarding the use of back-channel and polling mechanisms like this.
 
 ### Hints {#request-interact-hint}
 
@@ -5213,6 +5213,34 @@ method against the deployment capabilities of the client software and its
 environment. Due to the increased security, an interaction finish method should
 be employed whenever possible.
 
+## Session Management for Interaction Finish Methods {#security-sessions}
+
+When using an interaction finish method such as `redirect` or `push`, the client instance receives
+an unsolicited HTTP request from an unknown party, through the end-user's browser. The client
+instance needs to be able to successfully associate this incoming request with a specific pending
+grant request being managed by the client. If the client instance is not careful and precise about
+this, an attacker could associate their own session at the client instance with a stolen interaction
+response. The means of preventing this varies by the type of client and interaction methods in use.
+Some common patterns are enumerated here.
+
+If the end user interacts with the client instance through a web browser and the `redirect`
+interaction finish method is used, the client instance can ensure that the incoming HTTP request
+from the finish method is presented in the same browser session that the grant request was
+started in. This technique is particularly useful when the `redrect` interaction start mode
+is used as well. The client instance can then store the relevant pending grant information in the
+session, either in the browser storage directly (such as with a single-page application) or
+in an associated session store on a back-end server. In both cases, when the incoming request
+reaches the client instance, the session information can be used to ensure it's the same party
+that started the request is present as the request finishes.
+
+If the end user does not interact with the client instance through a web browser or the `push`
+interaction finish method is used, the client instance can ensure that the incoming HTTP request
+can be uniquely associated with an ongoing grant request by making the interaction finish callback
+URI unique for the grant when making the [interaction request](#request-interact-finish). Mobile
+applications and other client instances that generally serve only a single end user at a time
+can use this uniquene incoming URL to differentiate between a legitimate incoming request and
+an attacker's stolen request.
+
 ## Storage of Information During Interaction and Continuation {#security-client-storage}
 
 When starting an interactive grant request, a client application has a number of protocol elements
@@ -5540,6 +5568,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Made token management URL required on token rotation.
     - Added considerations on token rotation and self-contained tokens.
     - Added security considerations for SSRF.
+    - Moved normative requirements about end user presence to security considerations.
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
