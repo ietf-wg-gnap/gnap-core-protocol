@@ -2645,9 +2645,8 @@ the client instance has to communicate the redirection URI to the end user.
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
-If the URI is hosted by the AS,
-the AS MUST determine the grant request being referenced from the URL
-value itself. If the URL cannot be associated with a currently active
+The URI value is used to identify the grant request being authorized.
+If the URL cannot be associated with a currently active
 request, the AS MUST display an error to the RO and MUST NOT attempt
 to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
 If the URI is not hosted by the AS directly, the means of communication between
@@ -2675,8 +2674,7 @@ request and MUST be protected by HTTPS or equivalent means.
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
-If the URI is hosted by the AS,
-the AS MUST determine the grant request being referenced from the user code.
+The value of the user code is used to identify the grant request being authorized.
 If the user code cannot be associated with a currently active
 request, the AS MUST display an error to the RO and MUST NOT attempt
 to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
@@ -2708,8 +2706,7 @@ request and MUST be protected by HTTPS or equivalent means.
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
-If the URI is hosted by the AS,
-the AS MUST determine the grant request being referenced from the user code.
+The value of the user code is used to identify the grant request being authorized.
 If the user code cannot be associated with a currently active
 request, the AS MUST display an error to the RO and MUST NOT attempt
 to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
