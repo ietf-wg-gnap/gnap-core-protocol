@@ -2297,7 +2297,7 @@ via a secondary device, it is not expected that the client instance redirect
 the end user to the URL given here at runtime.
 If the client instance is capable of communicating an
 short arbitrary URI to the end user for use with the user code, the client
-instance can instead use the ["user_code_uri"](#request-usercodeuri) method instead.
+instance can instead use the ["user_code_uri"](#request-interact-usercodeuri) method instead.
 If the client instance is capable of communicating a long arbitrary URI to the end user,
 such as through a scannable code, the
 client instance can use the ["redirect"](#request-interact-redirect) mode
