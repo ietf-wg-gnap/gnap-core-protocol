@@ -5543,6 +5543,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Made token management URL required on token rotation.
     - Added considerations on token rotation and self-contained tokens.
     - Added security considerations for SSRF.
+    - Clarified default wait times for continuation requests (including polling).
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
