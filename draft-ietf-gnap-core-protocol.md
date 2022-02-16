@@ -5226,7 +5226,7 @@ Some common patterns are enumerated here.
 If the end user interacts with the client instance through a web browser and the `redirect`
 interaction finish method is used, the client instance can ensure that the incoming HTTP request
 from the finish method is presented in the same browser session that the grant request was
-started in. This technique is particularly useful when the `redrect` interaction start mode
+started in. This technique is particularly useful when the `redirect` interaction start mode
 is used as well. The client instance can then store the relevant pending grant information in the
 session, either in the browser storage directly (such as with a single-page application) or
 in an associated session store on a back-end server. In both cases, when the incoming request
