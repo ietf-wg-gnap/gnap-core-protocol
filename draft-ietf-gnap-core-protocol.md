@@ -1878,7 +1878,7 @@ wait (integer)
 : RECOMMENDED. The amount of time in integer
             seconds the client instance MUST wait after receiving this continuation
             handle and calling the URI. The value SHOULD NOT be less than five seconds,
-            and omission of the value MUST NOT be interpreted as zero (i.e., no delay 
+            and omission of the value MUST NOT be interpreted as zero (i.e., no delay
             between requests)
 
 access_token (object)
@@ -2887,7 +2887,7 @@ Digest: sha256=...
 
 If a `wait` parameter was included in the [continuation response](#response-continue), the
 client instance MUST NOT call the continuation URI prior to waiting the number of
-seconds indicated. If no `wait` period is indicated, the client instance 
+seconds indicated. If no `wait` period is indicated, the client instance
 MUST NOT poll immediately and SHOULD
 wait at least 5 seconds. If the client instance does not respect the
 given wait period, the AS MUST return the error `too_fast` defined in {{response-error}}.
