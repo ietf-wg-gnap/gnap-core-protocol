@@ -2325,7 +2325,8 @@ uri (string)
 : RECOMMENDED. The interaction URI that the client instance
               will direct the RO to. This URI MUST be short enough to be
               communicated to the end user. It is RECOMMENDED that this URI
-              be short enough for an end user to type in manually.
+              be short enough for an end user to type in manually. The URI
+              MUST NOT contain the `code` value.
 
 
 ~~~
