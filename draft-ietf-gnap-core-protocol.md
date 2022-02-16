@@ -2284,7 +2284,9 @@ code (string)
 
 The client instance MUST communicate the "code" to the end user in some
 fashion, such as displaying it on a screen or reading it out
-audibly.
+audibly. This code is used by the interaction component of the AS as a means
+of identifying the pending grant request and does not function as an
+authentication factor for the RO.
 
 The URI that the end user is intended to enter the code into MUST be stable,
 since the client instance is expected to have no means of communicating a
@@ -2340,11 +2342,13 @@ uri (string)
 
 The client instance MUST communicate the "code" to the end user in some
 fashion, such as displaying it on a screen or reading it out
-audibly.
+audibly. This code is used by the interaction component of the AS as a means
+of identifying the pending grant request and does not function as an
+authentication factor for the RO.
 
 The client instance MUST also communicate the URI to the end user. Since it is expected
 that the end user will continue interaction on a secondary device,
-the URI needs to be short enough to allow the end user to copy it to a secondary
+the URI needs to be short enough to allow the end user to type or copy it to a secondary
 device without mistakes.
 
 The URI returned is a function of the AS, but the URI itself MAY be completely
@@ -2687,7 +2691,7 @@ enter attempts, the interaction component SHOULD display an error to the user an
 MAY take additional actions such as slowing down the input interactions.
 The user should be warned as such an error state is approached, if possible.
 
-### Interaction at the Dynamic User Code URI {#interaction-usercodeuri}
+### Interaction at a Dynamic User Code URI {#interaction-usercodeuri}
 
 When the end user is directed to enter a short code through the ["user_code_uri"](#response-interact-usercodeuri)
 mode, the client instance communicates the user code and associated URI to the end user and
@@ -2695,7 +2699,7 @@ directs the end user to enter that code at the URI.
 This mode is used when the client instance is not able to facilitate launching
 an arbitrary URI but can communicate arbitrary values like URIs. As a consequence, these URIs
 SHOULD be short.
-The client instance MUST NOT modify the URI when launching it,
+The client instance MUST NOT modify the URI when communicating it to the end user;
 in particular the client instance MUST NOT add any parameters to the URI.
 The user code URI MUST be reachable from the end user's browser, though
 the URI is usually be opened on a separate device from the client instance
