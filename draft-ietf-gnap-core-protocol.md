@@ -5241,6 +5241,11 @@ applications and other client instances that generally serve only a single end u
 can use this uniquene incoming URL to differentiate between a legitimate incoming request and
 an attacker's stolen request.
 
+If the client instance does not have the ability to use an interaction finish method, it can
+use polling to continue the request. The tradeoffs of this approach are discussed in
+{{security-polling}}, and if possible, an explicit interaction finish method should be
+used instead.
+
 ## Storage of Information During Interaction and Continuation {#security-client-storage}
 
 When starting an interactive grant request, a client application has a number of protocol elements
