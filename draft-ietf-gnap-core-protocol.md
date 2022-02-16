@@ -971,11 +971,11 @@ A non-normative example of a grant request is below:
       "key": {
         "proof": "httpsig",
         "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeL...."
+          "kty": "RSA",
+          "e": "AQAB",
+          "kid": "xyz-1",
+          "alg": "RS256",
+          "n": "kOB5rR4Jv0GMeL...."
         }
       }
     },
@@ -1251,11 +1251,11 @@ display (object)
     "key": {
         "proof": "httpsig",
         "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8..."
+            "kty": "RSA",
+            "e": "AQAB",
+            "kid": "xyz-1",
+            "alg": "RS256",
+            "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8..."
         },
         "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
     },
@@ -3727,8 +3727,8 @@ NOTE: '\' line wrapping per RFC 8792
         }
     },
     "client": {
-      "proof": "httpsig",
       "key": {
+        "proof": "httpsig",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
@@ -3809,8 +3809,8 @@ Signature: sig1=:SatKrAh2qNxbDBY6H3XUtpWn07aSrukpi3202L4DIPLLGgKdSu\
         }
     },
     "client": {
-      "proof": "httpsig",
       "key": {
+        "proof": "httpsig",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
@@ -3886,8 +3886,8 @@ Client-Cert: \
         }
     },
     "client": {
-      "proof": "jws",
       "key": {
+        "proof": "mtls",
         "cert": "MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMD\
   YxNDAyBgNVBAMMK05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV\
   6QzY2bVEwHhcNMjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQD\
@@ -4005,8 +4005,8 @@ NOTE: '\' line wrapping per RFC 8792
         }
     },
     "client": {
-      "proof": "jwsd",
       "key": {
+        "proof": "jwsd",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
@@ -4069,8 +4069,8 @@ Detached-JWS: eyJhbGciOiJSUzI1NiIsImNyZWF0ZWQiOjE2MTg4ODQ0NzUsImh0b\
         }
     },
     "client": {
-      "proof": "jwsd",
       "key": {
+        "proof": "jwsd",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
@@ -4174,8 +4174,8 @@ NOTE: '\' line wrapping per RFC 8792
         }
     },
     "client": {
-      "proof": "jws",
       "key": {
+        "proof": "jws",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
