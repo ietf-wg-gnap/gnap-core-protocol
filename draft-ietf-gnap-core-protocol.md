@@ -5216,7 +5216,7 @@ be employed whenever possible.
 ## Session Management for Interaction Finish Methods {#security-sessions}
 
 When using an interaction finish method such as `redirect` or `push`, the client instance receives
-an unsolicited HTTP request from an unknown party, through the end-user's browser. The client
+an unsolicited HTTP request from an unknown party. The client
 instance needs to be able to successfully associate this incoming request with a specific pending
 grant request being managed by the client. If the client instance is not careful and precise about
 this, an attacker could associate their own session at the client instance with a stolen interaction
@@ -5230,7 +5230,7 @@ started in. This technique is particularly useful when the `redirect` interactio
 is used as well. The client instance can then store the relevant pending grant information in the
 session, either in the browser storage directly (such as with a single-page application) or
 in an associated session store on a back-end server. In both cases, when the incoming request
-reaches the client instance, the session information can be used to ensure it's the same party
+reaches the client instance, the session information can be used to ensure that the same party
 that started the request is present as the request finishes.
 
 If the end user does not interact with the client instance through a web browser or the `push`
@@ -5238,7 +5238,7 @@ interaction finish method is used, the client instance can ensure that the incom
 can be uniquely associated with an ongoing grant request by making the interaction finish callback
 URI unique for the grant when making the [interaction request](#request-interact-finish). Mobile
 applications and other client instances that generally serve only a single end user at a time
-can use this uniquene incoming URL to differentiate between a legitimate incoming request and
+can use this unique incoming URL to differentiate between a legitimate incoming request and
 an attacker's stolen request.
 
 If the client instance does not have the ability to use an interaction finish method, it can
