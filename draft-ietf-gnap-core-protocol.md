@@ -45,6 +45,7 @@ normative:
           ins: P. Saint-Andre
     RFC2119:
     RFC3986:
+    RFC4648:
     RFC5646:
     RFC7231:
     RFC7234:
@@ -2790,7 +2791,7 @@ request, the algorithm defaults to "sha3".
 
 The "sha3" hash method consists of hashing the input string
 with the 512-bit SHA3 algorithm. The byte array is then encoded
-using URL Safe Base64 with no padding. The resulting string is the
+using URL Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
 hash value.
 
 ~~~
@@ -2804,7 +2805,7 @@ p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM\
 
 The "sha2" hash method consists of hashing the input string
 with the 512-bit SHA2 algorithm. The byte array is then encoded
-using URL Safe Base64 with no padding. The resulting string is the
+using URL Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
 hash value.
 
 ~~~
