@@ -1484,7 +1484,7 @@ There is no preference order specified in this request. An AS MAY
 [respond to any, all, or none of the presented interaction modes](#response-interact) in a request, depending on
 its capabilities and what is allowed to fulfill the request.
 
-start (list of strings/objects)
+start (array of strings/objects)
 : Indicates how the client instance can start an interaction.
 
 finish (object)
