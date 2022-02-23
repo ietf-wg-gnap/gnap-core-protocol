@@ -988,8 +988,8 @@ A non-normative example of a grant request is below:
         }
     },
     "subject": {
-        "formats": ["iss_sub", "opaque"],
-        "assertions": ["id_token"]
+        "sub_ids_formats": ["iss_sub", "opaque"],
+        "assertions_formats": ["id_token"]
     }
 }
 ~~~
@@ -1182,20 +1182,20 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in
 [a registry TBD](#IANA)).
 
-formats (array of strings)
+sub_ids_formats (array of strings)
 : An array of subject identifier subject formats
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
-assertions (array of strings)
+assertions_formats (array of strings)
 : An array of requested assertion formats. Possible values include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
-    assertion values are defined by [a registry TBD](#IANA).
+    assertion formats are defined by [a registry TBD](#IANA).
     \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
 ~~~
 "subject": {
-  "formats": [ "iss_sub", "opaque" ],
-  "assertions": [ "id_token", "saml2" ]
+  "sub_ids_formats": [ "iss_sub", "opaque" ],
+  "assertions_formats": [ "id_token", "saml2" ]
 }
 ~~~
 
@@ -1211,7 +1211,7 @@ channels by the client instance, as discussed in {{response-subject}}.
 
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
-Note: the "formats" and "assertions" request fields are independent of
+Note: the "sub_ids_formats" and "assertions_formats" request fields are independent of
 each other, and a returned assertion MAY use a different subject
 identifier.
 
@@ -1395,13 +1395,10 @@ sub_ids (array of objects)
             end user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
 assertions (array of objects)
-: An array containing assertions as values keyed on the assertion
-    type defined by [a registry TBD](#IANA). Possible keys include
-    `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
-    values are the string serialization of the assertion format, encoded as a plain
-    JSON string. Additional assertion types are defined by [a registry TBD](#IANA).
-    \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
-
+: An array containing assertions as objects each containing the assertion
+    format and the assertion value as the JSON string serialization of the assertion. 
+    Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. 
+    Additional assertion formats are defined by [a registry TBD](#IANA).
 
 ~~~
 "user": {
@@ -1410,7 +1407,7 @@ assertions (array of objects)
     "id": "J2G8G8O4AZ"
   } ],
   "assertions": [ {
-    "type": "id_token", 
+    "format": "id_token", 
     "value": "eyj..."
   } ]
 }
@@ -2353,7 +2350,7 @@ updated_at (string)
     "id": "XUT2MFM1XBIKJKSDU8QM"
   } ],
   "assertions": [ {
-    "type": "id_token",
+    "format": "id_token",
     "value": "eyj..."
   } ]
 }
@@ -4540,9 +4537,9 @@ key_proofs_supported (array of strings)
           values of the `proof` field of the
           [key section](#key-format) of the request.
 
-subject_formats_supported (array of strings)
+sub_ids_formats_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
-          subject identifier types. The values of this list correspond to possible values
+          subject identifier formats. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
 assertions_supported (array of strings)
