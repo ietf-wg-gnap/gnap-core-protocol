@@ -2429,9 +2429,33 @@ If the AS determines that the request cannot be issued for any
 reason, it responds to the client instance with an error message.
 
 
-error (string)
-: The error code.
+"error" (string)
+:   REQUIRED.  A single ASCII error code from the
+    following, with additional values available in [a registry TBD](#IANA):
 
+    "invalid_request":
+    :     The request is missing a required parameter, includes an
+          invalid parameter value or is otherwise malformed.
+
+    "invalid_client":
+    :     The request was made from a client that was not recognized
+          or allowed by the AS, or the client's signature validation failed.
+
+    "user_denied":
+    : The RO denied the request.
+
+    "too_fast":
+    : The client instance did not respect the timeout in the wait response.
+
+    "unknown_request":
+    : The request referenced an unknown ongoing access request.
+
+    "request_denied":
+    : The request was denied for an unspecified reason.
+    
+"error_description" (string)
+:   OPTIONAL. A human-readable string description of the error intended for the
+    developer of the client.
 
 ~~~
 {
@@ -2440,22 +2464,6 @@ error (string)
 
 }
 ~~~
-
-
-
-The error code is one of the following, with additional values
-available in [a registry TBD](#IANA):
-
-
-user_denied
-: The RO denied the request.
-
-too_fast
-: The client instance did not respect the timeout in the
-            wait response.
-
-unknown_request
-: The request referenced an unknown ongoing access request.
 
 \[\[ [See issue #79](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/79) \]\]
 
