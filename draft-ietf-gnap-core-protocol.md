@@ -2399,7 +2399,7 @@ values in the `client` field.
 
 Dynamically generated client instance identifiers are string values that MUST be
 protected by the client instance as secrets. Instance identifier values MUST be unguessable
-and MUST NOT contain any information that would compromise the AS if revealed. Instance identifier values are
+and MUST NOT contain any information that would compromise any party if revealed. Instance identifier values are
 opaque to the client instance.
 
 instance_id (string)
