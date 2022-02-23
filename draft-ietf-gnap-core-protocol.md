@@ -4087,7 +4087,7 @@ claims:
 `alg` (string):
 : The algorithm used to sign the request. MUST be appropriate to the key presented.
   If the key is presented as a JWK, this MUST be equal to the `alg` parameter of the key. MUST NOT be `none`.
-  REQUIRED. 
+  REQUIRED.
 
 `typ` (string):
 : The type header, value ”gnap-binding+jwsd”. REQUIRED.
@@ -4259,7 +4259,7 @@ To protect the request, the JWS header contains the following claims.
 `alg` (string):
 : The algorithm used to sign the request. MUST be appropriate to the key presented.
   If the key is presented as a JWK, this MUST be equal to the `alg` parameter of the key. MUST NOT be `none`.
-  REQUIRED. 
+  REQUIRED.
 
 `typ` (string):
 : The type header, value ”gnap-binding+jwsd”. REQUIRED.
