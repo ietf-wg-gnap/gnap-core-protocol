@@ -4515,8 +4515,8 @@ can be negotiated dynamically in the course of the protocol.
 However, the AS can have limits on its allowed functionality. If the
 client instance wants to optimize its calls to the AS before making a request, it MAY
 send an HTTP OPTIONS request to the grant request endpoint to retrieve the
-server's discovery information. The AS MUST respond with a JSON object with Content-Type
-`application/json` containing the following information:
+server's discovery information. The AS MUST respond with a JSON document with Content-Type
+`application/json` containing a single object with the following information:
 
 
 grant_request_endpoint (string)
