@@ -3527,8 +3527,8 @@ as an extension.
 
 ### Key Protection {#key-protection}
 
-The security of GNAP when in use with symmetric keys relies on the cryptographic security of the keys themselves. 
-Therefore, a key management system MUST be used to supply the keys. Moreover, the symmetric key MUST NOT be a human memorable password or a value derived from one.
+The security of GNAP relies on the cryptographic security of the keys themselves. 
+When symmetric keys are used in GNAP, a key management system or secure key derivation mechanism MUST be used to supply the keys. Symmetric keys MUST NOT be a human memorable password or a value derived from one. Symmetric keys MUST NOT be passed by value from the client instance to the AS.
 
 ## Presenting Access Tokens {#use-access-token}
 
