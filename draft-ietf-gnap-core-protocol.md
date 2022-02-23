@@ -218,7 +218,7 @@ Resource Server (RS)
 Resource Owner (RO)
 : subject entity that may grant or deny operations on resources it has authority upon.
 
-    Note: the act of granting or denying an operation may be manual (i.e. through an interaction with a person) or automatic (i.e. through predefined organizational rules).
+    Note: the act of granting or denying an operation may be manual (i.e. through an interaction with a physical person) or automatic (i.e. through predefined organizational rules).
 
 End user
 : natural person that operates a client instance.
