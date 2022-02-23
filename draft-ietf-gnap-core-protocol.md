@@ -1825,12 +1825,6 @@ an opaque identifier.
 NOTE: '\' line wrapping per RFC 8792 and a [subject identifier](#response-subject) in the form of
 an opaque identifier.
 
-~~~
-NOTE: '\' line wrapping per RFC 8792
-
-{
-    "access_token": {
-
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
@@ -2250,9 +2244,9 @@ code (string)
               minutes. It is RECOMMENDED that this code be no more than eight
               characters in length.
 
-uri (string)
-: RECOMMENDED. The interaction URI that the client instance
-              will direct the RO to. This URI MUST be stable such
+url (string)
+: RECOMMENDED. The interaction URL that the client instance
+              will direct the RO to. This URL MUST be stable such
               that client instances can be statically configured with it.
 
 
@@ -2260,7 +2254,7 @@ uri (string)
 "interact": {
     "user_code": {
         "code": "A1BC-3DFF",
-        "uri": "https://srv.ex/device"
+        "url": "https://srv.ex/device"
     }
 }
 ~~~
@@ -4528,9 +4522,9 @@ containing the following information:
 
 grant_request_endpoint (string)
 : REQUIRED. The location of the
-          AS's grant request endpoint. The location MUST be a URI {{RFC3986}}
+          AS's grant request endpoint. The location MUST be a URL {{RFC3986}}
           with a scheme component that MUST be https, a host component, and optionally,
-          port, path and query components and no fragment components. This URI MUST
+          port, path and query components and no fragment components. This URL MUST
           match the URI the client instance used to make the discovery request.
 
 interaction_start_modes_supported (array of strings)
@@ -5449,18 +5443,7 @@ not required by the protocol, the AS can fetch other client-instance provided UR
 image or home page, for verification or privacy-preserving purposes before displaying them to the
 resource owner as part of a consent screen. Furthermore, extensions to GNAP that allow or require
 URI fetch could also be similarly susceptible, such as a system for having the AS fetch a client
-instance's ke during normal operation of the protocol. If an attacker is able to control the value of one of
-these URIs within the protocol, the attacker could cause the target system to execute a request on
-a URI that is within reach of the target system but normally unavailable to the attacker. For
-example, an attacker sending a URL of `http://localhost/admin` to cause the server to access an
-internal function on itself, or `https://192.168.0.14/` to call a service behind a firewall.
-Even if the attacker does not gain access to the results of the call, the side effects of such
-requests coming from a trusted host can be problematic to the security and sanctity of such
-otherwise unexposed endpoints.
-
-In GNAP, the most vulnerable place in the core protocol is the
-[push-based post-interaction finish method](#interaction-pushback), as the client instance is
-less trusted than the AS and can use this method to make the AS calys from a presented URI instead of the client instance presenting the key by value.
+instance's keys from a presented URI instead of the client instance presenting the key by value.
 Such extensions are outside the scope of this specification, but any system deploying such an
 extension would need to be aware of this issue.
 
@@ -5469,10 +5452,10 @@ To help mitigate this problem, similar approaches to protecting parties against
 in a direct request being made by a party in the protocol can be filtered through an allowlist or
 blocklist. For example, an AS that supports the `push` based interaction `finish` can compare the
 callback URI in the interaction request to a known URI for a pre-registered client instance, or it
-can ensure that the URI is not on a blocklist of sensitive URIs such as internal network addresses.
+can ensure that the URI is not on a blocklist of sensitive URLs such as internal network addresses.
 However, note that because these types of calls happen outside of the view of human interaction,
 it is not usually feasible to provide notification and warning to someone before the request
-needs to be executed, as is the case with redirection URIs. As such, SSRF is somewhat more difficult
+needs to be executed, as is the case with redirection URLs. As such, SSRF is somewhat more difficult
 to manage at runtime, and systems should generally refuse to fetch a URI if unsure.
 
 # Privacy Considerations {#privacy}
@@ -5792,7 +5775,7 @@ Cache-Control: no-store
 
 
 The client instance saves the response and redirects the user to the
-interaction_uri by sending the following HTTP message to the user's
+interaction_url by sending the following HTTP message to the user's
 browser.
 
 ~~~
