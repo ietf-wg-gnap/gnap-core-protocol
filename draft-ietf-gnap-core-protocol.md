@@ -2449,6 +2449,9 @@ reason, it responds to the client instance with an error message.
     "unknown_request":
     : The request referenced an unknown ongoing access request.
 
+    "request_denied":
+    : The request was denied for an unspecified reason.
+    
 "error_description" (string)
 :   OPTIONAL. A human-readable string description of the error intended for the
     developer of the client.
