@@ -5218,9 +5218,9 @@ be employed whenever possible.
 When using an interaction finish method such as `redirect` or `push`, the client instance receives
 an unsolicited HTTP request from an unknown party. The client
 instance needs to be able to successfully associate this incoming request with a specific pending
-grant request being managed by the client. If the client instance is not careful and precise about
+grant request being managed by the client instance. If the client instance is not careful and precise about
 this, an attacker could associate their own session at the client instance with a stolen interaction
-response. The means of preventing this varies by the type of client and interaction methods in use.
+response. The means of preventing this varies by the type of client software and interaction methods in use.
 Some common patterns are enumerated here.
 
 If the end user interacts with the client instance through a web browser and the `redirect`
