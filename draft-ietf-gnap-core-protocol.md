@@ -1338,8 +1338,7 @@ uri (string)
 : User-facing web page of the client software
 
 logo_uri (string)
-: Display image to represent the client software
-
+: Display image to represent the client software. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype.
 
 ~~~
 "display": {
@@ -1348,10 +1347,6 @@ logo_uri (string)
     "logo_uri": "data:image/png;base64,Eeww...="
 }
 ~~~
-
-The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype.
-
-\[\[ [See issue #48](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/48) \]\]
 
 Additional display fields are defined by [a registry TBD](#IANA).
 
