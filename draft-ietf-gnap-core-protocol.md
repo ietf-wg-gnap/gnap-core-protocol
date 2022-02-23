@@ -1183,7 +1183,7 @@ contain the following fields (or additional fields defined in
 [a registry TBD](#IANA)).
 
 formats (array of strings)
-: An array of subject identifier subject types
+: An array of subject identifier subject formats
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
 assertions (array of strings)
@@ -1394,7 +1394,7 @@ sub_ids (array of objects)
 : An array of subject identifiers for the
             end user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
-assertions (array of objects/strings)
+assertions (array of objects)
 : An array containing assertions as values keyed on the assertion
     type defined by [a registry TBD](#IANA). Possible keys include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
@@ -1410,12 +1410,12 @@ assertions (array of objects/strings)
     "id": "J2G8G8O4AZ"
   } ],
   "assertions": [ {
-    "id_token": "eyj..."
+    "type": "id_token", 
+    "value": "eyj..."
   } ]
 }
 
 ~~~
-
 
 
 Subject identifiers are hints to the AS in determining the
@@ -2354,7 +2354,8 @@ updated_at (string)
     "id": "XUT2MFM1XBIKJKSDU8QM"
   } ],
   "assertions": [ {
-    "id_token": "eyj..."
+    "format": "id_token",
+    "value": "eyj..."
   } ]
 }
 ~~~
