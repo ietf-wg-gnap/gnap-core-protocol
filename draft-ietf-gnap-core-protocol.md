@@ -1212,11 +1212,7 @@ channels by the client instance, as discussed in {{response-subject}}.
 
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
-Note: the "formats" and "assertions" request fields are independent of
-each other, and a returned assertion MAY use a different subject
-identifier.
-
-\[\[ [See issue #43](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/43) \]\]
+Note: the "formats" and "assertions" request fields are independent of each other, and a returned assertion MAY use a different subject identifier than specified in the request, as long as it refers to the same person.
 
 ## Identifying the Client Instance {#request-client}
 
