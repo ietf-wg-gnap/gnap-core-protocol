@@ -360,6 +360,12 @@ in all use cases. For example, a client instance could be calling the
 AS just to get direct user information and have no need to get
 an access token to call an RS.
 
+### Overall Protocol Sequence {#sequence-overall}
+
+The following diagram provides a general overview of GNAP, including many
+different optional phases and connections. The diagrams in the following sections
+provide views of GNAP under more specific circumstances.
+
 ~~~
     +------------+         +------------+
     | End user   | ~ ~ ~ ~ |  Resource  |
