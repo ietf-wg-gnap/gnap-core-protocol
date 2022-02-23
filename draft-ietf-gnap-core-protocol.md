@@ -922,26 +922,26 @@ To start a request, the client instance sends a [JSON](#RFC8259) document with a
 member of the request object represents a different aspect of the
 client instance's request. Each field is described in detail in a section below.
 
-access_token (object / array of objects)
-: Describes the rights and properties associated with the requested access token. {{request-token}}
+`access_token` (object / array of objects):
+: Describes the rights and properties associated with the requested access token. REQUIRED if requesting an access token. See {{request-token}}.
 
-subject (object)
+`subject` (object):
 : Describes the information about the RO that the client instance is requesting to be returned
-    directly in the response from the AS. {{request-subject}}
+    directly in the response from the AS. REQUIRED if requesting subject information. See {{request-subject}}.
 
-client (object / string)
+`client` (object / string):
 : Describes the client instance that is making this request, including
     the key that the client instance will use to protect this request and any continuation
     requests at the AS and any user-facing information about the client instance used in
-    interactions. {{request-client}}
+    interactions. REQUIRED. See {{request-client}}.
 
-user (object / string)
+`user` (object / string):
 : Identifies the end user to the AS in a manner that the AS can verify, either directly or
-    by interacting with the end user to determine their status as the RO. {{request-user}}
+    by interacting with the end user to determine their status as the RO. OPTIONAL. See {{request-user}}.
 
-interact (object)
+`interact` (object):
 : Describes the modes that the client instance supports for allowing the RO to interact with the
-    AS and modes for the client instance to receive updates when interaction is complete. {{request-interact}}
+    AS and modes for the client instance to receive updates when interaction is complete. REQUIRED if interaction is supported. See {{request-interact}}.
 
 Additional members of this request object can be defined by extensions to this protocol
 as described in {{request-extending}}.
@@ -1023,24 +1023,24 @@ as described in the following sections.
 To request a single access token, the client instance sends an `acccess_token` object
 composed of the following fields.
 
-access (array of objects/strings)
+`access` (array of objects/strings):
 : Describes the rights that the client instance is requesting for one or more access tokens to be
-    used at RS's. This field is REQUIRED. {{resource-access-rights}}
+    used at RS's. REQUIRED. See {{resource-access-rights}}.
 
-label (string)
+`label` (string):
 : A unique name chosen by the client instance to refer to the resulting access token. The value of this
     field is opaque to the AS.  If this field
     is included in the request, the AS MUST include the same label in the [token response](#response-token).
-    This field is REQUIRED if used as part of a [multiple access token request](#request-token-multiple),
-    and is OPTIONAL otherwise.
+    REQUIRED if used as part of a [multiple access token request](#request-token-multiple),
+    OPTIONAL otherwise.
 
-flags (array of strings)
+`flags` (array of strings):
 : A set of flags that indicate desired attributes or behavior to be attached to the access token by the
-    AS. This field is OPTIONAL.
+    AS. OPTIONAL.
 
 The values of the `flags` field defined by this specification are as follows:
 
-"bearer"
+`"bearer"`:
 : If this flag is included, the access token being requested is a bearer token.
     If this flag is omitted, the access token is bound to the key used
     by the client instance in this request (or that key's most recent rotation)
@@ -1049,7 +1049,7 @@ The values of the `flags` field defined by this specification are as follows:
     in {{use-access-token}}. See {{security-bearer-tokens}} for additional
     considerations on the use of bearer tokens.
 
-"split"
+`"split"`:
 : If this flag is included, the client instance is capable of
     receiving a different number of tokens than specified in the
     [token request](#request-token), including
@@ -1190,14 +1190,16 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in
 [a registry TBD](#IANA)).
 
-sub_id_formats (array of strings)
+`sub_id_formats` (array of strings):
 : An array of subject identifier subject formats
-            requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+    requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+    REQUIRED if subject identifiers are requested.
 
-assertion_formats (array of strings)
+`assertion_formats` (array of strings):
 : An array of requested assertion formats. Possible values include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
     assertion formats are defined by [a registry TBD](#IANA).
+    REQUIRED if assertions are requested.
     \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
 ~~~
@@ -1237,21 +1239,20 @@ When client instance information is sent
 by value, the `client` field of the request consists of a JSON
 object with the following fields.
 
-key (object / string)
+`key` (object / string):
 : The public key of the client instance to be used in this request as
     described in {{key-format}} or a reference to a key as
-    described in {{key-reference}}. This field is REQUIRED.
+    described in {{key-reference}}. REQUIRED.
 
-class_id (string)
+`class_id` (string):
 : An identifier string that the AS can use to identify the
     client software comprising this client instance. The contents
-    and format of this field are up to the AS. This field
-    is OPTIONAL.
+    and format of this field are up to the AS. OPTIONAL.
 
-display (object)
+`display` (object):
 : An object containing additional information that the AS
     MAY display to the RO during interaction, authorization,
-    and management. This field is OPTIONAL.
+    and management. OPTIONAL.
 
 ~~~
 "client": {
@@ -1337,14 +1338,14 @@ during any interactions at the AS, it MAY send that information in the
 to present to the RO during any interactive sequences.
 
 
-name (string)
-: Display name of the client software
+`name` (string):
+: Display name of the client software. RECOMMENDED.
 
-uri (string)
-: User-facing web page of the client software
+`uri` (string):
+: User-facing web page of the client software. OPTIONAL.
 
-logo_uri (string)
-: Display image to represent the client software. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype.
+`logo_uri` (string)
+: Display image to represent the client software. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype. OPTIONAL.
 
 ~~~
 "display": {
@@ -1394,15 +1395,15 @@ identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
 or by reference.
 
-sub_ids (array of objects)
+`sub_ids` (array of objects):
 : An array of subject identifiers for the
-            end user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+    end user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+    OPTIONAL.
 
-assertions (array of objects)
+`assertions` (array of objects)
 : An array containing assertions as objects each containing the assertion
     format and the assertion value as the JSON string serialization of the assertion. 
-    Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. 
-    Additional assertion formats are defined by [a registry TBD](#IANA).
+    OPTIONAL.
 
 ~~~
 "user": {
@@ -1485,17 +1486,14 @@ There is no preference order specified in this request. An AS MAY
 [respond to any, all, or none of the presented interaction modes](#response-interact) in a request, depending on
 its capabilities and what is allowed to fulfill the request.
 
-start (array of strings/objects)
-: Indicates how the client instance can start an interaction.
+`start` (array of strings/objects):
+: Indicates how the client instance can start an interaction. REQUIRED.
 
-finish (object)
-: Indicates how the client instance can receive an indication that interaction has finished at the AS.
+`finish` (object):
+: Indicates how the client instance can receive an indication that interaction has finished at the AS. OPTIONAL.
 
-hints (object)
-: Provides additional information to inform the interaction process at the AS.
-
-The `interact` field MUST contain the `start` key, and MAY contain the `finish` and `hints` keys. The value
-of each key is an array which contains strings or JSON objects as defined below.
+`hints` (object):
+: Provides additional information to inform the interaction process at the AS. OPTIONAL.
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
 the end user to an arbitrary URI and can receive a [redirect](#request-interact-callback-redirect) through
@@ -1537,19 +1535,19 @@ apply suitable timeouts to any callback URIs.
 
 This specification defines the following interaction start modes as an array of string values under the `start` key:
 
-"redirect"
+`"redirect"`:
 : Indicates that the client instance can direct the end user to an arbitrary URI
     for interaction. {{request-interact-redirect}}
 
-"app"
+`"app"`:
 : Indicates that the client instance can launch an application on the end user's
     device for interaction. {{request-interact-app}}
 
-"user_code"
+`"user_code"`:
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a stable URI. {{request-interact-usercode}}
 
-"user_code_uri"
+`"user_code_uri"`:
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a short, dynamic URI. {{request-interact-usercodeuri}}
 
@@ -1646,51 +1644,54 @@ request, the AS returns a user code and interaction URL as specified
 in {{response-interact-usercodeuri}}. The client instance manages this interaction
 method as described in {{interaction-usercodeuri}}.
 
-### Finish Interaction Modes {#request-interact-finish}
+### Finish Interaction Methods {#request-interact-finish}
 
 If the client instance is capable of receiving a message from the AS indicating
 that the RO has completed their interaction, the client instance
 indicates this by sending the following members of an object under the `finish` key.
 
-method (string)
-: REQUIRED. The callback method that the AS will use to contact the client instance.
-    This specification defines the following interaction completion methods,
-    with other values defined by [a registry TBD](#IANA):
+`method` (string):
+: The callback method that the AS will use to contact the client instance.
+    REQUIRED.
 
-    "redirect"
-    : Indicates that the client instance can receive a redirect from the end user's device
+`uri` (string):
+: Indicates the URI that the AS will either send the RO to
+    after interaction or send an HTTP POST request. This URI MAY be unique per request and MUST
+    be hosted by or accessible by the client instance. This URI MUST NOT contain
+    any fragment component. This URI MUST be protected by HTTPS, be
+    hosted on a server local to the RO's browser ("localhost"), or
+    use an application-specific URI scheme. If the client instance needs any
+    state information to tie to the front channel interaction
+    response, it MUST use a unique callback URI to link to
+    that ongoing state. The allowable URIs and URI patterns MAY be restricted by the AS
+    based on the client instance's presented key information. The callback URI
+    SHOULD be presented to the RO during the interaction phase
+    before redirect. REQUIRED for `redirect` and `push` methods.
+
+`nonce` (string):
+: Unique value to be used in the
+    calculation of the "hash" query parameter sent to the callback URI,
+    must be sufficiently random to be unguessable by an attacker.
+    MUST be generated by the client instance as a unique value for this
+    request. REQUIRED.
+
+`hash_method` (string):
+: The hash calculation
+    mechanism to be used for the callback hash in {{interaction-hash}}. Can be one of `sha3` or `sha2`. If
+    absent, the default value is `sha3`. OPTIONAL.
+    \[\[ [See issue #56](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/56) \]\]
+
+This specification defines the following values for the `method` parameter,
+with other values defined by [a registry TBD](#IANA):
+
+`"redirect"`:
+: Indicates that the client instance can receive a redirect from the end user's device
     after interaction with the RO has concluded. {{request-interact-callback-redirect}}
 
-    "push"
-    : Indicates that the client instance can receive an HTTP POST request from the AS
+`"push"`:
+: Indicates that the client instance can receive an HTTP POST request from the AS
     after interaction with the RO has concluded. {{request-interact-callback-push}}
 
-uri (string)
-: REQUIRED. Indicates the URI that the AS will either send the RO to
-              after interaction or send an HTTP POST request. This URI MAY be unique per request and MUST
-              be hosted by or accessible by the client instance. This URI MUST NOT contain
-              any fragment component. This URI MUST be protected by HTTPS, be
-              hosted on a server local to the RO's browser ("localhost"), or
-              use an application-specific URI scheme. If the client instance needs any
-              state information to tie to the front channel interaction
-              response, it MUST use a unique callback URI to link to
-              that ongoing state. The allowable URIs and URI patterns MAY be restricted by the AS
-              based on the client instance's presented key information. The callback URI
-              SHOULD be presented to the RO during the interaction phase
-              before redirect.
-
-nonce (string)
-: REQUIRED. Unique value to be used in the
-              calculation of the "hash" query parameter sent to the callback URI,
-              must be sufficiently random to be unguessable by an attacker.
-              MUST be generated by the client instance as a unique value for this
-              request.
-
-hash_method (string)
-: OPTIONAL. The hash calculation
-              mechanism to be used for the callback hash in {{interaction-hash}}. Can be one of `sha3` or `sha2`. If
-              absent, the default value is `sha3`.
-              \[\[ [See issue #56](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/56) \]\]
 
 If this interaction mode is supported for this client instance and
 request, the AS returns a nonce for use in validating
@@ -1759,13 +1760,13 @@ instance that the AS can use to help drive user interaction.
 
 This specification defines the following properties under the `hints` key:
 
-ui_locales (array of strings)
+`ui_locales` (array of strings):
 : Indicates the end user's preferred locales that the AS can use
     during interaction, particularly before the RO has
-    authenticated. {{request-interact-locale}}
+    authenticated. OPTIONAL. {{request-interact-locale}}
 
 The following sections detail requests for interaction
-modes. Additional interaction modes are defined in
+hints. Additional interaction hints are defined in
 [a registry TBD](#IANA).
 
 
@@ -1804,27 +1805,27 @@ In response to a client instance's request, the AS responds with a JSON object
 as the HTTP entity body. Each possible field is detailed in the sections below.
 
 
-continue (object)
+`continue` (object):
 : Indicates that the client instance can continue the request by making one or
-    more continuation requests. {{response-continue}}
+    more continuation requests. REQUIRED if continuation calls are allowed for this client instance on this grant request. See {{response-continue}}.
 
-access_token (object / array of objects)
+`access_token` (object / array of objects):
 : A single access token or set of access tokens that the client instance can use to call the RS on
-    behalf of the RO. {{response-token-single}}
+    behalf of the RO. REQUIRED if an access token is included. See {{response-token}}.
 
-interact (object)
+`interact` (object):
 : Indicates that interaction through some set of defined mechanisms
-    needs to take place. {{response-interact}}
+    needs to take place. REQUIRED if interaction is needed or allowed. See {{response-interact}}.
 
-subject (object)
-: Claims about the RO as known and declared by the AS, as described in {{response-subject}}.
+`subject` (object):
+: Claims about the RO as known and declared by the AS. REQUIRED if subject information is included. See {{response-subject}}.
 
-instance_id (string)
+`instance_id` (string):
 : An identifier this client instance can use to identify itself when making
-    future requests. {{response-dynamic-handles}}
+    future requests. OPTIONAL. See {{response-dynamic-handles}}.
 
-error (object)
-: An error code indicating that something has gone wrong. {{response-error}}
+`error` (object):
+: An error code indicating that something has gone wrong. REQUIRED for an error condition. If included, other fields MUST NOT be included. See {{response-error}}.
 
 In this example, the AS is returning an [interaction URI](#response-interact-redirect),
 a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
@@ -1897,28 +1898,31 @@ additional requests, it responds with the `continue` field. This field
 contains a JSON object with the following properties.
 
 
-uri (string)
-: REQUIRED. The URI at which the client instance can make
-            continuation requests. This URI MAY vary per
-            request, or MAY be stable at the AS.
-            The client instance MUST use this
-            value exactly as given when making a [continuation request](#continue-request).
+`uri` (string):
+: The URI at which the client instance can make
+    continuation requests. This URI MAY vary per
+    request, or MAY be stable at the AS.
+    The client instance MUST use this
+    value exactly as given when making a [continuation request](#continue-request).
+    REQUIRED.
 
-wait (integer)
-: RECOMMENDED. The amount of time in integer
-            seconds the client instance MUST wait after receiving this continuation
-            handle and calling the URI. The value SHOULD NOT be less than five seconds,
-            and omission of the value MUST NOT be interpreted as zero (i.e., no delay
-            between requests).
+`wait` (integer):
+: The amount of time in integer
+    seconds the client instance MUST wait after receiving this request continuation
+    response and calling the continuation URI. The value SHOULD NOT be less than five seconds,
+    and omission of the value MUST NOT be interpreted as zero (i.e., no delay
+    between requests).
+    RECOMMENDED.
 
-access_token (object)
-: REQUIRED. A unique access token for continuing the request, called the "continuation access token".
-            The value of this property MUST be in the format specified
-            in {{response-token-single}}. This access token MUST be bound to the
-            client instance's key used in the request and MUST NOT be a bearer token. As a consequence,
-            the `flags` array of this access token MUST NOT contain the string `bearer` and the
-            `key` field MUST be omitted.
-            The client instance MUST present the continuation access token in all requests to the continuation URI as described in {{use-access-token}}.
+`access_token` (object):
+: A unique access token for continuing the request, called the "continuation access token".
+    The value of this property MUST be in the format specified
+    in {{response-token-single}}. This access token MUST be bound to the
+    client instance's key used in the request and MUST NOT be a bearer token. As a consequence,
+    the `flags` array of this access token MUST NOT contain the string `bearer` and the
+    `key` field MUST be omitted.
+    The client instance MUST present the continuation access token in all requests to the continuation URI as described in {{use-access-token}}.
+    REQUIRED.
 
 ~~~
 {
@@ -1962,21 +1966,22 @@ field. The value of this field is an object with the following
 properties.
 
 
-value (string)
-: REQUIRED. The value of the access token as a
+`value` (string):
+: The value of the access token as a
     string. The value is opaque to the client instance. The value SHOULD be
     limited to ASCII characters to facilitate transmission over HTTP
     headers within other protocols without requiring additional encoding.
+    REQUIRED.
 
-label (string)
-: REQUIRED for multiple access tokens, OPTIONAL for single access token.
-    The value of the `label` the client instance provided in the associated
+`label` (string):
+: The value of the `label` the client instance provided in the associated
     [token request](#request-token), if present. If the token has been split
     by the AS, the value of the `label` field is chosen by the AS and the
     `split` flag is used.
+    REQUIRED for multiple access tokens, OPTIONAL for single access token.
 
-manage (string)
-: OPTIONAL. The management URI for this
+`manage` (string):
+: The management URI for this
     access token. If provided, the client instance MAY manage its access
     token as described in {{token-management}}. This management
     URI is a function of the AS and is separate from the RS
@@ -1984,35 +1989,40 @@ manage (string)
     This URI MUST NOT include the
     access token value and SHOULD be different for each access
     token issued in a request.
+    OPTIONAL.
 
-access (array of objects/strings)
-: RECOMMENDED. A description of the rights
+`access` (array of objects/strings):
+: A description of the rights
     associated with this access token, as defined in
     {{resource-access-rights}}. If included, this MUST reflect the rights
     associated with the issued access token. These rights MAY vary
     from what was requested by the client instance.
+    `REQUIRED`.
 
-expires_in (integer)
-: OPTIONAL. The number of seconds in
+`expires_in` (integer):
+: The number of seconds in
     which the access will expire. The client instance MUST NOT use the access
     token past this time. An RS MUST NOT accept an access token
     past this time. Note that the access token MAY be revoked by the
     AS or RS at any point prior to its expiration.
+    OPTIONAL.
 
-key (object / string)
-: OPTIONAL. The key that the token is bound to, if different from the
+`key` (object / string):
+: The key that the token is bound to, if different from the
     client instance's presented key. The key MUST be an object or string in a format
     described in {{key-format}}. The client instance MUST be able to
     dereference or process the key information in order to be able
     to sign the request.
+    OPTIONAL.
 
-flags (array of strings)
-: OPTIONAL. A set of flags that represent attributes or behaviors of the access token
+`flags` (array of strings):
+: A set of flags that represent attributes or behaviors of the access token
     issued by the AS.
+    OPTIONAL.
 
 The values of the `flags` field defined by this specification are as follows:
 
-"bearer"
+`"bearer"`:
 : This flag indicates whether the token is a bearer token, not bound to a key and proofing mechanism.
     If the `bearer` flag is present, the access token is a bearer token, and the `key`
     field in this response MUST be omitted. If the `bearer` flag is omitted and the `key` field
@@ -2021,19 +2031,19 @@ The values of the `flags` field defined by this specification are as follows:
     the token is bound to the key and proofing mechanism indicated in the `key` field.
     See {{security-bearer-tokens}} for additional considerations on the use of bearer tokens.
 
-"durable"
-: OPTIONAL. Flag indicating a hint of AS behavior on token rotation.
+`"durable"`:
+: Flag indicating a hint of AS behavior on token rotation.
     If this flag is present, then the client instance can expect
     a previously-issued access token to continue to work after it has been [rotated](#rotate-access-token)
     or the underlying grant request has been [modified](#continue-modify), resulting
     in the issuance of new access tokens. If this flag is omitted, the client
     instance can anticipate a given access token
-    will stop working after token rotation or grant request modification.
+    could stop working after token rotation or grant request modification.
     Note that a token flagged as `durable` can still expire or be revoked through
     any normal means.
 
-"split"
-: OPTIONAL. Flag indicating that this token was generated by issuing multiple access tokens
+`"split"`:
+: Flag indicating that this token was generated by issuing multiple access tokens
     in response to one of the client instance's [token request](#request-token) objects.
     This behavior MUST NOT be used unless the client instance has specifically requested it
     by use of the `split` flag.
@@ -2180,20 +2190,21 @@ no preference order for interaction modes in the response,
 and it is up to the client instance to determine which ones to use. All supported
 interaction methods are included in the same `interact` object.
 
-redirect (string)
-: Redirect to an arbitrary URI. {{response-interact-redirect}}
+`redirect` (string):
+: Redirect to an arbitrary URI. REQUIRED if the `redirect` interaction start mode is possible for this request. See {{response-interact-redirect}}.
 
-app (string)
-: Launch of an application URI. {{response-interact-app}}
+`app` (string):
+: Launch of an application URI. REQUIRED if the `app` interaction start mode is possible for this request. See {{response-interact-app}}.
 
-finish (string)
-: A nonce used by the client instance to verify the callback after interaction is completed. {{response-interact-finish}}
+`user_code` (object):
+: Display a short user code. REQUIRED if the `user_code` interaction start mode is possible for this request. See {{response-interact-usercode}}.
 
-user_code (object)
-: Display a short user code. {{response-interact-usercode}}
+`user_code_uri` (object):
+: Display a short user code and URL. REQUIRED if the `user_code_uri` interaction start mode is possible for this request. {{response-interact-usercodeuri}}
 
-user_code_uri (object)
-: Display a short user code and URL. {{response-interact-usercodeuri}}
+`finish` (string):
+: A nonce used by the client instance to verify the callback after interaction is completed. REQUIRED if the interaction finish method requested by the client instance is possible for this request. See {{response-interact-finish}}.
+
 
 Additional interaction mode responses can be defined in [a registry TBD](#IANA).
 
@@ -2269,14 +2280,15 @@ request, the AS responds with a "user_code" field. This field is an
 object that contains the following members.
 
 
-code (string)
-: REQUIRED. A unique short code that the user
-              can type into a web page. This string MUST be
-              case-insensitive, MUST consist of only easily typeable
-              characters (such as letters or numbers). The time in which this
-              code will be accepted SHOULD be short lived, such as several
-              minutes. It is RECOMMENDED that this code be no more than eight
-              characters in length.
+`code` (string):
+: A unique short code that the user
+    can type into a web page. This string MUST be
+    case-insensitive, MUST consist of only easily typeable
+    characters (such as letters or numbers). The time in which this
+    code will be accepted SHOULD be short lived, such as several
+    minutes. It is RECOMMENDED that this code be no more than eight
+    characters in length.
+    REQUIRED.
 
 ~~~
 "interact": {
@@ -2314,26 +2326,27 @@ See details of the interaction in {{interaction-usercode}}.
 If the client instance indicates that it can
 [display a short user-typeable code](#request-interact-usercode)
 and the AS supports this mode for the client instance's
-request, the AS responds with a "user_code" field. This field is an
+request, the AS responds with a "user_code_uri"
 object that contains the following members.
 
 
-code (string)
-: REQUIRED. A unique short code that the end user
-              can type into a provided URI. This string MUST be
-              case-insensitive, MUST consist of only easily typeable
-              characters (such as letters or numbers). The time in which this
-              code will be accepted SHOULD be short lived, such as several
-              minutes. It is RECOMMENDED that this code be no more than eight
-              characters in length.
+`code` (string):
+: A unique short code that the end user
+    can type into a provided URI. This string MUST be
+    case-insensitive, MUST consist of only easily typeable
+    characters (such as letters or numbers). The time in which this
+    code will be accepted SHOULD be short lived, such as several
+    minutes. It is RECOMMENDED that this code be no more than eight
+    characters in length.
+    REQUIRED.
 
-uri (string)
-: RECOMMENDED. The interaction URI that the client instance
-              will direct the RO to. This URI MUST be short enough to be
-              communicated to the end user. It is RECOMMENDED that this URI
-              be short enough for an end user to type in manually. The URI
-              MUST NOT contain the `code` value.
-
+`uri` (string):
+: The interaction URI that the client instance
+    will direct the RO to. This URI MUST be short enough to be
+    communicated to the end user. It is RECOMMENDED that this URI
+    be short enough for an end user to type in manually. The URI
+    MUST NOT contain the `code` value.
+    REQUIRED.
 
 ~~~
 "interact": {
@@ -2405,23 +2418,26 @@ the RO and the end user are the same party. This can be accomplished through som
 This field is an object with the following OPTIONAL properties.
 
 
-sub_ids (array of objects)
+`sub_ids` (array of objects):
 : An array of subject identifiers for the
-            RO, as defined by
-            {{I-D.ietf-secevent-subject-identifiers}}.
+    RO, as defined by
+    {{I-D.ietf-secevent-subject-identifiers}}.
+    REQUIRED if returning subject identifiers.
 
+`assertions` (array of objects):
 : An array containing assertions as objects each containing the assertion
     format and the assertion value as the JSON string serialization of the assertion. 
     Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. 
     Additional assertion formats are defined by [a registry TBD](#IANA).
+    REQUIRED if returning assertions.
 
-updated_at (string)
+`updated_at` (string):
 : Timestamp as an ISO8610 date string, indicating
-            when the identified account was last updated. The client instance MAY use
-            this value to determine if it needs to request updated profile
-            information through an identity API. The definition of such an
-            identity API is out of scope for this specification.
-
+    when the identified account was last updated. The client instance MAY use
+    this value to determine if it needs to request updated profile
+    information through an identity API. The definition of such an
+    identity API is out of scope for this specification.
+    RECOMMENDED.
 
 ~~~
 "subject": {
@@ -2478,10 +2494,11 @@ protected by the client instance as secrets. Instance identifier values MUST be 
 and MUST NOT contain any information that would compromise any party if revealed. Instance identifier values are
 opaque to the client instance.
 
-instance_id (string)
+`instance_id` (string):
 : A string value used to represent the information
-            in the `client` object that the client instance can use in a future request, as
-            described in {{request-instance}}.
+    in the `client` object that the client instance can use in a future request, as
+    described in {{request-instance}}.
+    OPTIONAL.
 
 This non-normative example shows an instance identifier along side an issued access token.
 
@@ -2505,43 +2522,45 @@ If the AS determines that the request cannot be issued for any
 reason, it responds to the client instance with an error message.
 
 
-"error" (string)
-:   REQUIRED.  A single ASCII error code from the
-    following, with additional values available in [a registry TBD](#IANA):
+`error` (string):
+:   A single ASCII error code from the
+    following, with additional values available in [a registry TBD](#IANA).
+    REQUIRED.
 
-    "invalid_request":
+    `"invalid_request"`:
     :     The request is missing a required parameter, includes an
           invalid parameter value or is otherwise malformed.
 
-    "invalid_client":
+    `"invalid_client"`:
     :     The request was made from a client that was not recognized
           or allowed by the AS, or the client's signature validation failed.
 
-    "user_denied":
+    `"user_denied"`:
     : The RO denied the request.
 
-    "too_fast":
+    `"too_fast"`:
     : The client instance did not respect the timeout in the wait response.
 
-    "unknown_request":
+    `"unknown_request"`:
     : The request referenced an unknown ongoing access request.
 
-    "request_denied":
+    `"request_denied"`:
     : The request was denied for an unspecified reason.
 
-"error_description" (string)
-:   OPTIONAL. A human-readable string description of the error intended for the
+`error_description` (string):
+:   A human-readable string description of the error intended for the
     developer of the client.
+    OPTIONAL.
+
+For example, if the RO denied the request while interacting with the AS,
+the AS would return the following error when the client instance tries to
+continue the grant request:
 
 ~~~
 {
-
   "error": "user_denied"
-
 }
 ~~~
-
-\[\[ [See issue #79](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/79) \]\]
 
 ## Extending the Response {#response-extend}
 
@@ -2786,13 +2805,15 @@ The AS secures this redirect by adding the hash and interaction
 reference as query parameters to the client instance's redirect URI.
 
 
-hash
-: REQUIRED. The interaction hash value as
-              described in {{interaction-hash}}.
+`hash`:
+: The interaction hash value as
+    described in {{interaction-hash}}.
+    REQUIRED.
 
-interact_ref
-: REQUIRED. The interaction reference
-              generated for this interaction.
+`interact_ref`:
+: The interaction reference
+    generated for this interaction.
+    REQUIRED.
 
 
 The means of directing the RO to this URI are outside the scope
@@ -2831,13 +2852,15 @@ The entity message body is a JSON object consisting of the
 following two fields:
 
 
-hash (string)
-: REQUIRED. The interaction hash value as
-              described in {{interaction-hash}}.
+`hash` (string):
+: The interaction hash value as
+    described in {{interaction-hash}}.
+    REQUIRED.
 
-interact_ref (string)
-: REQUIRED. The interaction reference
-              generated for this interaction.
+`interact_ref` (string)
+: The interaction reference
+    generated for this interaction.
+    REQUIRED.
 
 
 ~~~
@@ -3569,28 +3592,31 @@ formats, all the key format values MUST be equivalent. Note that
 while most formats present the full value of the public key, some
 formats present a value cryptographically derived from the public key.
 
-proof (string)
+`proof` (string):
 : The form of proof that the client instance will use when
     presenting the key. The valid values of this field and
     the processing requirements for each are detailed in
-    {{binding-keys}}. The `proof` field is REQUIRED.
+    {{binding-keys}}. REQUIRED.
 
-jwk (object)
+`jwk` (object):
 : The public key and its properties represented as a JSON Web Key {{RFC7517}}.
     A JWK MUST contain the `alg` (Algorithm) and `kid` (Key ID) parameters. The `alg`
     parameter MUST NOT be "none". The `x5c` (X.509 Certificate Chain) parameter MAY
     be used to provide the X.509 representation of the provided public key.
+    OPTIONAL.
 
-cert (string)
+`cert` (string):
 : PEM serialized value of the certificate used to
-            sign the request, with optional internal whitespace per {{RFC7468}}. The
-            PEM header and footer are optionally removed.
+    sign the request, with optional internal whitespace per {{RFC7468}}. The
+    PEM header and footer are optionally removed.
+    OPTIONAL.
 
-cert#S256 (string)
+`cert#S256` (string):
 : The certificate thumbprint calculated as
-            per [OAuth-MTLS](#RFC8705) in base64 URL
-            encoding. Note that this format does not include
-            the full public key.
+    per [OAuth-MTLS](#RFC8705) in base64 URL
+    encoding. Note that this format does not include
+    the full public key.
+    OPTIONAL.
 
 Additional key formats are defined in [a registry TBD](#IANA).
 
@@ -3602,11 +3628,11 @@ proofing mechanism, as indicated by the `httpsig` value of the `proof` field.
 "key": {
     "proof": "httpsig",
     "jwk": {
-                "kty": "RSA",
-                "e": "AQAB",
-                "kid": "xyz-1",
-                "alg": "RS256",
-                "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+        "kty": "RSA",
+        "e": "AQAB",
+        "kid": "xyz-1",
+        "alg": "RS256",
+        "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
     },
     "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
 }
@@ -3701,17 +3727,17 @@ used is indicated by the proof parameter of the key object in {{key-format}}.
 Values defined by this specification are as follows:
 
 
-httpsig
-: HTTP Signing signature header
+`"httpsig"`:
+: HTTP Signing signature headers. See {{httpsig-binding}}.
 
-mtls
-: Mutual TLS certificate verification
+`"mtls"`:
+: Mutual TLS certificate verification. See {{mtls}}.
 
-jwsd
-: A detached JWS signature header
+`"jwsd"`:
+: A detached JWS signature header. See {{detached-jws}}.
 
-jws
-: Attached JWS payload
+`"jws"`:
+: Attached JWS payload. See {{attached-jws}}.
 
 
 Additional proofing methods are defined by [a registry TBD](#IANA).
@@ -3795,24 +3821,26 @@ This method is indicated by `httpsig` in
 the `proof` field. The signer creates an HTTP
 Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}.
 
-The message components of the signature MUST include the following:
+The covered components of the signature MUST include the following:
 
-@method:
-: the method used in the HTTP request
+`"@method"`:
+: The method used in the HTTP request.
 
-@target-uri:
-: the full request URI of the HTTP request
+`"@target-uri"`:
+: The full request URI of the HTTP request.
 
-content-digest or digest:
-: The Content-Digest or Digest header as defined in {{I-D.ietf-httpbis-digest-headers}}. When the
-request message has a body, the signer MUST calculate this header value and the verifier
-MUST validate this field value. Use of Content-Digest is RECOMMENDED. Use of content-encoding
-agnostic digest methods (such as `id-sha-256`) is RECOMMENDED.
+When the message contains a request body, the covered components MUST also include the following:
 
-When the request is bound to an access token, the covered content
-MUST also include:
+`"content-digest"`:
+: The Content-Digest header as defined in {{I-D.ietf-httpbis-digest-headers}}. When the
+    request message has a body, the signer MUST calculate this header value and the verifier
+    MUST validate this field value. Use of content-encoding
+    agnostic digest methods (such as `sha-256`) is RECOMMENDED.
 
-authorization:
+When the request is bound to an access token, the covered components
+MUST also include the following:
+
+`"authorization"`:
 : The Authorization header used to present the access token as discussed in
 {{use-access-token}}.
 
@@ -3866,10 +3894,10 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-This body is hashed for the Content-Digest header using `id-sha-256` into the following encoded value:
+This body is hashed for the Content-Digest header using `sha-256` into the following encoded value:
 
 ~~~
-id-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
 ~~~
 
 The HTTP message signature input string is calculated to be the following:
@@ -3880,7 +3908,7 @@ NOTE: '\' line wrapping per RFC 8792
 "@method": POST
 "@target-uri": https://server.example.com/gnap
 "content-type": application/json
-"content-digest": id-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+Crwwv\
+"content-digest": sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+Crwwv\
   UoiaDCSjKxw=
 "content-length": 986
 "@signature-params": ("@method" "@target-uri" "content-type" \
@@ -3897,7 +3925,7 @@ POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
 Content-Length: 986
-Content-Digest: id-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSj\
+Content-Digest: sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSj\
   Kxw=
 Signature-Input: sig1=("@method" "@target-uri" "content-type" \
   "content-digest" "content-length");created=1618884475\
@@ -4050,33 +4078,35 @@ This method is indicated by `jwsd` in the
 `proof` field. A JWS {{RFC7515}} object is created as follows:
 
 To protect the request, the JOSE header of the signature contains the following
-parameters:
+claims:
 
-kid (string)
-: The key identifier. RECOMMENDED. If the key is presented in JWK format, this
+`kid` (string):
+: The key identifier. REQUIRED if the key is presented in JWK format, this
   MUST be the value of the `kid` field of the key.
 
-alg (string)
-: The algorithm used to sign the request. REQUIRED. MUST be appropriate to the key presented.
+`alg` (string):
+: The algorithm used to sign the request. MUST be appropriate to the key presented.
   If the key is presented as a JWK, this MUST be equal to the `alg` parameter of the key. MUST NOT be `none`.
+  REQUIRED. 
 
-typ (string)
-: The type header, value ”gnap-binding+jwsd”. REQUIRED
+`typ` (string):
+: The type header, value ”gnap-binding+jwsd”. REQUIRED.
 
-htm (string)
-: The HTTP Method used to make this request, as an uppercase ASCII string. REQUIRED
+`htm` (string):
+: The HTTP Method used to make this request, as a case-sensitive ASCII string. Note that most public HTTP methods are in uppercase ASCII by convention. REQUIRED.
 
-uri (string)
-: The HTTP URI used for this request, including all path and query components and no fragment component. REQUIRED
+`uri` (string):
+: The HTTP URI used for this request, including all path and query components and no fragment component. REQUIRED.
 
-created (integer)
-: A timestamp of when the signature was created, in integer seconds since UNIX Epoch
+`created` (integer):
+: A timestamp of when the signature was created, in integer seconds since UNIX Epoch. REQUIRED.
 
-ath (string)
-: When a request is bound to an access token, the access token hash value. The value MUST be the
+When the request is bound to an access token, the JOSE header MUST also include the following:
+
+`ath` (string):
+: The hash of the access token. The value MUST be the
   result of Base64url encoding (with no padding) the SHA-256 digest
-  of the ASCII encoding of the associated access token's value. REQUIRED if the request
-  protects an access token.
+  of the ASCII encoding of the associated access token's value. REQUIRED.
 
 If the HTTP request has a message body, such as an HTTP POST or PUT method,
 the payload of the JWS object is the Base64url encoding (without padding)
@@ -4220,29 +4250,36 @@ the signer does, with no normalization or transformation of the request.
 This method is indicated by `jws` in the
 `proof` field. A JWS {{RFC7515}} object is created as follows:
 
-The JOSE header MUST contain the `kid` parameter of the key bound to this
-signer for this request. The `alg` parameter MUST be set to a value appropriate
-for the key identified by `kid` and MUST NOT be `none`.
+To protect the request, the JWS header contains the following claims.
 
-To protect the request, the JWS header MUST contain the following
-additional parameters.
+`kid` (string):
+: The key identifier. REQUIRED if the key is presented in JWK format, this
+  MUST be the value of the `kid` field of the key.
 
-typ (string)
-: The type header, value ”gnap-binding+jws”.
+`alg` (string):
+: The algorithm used to sign the request. MUST be appropriate to the key presented.
+  If the key is presented as a JWK, this MUST be equal to the `alg` parameter of the key. MUST NOT be `none`.
+  REQUIRED. 
 
-htm (string)
-: The HTTP Method used to make this request, as an uppercase ASCII string.
+`typ` (string):
+: The type header, value ”gnap-binding+jwsd”. REQUIRED.
 
-uri (string)
-: The HTTP URI used for this request, including all path and query components and no fragment component.
+`htm` (string):
+: The HTTP Method used to make this request, as a case-sensitive ASCII string. (Note that most public HTTP methods are in uppercase.) REQUIRED.
 
-created (integer)
-: A timestamp of when the signature was created, in integer seconds since UNIX Epoch
+`uri` (string):
+: The HTTP URI used for this request, including all path and query components and no fragment component. REQUIRED.
 
-ath (string)
-: When a request is bound to an access token, the access token hash value. The value MUST be the
+`created` (integer):
+: A timestamp of when the signature was created, in integer seconds since UNIX Epoch. REQUIRED.
+
+When the request is bound to an access token, the JOSE header MUST also include the following:
+
+`ath` (string):
+: The hash of the access token. The value MUST be the
   result of Base64url encoding (with no padding) the SHA-256 digest
-  of the ASCII encoding of the associated access token's value.
+  of the ASCII encoding of the associated access token's value. REQUIRED.
+
 
 If the HTTP request has a message body, such as an HTTP POST or PUT method,
 the payload of the JWS object is the JSON serialized body of the request, and
@@ -4384,10 +4421,10 @@ using objects that each contain multiple
 dimensions of access. Each object contains a REQUIRED `type`
 property that determines the type of API that the token is used for.
 
-type (string)
+`type` (string):
 : The type of resource request as a string. This field MAY
       define which other fields are allowed in the request object.
-      This field is REQUIRED.
+      REQUIRED.
 
 The value of the `type` field is under the control of the AS.
 This field MUST be compared using an exact byte match of the string
@@ -4402,28 +4439,29 @@ While it is expected that many APIs will have their own properties, a set of
 common properties are defined here. Specific API implementations
 SHOULD NOT re-use these fields with different semantics or syntax. The
 available values for these properties are determined by the API
-being protected at the RS.
+being protected at the RS. All values are OPTIONAL at the discretion of the
+API definition.
 
-actions (array of strings)
+`actions` (array of strings):
 : The types of actions the client instance will take at the RS as an array of strings.
     For example, a client instance asking for a combination of "read" and "write" access.
 
-locations (array of strings)
+`locations` (array of strings):
 : The location of the RS as an array of
     strings. These strings are typically URIs identifying the
     location of the RS.
 
-datatypes (array of strings)
+`datatypes` (array of strings):
 : The kinds of data available to the client instance at the RS's API as an
     array of strings. For example, a client instance asking for access to
     raw "image" data and "metadata" at a photograph API.
 
-identifier (string)
+`identifier` (string):
 : A string identifier indicating a specific resource at the RS.
     For example, a patient identifier for a medical API or
     a bank account number for a financial API.
 
-privileges (array of strings)
+`privileges` (array of strings):
 : The types or levels of privilege being requested at the resource. For example, a client
     instance asking for administrative level access, or access when the resource owner
     is no longer online.
@@ -4635,44 +4673,49 @@ server's discovery information. The AS MUST respond with a JSON document with Co
 `application/json` containing a single object with the following information:
 
 
-grant_request_endpoint (string)
-: REQUIRED. The location of the
-          AS's grant request endpoint. The location MUST be a URL {{RFC3986}}
-          with a scheme component that MUST be https, a host component, and optionally,
-          port, path and query components and no fragment components. This URL MUST
-          match the URI the client instance used to make the discovery request.
+`grant_request_endpoint` (string):
+: The location of the
+    AS's grant request endpoint. The location MUST be a URL {{RFC3986}}
+    with a scheme component that MUST be https, a host component, and optionally,
+    port, path and query components and no fragment components. This URL MUST
+    match the URL the client instance used to make the discovery request.
+    REQUIRED.
 
-interaction_start_modes_supported (array of strings)
-: OPTIONAL. A list of the AS's interaction start methods. The values of this list correspond to the
-          possible values for the [interaction start section](#request-interact-start) of the request.
+`interaction_start_modes_supported` (array of strings):
+: A list of the AS's interaction start methods. The values of this list correspond to the
+    possible values for the [interaction start section](#request-interact-start) of the request.
+    OPTIONAL.
 
-interaction_finish_methods_supported (array of strings)
-: OPTIONAL. A list of the AS's interaction finish methods. The values of this list correspond to the
-          possible values for the method element of the [interaction finish section](#request-interact-finish) of the request.
+`interaction_finish_methods_supported` (array of strings):
+: A list of the AS's interaction finish methods. The values of this list correspond to the
+    possible values for the method element of the [interaction finish section](#request-interact-finish) of the request.
+    OPTIONAL.
 
-key_proofs_supported (array of strings)
-: OPTIONAL. A list of the AS's supported key
-          proofing mechanisms. The values of this list correspond to possible
-          values of the `proof` field of the
-          [key section](#key-format) of the request.
+`key_proofs_supported` (array of strings):
+: A list of the AS's supported key
+    proofing mechanisms. The values of this list correspond to possible
+    values of the `proof` field of the
+    [key section](#key-format) of the request.
+    OPTIONAL.
 
-sub_id_formats_supported (array of strings)
-: OPTIONAL. A list of the AS's supported
-          subject identifier formats. The values of this list correspond to possible values
-          of the [subject identifier section](#request-subject) of the request.
+`sub_id_formats_supported` (array of strings):
+: A list of the AS's supported
+    subject identifier formats. The values of this list correspond to possible values
+    of the [subject identifier section](#request-subject) of the request.
+    OPTIONAL.
 
-assertion_formats_supported (array of strings)
-: OPTIONAL. A list of the AS's supported
-          assertion formats. The values of this list correspond to possible
-          values of the [subject assertion section](#request-subject) of the request.
-
+`assertion_formats_supported` (array of strings):
+: A list of the AS's supported
+    assertion formats. The values of this list correspond to possible
+    values of the [subject assertion section](#request-subject) of the request.
+    OPTIONAL.
 
 The information returned from this method is for optimization
 purposes only. The AS MAY deny any request, or any portion of a request,
 even if it lists a capability as supported. For example, a given client instance
 can be registered with the `mtls` key proofing
-mechanism, but the AS also returns other proofing methods, then the AS
-will deny a request from that client instance using a different proofing
+mechanism, but the AS also returns other proofing methods from the discovery document, then the AS
+will still deny a request from that client instance using a different proofing
 mechanism.
 
 ## RS-first Method of AS Discovery {#rs-request-without-token}
@@ -5718,6 +5761,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Clarified default wait times for continuation requests (including polling).
     - Clarified URI vs. URL.
     - Added "user_code_uri" mode, removed "uri" from "user_code" mode.
+    - Consistently formatted all parameter lists.
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
