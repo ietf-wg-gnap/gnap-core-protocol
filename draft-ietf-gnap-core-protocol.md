@@ -2337,7 +2337,6 @@ sub_ids (array of objects)
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
     values are the string serialization of the assertion format, encoded as a plain
     JSON string. Additional assertion types are defined by [a registry TBD](#IANA).
-    \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
 updated_at (string)
 : Timestamp as an ISO8610 date string, indicating
@@ -2354,7 +2353,7 @@ updated_at (string)
     "id": "XUT2MFM1XBIKJKSDU8QM"
   } ],
   "assertions": [ {
-    "format": "id_token",
+    "type": "id_token",
     "value": "eyj..."
   } ]
 }
