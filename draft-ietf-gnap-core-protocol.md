@@ -1879,7 +1879,7 @@ wait (integer)
             seconds the client instance MUST wait after receiving this continuation
             handle and calling the URI. The value SHOULD NOT be less than five seconds,
             and omission of the value MUST NOT be interpreted as zero (i.e., no delay
-            between requests)
+            between requests).
 
 access_token (object)
 : REQUIRED. A unique access token for continuing the request, called the "continuation access token".
