@@ -5920,7 +5920,7 @@ Cache-Control: no-store
         "redirect": "https://srv.ex/MXKHQ",
         "user_code": {
             "code": "A1BC-3DFF",
-            "uri": "https://srv.ex/device"
+            "url": "https://srv.ex/device"
         }
     },
     "continue": {
