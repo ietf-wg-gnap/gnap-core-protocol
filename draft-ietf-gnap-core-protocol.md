@@ -5227,17 +5227,24 @@ If the end user interacts with the client instance through a web browser and the
 interaction finish method is used, the client instance can ensure that the incoming HTTP request
 from the finish method is presented in the same browser session that the grant request was
 started in. This technique is particularly useful when the `redirect` interaction start mode
-is used as well. The client instance can then store the relevant pending grant information in the
+is used as well, since in many cases the end user will follow the redirection with the
+same browser that they are using to interact with the client instance.
+The client instance can then store the relevant pending grant information in the
 session, either in the browser storage directly (such as with a single-page application) or
 in an associated session store on a back-end server. In both cases, when the incoming request
 reaches the client instance, the session information can be used to ensure that the same party
 that started the request is present as the request finishes.
 
-If the end user does not interact with the client instance through a web browser or the `push`
-interaction finish method is used, the client instance can ensure that the incoming HTTP request
-can be uniquely associated with an ongoing grant request by making the interaction finish callback
-URI unique for the grant when making the [interaction request](#request-interact-finish). Mobile
-applications and other client instances that generally serve only a single end user at a time
+If the end user does not interact with the client instance through a web browser or the interaction
+start method does not use the same browser or device that the end user is interacting through
+(such as the launch of a second device through a scannable code or presentation of a user code) the
+client instance will not be able to strongly associate an incoming HTTP request with an established
+session with the end user. This is also true when the `push` interaction finish method is used,
+since the HTTP request comes directly from the interaction component of the AS. In these
+circumstances, the client instance can at least ensure that the incoming HTTP
+request can be uniquely associated with an ongoing grant request by making the interaction finish
+callback URI unique for the grant when making the [interaction request](#request-interact-finish).
+Mobile applications and other client instances that generally serve only a single end user at a time
 can use this unique incoming URL to differentiate between a legitimate incoming request and
 an attacker's stolen request.
 
