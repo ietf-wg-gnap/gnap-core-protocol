@@ -5235,6 +5235,24 @@ in an associated session store on a back-end server. In both cases, when the inc
 reaches the client instance, the session information can be used to ensure that the same party
 that started the request is present as the request finishes.
 
+Ensuring that the same party that started a request is present when that request finishes can
+prevent phishing attacks, where an attacker starts a request at an honest client instance and
+tricks an honest RO into authorizing it. For example, if an honest end user (that also acts as the
+RO) wants to start a request through a client instance controlled by the attacker, the attacker can
+start a request at an honest client instance and then redirect the honest end user to the
+interaction URI from the attackers session with the honest client instance. If the honest end user
+then fails to realize that it is not authorizing the attacker-controlled client instance (with which
+it started its request) but the honest client instance when interacting with the AS, the attacker's
+session with the honest client instance would be authorized. This would give the attacker access to
+the honest end user's resources that the honest client instance is authorized to access. However,
+if after the interaction the AS redirects the honest end user back to the client instance whose
+grant request the end user just authorized, the honest end user is redirected to the honest client
+instance. The honest client instance can then detect that it is not the party that started the
+request that is present, since the request at the honest client instance was started by the
+attacker, which can prevent the attack. This is related to {{security-impersonation}}, because again
+the attack can be prevented by the AS informing the user as much as possible about the client
+instance that is to be authorized.
+
 If the end user does not interact with the client instance through a web browser or the interaction
 start method does not use the same browser or device that the end user is interacting through
 (such as the launch of a second device through a scannable code or presentation of a user code) the
