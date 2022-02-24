@@ -2267,7 +2267,7 @@ object that contains the following members.
 
 code (string)
 : REQUIRED. A unique short code that the user
-              can type into a static URL. This string MUST be
+              can type into a web page. This string MUST be
               case-insensitive, MUST consist of only easily typeable
               characters (such as letters or numbers). The time in which this
               code will be accepted SHOULD be short lived, such as several
