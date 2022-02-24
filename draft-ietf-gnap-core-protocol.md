@@ -988,8 +988,8 @@ A non-normative example of a grant request is below:
         }
     },
     "subject": {
-        "sub_ids_formats": ["iss_sub", "opaque"],
-        "assertions_formats": ["id_token"]
+        "sub_id_formats": ["iss_sub", "opaque"],
+        "assertion_formats": ["id_token"]
     }
 }
 ~~~
@@ -1182,11 +1182,11 @@ the AS, it sends a `subject` field as a JSON object. This object MAY
 contain the following fields (or additional fields defined in
 [a registry TBD](#IANA)).
 
-sub_ids_formats (array of strings)
+sub_id_formats (array of strings)
 : An array of subject identifier subject formats
             requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
 
-assertions_formats (array of strings)
+assertion_formats (array of strings)
 : An array of requested assertion formats. Possible values include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
     assertion formats are defined by [a registry TBD](#IANA).
@@ -1194,8 +1194,8 @@ assertions_formats (array of strings)
 
 ~~~
 "subject": {
-  "sub_ids_formats": [ "iss_sub", "opaque" ],
-  "assertions_formats": [ "id_token", "saml2" ]
+  "sub_id_formats": [ "iss_sub", "opaque" ],
+  "assertion_formats": [ "id_token", "saml2" ]
 }
 ~~~
 
@@ -1211,7 +1211,7 @@ channels by the client instance, as discussed in {{response-subject}}.
 
 The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
 
-Note: the "sub_ids_formats" and "assertions_formats" request fields are independent of
+Note: the "sub_id_formats" and "assertion_formats" request fields are independent of
 each other, and a returned assertion MAY use a different subject
 identifier.
 
@@ -2329,11 +2329,10 @@ sub_ids (array of objects)
             RO, as defined by
             {{I-D.ietf-secevent-subject-identifiers}}.
 
-: An array containing assertions as values keyed on the assertion
-    type defined by [a registry TBD](#IANA). Possible keys include
-    `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. The assertion
-    values are the string serialization of the assertion format, encoded as a plain
-    JSON string. Additional assertion types are defined by [a registry TBD](#IANA).
+: An array containing assertions as objects each containing the assertion
+    format and the assertion value as the JSON string serialization of the assertion. 
+    Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. 
+    Additional assertion formats are defined by [a registry TBD](#IANA).
 
 updated_at (string)
 : Timestamp as an ISO8610 date string, indicating
@@ -4537,12 +4536,12 @@ key_proofs_supported (array of strings)
           values of the `proof` field of the
           [key section](#key-format) of the request.
 
-sub_ids_formats_supported (array of strings)
+sub_id_formats_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
           subject identifier formats. The values of this list correspond to possible values
           of the [subject identifier section](#request-subject) of the request.
 
-assertions_supported (array of strings)
+assertion_formats_supported (array of strings)
 : OPTIONAL. A list of the AS's supported
           assertion formats. The values of this list correspond to possible
           values of the [subject assertion section](#request-subject) of the request.
