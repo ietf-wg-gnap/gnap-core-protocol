@@ -3637,6 +3637,10 @@ by both clients and ASs, which could be accomplished by e.g. a client publishing
 a public key at a URI. For interoperability, this method could later be described
 as an extension.
 
+### Key Protection {#key-protection}
+
+The security of GNAP relies on the cryptographic security of the keys themselves. 
+When symmetric keys are used in GNAP, a key management system or secure key derivation mechanism MUST be used to supply the keys. Symmetric keys MUST NOT be a human memorable password or a value derived from one. Symmetric keys MUST NOT be passed by value from the client instance to the AS.
 
 ## Presenting Access Tokens {#use-access-token}
 
@@ -4947,7 +4951,7 @@ as key derivation schemes to take advantage of symmetric cryptography but withou
 key distribution at runtime, which would expose the keys in transit.
 
 Both the AS and client software can use systems such as hardware security modules to strengthen
-their key security storage and generation for both asymmetric and symmetric keys.
+their key security storage and generation for both asymmetric and symmetric keys (see also {{key-protection}}).
 
 ## Generation of Access Tokens {#security-access-tokens}
 
