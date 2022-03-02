@@ -160,7 +160,7 @@ of these can be found in {{example-oauth2}}.
 
 {::boilerplate bcp14-tagged}
 
-This document contains non-normative examples of partial and complete HTTP messages, JSON structures, URLs, query components, keys, and other elements. Some examples use a single trailing backslash `\` to indicate line wrapping for long values, as per {{!RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
+This document contains non-normative examples of partial and complete HTTP messages, JSON structures, URIs, query components, keys, and other elements. Whenever possible, the document uses URI as a generic term, since it aligns with {{!RFC3986}} recommendations and matches better with the intent that the identifier may be reachable through various/generic means (compared to URLs). Some examples use a single trailing backslash `\` to indicate line wrapping for long values, as per {{!RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
 
 ## Roles
 
@@ -322,7 +322,7 @@ Looking back on each trust relationship:
 
 - end user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers promise to implement requirements and generally some recommendations or best practices, so that the end users may confidently use their software. However, end users might also be facing some attacker's client software, without even realizing it.
 
-- end user/AS: when the client supports it (see {{response-interact}}), the end user gets to interact with front-channel URLs provided by the AS. See {{security-front-channel}} for some considerations in trusting these interactions.
+- end user/AS: when the client supports it (see {{response-interact}}), the end user gets to interact with front-channel URIs provided by the AS. See {{security-front-channel}} for some considerations in trusting these interactions.
 
 - client/AS: An honest AS may be facing an attacker's client (as discussed just above), or the reverse, and GNAP aims at making common attacks impractical. The core specification makes access tokens opaque to the client and defines the request/response scheme in detail, therefore avoiding extra trust hypotheses from this critical piece of software. Yet the AS may further define cryptographic attestations or optional rules to simplify the access of clients it already trusts, due to past behavior or organizational policies (see {{request-client}}).
 
@@ -472,9 +472,9 @@ possible for there not to be a user involved in the delegation process.
 
 In this example flow, the client instance is a web application that wants access to resources on behalf
 of the current user, who acts as both the end user and the resource
-owner (RO). Since the client instance is capable of directing the user to an arbitrary URL and
+owner (RO). Since the client instance is capable of directing the user to an arbitrary URI and
 receiving responses from the user's browser, interaction here is handled through
-front-channel redirects using the user's browser. The redirection URL used for interaction is
+front-channel redirects using the user's browser. The redirection URI used for interaction is
 a service hosted by the AS in this example. The client instance uses a persistent session
 with the user to ensure the same user that is starting the interaction is the user
 that returns from the interaction.
@@ -514,22 +514,22 @@ that returns from the interaction.
 1. The client instance establishes a verifiable session to the user, in the role of the end user.
 
 2. The client instance [requests access to the resource](#request). The client instance indicates that
-    it can [redirect to an arbitrary URL](#request-interact-redirect) and
+    it can [redirect to an arbitrary URI](#request-interact-redirect) and
     [receive a redirect from the browser](#request-interact-callback-redirect). The client instance
     stores verification information for its redirect in the session created
     in (1).
 
 3. The AS determines that interaction is needed and [responds](#response) with
-    a [URL to send the user to](#response-interact-redirect) and
+    a [URI to send the user to](#response-interact-redirect) and
     [information needed to verify the redirect](#response-interact-finish) in (7).
     The AS also includes information the client instance will need to
     [continue the request](#response-continue) in (8). The AS associates this
     continuation information with an ongoing request that will be referenced in (4), (6), and (8).
 
 4. The client instance stores the verification and continuation information from (3) in the session from (1). The client instance
-    then [redirects the user to the URL](#interaction-redirect) given by the AS in (3).
-    The user's browser loads the interaction redirect URL. The AS loads the pending
-    request based on the incoming URL generated in (3).
+    then [redirects the user to the URI](#interaction-redirect) given by the AS in (3).
+    The user's browser loads the interaction redirect URI. The AS loads the pending
+    request based on the incoming URI generated in (3).
 
 5. The user authenticates at the AS, taking on the role of the RO.
 
@@ -537,9 +537,9 @@ that returns from the interaction.
 
 7. When the AS is done interacting with the user, the AS
     [redirects the user back](#interaction-callback) to the
-    client instance using the redirect URL provided in (2). The redirect URL is augmented with
+    client instance using the redirect URI provided in (2). The redirect URI is augmented with
     an interaction reference that the AS associates with the ongoing
-    request created in (2) and referenced in (4). The redirect URL is also
+    request created in (2) and referenced in (4). The redirect URI is also
     augmented with a hash of the security information provided
     in (2) and (3). The client instance loads the verification information from (2) and (3) from
     the session created in (1). The client instance [calculates a hash](#interaction-hash)
@@ -570,8 +570,8 @@ An example set of protocol messages for this method can be found in {{example-au
 
 In this example flow, the client instance is a device that is capable of presenting a short,
 human-readable code to the user and directing the user to enter that code at
-a known URL. The URL the user enters the code at is an interactive service hosted by the
-AS in this example. The client instance is not capable of presenting an arbitrary URL to the user,
+a known URI. The URI the user enters the code at is an interactive service hosted by the
+AS in this example. The client instance is not capable of presenting an arbitrary URI to the user,
 nor is it capable of accepting incoming HTTP requests from the user's browser.
 The client instance polls the AS while it is waiting for the RO to authorize the request.
 The user's interaction is assumed to occur on a secondary device. In this example
@@ -620,7 +620,7 @@ the AS.
 
 2. The AS determines that interaction is needed and [responds](#response) with
     a [user code to communicate to the user](#response-interact-usercode). This
-    could optionally include a URL to direct the user to, but this URL should
+    could optionally include a URI to direct the user to, but this URI should
     be static and so could be configured in the client instance's documentation.
     The AS also includes information the client instance will need to
     [continue the request](#response-continue) in (8) and (10). The AS associates this
@@ -629,11 +629,11 @@ the AS.
 3. The client instance stores the continuation information from (2) for use in (8) and (10). The client instance
     then [communicates the code to the user](#interaction-redirect) given by the AS in (2).
 
-4. The user's directs their browser to the user code URL. This URL is stable and
+4. The user's directs their browser to the user code URI. This URI is stable and
     can be communicated via the client software's documentation, the AS documentation, or
     the client software itself. Since it is assumed that the RO will interact
     with the AS through a secondary device, the client instance does not provide a mechanism to
-    launch the RO's browser at this URL.
+    launch the RO's browser at this URI.
 
 5. The end user authenticates at the AS, taking on the role of the RO.
 
@@ -800,7 +800,7 @@ An example set of protocol messages for this method can be found in {{example-no
 In this example flow, the client instance receives an access token to access a resource server through
 some valid GNAP process. The client instance uses that token at the RS for some time, but eventually
 the access token expires. The client instance then gets a new access token by rotating the
-expired access token at the AS using the token's management URL.
+expired access token at the AS using the token's management URI.
 
 ~~~
 +--------+                                          +--------+
@@ -1474,7 +1474,7 @@ Often, the AS will require [interaction with the RO](#authorization) in order to
 approve a requested delegation to the client instance for both access to resources and direct
 subject information. Many times the end user using the client instance is the same person as
 the RO, and the client instance can directly drive interaction with the end user by facilitating
-the process through means such as redirection to a URL or launching an application. Other times, the
+the process through means such as redirection to a URI or launching an application. Other times, the
 client instance can provide information to start the RO's interaction on a secondary
 device, or the client instance will wait for the RO to approve the request asynchronously.
 The client instance could also be signaled that interaction has concluded through a
@@ -1504,7 +1504,7 @@ The `interact` field MUST contain the `start` key, and MAY contain the `finish` 
 of each key is an array which contains strings or JSON objects as defined below.
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
-the end user to an arbitrary URL and can receive a [redirect](#request-interact-callback-redirect) through
+the end user to an arbitrary URI and can receive a [redirect](#request-interact-callback-redirect) through
 a browser request.
 
 ~~~
@@ -1520,7 +1520,7 @@ a browser request.
 
 In this non-normative example, the client instance is indicating that it can
 display a [user code](#request-interact-usercode) and direct the end user
-to an [arbitrary URL](#request-interact-redirect) on a secondary
+to an [arbitrary URI](#request-interact-redirect) on a secondary
 device, but it cannot accept a redirect or push callback.
 
 ~~~
@@ -1536,15 +1536,15 @@ error since the client instance will be unable to complete the
 request without authorization.
 
 The AS SHOULD handle any interact request as a one-time-use mechanism and SHOULD apply suitable timeouts to any interaction mechanisms
-provided, including user codes and redirection URLs. The client instance SHOULD
-apply suitable timeouts to any callback URLs.
+provided, including user codes and redirection URIs. The client instance SHOULD
+apply suitable timeouts to any callback URIs.
 
 ### Start Mode Definitions {#request-interact-start}
 
 This specification defines the following interaction start modes as an array of string values under the `start` key:
 
 "redirect"
-: Indicates that the client instance can direct the end user to an arbitrary URL
+: Indicates that the client instance can direct the end user to an arbitrary URI
     for interaction. {{request-interact-redirect}}
 
 "app"
@@ -1553,20 +1553,20 @@ This specification defines the following interaction start modes as an array of 
 
 "user_code"
 : Indicates that the client instance can communicate a human-readable short
-    code to the end user for use with a stable URL. {{request-interact-usercode}}
+    code to the end user for use with a stable URI. {{request-interact-usercode}}
 
-#### Redirect to an Arbitrary URL {#request-interact-redirect}
+#### Redirect to an Arbitrary URI {#request-interact-redirect}
 
-If the client instance is capable of directing the end user to a URL defined
+If the client instance is capable of directing the end user to a URI defined
 by the AS at runtime, the client instance indicates this by including
 `redirect` in the array under the `start` key. The means by which
-the client instance will activate this URL is out of scope of this
+the client instance will activate this URI is out of scope of this
 specification, but common methods include an HTTP redirect,
 launching a browser on the end user's device, providing a scannable
-image encoding, and printing out a URL to an interactive
-console. While this URL is generally hosted at the AS, the client
+image encoding, and printing out a URI to an interactive
+console. While this URI is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
-or relationship to the AS grant URL.
+or relationship to the AS grant URI.
 
 ~~~
 "interact": {
@@ -1581,12 +1581,12 @@ The client instance manages this interaction method as described in {{interactio
 See {{security-front-channel}} for more considerations regarding the use of front-channel
 communication techniques such as this.
 
-#### Open an Application-specific URL {#request-interact-app}
+#### Open an Application-specific URI {#request-interact-app}
 
-If the client instance can open a URL associated with an application on
+If the client instance can open a URI associated with an application on
 the end user's device, the client instance indicates this by including `app`
 in the array under the `start` key. The means by which the client instance
-determines the application to open with this URL are out of scope of
+determines the application to open with this URI are out of scope of
 this specification.
 
 ~~~
@@ -1596,7 +1596,7 @@ this specification.
 ~~~
 
 If this interaction mode is supported for this client instance and
-request, the AS returns an app interaction response with an app URL
+request, the AS returns an app interaction response with an app URI
 payload {{response-interact-app}}. The client instance manages
 this interaction method as described in {{interaction-app}}.
 
@@ -1607,10 +1607,10 @@ this interaction method as described in {{interaction-app}}.
 If the client instance is capable of displaying or otherwise communicating
 a short, human-entered code to the RO, the client instance indicates this
 by including `user_code` in the array under the `start` key. This
-code is to be entered at a static URL that does not change at
-runtime. While this URL is generally hosted at the AS, the client
+code is to be entered at a static URI that does not change at
+runtime. While this URI is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
-or relationship to the AS grant URL.
+or relationship to the AS grant URI.
 
 ~~~
 "interact": {
@@ -1619,7 +1619,7 @@ or relationship to the AS grant URL.
 ~~~
 
 If this interaction mode is supported for this client instance and
-request, the AS returns a user code and interaction URL as specified
+request, the AS returns a user code and interaction URI as specified
 in {{response-interact-usercode}}. The client instances manages this interaction
 method as described in {{interaction-usercode}}
 
@@ -1659,7 +1659,7 @@ uri (string)
 
 nonce (string)
 : REQUIRED. Unique value to be used in the
-              calculation of the "hash" query parameter sent to the callback URL,
+              calculation of the "hash" query parameter sent to the callback URI,
               must be sufficiently random to be unguessable by an attacker.
               MUST be generated by the client instance as a unique value for this
               request.
@@ -1699,7 +1699,7 @@ GET as described in {{interaction-callback}}.
 Requests to the callback URI MUST be processed by the client instance as described in
 {{interaction-callback}}.
 
-Since the incoming request to the callback URL is from the RO's
+Since the incoming request to the callback URI is from the RO's
 browser, this method is usually used when the RO and end user are the
 same entity. As such, the client instance MUST ensure the end user is present on the request to
 prevent substitution attacks.
@@ -1726,7 +1726,7 @@ as described in {{interaction-pushback}}.
 Requests to the callback URI MUST be processed by the client instance as described in
 {{interaction-pushback}}.
 
-Since the incoming request to the callback URL is from the AS and
+Since the incoming request to the callback URI is from the AS and
 not from the RO's browser, the client instance MUST NOT require the end user to
 be present on the incoming HTTP request.
 
@@ -1804,7 +1804,7 @@ instance_id (string)
 error (object)
 : An error code indicating that something has gone wrong. {{response-error}}
 
-In this example, the AS is returning an [interaction URL](#response-interact-redirect),
+In this example, the AS is returning an [interaction URI](#response-interact-redirect),
 a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
 
 ~~~
@@ -1825,11 +1825,12 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-In this example, the AS is returning a bearer [access token](#response-token-single) with a management URL and a [subject identifier](#response-subject) in the form of
+In this example, the AS is returning a bearer [access token](#response-token-single) with a management URI and a [subject identifier](#response-subject) in the form of
 an opaque identifier.
 
 ~~~
-NOTE: '\' line wrapping per RFC 8792
+NOTE: '\' line wrapping per RFC 8792 and a [subject identifier](#response-subject) in the form of
+an opaque identifier.
 
 {
     "access_token": {
@@ -1848,7 +1849,7 @@ NOTE: '\' line wrapping per RFC 8792
 ~~~
 
 In this example, the AS is returning set of [subject identifiers](#response-subject),
-simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID).
+simultaneously as an opaque identifier, an email address, and a decentralized identifier URL (DID).
 
 ~~~
 {
@@ -2018,7 +2019,7 @@ Flag values MUST NOT be included more than once.
 Additional flags can be defined by extensions using [a registry TBD](#IANA).
 
 The following non-normative example shows a single access token bound to the client instance's key
-used in the initial request, with a management URL, and that has access to three described resources
+used in the initial request, with a management URI, and that has access to three described resources
 (one using an object and two described by reference strings).
 
 ~~~
@@ -2083,7 +2084,7 @@ chosen by the client instance in the [multiple access token request](#request-to
 
 In this non-normative example, two tokens are issued under the
 names `token1` and `token2`, and only the first token has a management
-URL associated with it.
+URI associated with it.
 
 ~~~
 NOTE: '\' line wrapping per RFC 8792
@@ -2156,10 +2157,10 @@ and it is up to the client instance to determine which ones to use. All supporte
 interaction methods are included in the same `interact` object.
 
 redirect (string)
-: Redirect to an arbitrary URL. {{response-interact-redirect}}
+: Redirect to an arbitrary URI. {{response-interact-redirect}}
 
 app (string)
-: Launch of an application URL. {{response-interact-app}}
+: Launch of an application URI. {{response-interact-app}}
 
 finish (string)
 : A nonce used by the client instance to verify the callback after interaction is completed. {{response-interact-finish}}
@@ -2176,11 +2177,11 @@ responses include secret or unique information, the AS SHOULD
 respond to each interaction mode only once in an ongoing request,
 particularly if the client instance [modifies its request](#continue-modify).
 
-### Redirection to an arbitrary URL {#response-interact-redirect}
+### Redirection to an arbitrary URI {#response-interact-redirect}
 
-If the client instance indicates that it can [redirect to an arbitrary URL](#request-interact-redirect) and the AS supports this mode for the client instance's
+If the client instance indicates that it can [redirect to an arbitrary URI](#request-interact-redirect) and the AS supports this mode for the client instance's
 request, the AS responds with the "redirect" field, which is
-a string containing the URL to direct the end user to. This URL MUST be
+a string containing the URI to direct the end user to. This URI MUST be
 unique for the request and MUST NOT contain any security-sensitive
 information such as user identifiers or access tokens.
 
@@ -2190,28 +2191,28 @@ information such as user identifiers or access tokens.
 }
 ~~~
 
-The URL returned is a function of the AS, but the URL itself MAY be completely
-distinct from the URL the client instance uses to [request access](#request), allowing an
+The URI returned is a function of the AS, but the URI itself MAY be completely
+distinct from the URI the client instance uses to [request access](#request), allowing an
 AS to separate its user-interactive functionality from its back-end security
 functionality. If the AS does not directly host the functionality accessed through
-the given URL, then the means for the interaction functionality to communicate
+the given URI, then the means for the interaction functionality to communicate
 with the rest of the AS are out of scope for this specification.
 
 \[\[ [See issue #72](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/72) \]\]
 
-The client instance sends the end user to the URL to interact with the AS. The
-client instance MUST NOT alter the URL in any way. The means for the client instance
-to send the end user to this URL is out of scope of this specification,
+The client instance sends the end user to the URI to interact with the AS. The
+client instance MUST NOT alter the URI in any way. The means for the client instance
+to send the end user to this URI is out of scope of this specification,
 but common methods include an HTTP redirect, launching the system
-browser, displaying a scannable code, or printing out the URL in an
+browser, displaying a scannable code, or printing out the URI in an
 interactive console. See details of the interaction in {{interaction-redirect}}.
 
-### Launch of an application URL {#response-interact-app}
+### Launch of an application URI {#response-interact-app}
 
-If the client instance indicates that it can [launch an application URL](#request-interact-app) and
+If the client instance indicates that it can [launch an application URI](#request-interact-app) and
 the AS supports this mode for the client instance's request, the AS
-responds with the "app" field, which is a string containing the URL
-for the client instance to launch. This URL MUST be unique for the request and
+responds with the "app" field, which is a string containing the URI
+for the client instance to launch. This URI MUST be unique for the request and
 MUST NOT contain any security-sensitive information such as user identifiers or access tokens.
 
 ~~~
@@ -2223,12 +2224,12 @@ MUST NOT contain any security-sensitive information such as user identifiers or 
 The means for the launched application to communicate with the AS are out of
 scope for this specification.
 
-The client instance launches the URL as appropriate on its platform, and
-the means for the client instance to launch this URL is out of scope of this
-specification. The client instance MUST NOT alter the URL in any way. The
+The client instance launches the URI as appropriate on its platform, and
+the means for the client instance to launch this URI is out of scope of this
+specification. The client instance MUST NOT alter the URI in any way. The
 client instance MAY attempt to detect if an installed application will
-service the URL being sent before attempting to launch the
-application URL. See details of the interaction in {{interaction-app}}.
+service the URI being sent before attempting to launch the
+application URI. See details of the interaction in {{interaction-app}}.
 
 \[\[ [See issue #71](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/71) \]\]
 
@@ -2269,24 +2270,24 @@ The client instance MUST communicate the "code" to the end user in some
 fashion, such as displaying it on a screen or reading it out
 audibly.
 
-The client instance SHOULD also communicate the URL if possible
-to facilitate user interaction, but since the URL should be stable,
+The client instance SHOULD also communicate the URI if possible
+to facilitate user interaction, but since the URI should be stable,
 the client instance should be able to safely decide to not display this value.
 As this interaction mode is designed to facilitate interaction
 via a secondary device, it is not expected that the client instance redirect
-the end user to the URL given here at runtime. Consequently, the URL needs to
+the end user to the URI given here at runtime. Consequently, the URI needs to
 be stable enough that a client instance could be statically configured with it, perhaps
-referring the end user to the URL via documentation instead of through an
+referring the end user to the URI via documentation instead of through an
 interactive means. If the client instance is capable of communicating an
-arbitrary URL to the end user, such as through a scannable code, the
+arbitrary URI to the end user, such as through a scannable code, the
 client instance can use the ["redirect"](#request-interact-redirect) mode
 for this purpose instead of or in addition to the user code mode.
 
-The URL returned is a function of the AS, but the URL itself MAY be completely
-distinct from the URL the client instance uses to [request access](#request), allowing an
+The URI returned is a function of the AS, but the URI itself MAY be completely
+distinct from the URI the client instance uses to [request access](#request), allowing an
 AS to separate its user-interactive functionality from its back-end security
 functionality. If the AS does not directly host the functionality accessed through
-the given URL, then the means for the interaction functionality to communicate
+the given URI, then the means for the interaction functionality to communicate
 with the rest of the AS are out of scope for this specification.
 
 See details of the interaction in {{interaction-usercode}}.
@@ -2295,7 +2296,7 @@ See details of the interaction in {{interaction-usercode}}.
 
 ### Interaction Finish {#response-interact-finish}
 
-If the client instance indicates that it can [receive a post-interaction redirect or push at a URL](#request-interact-finish)
+If the client instance indicates that it can [receive a post-interaction redirect or push at a URI](#request-interact-finish)
 and the AS supports this mode for the
 client instance's request, the AS responds with a `finish` field containing a nonce
 that the client instance will use in validating the callback as defined in
@@ -2309,7 +2310,7 @@ that the client instance will use in validating the callback as defined in
 
 When the interaction is completed, the interaction component MUST contact the client instance
 using either a redirect or launch of the RO's browser
-or through an HTTP POST to the client instance's callback URL using the method indicated in the
+or through an HTTP POST to the client instance's callback URI using the method indicated in the
 [interaction request](#request-interact-finish) as described in {{interaction-finish}}.
 
 If the AS returns a nonce, the client instance MUST NOT
@@ -2587,8 +2588,8 @@ the client instance has to communicate the redirection URI to the end user.
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
 If the URI is hosted by the AS,
-the AS MUST determine the grant request being referenced from the URL
-value itself. If the URL cannot be associated with a currently active
+the AS MUST determine the grant request being referenced from the URI
+value itself. If the URI cannot be associated with a currently active
 request, the AS MUST display an error to the RO and MUST NOT attempt
 to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
 If the URI is not hosted by the AS directly, the means of communication between
@@ -2609,7 +2610,7 @@ directs the end user to enter that code at an associated URI.
 This mode is used when the client instance is not able to facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
 communicated in the response from the AS, but the client instance
-communicates that URL to the end user. As a consequence, these URIs SHOULD be short.
+communicates that URI to the end user. As a consequence, these URIs SHOULD be short.
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
@@ -2640,7 +2641,7 @@ request and MUST be protected by HTTPS or equivalent means.
 
 When the client instance is directed to launch an application through the
 ["app"](#response-interact-app) mode, the client launches the
-URL as appropriate to the system, such as through a deep link or custom URI
+URI as appropriate to the system, such as through a deep link or custom URI
 scheme registered to a mobile application. The means by which the AS and the
 launched application communicate with each other and perform any
 of the required actions are out of scope for this specification.
@@ -2684,10 +2685,10 @@ following circumstances:
 When using the [`redirect` interaction finish method](#response-interact-finish),
 the AS signals to the client instance that interaction is
 complete and the request can be continued by directing the RO (in
-their browser) back to the client instance's redirect URL sent in [the callback request](#request-interact-callback-redirect).
+their browser) back to the client instance's redirect URI sent in [the callback request](#request-interact-callback-redirect).
 
 The AS secures this redirect by adding the hash and interaction
-reference as query parameters to the client instance's redirect URL.
+reference as query parameters to the client instance's redirect URI.
 
 
 hash
@@ -2699,10 +2700,10 @@ interact_ref
               generated for this interaction.
 
 
-The means of directing the RO to this URL are outside the scope
+The means of directing the RO to this URI are outside the scope
 of this specification, but common options include redirecting the
 RO from a web page and launching the system browser with the
-target URL. See {{security-redirect-status-codes}} for considerations on
+target URI. See {{security-redirect-status-codes}} for considerations on
 which HTTP status code to use when redirecting a request that
 potentially contains credentials.
 
@@ -2729,7 +2730,7 @@ reference value received here.
 When using the [`push` interaction finish method](#response-interact-finish),
 the AS signals to the client instance that interaction is
 complete and the request can be continued by sending an HTTP POST
-request to the client instance's callback URL sent in [the callback request](#request-interact-callback-push).
+request to the client instance's callback URI sent in [the callback request](#request-interact-callback-push).
 
 The entity message body is a JSON object consisting of the
 following two fields:
@@ -2769,7 +2770,7 @@ reference value received here.
 
 ### Calculating the interaction hash {#interaction-hash}
 
-The "hash" parameter in the request to the client instance's callback URL ties
+The "hash" parameter in the request to the client instance's callback URI ties
 the front channel response to an ongoing request by using values
 known only to the parties involved. This security mechanism allows the client instance to protect itself against
 several kinds of session fixation and injection attacks. The AS MUST
@@ -2782,7 +2783,7 @@ using a single newline (`\n`) character to separate them:
 * the "nonce" value sent by the client instance in the [interaction "finish" section of the initial request](#request-interact-finish)
 * the AS's nonce value from [the interaction finish response](#response-interact-finish)
 * the "interact_ref" returned from the AS as part of the [interaction finish method](#interaction-finish)
-* the grant endpoint URL the client instance used to make its [initial request](#request)
+* the grant endpoint URI the client instance used to make its [initial request](#request)
 
 There is no padding or whitespace before or after any of the lines,
 and no trailing newline character.
@@ -2847,7 +2848,7 @@ as well as a continuation access token to use during the requests.
 
 The continuation access token is initially bound to the same key and method the client instance used to make
 the initial request. As a consequence,
-when the client instance makes any calls to the continuation URL, the client instance MUST present
+when the client instance makes any calls to the continuation URI, the client instance MUST present
 the continuation access token as described in {{use-access-token}} and present
 proof of the client instance's key (or its most recent rotation)
 by signing the request as described in {{binding-keys}}.
@@ -2870,7 +2871,7 @@ Signature: sig1=...
 ~~~
 
 The AS MUST be able to tell from the client instance's request which specific ongoing request
-is being accessed, using a combination of the continuation URL,
+is being accessed, using a combination of the continuation URI,
 the provided continuation access token, and the client instance identified by the key signature.
 If the AS cannot determine a single active grant request to map the
 continuation request to, the AS MUST return an error.
@@ -2881,7 +2882,7 @@ modifying the initial request, and getting the current state of the request.
 
 All requests to the continuation API are protected by this bound continuation access token.
 For example, here the client instance makes a POST request to a stable continuation endpoint
-URL with the [interaction reference](#continue-after-interaction),
+URI with the [interaction reference](#continue-after-interaction),
 includes the access token, and signs with HTTP Message Signatures:
 
 ~~~
@@ -3300,7 +3301,7 @@ The AS SHOULD revoke all associated access tokens.
 
 If an access token response includes the `manage` parameter as
 described in {{response-token-single}}, the client instance MAY call
-this URL to manage the access token with any of the actions defined in
+this URI to manage the access token with any of the actions defined in
 the following sections: rotate and revoke. Other actions are undefined by this
 specification.
 
@@ -3340,7 +3341,7 @@ Digest: sha256=...
 ~~~
 
 The AS validates that the token presented is associated with the management
-URL, that the AS issued the token to the given client instance, and that
+URI, that the AS issued the token to the given client instance, and that
 the presented key is appropriate to the token.
 
 Note that in many cases, the access token will have expired for regular use. To facilitate
@@ -3352,16 +3353,16 @@ honor a rotation request for an access token that has been revoked or otherwise 
 
 If the token is validated and the key is appropriate for the
 request, the AS MUST invalidate the current access token associated
-with this URL, if possible. Note that stateless access tokens can make proactive
+with this URI, if possible. Note that stateless access tokens can make proactive
 revocation difficult within a system, see {{security-stateless-tokens}}.
 
 The AS responds with an HTTP 200 with a JSON body consisting of the rotated access token
 in the `access_token` field described in {{response-token-single}}. The value of the
 access token MUST NOT be the same as the current value of the access
 token used to access the management API. The response MUST include an
-access token management URL, and the value of this URL MAY be different
-from the URL used by the client instance to make the rotation call. The client instance
-MUST use this new URL to manage the rotated access token.
+access token management URI, and the value of this URI MAY be different
+from the URI used by the client instance to make the rotation call. The client instance
+MUST use this new URI to manage the rotated access token.
 
 The access rights in the `access` array for the rotated access token MUST
 be included in the response and MUST be the same
@@ -3435,7 +3436,7 @@ Though the AS MAY revoke an access token at any time for
 any reason, the token management function is specifically for the client instance's use.
 If the access token has already expired or has been revoked through other
 means, the AS SHOULD honor the revocation request to
-the token management URL as valid, since the end result is still the token
+the token management URI as valid, since the end result is still the token
 not being usable.
 
 
@@ -3536,7 +3537,7 @@ to be dereferencable by the client. These types of key references are an
 internal reference to the AS, such as an identifier of a record in a database.
 In other applications, it can be useful to use key references that are resolvable
 by both clients and ASs, which could be accomplished by e.g. a client publishing
-a public key at a URL. For interoperability, this method could later be described
+a public key at a URI. For interoperability, this method could later be described
 as an extension.
 
 
@@ -3700,7 +3701,7 @@ The message components of the signature MUST include the following:
 : the method used in the HTTP request
 
 @target-uri:
-: the full request URL of the HTTP request
+: the full request URI of the HTTP request
 
 content-digest or digest:
 : The Content-Digest or Digest header as defined in {{I-D.ietf-httpbis-digest-headers}}. When the
@@ -4539,7 +4540,7 @@ grant_request_endpoint (string)
           AS's grant request endpoint. The location MUST be a URL {{RFC3986}}
           with a scheme component that MUST be https, a host component, and optionally,
           port, path and query components and no fragment components. This URL MUST
-          match the URL the client instance used to make the discovery request.
+          match the URI the client instance used to make the discovery request.
 
 interaction_start_modes_supported (array of strings)
 : OPTIONAL. A list of the AS's interaction start methods. The values of this list correspond to the
@@ -4978,7 +4979,7 @@ is shown to be present during interaction, the AS can either determine this to b
 to the client instance through returned subject information that the current user has changed from
 what the client instance thought. This user information can also be used by the AS to streamline the
 interaction process when the user is present. For example, instead of having the user type in their
-account identifier during interaction at a redirected URL, the AS can immediately challenge the user
+account identifier during interaction at a redirected URI, the AS can immediately challenge the user
 for their account credentials. Alternatively, if an existing session is detected, the AS can
 determine that it matches the identifier provided by the client and subsequently skip an explicit
 authentication event by the resource owner.
@@ -5063,34 +5064,34 @@ instance that has self-asserted its own key and display information.
 ## Interception of Information in the Browser {#security-browser-interception}
 
 Most information passed through the web-browser is susceptible to interception and possible manipulation by
-elements within the browser such as scripts loaded within pages. Information in the URL is exposed
+elements within the browser such as scripts loaded within pages. Information in the URI is exposed
 through browser and server logs, and can also leak to other parties through HTTP `Referer` headers.
 
-GNAP's design limits the information passed directly through the browser, allowing for opaque URLs in most circumstances.
+GNAP's design limits the information passed directly through the browser, allowing for opaque URIs in most circumstances.
 For the redirect-based interaction finish mechanism, named query parameters are used to carry
 unguessable opaque values. For these, GNAP requires creation and validation of a cryptographic
-hash to protect the query parameters added to the URL and associate them with an ongoing grant
+hash to protect the query parameters added to the URI and associate them with an ongoing grant
 process. The client instance has to properly validate this hash to prevent an attacker from
 injecting an interaction reference intended for a different AS or client instance.
 
-Several interaction start mechanisms use URLs created by the AS and passed to the client instance.
-While these URLs are opaque to the client instance, it's possible for the AS to include parameters,
+Several interaction start mechanisms use URIs created by the AS and passed to the client instance.
+While these URIs are opaque to the client instance, it's possible for the AS to include parameters,
 paths, and other pieces of information that could leak security data or be manipulated by a party
 in the middle of the transaction.
 
-## Callback URL Manipulation {#security-callback-url}
+## Callback URI Manipulation {#security-callback-uri}
 
-The callback URL used in interaction finish mechanisms is defined by the client instance. This URL is
+The callback URI used in interaction finish mechanisms is defined by the client instance. This URI is
 opaque to the AS, but can contain information relevant to the client instance's operations. In
 particular, the client instance can include state information to allow the callback request to
 be associated with an ongoing grant request.
 
-Since this URL is exposed to the end user's browser, it is susceptible to both logging and manipulation
+Since this URI is exposed to the end user's browser, it is susceptible to both logging and manipulation
 in transit before the request is made to the client software. As such, a client instance should
-never put security-critical or private information into the callback URL in a cleartext form. For example,
-if the client software includes a post-redirect target URL in its callback URL to the AS, this target URL
+never put security-critical or private information into the callback URI in a cleartext form. For example,
+if the client software includes a post-redirect target URI in its callback URI to the AS, this target URI
 could be manipulated by an attacker, creating an open redirector at the client. Instead,
-a client instance can use an unguessable identifier into the URL that can then be used by the client
+a client instance can use an unguessable identifier into the URI that can then be used by the client
 software to look up the details of the pending request. Since this approach requires some form of statefulness
 by the client software during the redirection process, clients that are not capable of holding state
 through a redirect should not use redirect-based interaction mechanisms.
@@ -5116,11 +5117,11 @@ redirect the RO to the client instance's redirect URI. Due to the use of status 
 user agent now transmits the RO's credentials to the client instance. A malicious client instance
 can then use the obtained credentials to impersonate the RO at the AS.
 
-Redirection away from the initial URL in an interaction session could also leak information found in that
-initial URL through the HTTP `Referer` header field, which would be sent by the user agent to the redirect
+Redirection away from the initial URI in an interaction session could also leak information found in that
+initial URI through the HTTP `Referer` header field, which would be sent by the user agent to the redirect
 target. To avoid such leakage, a server can first redirect to an internal interstitial page without any identifying
-or sensitive information on the URL before processing the request. When the user agent is ultimately
-redirected from this page, no part of the original interaction URL will be found in the Referrer header.
+or sensitive information on the URI before processing the request. When the user agent is ultimately
+redirected from this page, no part of the original interaction URI will be found in the Referrer header.
 
 ## MTLS Message Integrity {#security-mtls}
 
@@ -5245,11 +5246,11 @@ allow an attacker to continue a pending transaction instead of the client instan
 software can make use of secure storage mechanisms, including hardware-based key and data
 storage, to prevent such exfiltration.
 
-Note that in GNAP, the client instance has to choose its interaction finish URL prior to making
-the first call to the AS. As such, the interaction finish URL will often have a unique identifier
+Note that in GNAP, the client instance has to choose its interaction finish URI prior to making
+the first call to the AS. As such, the interaction finish URI will often have a unique identifier
 for the ongoing request, allowing the client instance to access the correct portion of its
-storage. Since this URL is passed to other parties and often used through a browser,
-this URL should not contain any security-sensitive information that would be
+storage. Since this URI is passed to other parties and often used through a browser,
+this URI should not contain any security-sensitive information that would be
 valuable to an attacker, such as any token identifier, nonce, or user information. Instead, a
 cryptographically random value is suggested.
 
@@ -5275,7 +5276,7 @@ the client software's programmed behavior.
 ## Exhaustion of Random Value Space {#security-random-exhaustion}
 
 Several parts of the GNAP process make use of unguessable randomized values, such as nonces,
-tokens, and randomized URLs. Since these values are intended to be unique, a sufficiently
+tokens, and randomized URIs. Since these values are intended to be unique, a sufficiently
 powerful attacker could make a large number of requests to trigger generation of randomized
 values in an attempt to exhaust the random number generation space. While this attack is
 particularly applicable to the AS, client software could likewise be targeted by an attacker
@@ -5293,16 +5294,16 @@ reference can be limited to have lifetimes tied to their functional utility. Fin
 different category of artifact (nonce, token, reference, identifier, etc.) can be
 generated from a separate random pool of values instead of a single global value space.
 
-## Front-channel URLs {#security-front-channel}
+## Front-channel URIs {#security-front-channel}
 
-Some interaction methods in GNAP make use of URLs accessed through the end user's browser,
-known collectively as front-channel communication. These URLs are most notably present in
+Some interaction methods in GNAP make use of URIs accessed through the end user's browser,
+known collectively as front-channel communication. These URIs are most notably present in
 the `redirect` interaction `start` method and the `redirect` interaction `finish` mode. Since
-these URLs are intended to be given to the end user, the end user and their browser will be
-subjected to anything hosted at that URL including viruses, malware, and phishing scams. This
+these URIs are intended to be given to the end user, the end user and their browser will be
+subjected to anything hosted at that URI including viruses, malware, and phishing scams. This
 kind of risk is inherent to all redirection-based protocols, including GNAP when used in this way.
 
-When talking to a new or unknown AS, a client instance might want to check the URL from the
+When talking to a new or unknown AS, a client instance might want to check the URI from the
 interaction `start` against a blocklist and warn the end user before redirecting them. Many
 client instances will provide an interstitial message prior to redirection in order to prepare
 the user for control of the user experience being handed to the domain of the AS, and such a
@@ -5311,20 +5312,20 @@ a well-known service provider. Client software can also prevent this by managing
 of known and trusted AS's.
 
 Alternatively, an attacker could start a GNAP request with a known and trusted AS but include
-their own attack site URL as the callback for the redirect `finish` method. The attacker would then send
-the interaction `start` URL to the victim and get them to click on it. Since the URL is at
+their own attack site URI as the callback for the redirect `finish` method. The attacker would then send
+the interaction `start` URI to the victim and get them to click on it. Since the URI is at
 the known AS, the victim is inclined to do so. The victim will then be prompted to approve the
 attacker's application, and in most circumstances the victim will then be redirected to the
 attacker's site whether or not the user approved the request. The AS could mitigate this partially
-by using a blocklist and allowlist of interaction `finish` URLs during the client instance's
-initial request, but this approach can be  especially difficult if the URL has any dynamic portion
+by using a blocklist and allowlist of interaction `finish` URIs during the client instance's
+initial request, but this approach can be  especially difficult if the URI has any dynamic portion
 chosen by the client software. The AS can couple these checks with policies associated with the
 client instance that has been authenticated in the request. If the AS has any doubt about the
-interaction finish URL, the AS can provide an interstitial warning to the end user before
+interaction finish URI, the AS can provide an interstitial warning to the end user before
 processing the redirect.
 
 Ultimately, all protocols that use redirect-based communication through the user's browser are
-susceptible to having an attacker try to co-opt one or more of those URLs in order to harm the
+susceptible to having an attacker try to co-opt one or more of those URIs in order to harm the
 user. It is the responsibility of the AS and the client software to provide appropriate warnings,
 education, and mitigation to protect end users.
 
@@ -5440,10 +5441,10 @@ eventually self-consistent without placing an undue complexity burden on the cli
 
 ## Server-side Request Forgery (SSRF) {#security-ssrf}
 
-There are several places within GNAP where a URL can be given to a party causing it to fetch that
-URL during normal operation of the protocol. If an attacker is able to control the value of one of
-these URLs within the protocol, the attacker could cause the target system to execute a request on
-a URL that is within reach of the target system but normally unavailable to the attacker. For
+There are several places within GNAP where a URI can be given to a party causing it to fetch that
+URI during normal operation of the protocol. If an attacker is able to control the value of one of
+these URIs within the protocol, the attacker could cause the target system to execute a request on
+a URI that is within reach of the target system but normally unavailable to the attacker. For
 example, an attacker sending a URL of `http://localhost/admin` to cause the server to access an
 internal function on itself, or `https://192.168.0.14/` to call a service behind a firewall.
 Even if the attacker does not gain access to the results of the call, the side effects of such
@@ -5452,25 +5453,25 @@ otherwise unexposed endpoints.
 
 In GNAP, the most vulnerable place in the core protocol is the
 [push-based post-interaction finish method](#interaction-pushback), as the client instance is
-less trusted than the AS and can use this method to make the AS call an arbitrary URL. While it is
-not required by the protocol, the AS can fetch other client-instance provided URLs such as the logo
+less trusted than the AS and can use this method to make the AS call an arbitrary URI. While it is
+not required by the protocol, the AS can fetch other client-instance provided URIs such as the logo
 image or home page, for verification or privacy-preserving purposes before displaying them to the
 resource owner as part of a consent screen. Furthermore, extensions to GNAP that allow or require
-URL fetch could also be similarly susceptible, such as a system for having the AS fetch a client
-instance's keys from a presented URL instead of the client instance presenting the key by value.
+URI fetch could also be similarly susceptible, such as a system for having the AS fetch a client
+instance's keys from a presented URI instead of the client instance presenting the key by value.
 Such extensions are outside the scope of this specification, but any system deploying such an
 extension would need to be aware of this issue.
 
 To help mitigate this problem, similar approaches to protecting parties against
-[malicious redirects](#security-front-channel) can be used. For example, all URLs that can result
+[malicious redirects](#security-front-channel) can be used. For example, all URIs that can result
 in a direct request being made by a party in the protocol can be filtered through an allowlist or
 blocklist. For example, an AS that supports the `push` based interaction `finish` can compare the
-callback URL in the interaction request to a known URL for a pre-registered client instance, or it
-can ensure that the URL is not on a blocklist of sensitive URLs such as internal network addresses.
+callback URI in the interaction request to a known URI for a pre-registered client instance, or it
+can ensure that the URI is not on a blocklist of sensitive URLs such as internal network addresses.
 However, note that because these types of calls happen outside of the view of human interaction,
 it is not usually feasible to provide notification and warning to someone before the request
 needs to be executed, as is the case with redirection URLs. As such, SSRF is somewhat more difficult
-to manage at runtime, and systems should generally refuse to fetch a URL if unsure.
+to manage at runtime, and systems should generally refuse to fetch a URI if unsure.
 
 # Privacy Considerations {#privacy}
 
@@ -5555,6 +5556,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Made token management URL required on token rotation.
     - Added considerations on token rotation and self-contained tokens.
     - Added security considerations for SSRF.
+    - Clarified URI vs. URL.
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
@@ -5799,7 +5801,7 @@ Location: https://server.example.com/interact/4CF492MLVMSW9MKM
 
 
 
-The user's browser fetches the AS's interaction URL. The user logs
+The user's browser fetches the AS's interaction URI. The user logs
 in, is identified as the RO for the resource being requested, and
 approves the request. Since the AS has a callback parameter, the AS
 generates the interaction reference, calculates the hash, and
@@ -5822,7 +5824,7 @@ The client instance receives this request from the user's browser. The
 client instance ensures that this is the same user that was sent out by
 validating session information and retrieves the stored pending
 request. The client instance uses the values in this to validate the hash
-parameter. The client instance then calls the continuation URL and presents the
+parameter. The client instance then calls the continuation URI and presents the
 handle and interaction reference in the request body. The client instance signs
 the request as above.
 
@@ -5950,12 +5952,12 @@ Cache-Control: no-store
 
 
 The client instance saves the response and displays the user code visually
-on its screen along with the static device URL. The client instance also
-displays the short interaction URL as a QR code to be scanned.
+on its screen along with the static device URI. The client instance also
+displays the short interaction URI as a QR code to be scanned.
 
 If the user scans the code, they are taken to the interaction
 endpoint and the AS looks up the current pending request based on the
-incoming URL. If the user instead goes to the static page and enters
+incoming URI. If the user instead goes to the static page and enters
 the code manually, the AS looks up the current pending request based
 on the value of the user code. In both cases, the user logs in, is
 identified as the RO for the resource being requested, and approves
@@ -5963,7 +5965,7 @@ the request. Once the request has been approved, the AS displays to
 the user a message to return to their device.
 
 Meanwhile, the client instance periodically polls the AS every 60 seconds at
-the continuation URL. The client instance signs the request using the
+the continuation URI. The client instance signs the request using the
 same key and method that it did in the first request.
 
 ~~~
@@ -5999,9 +6001,9 @@ Cache-Control: no-store
 ~~~
 
 
-Note that the continuation URL and access token have been rotated since they were
+Note that the continuation URI and access token have been rotated since they were
 used by the client instance to make this call. The client instance polls the
-continuation URL after a 60 second timeout using this new information.
+continuation URI after a 60 second timeout using this new information.
 
 ~~~
 POST /continue/ATWHO4Q1WV HTTP/1.1
@@ -6014,7 +6016,7 @@ Digest: sha256=...
 
 
 
-The AS retrieves the pending request based on the URL and access token,
+The AS retrieves the pending request based on the URI and access token,
 determines that it has been approved, and issues an access
 token for the client to use at the RS.
 
@@ -6175,7 +6177,7 @@ example, the AS has an application that it can push notifications in
 to for the specified account.
 
 Meanwhile, the client instance periodically polls the AS every 60 seconds at
-the continuation URL.
+the continuation URI.
 
 ~~~
 POST /continue HTTP/1.1
@@ -6210,7 +6212,7 @@ Cache-Control: no-store
 
 Note that the continuation handle has been rotated since it was
 used by the client instance to make this call. The client instance polls the
-continuation URL after a 60 second timeout using the new handle.
+continuation URI after a 60 second timeout using the new handle.
 
 ~~~
 POST /continue HTTP/1.1
@@ -6310,7 +6312,7 @@ uses for authentication, the scopes represent resources that the
 client instance is requesting, and the `redirect_uri` and `state` value are
 pre-combined into a `finish` URI that can be unique per request. The
 client instance additionally creates a nonce to protect the callback, separate
-from the state parameter that it has added to its return URL.
+from the state parameter that it has added to its return URI.
 
 From here, the protocol continues as above.
 
