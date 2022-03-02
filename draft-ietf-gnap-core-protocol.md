@@ -1350,7 +1350,7 @@ to present to the RO during any interactive sequences.
 ~~~
 "display": {
     "name": "My Client Display Name",
-    "uri": "https://example.net/client", 
+    "uri": "https://example.net/client",
     "logo_uri": "data:image/png;base64,Eeww...="
 }
 ~~~
@@ -1402,7 +1402,7 @@ or by reference.
 
 `assertions` (array of objects)
 : An array containing assertions as objects each containing the assertion
-    format and the assertion value as the JSON string serialization of the assertion. 
+    format and the assertion value as the JSON string serialization of the assertion.
     OPTIONAL.
 
 ~~~
@@ -1412,7 +1412,7 @@ or by reference.
     "id": "J2G8G8O4AZ"
   } ],
   "assertions": [ {
-    "format": "id_token", 
+    "format": "id_token",
     "value": "eyj..."
   } ]
 }
@@ -2426,8 +2426,8 @@ This field is an object with the following OPTIONAL properties.
 
 `assertions` (array of objects):
 : An array containing assertions as objects each containing the assertion
-    format and the assertion value as the JSON string serialization of the assertion. 
-    Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. 
+    format and the assertion value as the JSON string serialization of the assertion.
+    Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion.
     Additional assertion formats are defined by [a registry TBD](#IANA).
     REQUIRED if returning assertions.
 
@@ -3664,7 +3664,7 @@ as an extension.
 
 ### Key Protection {#key-protection}
 
-The security of GNAP relies on the cryptographic security of the keys themselves. 
+The security of GNAP relies on the cryptographic security of the keys themselves.
 When symmetric keys are used in GNAP, a key management system or secure key derivation mechanism MUST be used to supply the keys. Symmetric keys MUST NOT be a human memorable password or a value derived from one. Symmetric keys MUST NOT be passed by value from the client instance to the AS.
 
 ## Presenting Access Tokens {#use-access-token}
