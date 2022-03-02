@@ -1550,6 +1550,10 @@ This specification defines the following interaction start modes as an array of 
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a stable URI. {{request-interact-usercode}}
 
+"user_code_uri"
+: Indicates that the client instance can communicate a human-readable short
+    code to the end user for use with a short, dynamic URI. {{request-interact-usercodeuri}}
+
 #### Redirect to an Arbitrary URI {#request-interact-redirect}
 
 If the client instance is capable of directing the end user to a URI defined
@@ -1603,7 +1607,10 @@ If the client instance is capable of displaying or otherwise communicating
 a short, human-entered code to the RO, the client instance indicates this
 by including `user_code` in the array under the `start` key. This
 code is to be entered at a static URI that does not change at
-runtime. While this URI is generally hosted at the AS, the client
+runtime. The client instance has no reasonable means to communicate a dynamic
+URI to the RO, and so this URI is usually communicated out of band to the
+RO through documentation or other messaging outside of GNAP.
+While this URI is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
 or relationship to the AS grant URI.
 
@@ -1614,10 +1621,31 @@ or relationship to the AS grant URI.
 ~~~
 
 If this interaction mode is supported for this client instance and
-request, the AS returns a user code and interaction URI as specified
-in {{response-interact-usercode}}. The client instances manages this interaction
-method as described in {{interaction-usercode}}
+request, the AS returns a user code as specified
+in {{response-interact-usercode}}. The client instance manages this interaction
+method as described in {{interaction-usercode}}.
 
+#### Display a Short User Code and URI {#request-interact-usercodeuri}
+
+If the client instance is capable of displaying or otherwise communicating
+a short, human-entered code along with a short, human-entered URI to the RO,
+the client instance indicates this
+by including `user_code_uri` in the array under the `start` key. This
+code is to be entered at the dynamic URL given in the response.
+While this URL is generally hosted at the AS, the client
+instance can make no assumptions about its contents, composition,
+or relationship to the AS grant URL.
+
+~~~
+"interact": {
+    "start": ["user_code_uri"]
+}
+~~~
+
+If this interaction mode is supported for this client instance and
+request, the AS returns a user code and interaction URL as specified
+in {{response-interact-usercodeuri}}. The client instance manages this interaction
+method as described in {{interaction-usercodeuri}}.
 
 ### Finish Interaction Modes {#request-interact-finish}
 
@@ -2165,6 +2193,9 @@ finish (string)
 user_code (object)
 : Display a short user code. {{response-interact-usercode}}
 
+user_code_uri (object)
+: Display a short user code and URL. {{response-interact-usercodeuri}}
+
 Additional interaction mode responses can be defined in [a registry TBD](#IANA).
 
 The AS MUST NOT respond with any interaction mode that the
@@ -2241,44 +2272,89 @@ object that contains the following members.
 
 code (string)
 : REQUIRED. A unique short code that the user
-              can type into an authorization server. This string MUST be
+              can type into a web page. This string MUST be
               case-insensitive, MUST consist of only easily typeable
               characters (such as letters or numbers). The time in which this
               code will be accepted SHOULD be short lived, such as several
               minutes. It is RECOMMENDED that this code be no more than eight
               characters in length.
 
-url (string)
-: RECOMMENDED. The interaction URL that the client instance
-              will direct the RO to. This URL MUST be stable such
-              that client instances can be statically configured with it.
-
-
 ~~~
 "interact": {
     "user_code": {
         "code": "A1BC-3DFF",
-        "url": "https://srv.ex/device"
     }
 }
 ~~~
 
 The client instance MUST communicate the "code" to the end user in some
 fashion, such as displaying it on a screen or reading it out
-audibly.
+audibly. This code is used by the interaction component of the AS as a means
+of identifying the pending grant request and does not function as an
+authentication factor for the RO.
 
-The client instance SHOULD also communicate the URI if possible
-to facilitate user interaction, but since the URI should be stable,
-the client instance should be able to safely decide to not display this value.
+The URI that the end user is intended to enter the code into MUST be stable,
+since the client instance is expected to have no means of communicating a
+dynamic URI to the end user at runtime.
+
 As this interaction mode is designed to facilitate interaction
 via a secondary device, it is not expected that the client instance redirect
-the end user to the URI given here at runtime. Consequently, the URI needs to
-be stable enough that a client instance could be statically configured with it, perhaps
-referring the end user to the URI via documentation instead of through an
-interactive means. If the client instance is capable of communicating an
-arbitrary URI to the end user, such as through a scannable code, the
+the end user to the URL given here at runtime.
+If the client instance is capable of communicating an
+short arbitrary URI to the end user for use with the user code, the client
+instance can instead use the ["user_code_uri"](#request-interact-usercodeuri) method instead.
+If the client instance is capable of communicating a long arbitrary URI to the end user,
+such as through a scannable code, the
 client instance can use the ["redirect"](#request-interact-redirect) mode
 for this purpose instead of or in addition to the user code mode.
+
+See details of the interaction in {{interaction-usercode}}.
+
+### Display of a Short User Code and URI {#response-interact-usercodeuri}
+
+If the client instance indicates that it can
+[display a short user-typeable code](#request-interact-usercode)
+and the AS supports this mode for the client instance's
+request, the AS responds with a "user_code" field. This field is an
+object that contains the following members.
+
+
+code (string)
+: REQUIRED. A unique short code that the end user
+              can type into a provided URI. This string MUST be
+              case-insensitive, MUST consist of only easily typeable
+              characters (such as letters or numbers). The time in which this
+              code will be accepted SHOULD be short lived, such as several
+              minutes. It is RECOMMENDED that this code be no more than eight
+              characters in length.
+
+uri (string)
+: RECOMMENDED. The interaction URI that the client instance
+              will direct the RO to. This URI MUST be short enough to be
+              communicated to the end user. It is RECOMMENDED that this URI
+              be short enough for an end user to type in manually. The URI
+              MUST NOT contain the `code` value.
+
+
+~~~
+"interact": {
+    "user_code_uri": {
+        "code": "A1BC-3DFF",
+        "uri": "https://srv.ex/device"
+    }
+}
+~~~
+
+The client instance MUST communicate the "code" to the end user in some
+fashion, such as displaying it on a screen or reading it out
+audibly. This code is used by the interaction component of the AS as a means
+of identifying the pending grant request and does not function as an
+authentication factor for the RO.
+
+The client instance MUST also communicate the URI to the end user. Since it is expected
+that the end user will continue interaction on a secondary device,
+the URI needs to be short enough to allow the end user to type or copy it to a secondary
+device without mistakes.
 
 The URI returned is a function of the AS, but the URI itself MAY be completely
 distinct from the URI the client instance uses to [request access](#request), allowing an
@@ -2288,8 +2364,6 @@ the given URI, then the means for the interaction functionality to communicate
 with the rest of the AS are out of scope for this specification.
 
 See details of the interaction in {{interaction-usercode}}.
-
-\[\[ [See issue #72](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/72) \]\]
 
 ### Interaction Finish {#response-interact-finish}
 
@@ -2583,9 +2657,8 @@ the client instance has to communicate the redirection URI to the end user.
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
-If the URI is hosted by the AS,
-the AS MUST determine the grant request being referenced from the URI
-value itself. If the URI cannot be associated with a currently active
+The URI value is used to identify the grant request being authorized.
+If the URI cannot be associated with a currently active
 request, the AS MUST display an error to the RO and MUST NOT attempt
 to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
 If the URI is not hosted by the AS directly, the means of communication between
@@ -2598,20 +2671,22 @@ the URI MAY be opened on a separate device from the client instance
 itself. The URI MUST be accessible from an HTTP GET
 request and MUST be protected by HTTPS or equivalent means.
 
-### Interaction at the User Code URI {#interaction-usercode}
+### Interaction at the Static User Code URI {#interaction-usercode}
 
 When the end user is directed to enter a short code through the ["user_code"](#response-interact-usercode)
 mode, the client instance communicates the user code to the end user and
 directs the end user to enter that code at an associated URI.
-This mode is used when the client instance is not able to facilitate launching
+This mode is used when the client instance is not able to communicate or facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
-communicated in the response from the AS, but the client instance
-communicates that URI to the end user. As a consequence, these URIs SHOULD be short.
+in the client software's documentation. As a consequence, these URIs SHOULD be short.
+The user code URI MUST be reachable from the end user's browser, though
+the URI is usually be opened on a separate device from the client instance
+itself. Since it is designed to be typed in, the URI SHOULD be accessible from an HTTP GET
+request and MUST be protected by HTTPS or equivalent means.
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
-If the URI is hosted by the AS,
-the AS MUST determine the grant request being referenced from the user code.
+The value of the user code is used to identify the grant request being authorized.
 If the user code cannot be associated with a currently active
 request, the AS MUST display an error to the RO and MUST NOT attempt
 to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
@@ -2626,12 +2701,37 @@ enter attempts, the interaction component SHOULD display an error to the user an
 MAY take additional actions such as slowing down the input interactions.
 The user should be warned as such an error state is approached, if possible.
 
-The client instance MUST NOT modify the URI when launching it,
+### Interaction at a Dynamic User Code URI {#interaction-usercodeuri}
+
+When the end user is directed to enter a short code through the ["user_code_uri"](#response-interact-usercodeuri)
+mode, the client instance communicates the user code and associated URI to the end user and
+directs the end user to enter that code at the URI.
+This mode is used when the client instance is not able to facilitate launching
+an arbitrary URI but can communicate arbitrary values like URIs. As a consequence, these URIs
+SHOULD be short.
+The client instance MUST NOT modify the URI when communicating it to the end user;
 in particular the client instance MUST NOT add any parameters to the URI.
 The user code URI MUST be reachable from the end user's browser, though
 the URI is usually be opened on a separate device from the client instance
-itself. The URI MUST be accessible from an HTTP GET
+itself. Since it is designed to be typed in, the URI SHOULD be accessible from an HTTP GET
 request and MUST be protected by HTTPS or equivalent means.
+
+In many cases, the URI indicates a web page hosted at the AS, allowing the
+AS to authenticate the end user as the RO and interactively provide consent.
+The value of the user code is used to identify the grant request being authorized.
+If the user code cannot be associated with a currently active
+request, the AS MUST display an error to the RO and MUST NOT attempt
+to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
+If the interaction component at the user code URI is not hosted by the AS directly, the means of communication between
+the AS and this URI, including communication of the user code itself, are out of scope for this specification.
+
+When the RO enters this code at the given URI,
+the AS MUST uniquely identify the pending request that the code was associated
+with. If the AS does not recognize the entered code, the interaction component MUST
+display an error to the user. If the AS detects too many unrecognized code
+enter attempts, the interaction component SHOULD display an error to the user and
+MAY take additional actions such as slowing down the input interactions.
+The user should be warned as such an error state is approached, if possible.
 
 ### Interaction through an Application URI {#interaction-app}
 
@@ -5555,6 +5655,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Added security considerations for SSRF.
     - Clarified default wait times for continuation requests (including polling).
     - Clarified URI vs. URL.
+    - Added "user_code_uri" mode, removed "uri" from "user_code" mode.
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
@@ -5933,8 +6034,7 @@ Cache-Control: no-store
     "interact": {
         "redirect": "https://srv.ex/MXKHQ",
         "user_code": {
-            "code": "A1BC-3DFF",
-            "url": "https://srv.ex/device"
+            "code": "A1BC-3DFF"
         }
     },
     "continue": {
