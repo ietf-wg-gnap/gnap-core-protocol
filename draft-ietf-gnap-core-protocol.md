@@ -1200,7 +1200,6 @@ contain the following fields (or additional fields defined in
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
     assertion formats are defined by [a registry TBD](#IANA).
     REQUIRED if assertions are requested.
-    \[\[ [See issue #41](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/41) \]\]
 
 ~~~
 "subject": {
@@ -2177,8 +2176,6 @@ If the AS has split the access token response, the response MUST include the `sp
 Each access token MAY be bound to different keys with different proofing mechanisms.
 
 The `manage` URI MUST NOT contain the access token `value`.
-
-\[\[ [See issue #70](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/70) \]\]
 
 ## Interaction Modes {#response-interact}
 
@@ -3364,8 +3361,6 @@ nonce and callback are different from the initial request. Since the original ca
 already used in the initial exchange, and the callback is intended for one-time-use, a new one
 needs to be included in order to use the callback again.
 
-\[\[ [See issue #97](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/97) \]\]
-
 ~~~
 PATCH /continue HTTP/1.1
 Host: server.example.com
@@ -4394,8 +4389,6 @@ LW2h2dz1Pn2eDnbyvgB0Ugae0BoZB4f69fKWj8Z9wvTIjk1LZJN1PcL7_zT8Lrlic9a\
 PyzT7Q9ovkd1s-4whE7TrnGUzFc5mgWUn_gsOpsP5mIIljoEEv-FqOW2RyNYulOZl0Q\
 8EnnDHV_vPzrHlUarbGg4YffgtwkQhdK72-JOxYQ
 ~~~
-
-\[\[ [See issue #109](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/109) \]\]
 
 When the verifier receives an attached JWS request, it MUST parse and
 validate the JWS object. The signature MUST be validated against the
