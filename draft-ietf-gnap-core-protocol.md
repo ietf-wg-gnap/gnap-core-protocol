@@ -44,6 +44,7 @@ normative:
         -
           ins: P. Saint-Andre
     RFC2119:
+    RFC2397:
     RFC3986:
     RFC4648:
     RFC5646:
@@ -1344,18 +1345,15 @@ uri (string)
 : User-facing web page of the client software
 
 logo_uri (string)
-: Display image to represent the client
-            software
-
+: Display image to represent the client software. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype.
 
 ~~~
 "display": {
     "name": "My Client Display Name",
-    "uri": "https://example.net/client"
+    "uri": "https://example.net/client", 
+    "logo_uri": "data:image/png;base64,Eeww...="
 }
 ~~~
-
-\[\[ [See issue #48](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/48) \]\]
 
 Additional display fields are defined by [a registry TBD](#IANA).
 
