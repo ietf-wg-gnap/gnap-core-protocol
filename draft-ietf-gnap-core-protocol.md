@@ -1724,9 +1724,8 @@ Requests to the callback URI MUST be processed by the client instance as describ
 
 Since the incoming request to the callback URI is from the RO's
 browser, this method is usually used when the RO and end user are the
-same entity. As such, the client instance MUST ensure the end user is present on the request to
-prevent substitution attacks.
-
+same entity. See {{security-sessions}} for considerations on ensuring the incoming HTTP message
+matches the expected context of the request.
 See {{security-front-channel}} for more considerations regarding the use of front-channel
 communication techniques such as this.
 
@@ -1750,8 +1749,9 @@ Requests to the callback URI MUST be processed by the client instance as describ
 {{interaction-pushback}}.
 
 Since the incoming request to the callback URI is from the AS and
-not from the RO's browser, the client instance MUST NOT require the end user to
-be present on the incoming HTTP request.
+not from the RO's browser, this request is not expected to have any shared
+session information from the start method. See {{security-sessions}} and {{security-polling}} for
+more considerations regarding the use of back-channel and polling mechanisms like this.
 
 ### Hints {#request-interact-hint}
 
@@ -5326,6 +5326,64 @@ method against the deployment capabilities of the client software and its
 environment. Due to the increased security, an interaction finish method should
 be employed whenever possible.
 
+## Session Management for Interaction Finish Methods {#security-sessions}
+
+When using an interaction finish method such as `redirect` or `push`, the client instance receives
+an unsolicited HTTP request from an unknown party. The client
+instance needs to be able to successfully associate this incoming request with a specific pending
+grant request being managed by the client instance. If the client instance is not careful and precise about
+this, an attacker could associate their own session at the client instance with a stolen interaction
+response. The means of preventing this varies by the type of client software and interaction methods in use.
+Some common patterns are enumerated here.
+
+If the end user interacts with the client instance through a web browser and the `redirect`
+interaction finish method is used, the client instance can ensure that the incoming HTTP request
+from the finish method is presented in the same browser session that the grant request was
+started in. This technique is particularly useful when the `redirect` interaction start mode
+is used as well, since in many cases the end user will follow the redirection with the
+same browser that they are using to interact with the client instance.
+The client instance can then store the relevant pending grant information in the
+session, either in the browser storage directly (such as with a single-page application) or
+in an associated session store on a back-end server. In both cases, when the incoming request
+reaches the client instance, the session information can be used to ensure that the same party
+that started the request is present as the request finishes.
+
+Ensuring that the same party that started a request is present when that request finishes can
+prevent phishing attacks, where an attacker starts a request at an honest client instance and
+tricks an honest RO into authorizing it. For example, if an honest end user (that also acts as the
+RO) wants to start a request through a client instance controlled by the attacker, the attacker can
+start a request at an honest client instance and then redirect the honest end user to the
+interaction URI from the attackers session with the honest client instance. If the honest end user
+then fails to realize that it is not authorizing the attacker-controlled client instance (with which
+it started its request) but the honest client instance when interacting with the AS, the attacker's
+session with the honest client instance would be authorized. This would give the attacker access to
+the honest end user's resources that the honest client instance is authorized to access. However,
+if after the interaction the AS redirects the honest end user back to the client instance whose
+grant request the end user just authorized, the honest end user is redirected to the honest client
+instance. The honest client instance can then detect that it is not the party that started the
+request that is present, since the request at the honest client instance was started by the
+attacker, which can prevent the attack. This is related to {{security-impersonation}}, because again
+the attack can be prevented by the AS informing the user as much as possible about the client
+instance that is to be authorized.
+
+If the end user does not interact with the client instance through a web browser or the interaction
+start method does not use the same browser or device that the end user is interacting through
+(such as the launch of a second device through a scannable code or presentation of a user code) the
+client instance will not be able to strongly associate an incoming HTTP request with an established
+session with the end user. This is also true when the `push` interaction finish method is used,
+since the HTTP request comes directly from the interaction component of the AS. In these
+circumstances, the client instance can at least ensure that the incoming HTTP
+request can be uniquely associated with an ongoing grant request by making the interaction finish
+callback URI unique for the grant when making the [interaction request](#request-interact-finish).
+Mobile applications and other client instances that generally serve only a single end user at a time
+can use this unique incoming URL to differentiate between a legitimate incoming request and
+an attacker's stolen request.
+
+If the client instance does not have the ability to use an interaction finish method, it can
+use polling to continue the request. The tradeoffs of this approach are discussed in
+{{security-polling}}, and if possible, an explicit interaction finish method should be
+used instead.
+
 ## Storage of Information During Interaction and Continuation {#security-client-storage}
 
 When starting an interactive grant request, a client application has a number of protocol elements
@@ -5653,6 +5711,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Made token management URL required on token rotation.
     - Added considerations on token rotation and self-contained tokens.
     - Added security considerations for SSRF.
+    - Moved normative requirements about end user presence to security considerations.
     - Clarified default wait times for continuation requests (including polling).
     - Clarified URI vs. URL.
     - Added "user_code_uri" mode, removed "uri" from "user_code" mode.
