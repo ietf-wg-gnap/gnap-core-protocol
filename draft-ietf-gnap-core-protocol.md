@@ -250,7 +250,7 @@ RS and a client instance from different perspectives, and it fulfills these
 roles separately as far as the overall protocol is concerned.
 
 A single role need not be deployed as a monolithic service. For example,
-A client instance could have components that are installed on the end user's device as
+a client instance could have components that are installed on the end user's device as
 well as a back-end system that it communicates with. If both of these
 components participate in the delegation protocol, they are both considered
 part of the client instance. If there are several copies of the client software
@@ -298,7 +298,7 @@ Privilege
 Protected Resource
 : protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid access token is provided.
 
-    Note: to avoid complex sentences, the specification document may simply refer to resource instead of protected resource.
+    Note: to avoid complex sentences, the specification document may simply refer to "resource" instead of "protected resource".
 
 Right
 : ability given to a subject to perform a given operation on a resource under the control of an RS.
@@ -354,7 +354,7 @@ all steps involving the RS below do not apply.
 In some circumstances,
 the information needed at a given stage is communicated out of band
 or is preconfigured between the components or entities performing
-the roles. For example, one entity can fulfil multiple roles, and so
+the roles. For example, one entity can fulfill multiple roles, and so
 explicit communication between the roles is not necessary within the
 protocol flow. Additionally some components may not be involved
 in all use cases. For example, a client instance could be calling the
@@ -628,9 +628,9 @@ the AS.
     continuation information with an ongoing request that will be referenced in (4), (6), (8), and (10).
 
 3. The client instance stores the continuation information from (2) for use in (8) and (10). The client instance
-    then [communicates the code to the user](#interaction-redirect) given by the AS in (2).
+    then [communicates the code to the user](#interaction-usercode) given by the AS in (2).
 
-4. The user's directs their browser to the user code URI. This URI is stable and
+4. The users directs their browser to the user code URI. This URI is stable and
     can be communicated via the client software's documentation, the AS documentation, or
     the client software itself. Since it is assumed that the RO will interact
     with the AS through a secondary device, the client instance does not provide a mechanism to
@@ -783,8 +783,8 @@ Since there is no explicit RO, the client instance does not interact with an RO.
 1. The client instance [requests access to the resource](#request). The client instance does not
     send any interaction modes to the server.
 
-2. The AS determines that the request is been authorized,
-    the AS grants access to the information
+2. The AS determines that the request has been authorized,
+    the AS grants access to the resource
     in the form of [access tokens](#response-token) to the client instance.
     Note that [direct subject information](#response-subject) is not
     generally applicable in this use case, as there is no user involved.
@@ -842,7 +842,7 @@ expired access token at the AS using the token's management URI.
 
 5. Time passes and the client instance uses the access token to call the RS again.
 
-6. The RS validates the access token and determines that the access token is expired
+6. The RS validates the access token and determines that the access token is expired.
     The RS responds to the client instance with an error.
 
 7. The client instance calls the token management URI returned in (2) to
@@ -918,7 +918,7 @@ the abstract as functions of the AS here.
 
 # Requesting Access {#request}
 
-To start a request, the client instance sends [JSON](#RFC8259) document with an object as its root. Each
+To start a request, the client instance sends a [JSON](#RFC8259) document with an object as its root. Each
 member of the request object represents a different aspect of the
 client instance's request. Each field is described in detail in a section below.
 
@@ -940,11 +940,11 @@ user (object / string)
     by interacting with the end user to determine their status as the RO. {{request-user}}
 
 interact (object)
-: Describes the modes that the client instance has for allowing the RO to interact with the
+: Describes the modes that the client instance supports for allowing the RO to interact with the
     AS and modes for the client instance to receive updates when interaction is complete. {{request-interact}}
 
 Additional members of this request object can be defined by extensions to this protocol
-as described in {{request-extending}}
+as described in {{request-extending}}.
 
 A non-normative example of a grant request is below:
 
@@ -1312,7 +1312,7 @@ If the client instance has an instance identifier that the AS can use to determi
 appropriate key information, the client instance can send this instance
 identifier as a direct reference value in lieu of the `client` object.
 The instance identifier MAY be assigned to a client instance at runtime
-through the {{response-dynamic-handles}} or MAY be obtained in another fashion,
+through a grant response ({{response-dynamic-handles}}) or MAY be obtained in another fashion,
 such as a static registration process at the AS.
 
 ~~~
@@ -1802,7 +1802,7 @@ the values or behavior of other request and response objects.
 # Grant Response {#response}
 
 In response to a client instance's request, the AS responds with a JSON object
-as the HTTP entity body. Each possible field is detailed in the sections below
+as the HTTP entity body. Each possible field is detailed in the sections below.
 
 
 continue (object)
