@@ -45,6 +45,7 @@ normative:
           ins: P. Saint-Andre
     RFC2119:
     RFC3986:
+    RFC4648:
     RFC5646:
     RFC7231:
     RFC7234:
@@ -358,6 +359,12 @@ protocol flow. Additionally some components may not be involved
 in all use cases. For example, a client instance could be calling the
 AS just to get direct user information and have no need to get
 an access token to call an RS.
+
+### Overall Protocol Sequence {#sequence-overall}
+
+The following diagram provides a general overview of GNAP, including many
+different optional phases and connections. The diagrams in the following sections
+provide views of GNAP under more specific circumstances.
 
 ~~~
     +------------+         +------------+
@@ -971,11 +978,11 @@ A non-normative example of a grant request is below:
       "key": {
         "proof": "httpsig",
         "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeL...."
+          "kty": "RSA",
+          "e": "AQAB",
+          "kid": "xyz-1",
+          "alg": "RS256",
+          "n": "kOB5rR4Jv0GMeL...."
         }
       }
     },
@@ -1251,11 +1258,11 @@ display (object)
     "key": {
         "proof": "httpsig",
         "jwk": {
-                    "kty": "RSA",
-                    "e": "AQAB",
-                    "kid": "xyz-1",
-                    "alg": "RS256",
-                    "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8..."
+            "kty": "RSA",
+            "e": "AQAB",
+            "kid": "xyz-1",
+            "alg": "RS256",
+            "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8..."
         },
         "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
     },
@@ -1484,7 +1491,7 @@ There is no preference order specified in this request. An AS MAY
 [respond to any, all, or none of the presented interaction modes](#response-interact) in a request, depending on
 its capabilities and what is allowed to fulfill the request.
 
-start (list of strings/objects)
+start (array of strings/objects)
 : Indicates how the client instance can start an interaction.
 
 finish (object)
@@ -1528,7 +1535,7 @@ that interaction is required, then the AS SHOULD return an
 error since the client instance will be unable to complete the
 request without authorization.
 
-The AS SHOULD apply suitable timeouts to any interaction mechanisms
+The AS SHOULD handle any interact request as a one-time-use mechanism and SHOULD apply suitable timeouts to any interaction mechanisms
 provided, including user codes and redirection URIs. The client instance SHOULD
 apply suitable timeouts to any callback URIs.
 
@@ -2135,7 +2142,7 @@ If the AS has split the access token response, the response MUST include the `sp
 
 Each access token MAY be bound to different keys with different proofing mechanisms.
 
-If [token management](#token-management) is allowed, each access token SHOULD have different `manage` URIs.
+The `manage` URI MUST NOT contain the access token `value`.
 
 \[\[ [See issue #70](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/70) \]\]
 
@@ -2429,9 +2436,33 @@ If the AS determines that the request cannot be issued for any
 reason, it responds to the client instance with an error message.
 
 
-error (string)
-: The error code.
+"error" (string)
+:   REQUIRED.  A single ASCII error code from the
+    following, with additional values available in [a registry TBD](#IANA):
 
+    "invalid_request":
+    :     The request is missing a required parameter, includes an
+          invalid parameter value or is otherwise malformed.
+
+    "invalid_client":
+    :     The request was made from a client that was not recognized
+          or allowed by the AS, or the client's signature validation failed.
+
+    "user_denied":
+    : The RO denied the request.
+
+    "too_fast":
+    : The client instance did not respect the timeout in the wait response.
+
+    "unknown_request":
+    : The request referenced an unknown ongoing access request.
+
+    "request_denied":
+    : The request was denied for an unspecified reason.
+
+"error_description" (string)
+:   OPTIONAL. A human-readable string description of the error intended for the
+    developer of the client.
 
 ~~~
 {
@@ -2440,22 +2471,6 @@ error (string)
 
 }
 ~~~
-
-
-
-The error code is one of the following, with additional values
-available in [a registry TBD](#IANA):
-
-
-user_denied
-: The RO denied the request.
-
-too_fast
-: The client instance did not respect the timeout in the
-            wait response.
-
-unknown_request
-: The request referenced an unknown ongoing access request.
 
 \[\[ [See issue #79](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/79) \]\]
 
@@ -2791,7 +2806,7 @@ request, the algorithm defaults to "sha3".
 
 The "sha3" hash method consists of hashing the input string
 with the 512-bit SHA3 algorithm. The byte array is then encoded
-using URL Safe Base64 with no padding. The resulting string is the
+using URL Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
 hash value.
 
 ~~~
@@ -2805,7 +2820,7 @@ p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM\
 
 The "sha2" hash method consists of hashing the input string
 with the 512-bit SHA2 algorithm. The byte array is then encoded
-using URL Safe Base64 with no padding. The resulting string is the
+using URL Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
 hash value.
 
 ~~~
@@ -3287,7 +3302,7 @@ The AS SHOULD revoke all associated access tokens.
 If an access token response includes the `manage` parameter as
 described in {{response-token-single}}, the client instance MAY call
 this URI to manage the access token with any of the actions defined in
-the following sections. Other actions are undefined by this
+the following sections: rotate and revoke. Other actions are undefined by this
 specification.
 
 The access token being managed acts as the access element for its own
@@ -3728,8 +3743,8 @@ NOTE: '\' line wrapping per RFC 8792
         }
     },
     "client": {
-      "proof": "httpsig",
       "key": {
+        "proof": "httpsig",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
@@ -3810,8 +3825,8 @@ Signature: sig1=:SatKrAh2qNxbDBY6H3XUtpWn07aSrukpi3202L4DIPLLGgKdSu\
         }
     },
     "client": {
-      "proof": "httpsig",
       "key": {
+        "proof": "httpsig",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
@@ -3887,8 +3902,8 @@ Client-Cert: \
         }
     },
     "client": {
-      "proof": "jws",
       "key": {
+        "proof": "mtls",
         "cert": "MIIC6jCCAdKgAwIBAgIGAXjw74xPMA0GCSqGSIb3DQEBCwUAMD\
   YxNDAyBgNVBAMMK05JWU15QmpzRGp5QkM5UDUzN0Q2SVR6a3BEOE50UmppOXlhcEV\
   6QzY2bVEwHhcNMjEwNDIwMjAxODU0WhcNMjIwMjE0MjAxODU0WjA2MTQwMgYDVQQD\
@@ -4006,8 +4021,8 @@ NOTE: '\' line wrapping per RFC 8792
         }
     },
     "client": {
-      "proof": "jwsd",
       "key": {
+        "proof": "jwsd",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
@@ -4070,8 +4085,8 @@ Detached-JWS: eyJhbGciOiJSUzI1NiIsImNyZWF0ZWQiOjE2MTg4ODQ0NzUsImh0b\
         }
     },
     "client": {
-      "proof": "jwsd",
       "key": {
+        "proof": "jwsd",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
@@ -4175,8 +4190,8 @@ NOTE: '\' line wrapping per RFC 8792
         }
     },
     "client": {
-      "proof": "jws",
       "key": {
+        "proof": "jws",
         "jwk": {
             "kid": "gnap-rsa",
             "kty": "RSA",
@@ -5541,6 +5556,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Made token management URL required on token rotation.
     - Added considerations on token rotation and self-contained tokens.
     - Added security considerations for SSRF.
+    - Clarified URI vs. URL.
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
