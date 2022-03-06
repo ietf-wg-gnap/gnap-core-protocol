@@ -5740,6 +5740,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 # Document History {#history}
 
+- -10
+    - 
+
 - -09
     - Added security considerations on redirection status codes.
     - Added security considerations on cuckoo token attack.
