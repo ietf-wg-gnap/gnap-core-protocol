@@ -5752,6 +5752,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Clarified URI vs. URL.
     - Added "user_code_uri" mode, removed "uri" from "user_code" mode.
     - Consistently formatted all parameter lists.
+    - Updated examples for HTTP Signatures.
 
 - -08
     - Update definition for "Client" to account for the case of no end user.
