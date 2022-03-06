@@ -3007,7 +3007,7 @@ Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
   "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
@@ -3051,7 +3051,7 @@ Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
   "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
@@ -3212,7 +3212,7 @@ Host: server.example.com
 Content-Type: application/json
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "access_token": {
@@ -3266,7 +3266,7 @@ Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "access_token": {
@@ -3312,7 +3312,7 @@ Host: server.example.com
 Content-Type: application/json
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "access_token": {
@@ -3368,7 +3368,7 @@ Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "access_token": {
@@ -3451,7 +3451,7 @@ Host: server.example.com
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 ~~~
 
 The AS validates that the token presented is associated with the management
@@ -3689,13 +3689,13 @@ GET /stuff HTTP/1.1
 Host: resource.example.com
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Signature-Input: sig1=("@method" "@target-uri" "authorization")\
-  ;created=1618884475;keyid="gnap-rsa"
-Signature: sig1=:KymTn1/++nwWsNHdc48sguMjnVSnvqQNrijQT0/kXDfljaIgHl\
-  o12NkEt4e5qZeCFutzRxWpHKtjVEDldIUSsktxj4Li7PgUNJtIkJkdA1EoebGz1X/\
-  AD3coqYpoaFsOcPyfXjYHYWFd8HxLOUz3imA8xbxS+J9GZAjyDjTfG6yfsMsfd10f\
-  nrDRJqalPNDEgOOwwyEtjht4MnzpV1Wf43YWwgEJOC2rvxPIeuNxWbUc5v/o3s3Zr\
-  ywo2sunUcwXwlmbgyiGY0vgGFWjdHfgKvjda7eNLTr7r3jPgo/GlOB3jyadD4xcKs\
-  S/idS3RGk1+e9jbGHK5cRTp0ZzF94kWw==:
+  ;created=1618884473;keyid="gnap-rsa"
+Signature: sig1=:ThgXGQjGiJYQW8JYxcNypXk7wQWG8KZ6AtyKOrqNOkgoa8iWgm\
+  feHLkRmT6BUj83DkLX84TQehhK3D5Lcgllhghuu2Pr3JmYVY7FFYwYAcfoISzVPKp\
+  YyDbh/g34qOpFvlCYDgG94ZX16LAKlqYXWn5vYgealgm54zzCCnvyaLKViGVWz6PM\
+  7rOIZqMQPOu6JceqdsiVn8xj2qTS9CWEmuJABtTnRoXNGVg8tUEQp7qt3F7tCI/AM\
+  vHW4FAYrQbE47qQsjh4zPiES1EM+lHdA9fCE0OEsfabxB7Gr9GvkMyiApWTf/Zs45\
+  IoJhr1OVtOCGVhEmoiNFreBTm7cTyTgg==:
 ~~~
 
 If the `flags` field contains the `bearer` flag, the access token is a bearer token
@@ -3872,7 +3872,7 @@ NOTE: '\' line wrapping per RFC 8792
             "kid": "gnap-rsa",
             "kty": "RSA",
             "e": "AQAB",
-            "alg": "RS256",
+            "alg": "PS512",
             "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
   YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
   YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
@@ -3892,7 +3892,7 @@ NOTE: '\' line wrapping per RFC 8792
 This body is hashed for the Content-Digest header using `sha-256` into the following encoded value:
 
 ~~~
-sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSjKxw=
+sha-256=:q2XBmzRDCREcS2nWo/6LYwYyjrlN1bRfv+HKLbeGAGg=:
 ~~~
 
 The HTTP message signature input string is calculated to be the following:
@@ -3902,13 +3902,12 @@ NOTE: '\' line wrapping per RFC 8792
 
 "@method": POST
 "@target-uri": https://server.example.com/gnap
+"content-digest": \
+  sha-256=:q2XBmzRDCREcS2nWo/6LYwYyjrlN1bRfv+HKLbeGAGg=:
+"content-length": 988
 "content-type": application/json
-"content-digest": sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+Crwwv\
-  UoiaDCSjKxw=
-"content-length": 986
-"@signature-params": ("@method" "@target-uri" "content-type" \
-  "content-digest" "content-length");created=1618884475\
-  ;keyid="gnap-rsa"
+"@signature-params": ("@method" "@target-uri" "content-digest" \
+  "content-length" "content-type");created=1618884473;keyid="gnap-rsa"
 ~~~
 
 This leads to the following full HTTP message request:
@@ -3919,19 +3918,17 @@ NOTE: '\' line wrapping per RFC 8792
 POST /gnap HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
-Content-Length: 986
-Content-Digest: sha-256=98QzyNVYpdgTrWBKpC4qFSCmmR+CrwwvUoiaDCSj\
-  Kxw=
-Signature-Input: sig1=("@method" "@target-uri" "content-type" \
-  "content-digest" "content-length");created=1618884475\
-  ;keyid="gnap-rsa"
-Signature: sig1=:SatKrAh2qNxbDBY6H3XUtpWn07aSrukpi3202L4DIPLLGgKdSu\
-  XyObjdCK/agmEx36xyn40iiCAqYskXugpNARianBiWKOkcWHhSs31FSTSoJ8vvGpJ\
-  4GxemDPvI6BXmLZtJvYBehoXtfcRFKGLzYOtbbtefzw2vP+k19W4PrhNmxFEUCepT\
-  KRk0sBoz4zIYK6FqEAHir0oRjwdCcXHFqI9U6+/DgpuxjFFX+OSZehmN6Q1quJgu0\
-  FITmsC9OANs5hwIAkXGJNdv3FuxAZAVrSnUScuGutSJXAn1daXToewVgBA+IrQ86m\
-  lsXtWgvmTTXENUvOELV6qTV2nenwr/UQ==:
-
+Content-Length: 988
+Content-Digest: sha-256=:q2XBmzRDCREcS2nWo/6LYwYyjrlN1bRfv+HKLbeGAG\
+  g=:
+Signature-Input: sig1=("@method" "@target-uri" "content-digest" \
+  "content-length" "content-type");created=1618884473;keyid="gnap-rsa"
+Signature: sig1=:EWJgAONk3D6542Scj8g51rYeMHw96cH2XiCMxcyL511wyemGcw\
+  5PosYVO3eK+v+h1H+LiO4BjapL5ffZV+SgU8Q2v+qEDA4FrP0+/ni9W+lazjIrzNs\
+  FAojwTlngMkAjZyDC/5+qUYB0KeEb4gnAhmuikv28DF30MT28yxCjeui2NGyzpPxB\
+  cWk1K2Cxb6hS1WXUSZufFN9jOzrTg2c8/jcKkROKbLZLshF/oCuxAAgDabTqJy+qk\
+  kz/Z/U5hI181qlTzNIYijnAvXzezlsLPZcMpJ1Au9APyBYAtDipAzyD6+IZl3rhzP\
+  2leuCMCOvDxg9qA83LVtsqfjNJO+dEHA==:
 
 {
     "access_token": {
@@ -3954,7 +3951,7 @@ Signature: sig1=:SatKrAh2qNxbDBY6H3XUtpWn07aSrukpi3202L4DIPLLGgKdSu\
             "kid": "gnap-rsa",
             "kty": "RSA",
             "e": "AQAB",
-            "alg": "RS256",
+            "alg": "PS512",
             "n": "hYOJ-XOKISdMMShn_G4W9m20mT0VWtQBsmBBkI2cmRt4Ai8Bf\
   YdHsFzAtYKOjpBR1RpKpJmVKxIGNy0g6Z3ad2XYsh8KowlyVy8IkZ8NMwSrcUIBZG\
   YXjHpwjzvfGvXH_5KJlnR3_uRUp4Z4Ujk2bCaKegDn11V2vxE41hqaPUnhRZxe0jR\
@@ -4752,7 +4749,7 @@ Host: server.example.com
 Content-Type: application/json
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "access_token": {
@@ -5912,7 +5909,7 @@ Host: server.example.com
 Content-Type: application/json
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "access_token": {
@@ -6033,7 +6030,7 @@ Content-Type: application/json
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "interact_ref": "4IFWWIKYBC2PQ6U56NL1"
@@ -6101,7 +6098,7 @@ Host: server.example.com
 Content-Type: application/json
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "access_token": {
@@ -6171,7 +6168,7 @@ Host: server.example.com
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 ~~~
 
 
@@ -6208,7 +6205,7 @@ Host: server.example.com
 Authorization: GNAP G7YQT4KQQ5TZY9SLSS5E
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 ~~~
 
 
@@ -6302,7 +6299,7 @@ Host: server.example.com
 Content-Type: application/json
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "access_token": {
@@ -6483,7 +6480,7 @@ Host: server.example.com
 Content-Type: application/json
 Signature-Input: sig1=...
 Signature: sig1=...
-Digest: sha256=...
+Content-Digest: sha-256=...
 
 {
     "access_token": {
