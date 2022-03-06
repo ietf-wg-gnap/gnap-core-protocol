@@ -1851,8 +1851,7 @@ In this example, the AS is returning a bearer [access token](#response-token-sin
 an opaque identifier.
 
 ~~~
-NOTE: '\' line wrapping per RFC 8792 and a [subject identifier](#response-subject) in the form of
-an opaque identifier.
+NOTE: '\' line wrapping per RFC 8792
 
 {
     "access_token": {
@@ -1871,7 +1870,7 @@ an opaque identifier.
 ~~~
 
 In this example, the AS is returning set of [subject identifiers](#response-subject),
-simultaneously as an opaque identifier, an email address, and a decentralized identifier URL (DID).
+simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID).
 
 ~~~
 {
