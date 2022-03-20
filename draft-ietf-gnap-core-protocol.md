@@ -5419,6 +5419,68 @@ use polling to continue the request. The tradeoffs of this approach are discusse
 {{security-polling}}, and if possible, an explicit interaction finish method should be
 used instead.
 
+## Calculating Interaction Hash {#security-interact-hash}
+
+The calculation of the interaction hash value provides defence in depth, allowing a client
+instance to protect itself from spurious injection of interaction references when using a
+callback finish method. An attacker attempting to substitute the interaction reference
+is stopped in several places.
+
+~~~
++------+     +--------+     +--------+     +--------+
+| User |     |Attacker|     | Client |     |   AS   |
+|      |     |        |     |Instance|     |        |
+|      |     |        |     |        |     |        |
+|      |     |        |(1)+>|        |     |        |
+|      |     |        |     |        |(2)->|        |
+|      |     |        |     |        |<-(3)|        |
+|      |     |        |<+(4)|        |     |        |
+|      |     |        |(5)+ + + + + + + + >|        |
+|      |     |        |< + + + + + + + +(6)|        |
+|      |     |        |     |        |     |        |
+|      |(A) + + + + + + + +>|        |     |        |
+|      |     |        |     |        |(B)->|        |
+|      |     |        |     |        |<-(C)|        |
+|      |<+ + + + + + + + (D)|        |     |        |
+|      |(E) + + + + + + + + + + + + + + + >|        |
+|      |     |        |     |        |     |        |
+|      |<+(7)|        |     |        |     |        |
+|      |(F) + + + + + + + +>|        |     |        |
+|      |     |        |     |        |(G)->|        |
+|      |     |        |     |        |     |        |
++------+     +--------+     +--------+     +--------+
+~~~
+
+- Prerequesits: The client instance can allow multiple end users to
+    access the same AS. The attacker is attempting to associate their rights
+    with the target user's session.
+- (1) The attacker starts a session at the client instance.
+- (2) The client instance creates a grant request with nonce CN1.
+- (3) The AS responds to the grant request with a
+    need to interact, nonce SN1, and a continuation token, CT1.
+- (4) The client instructs the attacker to interact at the AS.
+- (5) The attacker interacts at the AS.
+- (6) The AS completes the interact finish with interact ref IR1 and
+    interact hash IH1 calculated from (CN1 + SN1 + IR1 + AS).
+    The attacker prevents IR1 from returning to the client instance.
+- (A) The target user starts a session at the client instance.
+- (B) The client instance creates a grant request with nonce CN2.
+- (C) The AS responds to the grant request with a
+    need to interact, nonce SN2, and a continuation token, CT2.
+- (D) The client instance instructs the user to interact at the AS.
+- (E) The target user interacts at the AS.
+- (7) Before the target user can complete their interaction, the attacker
+    delivers their own interact ref IR1 into the user's session. The attacker
+    cannot calculate the appropriate hash because the attacker does not have
+    access to CN2 and SN2.
+- (F) The target user triggers the interaction finish in their own session
+    with the attacker's IR1.
+- (G) If the client instance is checking the interaction hash, the attack
+    stops here because the hash calculation of (CN2 + SN2 + IR1 + AS) will fail.
+    If the client instance does not check the interaction hash, the AS will
+    reject the interaction request because it is presented against CT2 and not
+    CT1 as expected.
+
 ## Storage of Information During Interaction and Continuation {#security-client-storage}
 
 When starting an interactive grant request, a client application has a number of protocol elements
