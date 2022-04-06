@@ -5423,7 +5423,10 @@ used instead.
 
 The calculation of the interaction hash value provides defence in depth, allowing a client
 instance to protect itself from spurious injection of interaction references when using a
-callback finish method. An attacker attempting to substitute the interaction reference
+callback finish method. The AS is protected during this attack through the
+continuation access token being bound to the expected interaction reference,
+but without hash calculation, the attacker could cause the client to make an
+HTTP request on command. With both of these in place, an attacker attempting to substitute the interaction reference
 is stopped in several places.
 
 ~~~
