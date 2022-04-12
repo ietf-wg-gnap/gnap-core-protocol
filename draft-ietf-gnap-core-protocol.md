@@ -170,7 +170,7 @@ Roles are defined by the actions taken and the expectations leveraged
 on the role by the overall protocol.
 
 
-~~~
+~~~ aasvg
 +-------------+            +------------+
 |             |            |            |
 |Authorization|            |  Resource  |
@@ -367,7 +367,7 @@ The following diagram provides a general overview of GNAP, including many
 different optional phases and connections. The diagrams in the following sections
 provide views of GNAP under more specific circumstances.
 
-~~~
+~~~ aasvg
     +------------+         +------------+
     | End user   | ~ ~ ~ ~ |  Resource  |
     |            |         | Owner (RO) |
@@ -480,7 +480,7 @@ a service hosted by the AS in this example. The client instance uses a persisten
 with the user to ensure the same user that is starting the interaction is the user
 that returns from the interaction.
 
-~~~
+~~~ aasvg
 +--------+                                  +--------+         +------+
 | Client |                                  |   AS   |         | User |
 |Instance|                                  |        |         |      |
@@ -580,7 +580,7 @@ it is assumed that the user is both the end user and RO, though the user is not 
 to be interacting with the client instance through the same web browser used for interaction at
 the AS.
 
-~~~
+~~~ aasvg
 +--------+                                  +--------+         +------+
 | Client |                                  |   AS   |         | User |
 |Instance|--(1)--- Request Access --------->|        |         |      |
@@ -682,7 +682,7 @@ during the request process to gather the RO's authorization for the client insta
 The client instance polls the AS while it is waiting for the RO to authorize the request.
 
 
-~~~
+~~~ aasvg
 +--------+                                  +--------+         +------+
 | Client |                                  |   AS   |         |  RO  |
 |Instance|--(1)--- Request Access --------->|        |         |      |
@@ -766,7 +766,7 @@ In this example flow, the AS policy allows the client instance to make a call on
 without the need for an RO to be involved at runtime to approve the decision.
 Since there is no explicit RO, the client instance does not interact with an RO.
 
-~~~
+~~~ aasvg
 +--------+                            +--------+
 | Client |                            |   AS   |
 |Instance|--(1)--- Request Access --->|        |
@@ -803,7 +803,7 @@ some valid GNAP process. The client instance uses that token at the RS for some 
 the access token expires. The client instance then gets a new access token by rotating the
 expired access token at the AS using the token's management URI.
 
-~~~
+~~~ aasvg
 +--------+                                          +--------+
 | Client |                                          |   AS   |
 |Instance|--(1)--- Request Access ----------------->|        |
@@ -865,7 +865,7 @@ and is returned [direct subject information](#response-subject). Many different
 interaction modes can be used in this scenario, so these are shown only in
 the abstract as functions of the AS here.
 
-~~~
+~~~ aasvg
 +--------+                                  +--------+         +------+
 | Client |                                  |   AS   |         | User |
 |Instance|                                  |        |         |      |
@@ -948,7 +948,7 @@ as described in {{request-extending}}.
 
 A non-normative example of a grant request is below:
 
-~~~
+~~~ json
 {
     "access_token": {
         "access": [
@@ -1069,7 +1069,7 @@ Additional flags can be defined by extensions using [a registry TBD](#IANA).
 In the following example, the client instance is requesting access to a complex resource
 described by a pair of access request object.
 
-~~~
+~~~ json
 "access_token": {
     "access": [
         {
@@ -1130,7 +1130,7 @@ the AS MUST return an error.
 The following non-normative example shows a request for two
 separate access tokens, `token1` and `token2`.
 
-~~~
+~~~ json
 "access_token": [
     {
         "label": "token1",
@@ -1201,7 +1201,7 @@ contain the following fields (or additional fields defined in
     assertion formats are defined by [a registry TBD](#IANA).
     REQUIRED if assertions are requested.
 
-~~~
+~~~ json
 "subject": {
   "sub_id_formats": [ "iss_sub", "opaque" ],
   "assertion_formats": [ "id_token", "saml2" ]
@@ -1253,7 +1253,7 @@ object with the following fields.
     MAY display to the RO during interaction, authorization,
     and management. OPTIONAL.
 
-~~~
+~~~ json
 "client": {
     "key": {
         "proof": "httpsig",
@@ -1314,7 +1314,7 @@ The instance identifier MAY be assigned to a client instance at runtime
 through a grant response ({{response-dynamic-handles}}) or MAY be obtained in another fashion,
 such as a static registration process at the AS.
 
-~~~
+~~~ json
 "client": "client-541-ab"
 ~~~
 
@@ -1346,7 +1346,7 @@ to present to the RO during any interactive sequences.
 `logo_uri` (string)
 : Display image to represent the client software. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype. OPTIONAL.
 
-~~~
+~~~ json
 "display": {
     "name": "My Client Display Name",
     "uri": "https://example.net/client",
@@ -1404,7 +1404,7 @@ or by reference.
     format and the assertion value as the JSON string serialization of the assertion.
     OPTIONAL.
 
-~~~
+~~~ json
 "user": {
   "sub_ids": [ {
     "format": "opaque",
@@ -1446,7 +1446,7 @@ If the client instance has a reference for the end user at this AS, the
 client instance MAY pass that reference as a string. The format of this string
 is opaque to the client instance.
 
-~~~
+~~~ json
 "user": "XUT2MFM1XBIKJKSDU8QM"
 ~~~
 
@@ -1498,7 +1498,7 @@ In this non-normative example, the client instance is indicating that it can [re
 the end user to an arbitrary URI and can receive a [redirect](#request-interact-callback-redirect) through
 a browser request.
 
-~~~
+~~~ json
 "interact": {
     "start": ["redirect"],
     "finish": {
@@ -1514,7 +1514,7 @@ display a [user code](#request-interact-usercode) and direct the end user
 to an [arbitrary URI](#request-interact-redirect) on a secondary
 device, but it cannot accept a redirect or push callback.
 
-~~~
+~~~ json
 "interact": {
     "start": ["redirect", "user_code"]
 }
@@ -1563,7 +1563,7 @@ console. While this URI is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
 or relationship to the AS grant URI.
 
-~~~
+~~~ json
 "interact": {
   "start": ["redirect"]
 }
@@ -1584,7 +1584,7 @@ in the array under the `start` key. The means by which the client instance
 determines the application to open with this URI are out of scope of
 this specification.
 
-~~~
+~~~ json
 "interact": {
   "start": ["app"]
 }
@@ -1610,7 +1610,7 @@ While this URI is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
 or relationship to the AS grant URI.
 
-~~~
+~~~ json
 "interact": {
     "start": ["user_code"]
 }
@@ -1632,7 +1632,7 @@ While this URL is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
 or relationship to the AS grant URL.
 
-~~~
+~~~ json
 "interact": {
     "start": ["user_code_uri"]
 }
@@ -1708,7 +1708,7 @@ A finish `method` value of `redirect` indicates that the client instance
 will expect a request from the RO's browser using the HTTP method
 GET as described in {{interaction-callback}}.
 
-~~~
+~~~ json
 "interact": {
     "finish": {
         "method": "redirect",
@@ -1734,7 +1734,7 @@ A finish `method` value of `push` indicates that the client instance will
 expect a request from the AS directly using the HTTP method POST
 as described in {{interaction-pushback}}.
 
-~~~
+~~~ json
 "interact": {
     "finish": {
         "method": "push",
@@ -1775,7 +1775,7 @@ If the client instance knows the end user's locale and language preferences, the
 client instance can send this information to the AS using the `ui_locales` field
 with an array of locale strings as defined by {{RFC5646}}.
 
-~~~
+~~~ json
 "interact": {
     "hints": {
         "ui_locales": ["en-US", "fr-CA"]
@@ -1829,7 +1829,7 @@ as the HTTP entity body. Each possible field is detailed in the sections below.
 In this example, the AS is returning an [interaction URI](#response-interact-redirect),
 a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 {
@@ -1850,7 +1850,7 @@ NOTE: '\' line wrapping per RFC 8792
 In this example, the AS is returning a bearer [access token](#response-token-single) with a management URI and a [subject identifier](#response-subject) in the form of
 an opaque identifier.
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 {
@@ -1872,7 +1872,7 @@ NOTE: '\' line wrapping per RFC 8792
 In this example, the AS is returning set of [subject identifiers](#response-subject),
 simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID).
 
-~~~
+~~~ json
 {
     "subject": {
         "sub_ids": [ {
@@ -1922,7 +1922,7 @@ contains a JSON object with the following properties.
     The client instance MUST present the continuation access token in all requests to the continuation URI as described in {{use-access-token}}.
     REQUIRED.
 
-~~~
+~~~ json
 {
     "continue": {
         "access_token": {
@@ -2054,7 +2054,7 @@ The following non-normative example shows a single access token bound to the cli
 used in the initial request, with a management URI, and that has access to three described resources
 (one using an object and two described by reference strings).
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 "access_token": {
@@ -2086,7 +2086,7 @@ NOTE: '\' line wrapping per RFC 8792
 The following non-normative example shows a single bearer access token
 with access to two described resources.
 
-~~~
+~~~ json
 "access_token": {
     "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
     "flags": ["bearer"],
@@ -2118,7 +2118,7 @@ In this non-normative example, two tokens are issued under the
 names `token1` and `token2`, and only the first token has a management
 URI associated with it.
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 "access_token": [
@@ -2153,7 +2153,7 @@ with a multiple access token structure containing one access token.
 
 If the AS has split the access token response, the response MUST include the `split` flag in the `flags` array.
 
-~~~
+~~~ json
 "access_token": [
     {
         "label": "split-1",
@@ -2249,7 +2249,7 @@ responds with the "app" field, which is a string containing the URI
 for the client instance to launch. This URI MUST be unique for the request and
 MUST NOT contain any security-sensitive information such as user identifiers or access tokens.
 
-~~~
+~~~ json
 "interact": {
     "app": "https://app.example.com/launch?tx=4CF492MLV"
 }
@@ -2286,7 +2286,7 @@ object that contains the following members.
     characters in length.
     REQUIRED.
 
-~~~
+~~~ json
 "interact": {
     "user_code": {
         "code": "A1BC-3DFF",
@@ -2344,7 +2344,7 @@ object that contains the following members.
     MUST NOT contain the `code` value.
     REQUIRED.
 
-~~~
+~~~ json
 "interact": {
     "user_code_uri": {
         "code": "A1BC-3DFF",
@@ -2381,7 +2381,7 @@ client instance's request, the AS responds with a `finish` field containing a no
 that the client instance will use in validating the callback as defined in
 {{interaction-finish}}.
 
-~~~
+~~~ json
 "interact": {
     "finish": "MBDOFXG4Y5CVJCX821LH"
 }
@@ -2435,7 +2435,7 @@ This field is an object with the following OPTIONAL properties.
     identity API is out of scope for this specification.
     RECOMMENDED.
 
-~~~
+~~~ json
 "subject": {
   "sub_ids": [ {
     "format": "opaque",
@@ -2498,7 +2498,7 @@ opaque to the client instance.
 
 This non-normative example shows an instance identifier along side an issued access token.
 
-~~~
+~~~ json
 {
     "instance_id": "7C7C4AZ9KHRS6X63AJAO",
     "access_token": {
@@ -2552,7 +2552,7 @@ For example, if the RO denied the request while interacting with the AS,
 the AS would return the following error when the client instance tries to
 continue the grant request:
 
-~~~
+~~~ json
 {
   "error": "user_denied"
 }
@@ -2859,7 +2859,7 @@ following two fields:
     REQUIRED.
 
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 POST /push/554321 HTTP/1.1
@@ -2976,7 +2976,7 @@ Access tokens other than the continuation access tokens MUST NOT be usable for c
 For example, here the client instance makes a POST request to a unique URI and signs
 the request with HTTP Message Signatures:
 
-~~~
+~~~ http-message
 POST /continue/KSKUOMUKM HTTP/1.1
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Host: server.example.com
@@ -2999,7 +2999,7 @@ For example, here the client instance makes a POST request to a stable continuat
 URI with the [interaction reference](#continue-after-interaction),
 includes the access token, and signs with HTTP Message Signatures:
 
-~~~
+~~~ http-message
 POST /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3043,7 +3043,7 @@ When the AS responds to the client instance's `finish` method as in {{interactio
 response includes an interaction reference. The client instance MUST include that value as the field
 `interact_ref` in a POST request to the continuation URI.
 
-~~~
+~~~ http-message
 POST /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3072,7 +3072,7 @@ SHOULD NOT contain any [interaction responses](#response-interact).
 For example, if the request is successful in causing the AS to issue access tokens and
 release opaque subject claims, the response could look like this:
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 {
@@ -3102,7 +3102,7 @@ poll the AS until the RO has authorized the request. To do so, the client instan
 request to the continuation URI as in {{continue-after-interaction}}, but does not
 include a message body.
 
-~~~
+~~~ http-message
 POST /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3122,7 +3122,7 @@ by telling the client instance to make another continuation request in the futur
 a new, unique access token has been issued for the call, which the client instance will use in its
 next continuation request.
 
-~~~
+~~~ json
 {
     "continue": {
         "access_token": {
@@ -3141,7 +3141,7 @@ next continuation request.
 If the request is successful in causing the AS to issue access tokens and
 release subject claims, the response could look like this example:
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 {
@@ -3205,7 +3205,7 @@ can occur, the response SHOULD contain [interaction responses](#response-interac
 
 For example, a client instance initially requests a set of resources using references:
 
-~~~
+~~~ http-message
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3235,7 +3235,7 @@ Access is granted by the RO, and a token is issued by the AS.
 In its final response, the AS includes a `continue` field, which includes
 a separate access token for accessing the continuation API:
 
-~~~
+~~~ json
 {
     "continue": {
         "access_token": {
@@ -3258,7 +3258,7 @@ the client instance realizes that it no longer needs
 "write" access and therefore modifies its ongoing request, here asking for just "read" access
 instead of both "read" and "write" as before.
 
-~~~
+~~~ json
 PATCH /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3284,7 +3284,7 @@ tokens can be issued to the client instance. The AS would likely revoke previous
 that had the greater access rights associated with them, unless they had been issued
 with the `durable` flag.
 
-~~~
+~~~ json
 {
     "continue": {
         "access_token": {
@@ -3305,7 +3305,7 @@ with the `durable` flag.
 For another example, the client instance initially requests read-only access but later
 needs to step up its access. The initial request could look like this example.
 
-~~~
+~~~ http-message
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3334,7 +3334,7 @@ Content-Digest: sha-256=...
 Access is granted by the RO, and a token is issued by the AS.
 In its final response, the AS includes a `continue` field:
 
-~~~
+~~~ http-message
 {
     "continue": {
         "access_token": {
@@ -3360,7 +3360,7 @@ nonce and callback are different from the initial request. Since the original ca
 already used in the initial exchange, and the callback is intended for one-time-use, a new one
 needs to be included in order to use the callback again.
 
-~~~
+~~~ http-message
 PATCH /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3398,7 +3398,7 @@ process are new access tokens and do not modify the rights of existing access to
 If the client instance wishes to cancel an ongoing grant request, it makes an
 HTTP DELETE request to the continuation URI.
 
-~~~
+~~~ http-message
 DELETE /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -3444,7 +3444,7 @@ To rotate an access token, the client instance makes an HTTP POST to the token m
 sending the access token in the appropriate header and signing the request
 with the appropriate key.
 
-~~~
+~~~ http-message
 POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
 Host: server.example.com
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
@@ -3483,7 +3483,7 @@ as the token before rotation. If the client instance requires different access r
 the client instance can request a new access token by creating [a new request](#request) or
 by [updating an existing grant request](#continue-modify).
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 {
@@ -3529,7 +3529,7 @@ The client instance makes an HTTP DELETE request to the token management
 URI, presenting the access token and signing the request with
 the appropriate key.
 
-~~~
+~~~ http-message
 DELETE /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
 Host: server.example.com
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
@@ -3541,7 +3541,7 @@ If the key presented is associated with the token (or the client instance, in
 the case of a bearer token), the AS MUST invalidate the access token, if
 possible, and return an HTTP 204 response code.
 
-~~~
+~~~ http-message
 204 No Content
 ~~~
 
@@ -3618,7 +3618,7 @@ This non-normative example shows a single key presented in multiple
 formats. This example key is intended to be used with the [HTTP Message Signatures]({{httpsig-binding}})
 proofing mechanism, as indicated by the `httpsig` value of the `proof` field.
 
-~~~
+~~~ json
 "key": {
     "proof": "httpsig",
     "jwk": {
@@ -3638,7 +3638,7 @@ Keys in GNAP can also be passed by reference such that the party receiving
 the reference will be able to determine the appropriate keying material for
 use in that part of the protocol.
 
-~~~
+~~~ json
     "key": "S-P4XJQ_RYJCRTSU1.63N3E"
 ~~~
 
@@ -3681,7 +3681,7 @@ The access token MUST be sent using the HTTP "Authorization" request header fiel
 the "GNAP" authorization scheme along with a key proof as described in {{binding-keys}}
 for the key bound to the access token. For example, an "httpsig"-bound access token is sent as follows:
 
-~~~
+~~~ http-message
 NOTE: '\' line wrapping per RFC 8792
 
 GET /stuff HTTP/1.1
@@ -3700,7 +3700,7 @@ Signature: sig1=:ThgXGQjGiJYQW8JYxcNypXk7wQWG8KZ6AtyKOrqNOkgoa8iWgm\
 If the `flags` field contains the `bearer` flag, the access token is a bearer token
 that MUST be sent using the `Authorization Request Header Field` method defined in {{RFC6750}}.
 
-~~~
+~~~ http-message
 Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 ~~~
 
@@ -3771,7 +3771,7 @@ to either the access token's own key or, in the case of bearer tokens, the clien
 In the following sections, unless otherwise noted, the `RS256` JOSE Signature Algorithm is applied
 using the following RSA key (presented here in JWK format):
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 {
@@ -3847,7 +3847,7 @@ parameter MUST NOT be included.
 
 In this example, the message body is the following JSON object:
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 {
@@ -4111,7 +4111,7 @@ The signer presents the signed object in compact form
 
 In this example, the JOSE Header contains the following parameters:
 
-~~~
+~~~ json
 {
     "alg": "RS256",
     "kid": "gnap-rsa",
@@ -4124,7 +4124,7 @@ In this example, the JOSE Header contains the following parameters:
 
 The request body is the following JSON object:
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 {
@@ -4287,7 +4287,7 @@ header as described in {{detached-jws}}.
 
 In this example, the JOSE header contains the following parameters:
 
-~~~
+~~~ json
 {
     "alg": "RS256",
     "kid": "gnap-rsa",
@@ -4300,7 +4300,7 @@ In this example, the JOSE header contains the following parameters:
 
 The request body, used as the JWS Payload, is the following JSON object:
 
-~~~
+~~~ json
 NOTE: '\' line wrapping per RFC 8792
 
 {
@@ -4459,7 +4459,7 @@ The following non-normative example is describing three kinds of access (read, w
 two different locations and two different data types (metadata, images) for a single access token
 using the fictitious `photo-api` type definition.
 
-~~~
+~~~ json
 "access": [
     {
         "type": "photo-api",
@@ -4498,7 +4498,7 @@ The following non-normative example uses the same fictitious `photo-api`
 type definition to request a single access token with more specifically
 targeted access rights by using two discrete objects within the request.
 
-~~~
+~~~ json
 "access": [
     {
         "type": "photo-api",
@@ -4544,7 +4544,7 @@ field. The second access request includes the `actions` and
 `identifier` fields specified here as well as the API-specific
 `currency` field.
 
-~~~
+~~~ json
 "access": [
     {
         "type": "photo-api",
@@ -4588,7 +4588,7 @@ the AS or RS representing the access being requested. Each string
 SHOULD correspond to a specific expanded object representation at
 the AS.
 
-~~~
+~~~ json
 "access": [
     "read", "dolphin-metadata", "some other thing"
 ]
@@ -4613,7 +4613,7 @@ string-type resource items. In this non-normative example,
 the client instance is requesting access to a `photo-api` and `financial-transaction` API type
 as well as the reference values of `read`, `dolphin-metadata`, and `some other thing`.
 
-~~~
+~~~ json
 "access": [
     {
         "type": "photo-api",
@@ -4724,7 +4724,7 @@ of this specification, but some dynamic methods are discussed in
 {{I-D.ietf-gnap-resource-servers}}.
 The content of the resource reference is opaque to the client instance.
 
-~~~
+~~~ http-message
 NOTE: '\' line wrapping per RFC 8792
 
 WWW-Authenticate: \
@@ -4742,7 +4742,7 @@ token using the resource reference `FWWIKYBQ6U56NL1` received from the RS
 in addition to the `dolphin-metadata` resource reference that the client instance
 has been configured with out of band.
 
-~~~
+~~~ http-message
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -5971,7 +5971,7 @@ Authorization Code grant type.
 The client instance initiates the request to the AS. Here the client instance
 identifies itself using its public key.
 
-~~~
+~~~ http-message
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -6030,7 +6030,7 @@ information it needs to connect. The AS has also indicated to the
 client instance that it can use the given instance identifier to identify itself in
 [future requests](#request-instance).
 
-~~~
+~~~ http-message
 HTTP/1.1 200 OK
 Content-Type: application/json
 Cache-Control: no-store
@@ -6057,7 +6057,7 @@ The client instance saves the response and redirects the user to the
 interaction_url by sending the following HTTP message to the user's
 browser.
 
-~~~
+~~~ http-message
 HTTP 302 Found
 Location: https://server.example.com/interact/4CF492MLVMSW9MKM
 ~~~
@@ -6071,7 +6071,7 @@ generates the interaction reference, calculates the hash, and
 redirects the user back to the client instance with these additional values
 added as query parameters.
 
-~~~
+~~~ http-message
 NOTE: '\' line wrapping per RFC 8792
 
 HTTP 302 Found
@@ -6091,7 +6091,7 @@ parameter. The client instance then calls the continuation URI and presents the
 handle and interaction reference in the request body. The client instance signs
 the request as above.
 
-~~~
+~~~ http-message
 POST /continue HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -6110,7 +6110,7 @@ Content-Digest: sha-256=...
 The AS retrieves the pending request based on the handle and issues
 an access token and returns this to the client instance.
 
-~~~
+~~~ http-message
 NOTE: '\' line wrapping per RFC 8792
 
 HTTP/1.1 200 OK
@@ -6160,7 +6160,7 @@ for updates while waiting for the user to authorize the request.
 
 The client instance initiates the request to the AS.
 
-~~~
+~~~ http-message
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -6189,7 +6189,7 @@ it includes both. Since there is no interaction finish mode, the AS does not inc
 a nonce, but does include a "wait" parameter on the continuation
 section because it expects the client instance to poll for results.
 
-~~~
+~~~ http-message
 HTTP/1.1 200 OK
 Content-Type: application/json
 Cache-Control: no-store
@@ -6230,7 +6230,7 @@ Meanwhile, the client instance periodically polls the AS every 60 seconds at
 the continuation URI. The client instance signs the request using the
 same key and method that it did in the first request.
 
-~~~
+~~~ http-message
 POST /continue/VGJKPTKC50 HTTP/1.1
 Host: server.example.com
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
@@ -6246,7 +6246,7 @@ determines that it has not yet been authorized. The AS indicates to
 the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
-~~~
+~~~ http-message
 HTTP/1.1 200 OK
 Content-Type: application/json
 Cache-Control: no-store
@@ -6267,7 +6267,7 @@ Note that the continuation URI and access token have been rotated since they wer
 used by the client instance to make this call. The client instance polls the
 continuation URI after a 60 second timeout using this new information.
 
-~~~
+~~~ http-message
 POST /continue/ATWHO4Q1WV HTTP/1.1
 Host: server.example.com
 Authorization: GNAP G7YQT4KQQ5TZY9SLSS5E
@@ -6282,7 +6282,7 @@ The AS retrieves the pending request based on the URI and access token,
 determines that it has been approved, and issues an access
 token for the client to use at the RS.
 
-~~~
+~~~ http-message
 NOTE: '\' line wrapping per RFC 8792
 
 HTTP/1.1 200 OK
@@ -6310,7 +6310,7 @@ behalf, with no user to interact with.
 The client instance creates a request to the AS, identifying itself with its
 public key and using MTLS to make the request.
 
-~~~
+~~~ http-message
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -6335,7 +6335,7 @@ Content-Type: application/json
 The AS processes this and determines that the client instance can ask for
 the requested resources and issues an access token.
 
-~~~
+~~~ http-message
 HTTP/1.1 200 OK
 Content-Type: application/json
 Cache-Control: no-store
@@ -6361,7 +6361,7 @@ asynchronously reach out to the RO for approval in this scenario.
 The client instance starts the request at the AS by requesting a set of
 resources. The client instance also identifies a particular user.
 
-~~~
+~~~ http-message
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
@@ -6418,7 +6418,7 @@ and that the identified user does have the ability to approve this
 request. The AS indicates to the client instance that it can poll for
 continuation.
 
-~~~
+~~~ http-message
 HTTP/1.1 200 OK
 Content-Type: application/json
 Cache-Control: no-store
@@ -6441,7 +6441,7 @@ to for the specified account.
 Meanwhile, the client instance periodically polls the AS every 60 seconds at
 the continuation URI.
 
-~~~
+~~~ http-message
 POST /continue HTTP/1.1
 Host: server.example.com
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
@@ -6456,7 +6456,7 @@ determines that it has not yet been authorized. The AS indicates to
 the client instance that no access token has yet been issued but it can
 continue to call after another 60 second timeout.
 
-~~~
+~~~ http-message
 HTTP/1.1 200 OK
 Content-Type: application/json
 Cache-Control: no-store
@@ -6476,7 +6476,7 @@ Note that the continuation handle has been rotated since it was
 used by the client instance to make this call. The client instance polls the
 continuation URI after a 60 second timeout using the new handle.
 
-~~~
+~~~ http-message
 POST /continue HTTP/1.1
 Host: server.example.com
 Authorization: GNAP BI9QNW6V9W3XFJK4R02D
@@ -6490,7 +6490,7 @@ The AS retrieves the pending request based on the handle and
 determines that it has been approved and it issues an access
 token.
 
-~~~
+~~~ http-message
 NOTE: '\' line wrapping per RFC 8792
 
 HTTP/1.1 200 OK
@@ -6524,7 +6524,7 @@ new protocol. Traditionally, the OAuth 2.0 client developer would put
 their `client_id` and `scope` values as parameters into a redirect request
 to the authorization endpoint.
 
-~~~
+~~~ http-message
 NOTE: '\' line wrapping per RFC 8792
 
 HTTP 302 Found
@@ -6542,7 +6542,7 @@ Now the developer wants to make an analogous request to the AS
 using GNAP. To do so, the client instance makes an HTTP POST and
 places the OAuth 2.0 values in the appropriate places.
 
-~~~
+~~~ http-message
 POST /tx HTTP/1.1
 Host: server.example.com
 Content-Type: application/json
