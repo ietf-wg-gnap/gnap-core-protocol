@@ -3755,7 +3755,7 @@ For example, the `httpsig` method can be specified with its parameters as:
 }
 ~~~
 
-If additional parameters are not required or used for a specific method, the method MAY be passed 
+If additional parameters are not required or used for a specific method, the method MAY be passed
 as a string instead of an object. For example, the `httpsig` method with no additional parameters could be sent instead as:
 
 ~~~ json
