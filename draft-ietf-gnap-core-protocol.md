@@ -5429,7 +5429,7 @@ but without hash calculation, the attacker could cause the client to make an
 HTTP request on command. With both of these in place, an attacker attempting to substitute the interaction reference
 is stopped in several places.
 
-~~~
+~~~ aasvg
 +------+     +--------+     +--------+     +--------+
 | User |     |Attacker|     | Client |     |   AS   |
 |      |     |        |     |Instance|     |        |
