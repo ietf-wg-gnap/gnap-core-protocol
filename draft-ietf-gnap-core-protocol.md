@@ -171,37 +171,7 @@ on the role by the overall protocol.
 
 
 ~~~ aasvg
-+-------------+            +------------+
-|             |            |            |
-|Authorization|            |  Resource  |
-|   Server    |            |   Server   |
-|             |<--+   +--->|            |
-+-------------+   |   |    +------------+
-        +         |   |
-        +         |   |
-        +         |   |
-        +         |   |
-        +         |   |
-        +      +----------+
-        +      |  Client  |
-        +      | Instance |
-        +      +----------+
-        +           +
-        +           +
-        +           +
-+-----------+       +     +------------+
-|           |       + + + |            |
-|  Resource |             |    End     |
-|   Owner   | ~ ~ ~ ~ ~ ~ |    User    |
-|           |             |            |
-+-----------+             +------------+
-
-Legend
-
-+ + + indicates interaction between a human and computer
------ indicates interaction between two pieces of software
-~ ~ ~ indicates a potential equivalence or out-of-band
-          communication between roles
+{::include diagram/roles.md}
 ~~~
 
 Authorization Server (AS)
@@ -368,40 +338,7 @@ different optional phases and connections. The diagrams in the following section
 provide views of GNAP under more specific circumstances.
 
 ~~~ aasvg
-    +------------+         +------------+
-    | End user   | ~ ~ ~ ~ |  Resource  |
-    |            |         | Owner (RO) |
-    +------------+         +------------+
-          +                       +
-          +                       +
-          (A)                     (B)
-          +                       +
-          +                       +
-    +--------+                    +          +------------+
-    | Client | (1)                +          |  Resource  |
-    |Instance|                    +          |   Server   |
-    |        |       +---------------+       |    (RS)    |
-    |        |--(2)->| Authorization |       |            |
-    |        |<-(3)--|     Server    |       |            |
-    |        |       |      (AS)     |       |            |
-    |        |--(4)->|               |       |            |
-    |        |<-(5)--|               |       |            |
-    |        |--------------(6)------------->|            |
-    |        |       |               |   (7) |            |
-    |        |<-------------(8)------------->|            |
-    |        |--(9)->|               |       |            |
-    |        |<-(10)-|               |       |            |
-    |        |--------------(11)------------>|            |
-    |        |       |               |  (12) |            |
-    |        |-(13)->|               |       |            |
-    |        |       |               |       |            |
-    +--------+       +---------------+       +------------+
-
-Legend
-+ + + indicates a possible interaction with a human
------ indicates an interaction between protocol roles
-~ ~ ~ indicates a potential equivalence or out-of-band
-        communication between roles
+{::include diagram/overall.md}
 ~~~
 
 - (A) The end user interacts with the client instance to indicate a need for resources on
@@ -481,35 +418,7 @@ with the user to ensure the same user that is starting the interaction is the us
 that returns from the interaction.
 
 ~~~ aasvg
-+--------+                                  +--------+         +------+
-| Client |                                  |   AS   |         | User |
-|Instance|                                  |        |         |      |
-|        |< (1) + Start Session + + + + + + + + + + + + + + + +|      |
-|        |                                  |        |         |      |
-|        |--(2)--- Request Access --------->|        |         |      |
-|        |                                  |        |         |      |
-|        |<-(3)-- Interaction Needed -------|        |         |      |
-|        |                                  |        |         |      |
-|        |+ (4) + Redirect for Interaction + + + + + + + + + > |      |
-|        |                                  |        |         |      |
-|        |                                  |        |<+ (5) +>|      |
-|        |                                  |        |  AuthN  |      |
-|        |                                  |        |         |      |
-|        |                                  |        |<+ (6) +>|      |
-|        |                                  |        |  AuthZ  |      |
-|        |                                  |        |         |      |
-|        |< (7) + Redirect for Continuation + + + + + + + + + +|      |
-|        |                                  |        |         +------+
-|        |--(8)--- Continue Request ------->|        |
-|        |                                  |        |
-|        |<-(9)----- Grant Access ----------|        |
-|        |                                  |        |
-|        |                                  |        |     +--------+
-|        |--(10)-- Access API ---------------------------->|   RS   |
-|        |                                  |        |     |        |
-|        |<-(11)-- API Response ---------------------------|        |
-|        |                                  |        |     +--------+
-+--------+                                  +--------+
+{::include diagram/redirect.md}
 ~~~
 
 1. The client instance establishes a verifiable session to the user, in the role of the end user.
@@ -581,48 +490,14 @@ to be interacting with the client instance through the same web browser used for
 the AS.
 
 ~~~ aasvg
-+--------+                                  +--------+         +------+
-| Client |                                  |   AS   |         | User |
-|Instance|--(1)--- Request Access --------->|        |         |      |
-|        |                                  |        |         |      |
-|        |<-(2)-- Interaction Needed -------|        |         |      |
-|        |                                  |        |         |      |
-|        |+ (3) + + Display User Code + + + + + + + + + + + + >|      |
-|        |                                  |        |         |      |
-|        |                                  |        |<+ (4) + |      |
-|        |                                  |        |Open URI |      |
-|        |                                  |        |         |      |
-|        |                                  |        |<+ (5) +>|      |
-|        |                                  |        |  AuthN  |      |
-|        |--(9)--- Continue Request (A) --->|        |         |      |
-|        |                                  |        |<+ (6) +>|      |
-|        |<-(10)- Not Yet Granted (Wait) ---|        |  Code   |      |
-|        |                                  |        |         |      |
-|        |                                  |        |<+ (7) +>|      |
-|        |                                  |        |  AuthZ  |      |
-|        |                                  |        |         |      |
-|        |                                  |        |<+ (8) +>|      |
-|        |                                  |        |Completed|      |
-|        |                                  |        |         |      |
-|        |--(11)-- Continue Request (B) --->|        |         +------+
-|        |                                  |        |
-|        |<-(12)----- Grant Access ---------|        |
-|        |                                  |        |
-|        |                                  |        |     +--------+
-|        |--(13)-- Access API ---------------------------->|   RS   |
-|        |                                  |        |     |        |
-|        |<-(14)-- API Response ---------------------------|        |
-|        |                                  |        |     +--------+
-+--------+                                  +--------+
+{::include diagram/usercode.md}
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance indicates that
     it can [display a user code](#request-interact-usercode).
 
 2. The AS determines that interaction is needed and [responds](#response) with
-    a [user code to communicate to the user](#response-interact-usercode). This
-    could optionally include a URI to direct the user to, but this URI should
-    be static and so could be configured in the client instance's documentation.
+    a [user code to communicate to the user](#response-interact-usercode).
     The AS also includes information the client instance will need to
     [continue the request](#response-continue) in (8) and (10). The AS associates this
     continuation information with an ongoing request that will be referenced in (4), (6), (8), and (10).
@@ -683,37 +558,15 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 
 
 ~~~ aasvg
-+--------+                                  +--------+         +------+
-| Client |                                  |   AS   |         |  RO  |
-|Instance|--(1)--- Request Access --------->|        |         |      |
-|        |                                  |        |         |      |
-|        |<-(2)-- Not Yet Granted (Wait) ---|        |         |      |
-|        |                                  |        |<+ (3) +>|      |
-|        |                                  |        |  AuthN  |      |
-|        |--(6)--- Continue Request (A) --->|        |         |      |
-|        |                                  |        |<+ (4) +>|      |
-|        |<-(7)-- Not Yet Granted (Wait) ---|        |  AuthZ  |      |
-|        |                                  |        |         |      |
-|        |                                  |        |<+ (5) +>|      |
-|        |                                  |        |Completed|      |
-|        |                                  |        |         |      |
-|        |--(8)--- Continue Request (B) --->|        |         +------+
-|        |                                  |        |
-|        |<-(9)------ Grant Access ---------|        |
-|        |                                  |        |
-|        |                                  |        |     +--------+
-|        |--(10)-- Access API ---------------------------->|   RS   |
-|        |                                  |        |     |        |
-|        |<-(11)-- API Response ---------------------------|        |
-|        |                                  |        |     +--------+
-+--------+                                  +--------+
+{::include diagram/async.md}
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
     send any interaction modes to the server, indicating that
     it does not expect to interact with the RO. The client instance can also signal
     which RO it requires authorization from, if known, by using the
-    [user request section](#request-user).
+    [user request section](#request-user). It's also possible for the AS to determine which
+    RO needs to be contacted by the nature of what access is being requested.
 
 2. The AS determines that interaction is needed, but the client instance cannot interact
     with the RO. The AS [responds](#response) with the information the client instance
@@ -767,17 +620,7 @@ without the need for an RO to be involved at runtime to approve the decision.
 Since there is no explicit RO, the client instance does not interact with an RO.
 
 ~~~ aasvg
-+--------+                            +--------+
-| Client |                            |   AS   |
-|Instance|--(1)--- Request Access --->|        |
-|        |                            |        |
-|        |<-(2)---- Grant Access -----|        |
-|        |                            |        |  +--------+
-|        |--(3)--- Access API ------------------->|   RS   |
-|        |                            |        |  |        |
-|        |<-(4)--- API Response ------------------|        |
-|        |                            |        |  +--------+
-+--------+                            +--------+
+{::include diagram/software.md}
 ~~~
 
 1. The client instance [requests access to the resource](#request). The client instance does not
@@ -804,29 +647,7 @@ the access token expires. The client instance then gets a new access token by ro
 expired access token at the AS using the token's management URI.
 
 ~~~ aasvg
-+--------+                                          +--------+
-| Client |                                          |   AS   |
-|Instance|--(1)--- Request Access ----------------->|        |
-|        |                                          |        |
-|        |<-(2)--- Grant Access --------------------|        |
-|        |                                          |        |
-|        |                             +--------+   |        |
-|        |--(3)--- Access Resource --->|   RS   |   |        |
-|        |                             |        |   |        |
-|        |<-(4)--- Success Response ---|        |   |        |
-|        |                             |        |   |        |
-|        |                             |        |   |        |
-|        |                             |        |   |        |
-|        |--(5)--- Access Resource --->|        |   |        |
-|        |                             |        |   |        |
-|        |<-(6)--- Error Response -----|        |   |        |
-|        |                             +--------+   |        |
-|        |                                          |        |
-|        |--(7)--- Rotate Token ------------------->|        |
-|        |                                          |        |
-|        |<-(8)--- Rotated Token -------------------|        |
-|        |                                          |        |
-+--------+                                          +--------+
+{::include diagram/refresh.md}
 ~~~
 
 1. The client instance [requests access to the resource](#request).
@@ -857,7 +678,7 @@ expired access token at the AS using the token's management URI.
     information, which the client instance will store in place of the values
     returned in (2).
 
-### Requesting User Information {#sequence-user}
+### Requesting Subject Information Only {#sequence-user}
 
 In this scenario, the client instance does not call an RS and does not
 request an access token. Instead, the client instance only requests
@@ -866,28 +687,7 @@ interaction modes can be used in this scenario, so these are shown only in
 the abstract as functions of the AS here.
 
 ~~~ aasvg
-+--------+                                  +--------+         +------+
-| Client |                                  |   AS   |         | User |
-|Instance|                                  |        |         |      |
-|        |--(1)--- Request Access --------->|        |         |      |
-|        |                                  |        |         |      |
-|        |<-(2)-- Interaction Needed -------|        |         |      |
-|        |                                  |        |         |      |
-|        |+ (3) + Facilitate Interaction + + + + + + + + + + > |      |
-|        |                                  |        |         |      |
-|        |                                  |        |<+ (4) +>|      |
-|        |                                  |        |  AuthN  |      |
-|        |                                  |        |         |      |
-|        |                                  |        |<+ (5) +>|      |
-|        |                                  |        |  AuthZ  |      |
-|        |                                  |        |         |      |
-|        |< (6) + Signal Continuation + + + + + + + + + + + + +|      |
-|        |                                  |        |         +------+
-|        |--(7)--- Continue Request ------->|        |
-|        |                                  |        |
-|        |<-(8)----- Grant Access ----------|        |
-|        |                                  |        |
-+--------+                                  +--------+
+{::include diagram/subject.md}
 ~~~
 
 1. The client instance [requests access to subject information](#request).
@@ -5430,28 +5230,7 @@ HTTP request on command. With both of these in place, an attacker attempting to 
 is stopped in several places.
 
 ~~~ aasvg
-+------+     +--------+     +--------+     +--------+
-| User |     |Attacker|     | Client |     |   AS   |
-|      |     |        |     |Instance|     |        |
-|      |     |        |     |        |     |        |
-|      |     |        |(1)+>|        |     |        |
-|      |     |        |     |        |(2)->|        |
-|      |     |        |     |        |<-(3)|        |
-|      |     |        |<+(4)|        |     |        |
-|      |     |        |(5)+ + + + + + + + >|        |
-|      |     |        |< + + + + + + + +(6)|        |
-|      |     |        |     |        |     |        |
-|      |(A) + + + + + + + +>|        |     |        |
-|      |     |        |     |        |(B)->|        |
-|      |     |        |     |        |<-(C)|        |
-|      |<+ + + + + + + + (D)|        |     |        |
-|      |(E) + + + + + + + + + + + + + + + >|        |
-|      |     |        |     |        |     |        |
-|      |<+(7)|        |     |        |     |        |
-|      |(F) + + + + + + + +>|        |     |        |
-|      |     |        |     |        |(G)->|        |
-|      |     |        |     |        |     |        |
-+------+     +--------+     +--------+     +--------+
+{::include diagram/hash.md}
 ~~~
 
 - Prerequesits: The client instance can allow multiple end users to
