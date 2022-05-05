@@ -13,7 +13,7 @@
 |        |                                  |        |  AuthN  |      |
 |        +--(9)--- Continue Request (A) --->|        |         |      |
 |        |                                  |        |<==(6)==>|      |
-|        |<-(10)- Not Yet Granted (Wait) ---+        |  Code   |      |
+|        |<-(10)-- Not Yet Granted (Wait) --+        |  Code   |      |
 |        |                                  |        |         |      |
 |        |                                  |        |<==(7)==>|      |
 |        |                                  |        |  AuthZ  |      |
