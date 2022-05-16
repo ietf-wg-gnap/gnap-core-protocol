@@ -4429,7 +4429,7 @@ As being equivalent to the following fully-defined object:
 The exact mechanisms for relating reference strings is up to the API designer. These are enforced
 by the AS, and the details are out of scope for this specification.
 
--1047This functionality is similar in practice to OAuth 2.0's `scope` parameter {{RFC6749}}, where a single string
+This functionality is similar in practice to OAuth 2.0's `scope` parameter {{RFC6749}}, where a single string
 represents the set of access rights requested by the client instance. As such, the reference
 string could contain any valid OAuth 2.0 scope value as in {{example-oauth2}}. Note that the reference
 string here is not bound to the same character restrictions as in OAuth 2.0's `scope` definition.
