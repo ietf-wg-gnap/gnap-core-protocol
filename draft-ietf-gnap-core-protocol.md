@@ -4421,7 +4421,7 @@ As being equivalent to the following fully-defined object:
     {
         "type": "photo-api",
         "actions": [ "read", "write", "delete" ],
-        "datatypes": [" metadata", "image" ]
+        "datatypes": [ "metadata", "image" ]
     }
 ]
 ~~~
