@@ -4384,7 +4384,9 @@ the union of the requested types of access for each of the two APIs, just as abo
 
 Instead of sending an [object describing the requested resource](#resource-access-rights),
 access rights MAY be communicated as a string known to
-the AS representing the access being requested. In the following non-normative example,
+the AS representing the access being requested. Just like access rights communicated
+as an object, access rights communicated as reference strings indicate a specific
+access at a protected resource. In the following non-normative example,
 three distinct resource access rights are being requested.
 
 ~~~ json
