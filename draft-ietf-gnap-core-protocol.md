@@ -4404,6 +4404,8 @@ API designer choosing any such human-readable strings SHOULD take steps
 to ensure the string values are not easily confused by a developer,
 such as by limiting the strings to easily disambiguated characters.
 
+In order to facilitate the use of both object and reference strings to access the same
+kind of APIs, the API designer can define a clear mapping between these forms.
 One possible approach for choosing reference string values is to use the same value as the
 `type` parameter from the fully-specified object, with the API defining a set of default
 behaviors in this case. For example, an API definition could declare the following string:
@@ -4473,11 +4475,6 @@ as well as the reference values of `read`, `dolphin-metadata`, and `some other t
 
 The requested access is the union of all elements of the array, including both objects and
 reference strings.
-
-
-
-In order to facilitate the use of both object and reference strings to access the same
-kind of APIs, the API designer
 
 # Discovery {#discovery}
 
