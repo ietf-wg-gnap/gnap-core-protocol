@@ -3756,20 +3756,20 @@ For example, the `httpsig` method can be specified with its parameters as:
 ~~~
 
 If additional parameters are not required or used for a specific method, the method MAY be passed
-as a string instead of an object. For example, the `httpsig` method with no additional parameters could be sent instead as:
+as a string instead of an object. For example, the `mtls` method with no additional parameters could be sent by the client instance as:
 
 ~~~ json
 {
-    "proof": "httpsig"
+    "proof": "mtls"
 }
 ~~~
 
-This compact form is equivalent to sending the following object:
+The AS would map this to the equivalent expanded form as follows:
 
 ~~~ json
 {
     "proof": {
-        "method": "httpsig"
+        "method": "mtls"
     }
 }
 ~~~
@@ -3852,12 +3852,12 @@ NOTE: '\' line wrapping per RFC 8792
 This method is indicated by the method value `httpsig`. The signer creates an HTTP
 Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}. This method defines the following parameters:
 
-`alg`
+`alg`:
 : The explicit HTTP signature algorithm, from the HTTP Signature Algorithm registry. If
     this parameter is omitted, the signing algorithm MUST be derived from the key
     material (such as using the JWS algorithm in a JWK formatted key). OPTIONAL.
 
-`content-digest-alg`
+`content-digest-alg`:
 : The algorithm used for the Content-Digest field, used to protect the body. If this
     parameter is omitted, its value is `sha-256`. OPTIONAL.
 
