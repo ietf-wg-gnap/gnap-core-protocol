@@ -1959,7 +1959,7 @@ interaction methods are included in the same `interact` object.
 `app` (string):
 : Launch of an application URI. REQUIRED if the `app` interaction start mode is possible for this request. See {{response-interact-app}}.
 
-`user_code` (object):
+`user_code` (string):
 : Display a short user code. REQUIRED if the `user_code` interaction start mode is possible for this request. See {{response-interact-usercode}}.
 
 `user_code_uri` (object):
@@ -2039,29 +2039,23 @@ application URI. See details of the interaction in {{interaction-app}}.
 If the client instance indicates that it can
 [display a short user-typeable code](#request-interact-usercode)
 and the AS supports this mode for the client instance's
-request, the AS responds with a "user_code" field. This field is an
-object that contains the following members.
-
-
-`code` (string):
-: A unique short code that the user
-    can type into a web page. This string MUST be
-    case-insensitive, MUST consist of only easily typeable
-    characters (such as letters or numbers). The time in which this
-    code will be accepted SHOULD be short lived, such as several
-    minutes. It is RECOMMENDED that this code be no more than eight
-    characters in length.
-    REQUIRED.
+request, the AS responds with a "user_code" field. This field is string
+containing a unique short code that the user
+can type into a web page. This string MUST be
+case-insensitive, MUST consist of only easily typeable
+characters (such as letters or numbers). The time in which this
+code will be accepted SHOULD be short lived, such as several
+minutes. It is RECOMMENDED that this code be no more than eight
+characters in length.
+REQUIRED.
 
 ~~~ json
 "interact": {
-    "user_code": {
-        "code": "A1BC-3DFF",
-    }
+    "user_code": "A1BC-3DFF"
 }
 ~~~
 
-The client instance MUST communicate the "code" to the end user in some
+The client instance MUST communicate the "user_code" value to the end user in some
 fashion, such as displaying it on a screen or reading it out
 audibly. This code is used by the interaction component of the AS as a means
 of identifying the pending grant request and does not function as an
@@ -5553,6 +5547,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -10
     - Removed "split_token" functionality.
+    - Collapse "user_code" into a string instead of an object.
 
 - -09
     - Added security considerations on redirection status codes.
