@@ -1,0 +1,16 @@
+{
+  "name": "gnap-core-protocol",
+  "version": "1.0.0",
+  "description": "GNAP Core Protocol Specification",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ietf-wg-gnap/gnap-core-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ietf-wg-gnap/gnap-core-protocol/issues"
+  },
+  "homepage": "https://github.com/ietf-wg-gnap/gnap-core-protocol#readme",
+  "dependencies": {
+    "aasvg": "^0.3.1"
+  }
+}
