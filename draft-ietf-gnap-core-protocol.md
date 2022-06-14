@@ -4391,9 +4391,10 @@ the union of the requested types of access for each of the two APIs, just as abo
 
 Instead of sending an [object describing the requested resource](#resource-access-rights),
 access rights MAY be communicated as a string known to
-the AS or RS representing the access being requested. Each string
-SHOULD correspond to a specific expanded object representation at
-the AS.
+the AS representing the access being requested. Just like access rights communicated
+as an object, access rights communicated as reference strings indicate a specific
+access at a protected resource. In the following non-normative example,
+three distinct resource access rights are being requested.
 
 ~~~ json
 "access": [
@@ -4409,6 +4410,33 @@ seen and understood by the client software's developer. In such cases, the
 API designer choosing any such human-readable strings SHOULD take steps
 to ensure the string values are not easily confused by a developer,
 such as by limiting the strings to easily disambiguated characters.
+
+In order to facilitate the use of both object and reference strings to access the same
+kind of APIs, the API designer can define a clear mapping between these forms.
+One possible approach for choosing reference string values is to use the same value as the
+`type` parameter from the fully-specified object, with the API defining a set of default
+behaviors in this case. For example, an API definition could declare the following string:
+
+~~~ json
+"access": [
+    "photo-api"
+]
+~~~
+
+As being equivalent to the following fully-defined object:
+
+~~~ json
+"access": [
+    {
+        "type": "photo-api",
+        "actions": [ "read", "write", "delete" ],
+        "datatypes": [ "metadata", "image" ]
+    }
+]
+~~~
+
+The exact mechanisms for relating reference strings is up to the API designer. These are enforced
+by the AS, and the details are out of scope for this specification.
 
 This functionality is similar in practice to OAuth 2.0's `scope` parameter {{RFC6749}}, where a single string
 represents the set of access rights requested by the client instance. As such, the reference
@@ -5592,6 +5620,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 - -10
+    - Added note on relating access rights sent as strings to rights sent as objects.
     - Expand proofing methods to allow definition by object, with single string as optimization for common cases.
     - Removed "split_token" functionality.
     - Collapse "user_code" into a string instead of an object.
