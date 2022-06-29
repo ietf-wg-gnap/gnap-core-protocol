@@ -2680,9 +2680,7 @@ The "hash_method" value MUST be one of the hash name strings defined in the
 If the "hash_method" value is not present in the client instance's
 request, the algorithm defaults to "sha3-512".
 
-#### sha3-512 {#hash-sha3}
-
-The "sha3-512" hash method consists of hashing the input string
+For example, the "sha3-512" hash method consists of hashing the input string
 with the 512-bit SHA3 algorithm. The byte array is then encoded
 using URL-Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
 hash value.
@@ -2693,8 +2691,6 @@ NOTE: '\' line wrapping per RFC 8792
 p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM\
   7XHPAdJzTZMtKBsaraJ64A
 ~~~
-
-#### sha2-512 {#hash-sha2}
 
 The "sha2-512" hash method consists of hashing the input string
 with the 512-bit SHA2 algorithm. The byte array is then encoded
