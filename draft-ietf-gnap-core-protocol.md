@@ -2391,7 +2391,7 @@ need to sign off on a transfer request. Alternatively, the AS could require N of
 to approve a given request in order. The AS could also determine that the end user is not the appropriate RO
 for a given request and reach out to the appropriate RO asynchronously.
 
-The RO is also allowed to define a policy at the AS to determine which kind of end user can get access to the resource, and under which condition. For instance, such a condition might require the end user login and the acceptance of the RO's legal provisions.
+The RO is also allowed to define a policy at the AS to determine which kind of end user can get access to the resource, and under which condition. For instance, such a condition might require the end user login and the acceptance of the RO's legal provisions. Alternatively, client software could be acting without an end user, and the RO's policy allows issuance of access tokens to instances of that client software without human interaction.
 
 The details of determining which RO's or related policies are required for a given request are out of scope for this specification.
 
