@@ -2986,7 +2986,9 @@ of the interaction responses as described in {{response-interact}}, just like it
 request.
 
 The client instance MAY include the `user` field as described in {{request-user}} to present new assertions
-or information about the end user.
+or information about the end user. The AS SHOULD check that this presented user information is
+consistent with any user information previously presented by the client instance for this
+grant request.
 \[\[ [See issue #93](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/93) \]\]
 
 The client instance MUST NOT include the `client` section of the request, since the client
