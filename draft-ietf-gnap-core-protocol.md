@@ -2360,12 +2360,12 @@ is capable of asking for several different kinds of information in response:
 - the subject information being requested in the `subject` request parameter
 - any additional requested information defined by extensions of this protocol
 
-When the grant request is in the _processing_ state, the AS determines what authorizations and 
+When the grant request is in the _processing_ state, the AS determines what authorizations and
 consents are required to fulfill this requested delegation. The details of how the
-AS makes this determination are out of scope for this document. However, there are several common 
-patterns defined and supported by GNAP for fulfilling these requirements, including information 
-sent by the client instance, information gathered through the interaction process, and information 
-supplied by external parties. An individual AS can define its own policies and processes for 
+AS makes this determination are out of scope for this document. However, there are several common
+patterns defined and supported by GNAP for fulfilling these requirements, including information
+sent by the client instance, information gathered through the interaction process, and information
+supplied by external parties. An individual AS can define its own policies and processes for
 deciding when and how to gather the necessary authorizations and consent.
 
 The client instance can supply information directly to the AS in its request. From this information, the AS can determine
@@ -2381,8 +2381,8 @@ If the AS determines that the information presented in the initial request is su
 access, the AS MAY move the grant request to the _approved_ state and return results [immediately in its response](#response) with
 access tokens and subject information.
 
-If the AS determines that additional runtime authorization is required, the AS can either deny the 
-request outright (if there is no possible recovery) or move the grant request to the _pending_ 
+If the AS determines that additional runtime authorization is required, the AS can either deny the
+request outright (if there is no possible recovery) or move the grant request to the _pending_
 state and use a number of means at its disposal to gather that authorization from the appropriate ROs, including for example:
 
 - starting interaction with the end user facilitated by the client software, such as a redirection or user code
@@ -2739,7 +2739,7 @@ NOTE: '\' line wrapping per RFC 8792
 While it is possible for the AS to return an _approved_ [grant response](#response) with all the
 client instance's requested information (including [access tokens](#response-token) and
 [direct user information](#response-subject)) immediately, it's more common that the AS and
-the client instance will need to communicate several times over the lifetime of a grant request, 
+the client instance will need to communicate several times over the lifetime of a grant request,
 especially while it is in the _pending_ state.
 This is often part of facilitating [interaction](#authorization), but it could
 also be used to allow the AS and client instance to continue negotiating the parameters of
@@ -2855,7 +2855,7 @@ MUST NOT include the interaction reference. If the AS detects a client instance 
 interaction reference multiple times, the AS MUST return an error and SHOULD invalidate
 the ongoing request.
 
-If the grant request is in the _approved_ state, the [grant response](#response) MAY contain any 
+If the grant request is in the _approved_ state, the [grant response](#response) MAY contain any
 newly-created [access tokens](#response-token) or
 newly-released [subject information](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. The response
@@ -2906,7 +2906,7 @@ Signature-Input: sig1=...
 Signature: sig1=...
 ~~~
 
-If the grant request is in the _approved_ state, the [grant response](#response) MAY contain any 
+If the grant request is in the _approved_ state, the [grant response](#response) MAY contain any
 newly-created [access tokens](#response-token) or
 newly-released [subject claims](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. If a `continue`
@@ -2979,10 +2979,10 @@ If the client instance is asking for more limited access, the AS could determine
 has been granted to the client instance and return the more limited access rights immediately.
 \[\[ [See issue #92](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/92) \]\]
 
-The client instance MAY include the `interact` field as described in {{request-interact}}. 
-Inclusion of this field indicates that the client instance is capable of driving interaction with 
-the end user, and this field replaces any values from a previous request. The AS MAY respond to any 
-of the interaction responses as described in {{response-interact}}, just like it would to a new 
+The client instance MAY include the `interact` field as described in {{request-interact}}.
+Inclusion of this field indicates that the client instance is capable of driving interaction with
+the end user, and this field replaces any values from a previous request. The AS MAY respond to any
+of the interaction responses as described in {{response-interact}}, just like it would to a new
 request.
 
 The client instance MAY include the `user` field as described in {{request-user}} to present new assertions
@@ -3199,7 +3199,7 @@ process are new access tokens and do not modify the rights of existing access to
 
 ## Revoking a Grant Request {#continue-delete}
 
-If the client instance wishes to cancel an ongoing grant request and place it into the _revoked_ 
+If the client instance wishes to cancel an ongoing grant request and place it into the _revoked_
 state, the client instance makes an
 HTTP DELETE request to the continuation URI.
 
