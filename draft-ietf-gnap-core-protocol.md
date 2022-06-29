@@ -5627,6 +5627,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Expand proofing methods to allow definition by object, with single string as optimization for common cases.
     - Removed "split_token" functionality.
     - Collapse "user_code" into a string instead of an object.
+    - References hash algorithm identifiers from the existing IANA registry
 
 - -09
     - Added security considerations on redirection status codes.
