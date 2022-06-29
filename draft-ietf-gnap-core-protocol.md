@@ -1461,10 +1461,9 @@ indicates this by sending the following members of an object under the `finish` 
     request. REQUIRED.
 
 `hash_method` (string):
-: The hash calculation
-    mechanism to be used for the callback hash in {{interaction-hash}}. Can be one of `sha3` or `sha2`. If
-    absent, the default value is `sha3`. OPTIONAL.
-    \[\[ [See issue #56](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/56) \]\]
+: An identifier of a hash calculation mechanism to be used for the callback hash in {{interaction-hash}},
+    as defined in the [IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg).
+    If absent, the default value is `sha3-512`. OPTIONAL.
 
 This specification defines the following values for the `method` parameter,
 with other values defined by [a registry TBD](#IANA):
@@ -2671,17 +2670,21 @@ https://server.example.com/tx
 ~~~
 
 The party then hashes this string with the appropriate algorithm
-based on the "hash_method" parameter under the "finish" key.
+based on the "hash_method" parameter under the "finish" key. The resulting
+byte array from the hash function is then encoded using URL-Safe Base64
+with no padding {{!RFC4648}}. The resulting string is the hash value.
+
+The "hash_method" value MUST be one of the hash name strings defined in the
+[IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg).
+
 If the "hash_method" value is not present in the client instance's
-request, the algorithm defaults to "sha3".
+request, the algorithm defaults to "sha3-512".
 
-\[\[ [See issue #56](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/56) \]\]
+#### sha3-512 {#hash-sha3}
 
-#### SHA3-512 {#hash-sha3}
-
-The "sha3" hash method consists of hashing the input string
+The "sha3-512" hash method consists of hashing the input string
 with the 512-bit SHA3 algorithm. The byte array is then encoded
-using URL Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
+using URL-Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
 hash value.
 
 ~~~
@@ -2691,11 +2694,11 @@ p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM\
   7XHPAdJzTZMtKBsaraJ64A
 ~~~
 
-#### SHA2-512 {#hash-sha2}
+#### sha2-512 {#hash-sha2}
 
-The "sha2" hash method consists of hashing the input string
+The "sha2-512" hash method consists of hashing the input string
 with the 512-bit SHA2 algorithm. The byte array is then encoded
-using URL Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
+using URL-Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
 hash value.
 
 ~~~
