@@ -1968,6 +1968,8 @@ interaction methods are included in the same `interact` object.
 `finish` (string):
 : A nonce used by the client instance to verify the callback after interaction is completed. REQUIRED if the interaction finish method requested by the client instance is possible for this request. See {{response-interact-finish}}.
 
+`expires_in` (integer):
+: The number of integer seconds after which this set of interaction responses will expire and no longer be usable by the client instance. If the interaction methods expire, the client MAY re-start the interaction process for this grant request by sending an [update](#continue-modify) with a new [interaction request](#request-interact) section. OPTIONAL. If omitted, the interaction response modes returned do not expire.
 
 Additional interaction mode responses can be defined in [a registry TBD](#IANA).
 
@@ -2303,6 +2305,10 @@ reason, it responds to the client instance with an error message.
 
     `"request_denied"`:
     : The request was denied for an unspecified reason.
+
+    `"invalid_interaction"`
+    : The client instance has provided an interaction reference that is incorrect
+        for this request or the interaction modes in use have expired.
 
 `error_description` (string):
 :   A human-readable string description of the error intended for the
