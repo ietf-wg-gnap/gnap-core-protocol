@@ -4,18 +4,18 @@
                       .---Need Interaction---->|         |    |
                      /                         | Pending |<--`
                     /   .--Finish Interaction--+         |
-                   /   /                       +----+----+
+                   /   /     (approve/deny)    +----+----+
                   /   /                             |
                  /   /                              | Cancel
                 /   v                               v
-             +-+----------+                    +=========+
-             |            |                    ║         ║
----Request-->| Processing +-------Revoke------>║ Revoked ║
-             |            |                    ║         ║
-             +-+----------+                    +=========+
+             +-+----------+                   +===========+
+             |            |                   ║           ║
+---Request-->| Processing +------Finalize---->║ Finalized ║
+             |            |                   ║           ║
+             +-+----------+                   +===========+
                 \    ^                              ^
-                 \    \                             | Revoke
-                  \    \                            |
+                 \    \                             | Revoke or
+                  \    \                            | Finalize
                    \    \                     +-----+----+
                     \    `-----Update---------+          |
                      \                        | Approved |<--.
