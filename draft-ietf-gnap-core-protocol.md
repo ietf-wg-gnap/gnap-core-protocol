@@ -1312,10 +1312,6 @@ that interaction is required, then the AS SHOULD return an
 error since the client instance will be unable to complete the
 request without authorization.
 
-The AS SHOULD handle any interact request as a one-time-use mechanism and SHOULD apply suitable timeouts to any interaction mechanisms
-provided, including user codes and redirection URIs. The client instance SHOULD
-apply suitable timeouts to any callback URIs.
-
 ### Start Mode Definitions {#request-interact-start}
 
 This specification defines the following interaction start modes as an array of string values under the `start` key:
@@ -2418,13 +2414,22 @@ If the AS and client instance have not reached a state where the delegation can 
 AS and client instance can repeat the interaction process as long as the AS supplies the client
 instance with [continuation information](#response-continue) to facilitate the ongoing requests.
 
-## Interaction Start Methods {#interaction-start}
+The AS SHOULD handle any interact request as a one-time-use mechanism and SHOULD apply suitable
+timeouts to any interaction start methods provided, including user codes and redirection URIs.
+The client instance SHOULD apply suitable timeouts to any interaction finish method.
 
-To initiate an interaction start method indicated by the
+## Starting Interaction With the End User {#interaction-start}
+
+To initiate an interaction start modes indicated by the
 [interaction start responses](#response-interact) from the AS, the client instance
-follows the steps defined by that interaction method. The actions of the client instance
+follows the steps defined by that interaction start mode. The actions of the client instance
 required for the interaction start modes defined in this specification are described
-in the following sections.
+in the following sections. Interaction start modes defined in
+
+If the client instance does not start an interaction start mode within an AS-determined amount of
+time, the AS SHOULD reject attempts to use the interaction start modes. If the client instance has
+already begun one interaction start mode, the AS SHOULD reject attempts to use other interaction
+start modes.
 
 ### Interaction at a Redirected URI {#interaction-redirect}
 
