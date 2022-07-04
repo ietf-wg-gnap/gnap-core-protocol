@@ -2424,7 +2424,8 @@ To initiate an interaction start modes indicated by the
 [interaction start responses](#response-interact) from the AS, the client instance
 follows the steps defined by that interaction start mode. The actions of the client instance
 required for the interaction start modes defined in this specification are described
-in the following sections. Interaction start modes defined in
+in the following sections. Interaction start modes defined in extensions to this specification
+MUST define the expected actions of the client software.
 
 If the client instance does not start an interaction start mode within an AS-determined amount of
 time, the AS SHOULD reject attempts to use the interaction start modes. If the client instance has
