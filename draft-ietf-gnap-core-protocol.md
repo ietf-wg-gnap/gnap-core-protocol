@@ -102,8 +102,8 @@ informative:
             -
                 ins: O. Oueidat
     HELMSCHMIDT2022:
-        target: 'tbd'
-        title: 'tbd'
+        target: 'http://dx.doi.org/10.18419/opus-12203'
+        title: Security Analysis of the Grant Negotiation and Authorization Protocol
         date: 2022
         author:
             -
