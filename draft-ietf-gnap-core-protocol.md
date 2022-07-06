@@ -1337,10 +1337,6 @@ that interaction is required, then the AS SHOULD return an
 error since the client instance will be unable to complete the
 request without authorization.
 
-The AS SHOULD handle any interact request as a one-time-use mechanism and SHOULD apply suitable timeouts to any interaction mechanisms
-provided, including user codes and redirection URIs. The client instance SHOULD
-apply suitable timeouts to any callback URIs.
-
 ### Start Mode Definitions {#request-interact-start}
 
 This specification defines the following interaction start modes as an array of string values under the `start` key:
@@ -1991,6 +1987,8 @@ interaction methods are included in the same `interact` object.
 `finish` (string):
 : A nonce used by the client instance to verify the callback after interaction is completed. REQUIRED if the interaction finish method requested by the client instance is possible for this request. See {{response-interact-finish}}.
 
+`expires_in` (integer):
+: The number of integer seconds after which this set of interaction responses will expire and no longer be usable by the client instance. If the interaction methods expire, the client MAY re-start the interaction process for this grant request by sending an [update](#continue-modify) with a new [interaction request](#request-interact) section. OPTIONAL. If omitted, the interaction response modes returned do not expire.
 
 Additional interaction mode responses can be defined in [a registry TBD](#IANA).
 
@@ -2331,6 +2329,10 @@ reason, it responds to the client instance with an error message.
     `"request_denied"`:
     : The request was denied for an unspecified reason.
 
+    `"invalid_interaction"`
+    : The client instance has provided an interaction reference that is incorrect
+        for this request or the interaction modes in use have expired.
+
 `error_description` (string):
 :   A human-readable string description of the error intended for the
     developer of the client.
@@ -2442,15 +2444,25 @@ polling, or through some other method defined by an extension of this specificat
 If the grant request is not in the _approved_ state, the
 client instance can repeat the interaction process by sending a [grant update request](#continue-modify) with new [interaction](#request-interact) methods.
 
-## Interaction Start Methods {#interaction-start}
+The AS SHOULD handle any interact request as a one-time-use mechanism and SHOULD apply suitable
+timeouts to any interaction start methods provided, including user codes and redirection URIs.
+The client instance SHOULD apply suitable timeouts to any interaction finish method.
+
+## Starting Interaction With the End User {#interaction-start}
 
 When a grant request is in the _pending_ state, the interaction start methods sent by
 the client instance can be used to facilitate interaction with the end user.
 To initiate an interaction start method indicated by the
 [interaction start responses](#response-interact) from the AS, the client instance
-follows the steps defined by that interaction method. The actions of the client instance
+follows the steps defined by that interaction start mode. The actions of the client instance
 required for the interaction start modes defined in this specification are described
-in the following sections.
+in the following sections. Interaction start modes defined in extensions to this specification
+MUST define the expected actions of the client software.
+
+If the client instance does not start an interaction start mode within an AS-determined amount of
+time, the AS SHOULD reject attempts to use the interaction start modes. If the client instance has
+already begun one interaction start mode, the AS SHOULD reject attempts to use other interaction
+start modes.
 
 ### Interaction at a Redirected URI {#interaction-redirect}
 
@@ -5675,6 +5687,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Expand proofing methods to allow definition by object, with single string as optimization for common cases.
     - Removed "split_token" functionality.
     - Collapse "user_code" into a string instead of an object.
+    - Allow interaction responses to time out.
     - Added explicit protocol state discussion.
     - Added RO policy use case.
 
