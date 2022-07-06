@@ -3014,7 +3014,7 @@ The client instance MUST NOT include post-interaction responses such as describe
 
 Modification requests MUST NOT alter previously-issued access tokens. Instead, any access
 tokens issued from a continuation are considered new, separate access tokens. The AS
-MAY revoke existing access tokens after a modification has occurred.
+MAY revoke previously-issued access tokens after a modification has occurred.
 \[\[ [See issue #96](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/96) \]\]
 
 If the modified request can be granted immediately by the AS,
