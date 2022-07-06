@@ -4105,6 +4105,12 @@ and their values MUST be valid. If the HTTP message request contains
 a body, the verifier MUST calculate the hash of body just as
 the signer does, with no normalization or transformation of the request.
 
+Note that this proof method depends on a specific cryptographic algorithm, SHA-256, in two ways:
+the `ath` hash algorithm is hardcoded, and computing the payload of the detached/attached signature
+also uses a hardcoded hash. A future version of this document may address crypto-agility for both
+these uses by replacing ath with a new header that upgrades the algorithm, and possibly defining a
+new header that indicates the HTTP content's hash method.
+
 ### Attached JWS {#attached-jws}
 
 This method is indicated by the method value `jws`. This method defines no
@@ -4261,6 +4267,12 @@ expected key of the signer. All required fields MUST be present
 and their values MUST be valid. If the HTTP message request contains
 a body, the verifier MUST decode the payload of the JWS object and
 treat this as the HTTP message body.
+
+Note that this proof method depends on a specific cryptographic algorithm, SHA-256, in two ways:
+the `ath` hash algorithm is hardcoded, and computing the payload of the detached/attached signature
+also uses a hardcoded hash. A future version of this document may address crypto-agility for both
+these uses by replacing ath with a new header that upgrades the algorithm, and possibly defining a
+new header that indicates the HTTP content's hash method.
 
 # Resource Access Rights {#resource-access-rights}
 
