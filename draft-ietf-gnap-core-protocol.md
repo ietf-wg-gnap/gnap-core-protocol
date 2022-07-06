@@ -307,6 +307,30 @@ A global assumption made by GNAP is that authorization requests are security and
 
 A formal trust model is out of scope of this specification, but might be carried out thanks to {{promise-theory}}.
 
+## Protocol Flow {#protocol}
+
+GNAP is fundamentally designed to allow delegated access to APIs and other information, such as subject information, using a multi-stage, stateful process. This process allows different parties to provide information into the system to alter and augment the state of the delegated access and its artifacts.
+
+The underlying requested grant moves through several states as different actions take place during the protocol:
+
+~~~ aasvg
+{::include diagram/states.md}
+~~~
+
+*Processing*
+: When a [request for access](#request) is received by the AS, a new grant request is created and placed in the _processing_ state by the AS. This state is also entered when an existing grant request is updated by the client instance and when interaction is completed. In this state, the AS processes the context of the grant request to determine whether interaction with the end user or RO is required for approval of the request. The grant request has to exit this state before a response can be returned to the client instance. If approval is required, the request moves to the _pending_ state and the AS returns a [continue response](#response-continue) along with any appropriate [interaction responses](#response-interact). If no such approval is required, such as when the client instance is acting on its own behalf or the AS can determine that access has been fulfilled, the request moves to the _approved_ state where [access tokens for API access](#response-token) and [subject information](#response-subject) can be issued to the client instance. If the AS determines that no additional processing can occur (such as a timeout or an unrecoverable error), the grant request is moved to the _finalized_ state and is terminated.
+
+*Pending*
+: When a request needs to be approved by a RO, or interaction with the end user is required, the grant request enters a state of _pending_. In this state, no access tokens can be granted and no subject information can be released to the client instance. While a grant request is in this state, the AS seeks to gather the required [consent and authorization](#authorization) for the requested access. A grant request in this state is always associated with a _continuation access token_ bound to the client instance's key. If no [interaction finish method](#request-interact-finish) is associated with this request, the client instance can send a [polling continue request](#continue-poll) to the AS. This returns a [continue response](#response-continue) while the grant request remains in this state, allowing the client instance to continue to check the state of the pending grant request. If an [interaction finish method](#request-interact-finish) is specified in the grant request, the client instance can [continue the request after interaction](#continue-after-interaction) to the AS to move this request to the _processing_ state to be re-evaluated by the AS. Note that this occurs whether the grant request has been approved or denied by the RO, since the AS needs to take into account the full context of the request before determining the next step for the grant request. When other information is made available in the context of the grant request, such as through the asynchronous actions of the RO, the AS moves this request to the _processing_ state to be re-evaluated. If the AS determines that no additional interaction can occur, such as all the interaction methods have timed out or a [revocation request](#continue-delete) is received from the client instance, the grant request can be moved to the _finalized_ state.
+
+*Approved*
+: When a request has been approved by an RO and no further interaction with the end user is required, the grant request enters a state of _approved_. In this state, responses to the client instance can include [access tokens for API access](#response-token) and [subject information](#response-subject). If continuation and updates are allowed for this grant request, the AS can include the [contination response](#response-continue). In this state, [post-interaction continuation requests](#continue-after-interaction) are not allowed, since all interaction is assumed to have been completed. If the client instance sends a [polling continue request](#continue-poll) while the request is in this state, [new access tokens](#response-token) can be issued in the response. Note that this always creates a new access token, but existing access tokens can be rotated and managed using the [token management API](#token-management). The client instance can send an [update continuation request](#continue-modify) to modify the requested access, causing the AS to move the request back to the _processing_ state for re-evaluation. If the AS determines that no additional tokens can be issued, and that no additional updates are to be accepted (such as the continuation access tokens have expired), the grant is moved to the _finalized_ state.
+
+*Finalized*
+: After the access tokens are issued, if the AS does not allow any additional updates on the grant request, the grant request enters the _finalized_ state. This state is also entered when an existing grant request is [revoked by the client instance](#continue-delete) or otherwise revoked by the AS (such as through out-of-band action by the RO). This state can also be entered if the AS determines that no additional processing is possible, for example if the RO has denied the requested access or if interaction is required but no compatible interaction methods are available. Once in this state, no new access tokens can be issued, no subject information can be returned, and no interactions can take place. Once in this state, the grant request is dead and cannot be revived. If future access is desired by the client instance, a new grant request can be created, unrelated to this grant request.
+
+While it is possible to deploy an AS in a stateless environment, such deployments will need a way to manage the current state of the grant request in a secure and deterministic fashion.
+
 ## Sequences {#sequence}
 
 GNAP can be used in a variety of ways to allow the core
@@ -803,8 +827,9 @@ A non-normative example of a grant request is below:
 ~~~
 
 
+Sending a request to the grant endpoint creates a grant request in the _processing_ state. The AS processes this request to determine whether interaction or authorization are necessary (moving to the _pending_ state), or if access can be granted immediately (moving to the _approved_ state).
 
-The request and response MUST be sent as a JSON object in the body of the HTTP
+The request MUST be sent as a JSON object in the body of the HTTP
 POST request with Content-Type `application/json`,
 unless otherwise specified by the signature mechanism.
 
@@ -1312,10 +1337,6 @@ that interaction is required, then the AS SHOULD return an
 error since the client instance will be unable to complete the
 request without authorization.
 
-The AS SHOULD handle any interact request as a one-time-use mechanism and SHOULD apply suitable timeouts to any interaction mechanisms
-provided, including user codes and redirection URIs. The client instance SHOULD
-apply suitable timeouts to any callback URIs.
-
 ### Start Mode Definitions {#request-interact-start}
 
 This specification defines the following interaction start modes as an array of string values under the `start` key:
@@ -1680,7 +1701,6 @@ If the AS determines that the request can be continued with
 additional requests, it responds with the `continue` field. This field
 contains a JSON object with the following properties.
 
-
 `uri` (string):
 : The URI at which the client instance can make
     continuation requests. This URI MAY vary per
@@ -1720,16 +1740,13 @@ contains a JSON object with the following properties.
 ~~~
 
 
-
-The client instance can use the values of this field to continue the
+This field is REQUIRED if the grant request is in the _pending_ state, as
+the field contains the information needed by the client request to continue the
 request as described in {{continue-request}}. Note that the
+continuation access token is bound to the client instance's key, and therefore the
 client instance MUST sign all continuation requests with its key as described
 in {{binding-keys}} and
-MUST present the access token in its continuation request.
-
-This field SHOULD be returned when interaction is expected, to
-allow the client instance to follow up after interaction has been
-concluded.
+MUST present the continuation access token in its continuation request.
 
 ## Access Tokens {#response-token}
 
@@ -1740,6 +1757,8 @@ as described in {{response-token-multiple}}.
 
 The client instance uses any access tokens in this response to call the RS as
 described in {{use-access-token}}.
+
+The grant request MUST be in the _approved_ state to include this field in the response.
 
 ### Single Access Token {#response-token-single}
 
@@ -1967,6 +1986,8 @@ interaction methods are included in the same `interact` object.
 `finish` (string):
 : A nonce used by the client instance to verify the callback after interaction is completed. REQUIRED if the interaction finish method requested by the client instance is possible for this request. See {{response-interact-finish}}.
 
+`expires_in` (integer):
+: The number of integer seconds after which this set of interaction responses will expire and no longer be usable by the client instance. If the interaction methods expire, the client MAY re-start the interaction process for this grant request by sending an [update](#continue-modify) with a new [interaction request](#request-interact) section. OPTIONAL. If omitted, the interaction response modes returned do not expire.
 
 Additional interaction mode responses can be defined in [a registry TBD](#IANA).
 
@@ -1976,6 +1997,8 @@ any interaction mode that the AS does not support. Since interaction
 responses include secret or unique information, the AS SHOULD
 respond to each interaction mode only once in an ongoing request,
 particularly if the client instance [modifies its request](#continue-modify).
+
+The grant request MUST be in the _pending_ state to include this field in the response.
 
 ### Redirection to an arbitrary URI {#response-interact-redirect}
 
@@ -2224,6 +2247,8 @@ are outside the scope of this specification.
 Extensions to this specification MAY define additional response
 properties in [a registry TBD](#IANA).
 
+The grant request MUST be in the _approved_ state to return this field in the response.
+
 See {{security-assertions}} for considerations that the client instance has to make when accepting
 and processing assertions from the AS.
 
@@ -2303,6 +2328,10 @@ reason, it responds to the client instance with an error message.
     `"request_denied"`:
     : The request was denied for an unspecified reason.
 
+    `"invalid_interaction"`
+    : The client instance has provided an interaction reference that is incorrect
+        for this request or the interaction modes in use have expired.
+
 `error_description` (string):
 :   A human-readable string description of the error intended for the
     developer of the client.
@@ -2332,12 +2361,13 @@ is capable of asking for several different kinds of information in response:
 - the subject information being requested in the `subject` request parameter
 - any additional requested information defined by extensions of this protocol
 
-The AS determines what authorizations and consents are required to fulfill this requested delegation. The details of how the
-AS makes this determination are out of scope for this document. However, there are several common patterns
-defined and supported by GNAP for fulfilling these requirements, including information sent by the client instance, information
-gathered through the interaction process, and information supplied by external parties. An individual AS
-can define its own policies and processes for deciding when and how to gather the necessary authorizations
-and consent.
+When the grant request is in the _processing_ state, the AS determines what authorizations and
+consents are required to fulfill this requested delegation. The details of how the
+AS makes this determination are out of scope for this document. However, there are several common
+patterns defined and supported by GNAP for fulfilling these requirements, including information
+sent by the client instance, information gathered through the interaction process, and information
+supplied by external parties. An individual AS can define its own policies and processes for
+deciding when and how to gather the necessary authorizations and consent.
 
 The client instance can supply information directly to the AS in its request. From this information, the AS can determine
 if the requested delegation can be granted immediately. The client instance can send several kinds of things, including:
@@ -2349,12 +2379,12 @@ if the requested delegation can be granted immediately. The client instance can 
 The AS will verify this presented information in the context of the client instance's request and
 can only trust the information as much as it trusts the presentation and context of the information.
 If the AS determines that the information presented in the initial request is sufficient for granting the requested
-access, the AS MAY return the positive results [immediately in its response](#response) with
+access, the AS MAY move the grant request to the _approved_ state and return results [immediately in its response](#response) with
 access tokens and subject information.
 
-If the AS determines that additional runtime authorization is required, the AS can either deny the request
-outright or use a number of means at its disposal to gather that authorization from the appropriate ROs,
-including for example:
+If the AS determines that additional runtime authorization is required, the AS can either deny the
+request outright (if there is no possible recovery) or move the grant request to the _pending_
+state and use a number of means at its disposal to gather that authorization from the appropriate ROs, including for example:
 
 - starting interaction with the end user facilitated by the client software, such as a redirection or user code
 - challenging the client instance through a challenge-response mechanism
@@ -2364,7 +2394,7 @@ including for example:
 
 The authorization and consent gathering process in GNAP is left deliberately flexible to allow for a
 wide variety of different deployments, interactions, and methodologies.
-In this process, the AS can gather consent from the RO as necessitated by the access that has
+In this process, the AS can gather consent from the RO or apply the RO's policy as necessitated by the access that has
 been requested. The AS can sometimes determine which RO needs to consent based on what has been requested
 by the client instance, such as a specific RS record, an identified user, or a request requiring specific
 access such as approval by an administrator. If the AS has a means of contacting the RO directly, it could
@@ -2388,8 +2418,11 @@ The AS is also allowed to request authorization from more than one RO, if the AS
 record might need to be released by both an attending nurse and a physician, or both owners of a bank account
 need to sign off on a transfer request. Alternatively, the AS could require N of M possible RO's
 to approve a given request in order. The AS could also determine that the end user is not the appropriate RO
-for a given request and reach out to the appropriate RO asynchronously. The details of determining which RO's are required for a given
-request are out of scope for this specification.
+for a given request and reach out to the appropriate RO asynchronously.
+
+The RO is also allowed to define a policy at the AS to determine which kind of end user can get access to the resource, and under which condition. For instance, such a condition might require the end user login and the acceptance of the RO's legal provisions. Alternatively, client software could be acting without an end user, and the RO's policy allows issuance of access tokens to instances of that client software without human interaction.
+
+The details of determining which RO's or related policies are required for a given request are out of scope for this specification.
 
 The client instance can also indicate that it is capable of facilitating interaction with the end user,
 another party, or another piece of software through its [interaction start](#request-interact-start) request.
@@ -2407,17 +2440,28 @@ After starting interaction, the client instance can then make a [continuation re
 either in response to a signal indicating the [finish of the interaction](#interaction-finish), through
 polling, or through some other method defined by an extension of this specification.
 
-If the AS and client instance have not reached a state where the delegation can be granted, the
-AS and client instance can repeat the interaction process as long as the AS supplies the client
-instance with [continuation information](#response-continue) to facilitate the ongoing requests.
+If the grant request is not in the _approved_ state, the
+client instance can repeat the interaction process by sending a [grant update request](#continue-modify) with new [interaction](#request-interact) methods.
 
-## Interaction Start Methods {#interaction-start}
+The AS SHOULD handle any interact request as a one-time-use mechanism and SHOULD apply suitable
+timeouts to any interaction start methods provided, including user codes and redirection URIs.
+The client instance SHOULD apply suitable timeouts to any interaction finish method.
 
+## Starting Interaction With the End User {#interaction-start}
+
+When a grant request is in the _pending_ state, the interaction start methods sent by
+the client instance can be used to facilitate interaction with the end user.
 To initiate an interaction start method indicated by the
 [interaction start responses](#response-interact) from the AS, the client instance
-follows the steps defined by that interaction method. The actions of the client instance
+follows the steps defined by that interaction start mode. The actions of the client instance
 required for the interaction start modes defined in this specification are described
-in the following sections.
+in the following sections. Interaction start modes defined in extensions to this specification
+MUST define the expected actions of the client software.
+
+If the client instance does not start an interaction start mode within an AS-determined amount of
+time, the AS SHOULD reject attempts to use the interaction start modes. If the client instance has
+already begun one interaction start mode, the AS SHOULD reject attempts to use other interaction
+start modes.
 
 ### Interaction at a Redirected URI {#interaction-redirect}
 
@@ -2706,13 +2750,14 @@ NOTE: '\' line wrapping per RFC 8792
 
 # Continuing a Grant Request {#continue-request}
 
-While it is possible for the AS to return a [grant response](#response) with all the
+While it is possible for the AS to return an approved [grant response](#response) with all the
 client instance's requested information (including [access tokens](#response-token) and
-[direct user information](#response-subject)), it's more common that the AS and
-the client instance will need to communicate several times over the lifetime of an access grant.
+[direct user information](#response-subject)) immediately, it's more common that the AS and
+the client instance will need to communicate several times over the lifetime of a grant request,
+especially while it is in the _pending_ state.
 This is often part of facilitating [interaction](#authorization), but it could
 also be used to allow the AS and client instance to continue negotiating the parameters of
-the [original grant request](#request).
+the [original grant request](#request) through modification of the request.
 
 To enable this ongoing negotiation, the AS provides a continuation API to the client software.
 The AS returns a `continue` field
@@ -2740,6 +2785,7 @@ the request with HTTP Message Signatures:
 POST /continue/KSKUOMUKM HTTP/1.1
 Authorization: GNAP 80UPRY5NM33OMUKMKSKU
 Host: server.example.com
+Content-Length: 0
 Signature-Input: sig1=...
 Signature: sig1=...
 ~~~
@@ -2823,11 +2869,14 @@ MUST NOT include the interaction reference. If the AS detects a client instance 
 interaction reference multiple times, the AS MUST return an error and SHOULD invalidate
 the ongoing request.
 
-The [grant response](#response) MAY contain any newly-created [access tokens](#response-token) or
-newly-released [subject claims](#response-subject). The response MAY contain
+If the grant request is in the _approved_ state, the [grant response](#response) MAY contain any
+newly-created [access tokens](#response-token) or
+newly-released [subject information](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. The response
 SHOULD NOT contain any [interaction responses](#response-interact).
 \[\[ [See issue #89](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/89) \]\]
+
+If the grant request is in the _pending_ state, the [grant response](#response) MUST NOT contain access tokens or subject information, and MAY contain a new [interaction responses](#response-interact) to any interaction methods that have not been exhausted at the AS.
 
 For example, if the request is successful in causing the AS to issue access tokens and
 release opaque subject claims, the response could look like this:
@@ -2871,11 +2920,14 @@ Signature-Input: sig1=...
 Signature: sig1=...
 ~~~
 
-The [grant response](#response) MAY contain any newly-created [access tokens](#response-token) or
+If the grant request is in the _approved_ state, the [grant response](#response) MAY contain any
+newly-created [access tokens](#response-token) or
 newly-released [subject claims](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. If a `continue`
 field is included, it SHOULD include a `wait` field to facilitate a reasonable polling rate by
 the client instance. The response SHOULD NOT contain [interaction responses](#response-interact).
+
+If the grant request is in the _pending_ state, the [grant response](#response) MUST NOT contain access tokens or subject information, and MAY contain a new [interaction responses](#response-interact) to any interaction methods that have not been exhausted at the AS.
 
 For example, if the request has not yet been authorized by the RO, the AS could respond
 by telling the client instance to make another continuation request in the future. In this example,
@@ -2899,7 +2951,7 @@ next continuation request.
 \[\[ [See issue #91](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/91) \]\]
 
 If the request is successful in causing the AS to issue access tokens and
-release subject claims, the response could look like this example:
+release subject information, the response could look like this example:
 
 ~~~ json
 NOTE: '\' line wrapping per RFC 8792
@@ -2929,6 +2981,10 @@ issued or claims have already been released. In such cases, the client instance 
 request to the continuation URI and includes any fields it needs to modify. Fields
 that aren't included in the request are considered unchanged from the original request.
 
+When the AS receives a valid modification request, the AS MUST place the grant request into the
+_processing_ state and re-evaluate the authorization in the new context created by the update
+request.
+
 The client instance MAY include the `access_token` and `subject` fields as described in {{request-token}}
 and {{request-subject}}. Inclusion of these fields override any values in the initial request,
 which MAY trigger additional requirements and policies by the AS. For example, if the client instance is asking for
@@ -2937,19 +2993,23 @@ If the client instance is asking for more limited access, the AS could determine
 has been granted to the client instance and return the more limited access rights immediately.
 \[\[ [See issue #92](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/92) \]\]
 
-The client instance MAY include the `interact` field as described in {{request-interact}}. Inclusion of
-this field indicates that the client instance is capable of driving interaction with the RO, and this field
-replaces any values from a previous request. The AS MAY respond to any of the interaction
-responses as described in {{response-interact}}, just like it would to a new request.
+The client instance MAY include the `interact` field as described in {{request-interact}}.
+Inclusion of this field indicates that the client instance is capable of driving interaction with
+the end user, and this field replaces any values from a previous request. The AS MAY respond to any
+of the interaction responses as described in {{response-interact}}, just like it would to a new
+request.
 
 The client instance MAY include the `user` field as described in {{request-user}} to present new assertions
-or information about the end user.
+or information about the end user. The AS SHOULD check that this presented user information is
+consistent with any user information previously presented by the client instance for this
+grant request.
 \[\[ [See issue #93](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/93) \]\]
 
-The client instance MUST NOT include the `client` section of the request.
+The client instance MUST NOT include the `client` section of the request, since the client
+instance is assumed not to have changed.
 \[\[ [See issue #94](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/94) \]\]
 
-The client instance MAY include post-interaction responses such as described in {{continue-after-interaction}}.
+The client instance MUST NOT include post-interaction responses such as described in {{continue-after-interaction}}.
 \[\[ [See issue #95](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/95) \]\]
 
 Modification requests MUST NOT alter previously-issued access tokens. Instead, any access
@@ -3153,9 +3213,10 @@ Since the old access tokens are good for a subset of the rights requested here, 
 AS might decide to not revoke them. However, any access tokens granted after this update
 process are new access tokens and do not modify the rights of existing access tokens.
 
-## Canceling a Grant Request {#continue-delete}
+## Revoking a Grant Request {#continue-delete}
 
-If the client instance wishes to cancel an ongoing grant request, it makes an
+If the client instance wishes to cancel an ongoing grant request and place it into the _revoked_
+state, the client instance makes an
 HTTP DELETE request to the continuation URI.
 
 ~~~ http-message
@@ -3167,8 +3228,10 @@ Signature-Input: sig1=...
 Signature: sig1=...
 ~~~
 
-If the request is successfully cancelled, the AS responds with an HTTP 202.
-The AS SHOULD revoke all associated access tokens.
+If the request is successfully revoked, the AS responds with an HTTP 202 (No Content).
+The AS SHOULD revoke all associated access tokens, if possible. The AS SHOULD disable all
+token rotation and other token management functions on such access tokens, if possible.
+Once the grant request is in the _revoked_ state, it MUST NOT be moved to any other state.
 
 # Token Management {#token-management}
 
@@ -5624,6 +5687,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Removed "split_token" functionality.
     - Collapse "user_code" into a string instead of an object.
     - References hash algorithm identifiers from the existing IANA registry
+    - Allow interaction responses to time out.
+    - Added explicit protocol state discussion.
+    - Added RO policy use case.
 
 - -09
     - Added security considerations on redirection status codes.
