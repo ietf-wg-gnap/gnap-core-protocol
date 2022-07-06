@@ -1233,12 +1233,9 @@ or by reference.
 Subject identifiers are hints to the AS in determining the
 RO and MUST NOT be taken as declarative statements that a particular
 RO is present at the client instance and acting as the end user. Assertions SHOULD be validated by the AS.
-\[\[ [See issue #49](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/49) \]\]
 
 If the identified end user does not match the RO present at the AS
 during an interaction step, the AS SHOULD reject the request with an error.
-
-\[\[ [See issue #50](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/50) \]\]
 
 If the AS trusts the client instance to present verifiable assertions, the AS MAY
 decide, based on its policy, to skip interaction with the RO, even
@@ -2293,8 +2290,6 @@ This non-normative example shows an instance identifier along side an issued acc
 
 ~~~
 
-\[\[ [See issue #77](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/77) \]\]
-
 \[\[ [See issue #78](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/78) \]\]
 
 ## Error Response {#response-error}
@@ -2946,8 +2941,6 @@ next continuation request.
 }
 ~~~
 
-\[\[ [See issue #90](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/90) \]\]
-
 \[\[ [See issue #91](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/91) \]\]
 
 If the request is successful in causing the AS to issue access tokens and
@@ -2991,7 +2984,6 @@ which MAY trigger additional requirements and policies by the AS. For example, i
 more access, the AS could require additional interaction with the RO to gather additional consent.
 If the client instance is asking for more limited access, the AS could determine that sufficient authorization
 has been granted to the client instance and return the more limited access rights immediately.
-\[\[ [See issue #92](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/92) \]\]
 
 The client instance MAY include the `interact` field as described in {{request-interact}}.
 Inclusion of this field indicates that the client instance is capable of driving interaction with
@@ -3003,19 +2995,15 @@ The client instance MAY include the `user` field as described in {{request-user}
 or information about the end user. The AS SHOULD check that this presented user information is
 consistent with any user information previously presented by the client instance for this
 grant request.
-\[\[ [See issue #93](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/93) \]\]
 
 The client instance MUST NOT include the `client` section of the request, since the client
 instance is assumed not to have changed.
-\[\[ [See issue #94](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/94) \]\]
 
 The client instance MUST NOT include post-interaction responses such as described in {{continue-after-interaction}}.
-\[\[ [See issue #95](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/95) \]\]
 
 Modification requests MUST NOT alter previously-issued access tokens. Instead, any access
 tokens issued from a continuation are considered new, separate access tokens. The AS
 MAY revoke previously-issued access tokens after a modification has occurred.
-\[\[ [See issue #96](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/96) \]\]
 
 If the modified request can be granted immediately by the AS,
 the [grant response](#response) MAY contain any newly-created [access tokens](#response-token) or
