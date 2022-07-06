@@ -2365,7 +2365,7 @@ including for example:
 
 The authorization and consent gathering process in GNAP is left deliberately flexible to allow for a
 wide variety of different deployments, interactions, and methodologies.
-In this process, the AS can gather consent from the RO as necessitated by the access that has
+In this process, the AS can gather consent from the RO or apply the RO's policy as necessitated by the access that has
 been requested. The AS can sometimes determine which RO needs to consent based on what has been requested
 by the client instance, such as a specific RS record, an identified user, or a request requiring specific
 access such as approval by an administrator. If the AS has a means of contacting the RO directly, it could
@@ -2389,8 +2389,11 @@ The AS is also allowed to request authorization from more than one RO, if the AS
 record might need to be released by both an attending nurse and a physician, or both owners of a bank account
 need to sign off on a transfer request. Alternatively, the AS could require N of M possible RO's
 to approve a given request in order. The AS could also determine that the end user is not the appropriate RO
-for a given request and reach out to the appropriate RO asynchronously. The details of determining which RO's are required for a given
-request are out of scope for this specification.
+for a given request and reach out to the appropriate RO asynchronously.
+
+The RO is also allowed to define a policy at the AS to determine which kind of end user can get access to the resource, and under which condition. For instance, such a condition might require the end user login and the acceptance of the RO's legal provisions. Alternatively, client software could be acting without an end user, and the RO's policy allows issuance of access tokens to instances of that client software without human interaction.
+
+The details of determining which RO's or related policies are required for a given request are out of scope for this specification.
 
 The client instance can also indicate that it is capable of facilitating interaction with the end user,
 another party, or another piece of software through its [interaction start](#request-interact-start) request.
@@ -5624,6 +5627,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Expand proofing methods to allow definition by object, with single string as optimization for common cases.
     - Removed "split_token" functionality.
     - Collapse "user_code" into a string instead of an object.
+    - Added RO policy use case.
 
 - -09
     - Added security considerations on redirection status codes.
