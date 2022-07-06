@@ -2018,8 +2018,6 @@ functionality. If the AS does not directly host the functionality accessed throu
 the given URI, then the means for the interaction functionality to communicate
 with the rest of the AS are out of scope for this specification.
 
-\[\[ [See issue #72](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/72) \]\]
-
 The client instance sends the end user to the URI to interact with the AS. The
 client instance MUST NOT alter the URI in any way. The means for the client instance
 to send the end user to this URI is out of scope of this specification,
