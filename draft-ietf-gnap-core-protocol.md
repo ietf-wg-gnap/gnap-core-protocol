@@ -5602,6 +5602,34 @@ it is not usually feasible to provide notification and warning to someone before
 needs to be executed, as is the case with redirection URLs. As such, SSRF is somewhat more difficult
 to manage at runtime, and systems should generally refuse to fetch a URI if unsure.
 
+# Human Rights Considerations {#human-rights}
+
+The human rights considerations in this section are modeled after the list of privacy threats in {{RFC8280}}, "Research into Human Rights Protocol Considerations", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
+
+# Freedom of Assembly through Delegation  
+
+## Forced Arbitration
+
+A delegation protocol that gives only the resource server the choice of an authorization sever as delegate introduces a well known human rights and privacy problems. The widely despised practice of forced arbitration is an example. Digital authorization experts acknowledge that established authorization protocols such as OAuth and OpenID Connect have led to platform oligopolies built on surveillance and unintended uses of private information, as noted in the correlation privacy section below.
+
+As a delegated authentication protocol, GNAP must not extend the forced arbitration model into the digital domain. This requires that the choice of delegate enabled by the GNAP standard should, by design, rest with the resource owner, not the resource server. The current draft does not explain or default to resource owner choice of delegate and therefore raises significant human rights and privacy concerns.
+
+One mitigation for this concern would be for GNAP to specify a capabilities token with provision for attenuated delegation. This would enable the resource owner to transfer a capability from the AS delegate of the resource server to an AS delegate of their choice as resource owner. 
+
+## Request Processing Cost and Risk
+
+Operating an authorization server is expensive and risky. The expense comes from having to manage policies and evaluate resource requests against the applicable policies. The risk comes from liability when requesting parties are not held sufficiently accountable for their requests. When the power of delegation is given to the service provider as a resource server, the market power of the individual human is reduced, thereby creating a human rights concern.
+
+## Data Minimization
+
+Furthermore, the data minimization privacy principle is violated when the delegate chosen by and accountable to the resource server is given access to request information such as user credentials and purpose when all the resource server really needs is the authorized scope of a request.
+
+Another mitigation would be for GNAP to require any resource server that does not allow RO choice of AS to offer a standard verifiable credential equivalent to the resource. This would enable the RO to move the resource to a resource server that does respect their choice of AS. This minimizes the data shared with the resource servers that do not repect the sovereignty of the resource owner.
+
+## Self-Sovereign Identity Alignment for Decentralization
+
+Including both capbilities and verifiable credentials in the core GNAP specification would have the added benefit of aligning our work with the self-sovereign identity data models standardized by W3C. 
+
 # Privacy Considerations {#privacy}
 
 The privacy considerations in this section are modeled after the list of privacy threats in {{RFC6973}}, "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
@@ -5629,7 +5657,7 @@ If the authorization server's implementation of access tokens is such that it re
 
 Several parties in the GNAP process are expected to persist data at least temporarily, if not semi-permanently, for the normal functioning of the system. If compromised, this could lead to exposure of sensitive information. This section documents the potentially sensitive information each party in GNAP is expected to store for normal operation. Naturally it is possible that any party is storing information for longer than technically necessary of the protocol mechanics (such as audit logs, etc).
 
-The authorization server is expected to store subject identifiers for users indefinitely, in order to be able to include them in the responses to clients. The authorization server is also expected to store client key identifiers associated with display information about the client such as its name and logo.
+The authorization server is expected to store subject identifiers for users indefinitely, in order to be able to include them in the responses to clients. The authorization server is also expected to store client key identifiers associated with display information about the client such as its name and logo. The authorization server is also expected to store policies that it evaluates requests against. These policies may be specific and confidential to the owner of the resource under control.
 
 The client is expected to store its client instance key indefinitely, in order to authenticate to the authorization server for the normal functioning of the GNAP flows. Additionally, the client will be temporarily storing artifacts issued by the authorization server during a flow, and these artifacts SHOULD be discarded by the client when the transaction is complete.
 
