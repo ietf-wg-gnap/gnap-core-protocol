@@ -5614,7 +5614,7 @@ FAA is the principal way that humans can use to manage asymmetry of power in aut
 
 ## User-Centric Request Model
 
-GNAP is best understood and implemented from the perspective of an authorization server responding to user requests. This processing has major both cost and privacy considerations for all of the actors involved. The resource server would like to outsource their policy evaluation processing chore and to reduce their liability by holding the user accountable. The user would like to mimimize the data they share as part of their request. The resource owner would like to avoid surveillance and discrimination through data minimization. From the perspective of the resource subject as resource owner, sharing authorization policies with a request processor they cannot choose is an FAA violation and therefore a human rights problem for GNAP.  
+GNAP is best understood and implemented from the perspective of an authorization server responding to user requests. This processing has major both cost and privacy considerations for all of the actors involved. The resource server would like to outsource their policy evaluation processing chore and to reduce their liability by holding the user accountable. The user would like to mimimize the data they share as part of their request. The resource owner would like to avoid surveillance and discrimination through data minimization. **From the perspective of the resource subject as resource owner, sharing authorization policies with a request processor they cannot choose is an FAA violation and therefore a human rights issue for GNAP.**  
 
 ## Forced Arbitration
 
