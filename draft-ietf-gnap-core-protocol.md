@@ -5614,15 +5614,15 @@ FAA is the principal way that humans can use to manage asymmetry of power in aut
 
 ## User-Centric Request Model
 
-GNAP is best understood and implemented from the perspective of an authorization server responding to user requests. This processing has major both cost and privacy considerations for all of the actors involved. The resource server would like to outsource their policy evaluation processing chore and to reduce their liability by holding the user accountable. The user would like to mimimize the data they share as part of their request. The resource owner would like to avoid surveillance and discrimination through data minimization. **From the perspective of the resource subject as resource owner, sharing authorization policies with a request processor they cannot choose is an FAA violation and therefore a human rights issue for GNAP.**  
+GNAP is best understood and implemented from the perspective of an authorization server responding to user requests. This processing has both cost and privacy considerations for all of the actors involved. The resource server would like to outsource their policy evaluation processing chore and to reduce their liability by holding the user accountable. The user would like to mimimize the data they share as part of their request. The resource owner would like to avoid surveillance and discrimination through data minimization. **From the perspective of the resource subject as resource owner, sharing authorization policies with a request processor they cannot choose is an FAA violation and therefore a human rights issue for GNAP.**  
 
 ## Forced Arbitration
 
-A delegation protocol that gives only the resource server the choice of an authorization sever as delegate introduces well known human rights and privacy problems. The widely despised practice of forced arbitration is an example. Digital authorization experts acknowledge that established authorization protocols such as OAuth and OpenID Connect have led to platform oligopolies built on surveillance and unintended uses of private information, as noted in the correlation privacy section below.
+A delegation protocol that gives only the resource server the choice of an authorization sever as delegate introduces well known human rights and privacy problems. The widely despised practice of forced arbitration is an example. At IETF 114, authorization protocol experts acknowledged that established authorization protocols such as OAuth and OpenID Connect have led to platform oligopolies built on surveillance and unintended uses of private information, as also noted in the correlation privacy [section](https://github.com/agropper/gnap-core-protocol/blob/main/draft-ietf-gnap-core-protocol.md#correlation) below.
 
-As a delegated authentication protocol, GNAP must not extend the forced arbitration model into the digital domain. This requires that the choice of delegate enabled by the GNAP standard should, by design, rest with the resource owner, not the resource server. The current draft does not explain or default to resource owner choice of delegate and therefore raises significant human rights and privacy concerns.
+As a delegated authentication protocol, GNAP must not extend the forced arbitration model into the digital domain. **This requires that the choice of request processing delegate enabled by the GNAP standard should, by design, rest with the resource owner, not the resource server.** The current draft does not explain or default to resource owner choice of delegate and therefore raises significant human rights and privacy concerns.
 
-One mitigation for this concern would be for GNAP to specify a capabilities token with provision for attenuated delegation. This would enable the resource owner to transfer a capability from the AS delegate of the resource server to an AS delegate of their choice as resource owner. 
+One mitigation for this concern would be for GNAP to specify a capabilities token with provision for attenuated delegation. This would enable the resource owner to transfer a capability issued by the resource server to an authorization server delegate of their choice as resource owner. 
 
 ## Request Processing Cost and Risk
 
@@ -5630,13 +5630,15 @@ Operating an authorization server is expensive and risky. The expense comes from
 
 ## Data Minimization
 
-Furthermore, the data minimization privacy principle is violated when the delegate chosen by and accountable to the resource server is given access to request information such as user credentials and purpose when all the resource server really needs is the authorized scope of a request.
+Furthermore, the data minimization privacy principle is violated when the delegate chosen by and accountable to the resource server is given access to request information such as user credentials and purpose when all the resource server really needs, in general, is the authorized scope of a request.
 
-Another mitigation would be for GNAP to require any resource server that does not allow RO choice of AS to offer a standard verifiable credential equivalent to the resource. This would enable the RO to move the resource to a resource server that does respect their choice of AS. This minimizes the data shared with the resource servers that do not repect the sovereignty of the resource owner.
+Another mitigation would be for GNAP to require any resource server that does not allow resource owner choice of authorization server to offer a standard verifiable credential equivalent to the resource. This would enable the resource owner to move the resource to a resource server that does respect their choice of authorization server. This minimizes the data shared with the resource servers that do not repect the sovereignty of the resource owner.
 
 ## Self-Sovereign Identity Alignment for Decentralization
 
-Including both capbilities and verifiable credentials in the core GNAP specification would have the added benefit of aligning our work with the self-sovereign identity data models standardized by W3C. 
+Including both capbilities and verifiable credentials in the core GNAP specification would have the added benefit of aligning our work with the self-sovereign identity data models standardized by W3C. Decentralization is one way to enhance FAA but experience has shown that IETF protocols based on the end-to-end principle to enable autonomous peers are still vulnerable to vendor lock-in and other forms of centralization. 
+
+W3C Decentralized Identifiers and Verifiable Credentials are standardized data models designed to promote autonomous (as in self-sovereign) participation in network protocols. However, a decade of experience with surveillance capitalism and platform dominance [teaches us](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html#section-7) that these well-meaning foundations for privacy and decentralization will not survive the lure of convenience and "free" network services of platforms that will be built on top of these data models. GNAP is set to benefit from this experience and avoid the unintended consequences of OAuth and OpenID Connect by designing for autonomous agency or FAA that cannot be restricted by powerful resource servers and platforms.
 
 # Privacy Considerations {#privacy}
 
