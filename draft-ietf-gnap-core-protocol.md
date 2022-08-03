@@ -5604,13 +5604,21 @@ to manage at runtime, and systems should generally refuse to fetch a URI if unsu
 
 # Human Rights Considerations {#human-rights}
 
-The human rights considerations in this section are modeled after the list of privacy threats in {{RFC8280}}, "Research into Human Rights Protocol Considerations", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
+Human rights considerations are different form from privacy considerations to the extent they are universal and cannot be regulated or consented away. A fundamental protocol such as GNAP must therefore support human rights by default and not as an option or extension. The human rights considerations in this section are modeled after the list of privacy threats in {{RFC8280}}, "Research into Human Rights Protocol Considerations" and the most recent draft of [Freedom of Association on the Internet](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html). Although there is no human right specific to delegated authorization, in the IETF context, we are using the work of HRPC and IRTF on [freedom of association and assembly](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html#section-4) (FAA) for the purpose of risk analysis and suggested mitigations. 
 
-# Freedom of Assembly through Delegation  
+# Freedom of Association and Assembly through Delegation
+
+GNAP is a delegated authorization protocol. The delegators can be either human subjects of a resource or service providers to the resource subjects. Human rights are at risk when the service providers, be they human or institutional, have asymmetrical power over the subject, as is often the case due to mandates (e.g. government), necessity (employers and hospitals), convenience (platforms), or oligopoly (telecoms). Delegation appears throughout the core GNAP protocol, explicitly as the authorization server, implicitly as the resource server if there is a practical choice, and also implicitly as the user agents for signing or client functionality. In the human rights sense, it's important to consider that the accountable user is often not in control of their user agent. For example, a physician writing a prescription may be in control of their signing key but is forced to use the hospital's information systems as their user agent relative to a pharmacy as resource server.
+
+FAA is the principal way that humans can use to manage asymmetry of power in authorization relationships. Unions and [moderated](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html#section-6.5) IRC channels are examples of delegation for authorization in negotiation or censorship respectively.
+
+## User-Centric Request Model
+
+GNAP is best understood and implemented from the perspective of an authorization server responding to user requests. This processing has major both cost and privacy considerations for all of the actors involved. The resource server would like to outsource their policy evaluation processing chore and to reduce their liability by holding the user accountable. The user would like to mimimize the data they share as part of their request. The resource owner would like to avoid surveillance and discrimination through data minimization. From the perspective of the resource subject as resource owner, sharing authorization policies with a request processor they cannot choose is an FAA violation and therefore a human rights problem for GNAP.  
 
 ## Forced Arbitration
 
-A delegation protocol that gives only the resource server the choice of an authorization sever as delegate introduces a well known human rights and privacy problems. The widely despised practice of forced arbitration is an example. Digital authorization experts acknowledge that established authorization protocols such as OAuth and OpenID Connect have led to platform oligopolies built on surveillance and unintended uses of private information, as noted in the correlation privacy section below.
+A delegation protocol that gives only the resource server the choice of an authorization sever as delegate introduces well known human rights and privacy problems. The widely despised practice of forced arbitration is an example. Digital authorization experts acknowledge that established authorization protocols such as OAuth and OpenID Connect have led to platform oligopolies built on surveillance and unintended uses of private information, as noted in the correlation privacy section below.
 
 As a delegated authentication protocol, GNAP must not extend the forced arbitration model into the digital domain. This requires that the choice of delegate enabled by the GNAP standard should, by design, rest with the resource owner, not the resource server. The current draft does not explain or default to resource owner choice of delegate and therefore raises significant human rights and privacy concerns.
 
