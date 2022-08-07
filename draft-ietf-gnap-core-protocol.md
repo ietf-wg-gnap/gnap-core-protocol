@@ -5606,11 +5606,31 @@ to manage at runtime, and systems should generally refuse to fetch a URI if unsu
 
 Human rights considerations are different form from privacy considerations to the extent they are universal and cannot be regulated or consented away. A fundamental protocol such as GNAP must therefore support human rights by default and not as an option or extension. The human rights considerations in this section are modeled after the list of privacy threats in {{RFC8280}}, "Research into Human Rights Protocol Considerations" and the most recent draft of [Freedom of Association on the Internet](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html). Although there is no human right specific to delegated authorization, in the IETF context we are using the work of HRPC and IRTF on [freedom of association and assembly](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html#section-4) (FAA) for the purpose of risk analysis and suggested mitigations. 
 
-# Freedom of Association and Assembly through Delegation
+## Can GNAP Promote Freedom of Association and Assembly?
 
-GNAP is a delegated authorization protocol. The delegators can be either human subjects of a resource or service providers to the resource subjects. Human rights are at risk when the service providers, be they human or institutional, have asymmetrical power over the subject, as is often the case due to mandates (e.g. government), necessity (employers and hospitals), convenience (platforms), or oligopoly (telecoms). Delegation appears throughout the core GNAP protocol, explicitly as the authorization server, implicitly as the resource server if there is a practical choice, and also implicitly as the user agents for signing or client functionality. In the human rights sense, it's important to consider that the accountable user is often not in control of their user agent. For example, a physician writing a prescription may be in control of their signing key but is forced to use the hospital's information systems as their user agent relative to a pharmacy as resource server.
+Experience with OAuth and related protocols like OpenID Connect has led to global platform oligopolies that are difficult to regulate and, when pressed, collaborate with governments that do not homor universal human rights. This unintended consequence of the authorization design is due to a combination of  of resource server autonomy and resource user convenience. Resource servers, if allowed, will do as much surveillance as they can get away with or outsource that surveillance to platform intermediaries for a reduced operating cost. For their part, users will, almost without exception, choose the most convenient path to resource access even when that path exposes them to secondary costs or unintended risks. 
 
-FAA is the principal way that humans can use to manage asymmetry of power in authorization relationships. Unions and [moderated](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html#section-6.5) IRC channels are examples of delegation for authorization in negotiation or censorship respectively.
+It is therefore now common practice for a resource server to align their interest with an authorization server and often an identity provider as well. For example, a network effect ensues when a social network offers users "free" resource processing as long as they are also party to the resource control function and, for the most successful social networks, trusted as identity providers.
+
+Effectively, the imposition of a an intemediary controller of a resource, is a violation of the human rights through forced association. The surveillance consequences of such imposition is an impediment to freedom of assembly. As with OAuth2 and UMA2, GNAP offers implementers of a resource server the choice to support freedom of assembly and association, but experience teaches us that resource servers will hardly ever make that choice.  
+
+## Reource Server Delegation without Attenuation
+
+GNAP gives the resource server a choice of authorization token formats. GNAP tokens don't have to support attenuated delegation. Without the capacity for attenuation, a resource owner is forced, in the human rights sense, to give the authorization server unrestricted control even when the resource owner is forced to associate with the authorization server.
+
+If a resource owner avoids the use of a forced authorization server the consequences are also bad because the requesting party will be impersonating the resource owner leading to an unacceptable lack of accountability.
+
+## Reource Server Delegation with Attenuation
+
+When a GNAP resource server provides capabilities that support attenuation the resource owner can use that capability directly without risking impersonation or the owner can delegate some of that capapbility to an authoriation server that they choose. This mitigation avoids the forced association problem but is effective in the real-world sense only if this is also the most convenient choice.
+
+Aligning the incentives for FAA means that GNAP MUST or SHOULD require resource servers to support attenuated delegation and do so in a way that is interoperable across any chosen GNAP-labeled authorization server. A real-world example would be open banking regulations that separate the choice of bank as resource server from the choice of payment processor (e.g. credit card) as authorization server. 
+
+# Interoperability Across Resurce and Authorization Servers
+
+Optionality in authorization token formats can again result in de-facto platform network effects as the cost and complexity of authorization servers drives smaller delegates out of the market.
+
+# ---- BELOW IS LEFT OVER FROM FIRST DRAFT AND SUBJECT TO REMOVAL ---- 
 
 ## User-Centric Request Model
 
