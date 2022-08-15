@@ -5637,9 +5637,13 @@ Aligning the incentives for FAA means that GNAP MUST or SHOULD require resource 
 Optionality in authorization token formats can again result in de-facto platform network effects as the cost and complexity of authorization servers drives smaller delegates out of the market. One source of confusion for a delegated authorization protocol is failure to separate the concerns of three classes of implementers:
 
 1 - RS / AS implemeneters should be interoperable with all end user clients. Client credentials are a weak and, in the Zero-Trust Architecture sense, an unacceptable substitute for user authentication. 
+
 2 - RS and AS can add value by publishing their scope options and other client features with respect for standards and without resorting to client credential or idenitity methods that then drive centralization.
+
 3 - RS / AS should supprt user-centric or self-sovereign identity standards and log-keeping features and deprecate or give open choice of federation solutions that then contribute to platform solutions.
+
 4 - Client implementers should be able to assist the end user in making requests in an interoperable way regardless of whether those requests are to a RS, AS, or a delegate of the RO. Clients should be "untrusted by default" in all cases where the user does not have free choice to associate with that client. Clients that interoperate with secure and convenient (local biometric) authenticators via standards support this separation of concerns for the two different kinds of user agent. 
+
 3 - User agent designers can offer policy support and automation of request processing. GNAP serves the delegation needs of both service providers and end users. GNAP must protect a user's right to choose how to store and apply their policies. In general, and in support of human rights, a RS or their designate should not also have access to the user's authorization policies. 
 
 # Privacy Considerations {#privacy}
