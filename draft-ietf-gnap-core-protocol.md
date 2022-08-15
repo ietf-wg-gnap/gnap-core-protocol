@@ -5610,31 +5610,31 @@ The GNAP specification supports human rights by allowing users to choose their d
 
 ## Can GNAP Promote Freedom of Association and Assembly?
 
-Experience with OAuth and related protocols like OpenID Connect has led to global platform oligopolies that are difficult to regulate and, when pressed, collaborate with governments that do not honor universal human rights. This unintended consequence of the authorization design is due to a combination of  of resource server autonomy and resource user convenience. Resource servers, if allowed, will do as much surveillance as they can get away with or outsource that surveillance to platform intermediaries for a reduced operating cost. For their part, users will, almost without exception, choose the most convenient path to resource access even when that path exposes them to secondary costs or unintended risks. 
+OAuth and related protocols like OpenID Connect have contributed to global platform oligopolies that are difficult to regulate and, when pressed, collaborate with governments that do not honor universal human rights. This unintended consequence of authorization design is due to a combination of resource server autonomy and resource user convenience. Resource servers, if allowed, will do as much surveillance as they can get away with or outsource that surveillance to platform intermediaries in exchange for a reduced operating cost. For their part, users will, almost without exception, choose the most convenient path to resource access even when that path exposes them to secondary costs or poorly understood risks. 
 
 It is therefore now common practice for a resource server to align their interest with an authorization server and often an identity provider as well. For example, a network effect ensues when a social network offers users "free" resource processing as long as they are also party to the resource control function and, for the most successful social networks, trusted as identity providers.
 
-Effectively, the imposition of a an intemediary controller of a resource, is a violation of the human rights through forced association. The surveillance consequences of such imposition is an impediment to freedom of assembly. As with OAuth2 and UMA2, GNAP offers implementers of a resource server the choice to support freedom of assembly and association, but experience teaches us that resource servers will hardly ever make that choice. 
+Effectively, the imposition of a an intemediary controller of a resource is a violation of human rights through forced association. The surveillance consequences of such imposition is an impediment to freedom of assembly. As with OAuth2 and UMA2, GNAP offers implementers of a resource server the choice to support freedom of assembly and association, but experience teaches us that resource servers will hardly ever make that choice unless it's core to the protocol's interoperability and user experience design. 
 
-Mitigation in GNAP still allows the RS to choose their AS as intermediary controler but also allows the RO to choose _their_ intermediary to for processing resourc requests. This intermediary could be a fiduciary or a community unrelated to and untrusted by either the AS or RS. 
+By way of mitigation, GNAP still allows the RS to choose their AS as intermediary controller but also allows the RO to choose _their_ intermediary to for processing resourc requests. This intermediary could be a fiduciary or a community unrelated to and untrusted by either the AS or RS. 
 
 ## Resource Server Delegation without Attenuation
 
 GNAP gives the resource server a choice of authorization token formats but GNAP tokens don't have to support attenuated delegation. Without the capacity for attenuation, a resource owner is forced, in the human rights sense, to make a choice between sharing attenuation policies with a request processor they did not freely choose or granting unattenuated access to requesting parties through impersonation. This compromises human rights through forced surveillance and compromises security through a lack of accountability.
 
-When attenuated delegation is not supported by the authorization token format, mitigation in GNAP requires the AS to operate a token exchange that requesting parties can access to request an attenuated token. For accountability, the AS can require and log a public key authenticated by the requesting party along with the desired scope of the new token. Note that the public key or similar designation need not be meaningful to the RS or its AS.  It only needs to be meaningful to the delegator in cases where security has been compromised.
+When attenuated delegation is not supported by the authorization token format, mitigation in GNAP requires the AS to operate a token exchange that users can access to request an attenuated token. For accountability, the AS can require and log a public key authenticated by the requesting party along with the desired scope of the new token. Note that the public key or similar designation need not be meaningful to the RS or its AS.  It only needs to be meaningful to the delegator in cases where security has been compromised.
 
 A second problem arises when the RO wants to have different agents for different policies, e.g., one agent for monitoring financial accounts and another agent for doing transactions.  Without attenuated delegation the RO has to give all permissions to both agents, a clear violation of the Principle of Least Privilege. It is also a privacy violation, since the party that needs fewer permissions learns that the RO has more. This problem can be addressed by giving the RO a separate capability for each scope on each resource, but that is not in the current specification.  The result will be incompatible implementations.
 
 ## Resource Server Delegation with Attenuation
 
-When a GNAP resource server provides capabilities that support attenuation the resource owner can use that capability directly or the owner can delegate some of that capapbility to an authoriation server that they choose. This mitigation avoids the forced association problem but is effective in the real-world sense only if this is also the most convenient choice.
+When a GNAP resource server provides capabilities that support attenuation the resource owner can use that capability directly or the owner can delegate some of that capapbility to an authoriation server that they choose. This mitigation avoids the forced association problem but it is effective in the real-world sense only if this is also the most convenient choice.
 
 Aligning the incentives for FAA means that GNAP MUST or SHOULD require resource servers to support attenuated delegation and do so in a way that is interoperable across any chosen GNAP-labeled authorization server. A real-world example would be open banking regulations that separate the choice of bank as resource server from the choice of payment processor (e.g. credit card) as authorization server. 
 
 ## Interoperability Across Resource and Authorization Servers
 
-Optionality in authorization token formats can again result in de-facto platform network effects as the cost and complexity of authorization servers drives smaller delegates out of the market. One source of confusion for a delegated authorization protocol is failure to separate the concerns of three classes of implementers:
+Optionality in authorization token formats can again result in platform network effects as the cost and complexity of authorization servers drives smaller delegates out of the market. One source of confusion for a delegated authorization protocol is failure to separate the concerns of three classes of implementers: the RS/AS, Client, and the user agent.
 
 1 - RS / AS implemeneters should be interoperable with all end user clients. Client credentials are a weak and, in the Zero-Trust Architecture sense, an unacceptable substitute for user authentication. 
 
@@ -5642,9 +5642,9 @@ Optionality in authorization token formats can again result in de-facto platform
 
 3 - RS / AS should supprt user-centric or self-sovereign identity standards and log-keeping features and deprecate or give open choice of federation solutions that then contribute to platform solutions.
 
-4 - Client implementers should be able to assist the end user in making requests in an interoperable way regardless of whether those requests are to a RS, AS, or a delegate of the RO. Clients should be "untrusted by default" in all cases where the user does not have free choice to associate with that client. Clients that interoperate with secure and convenient (local biometric) authenticators via standards support this separation of concerns for the two different kinds of user agent. 
+4 - Client implementers should be able to assist the end user in making requests in an interoperable way regardless of whether those requests are to a RS, AS, or a delegate of the RO. Clients should be "untrusted by default" in all cases where the user does not have free choice to associate with that client. Clients that interoperate with secure and convenient (local biometric) authenticators via standards support this separation of concerns. 
 
-3 - User agent designers can offer policy support and automation of request processing. GNAP serves the delegation needs of both service providers and end users. GNAP must protect a user's right to choose how to store and apply their policies. In general, and in support of human rights, a RS or their designate should not also have access to the user's authorization policies. 
+5 - User agent designers, as keepers of the user's policies, can offer policy support and automation of request processing. GNAP serves the delegation needs of both service providers and end users. GNAP must protect a user's right to choose how to store and apply their policies without forced association with a particular AS. 
 
 # Privacy Considerations {#privacy}
 
