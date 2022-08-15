@@ -5604,10 +5604,12 @@ to manage at runtime, and systems should generally refuse to fetch a URI if unsu
 
 # Human Rights Considerations {#human-rights}
 
-Human rights considerations are different form from privacy considerations to the extent they are universal and cannot be regulated or consented away. A fundamental protocol such as GNAP must therefore support human rights by default and not as an option or extension. The human rights considerations in this section are modeled after the list of privacy threats in {{RFC8280}}, "Research into Human Rights Protocol Considerations" and the most recent draft of [Freedom of Association on the Internet](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html). Although there is no human right specific to delegated authorization, in the IETF context we are using the work of HRPC and IRTF on [freedom of association and assembly](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html#section-4) (FAA) for the purpose of risk analysis and suggested mitigations. 
+Human rights considerations are different form from privacy considerations to the extent they are universal and cannot be regulated or consented away. *A fundamental protocol such as GNAP must therefore support human rights by default and not as an option or extension.* The human rights considerations in this section are modeled after the list of privacy threats in [RFC8280](https://datatracker.ietf.org/doc/html/rfc8280), "Research into Human Rights Protocol Considerations" and the most recent draft of [Freedom of Association on the Internet](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html). Although there is no human right specific to delegated authorization, in the IETF context we are using the work of HRPC and IRTF on [freedom of association and assembly](https://www.ietf.org/archive/id/draft-irtf-hrpc-association-10.html#section-4) (FAA) for the purpose of risk analysis and suggested mitigations. 
 
 The GNAP specification supports human rights from two complementary perspectives: 
+
 1 - It forces entities that process or control personal data to accurately and consistently label their polices, and
+
 2 - It enables humans to choose their delegates through interoperability at the RS and AS. 
 
 ## Can GNAP Promote Freedom of Association and Assembly?
