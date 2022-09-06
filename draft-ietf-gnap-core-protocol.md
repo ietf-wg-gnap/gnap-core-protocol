@@ -1333,7 +1333,30 @@ request without authorization.
 
 ### Start Mode Definitions {#request-interact-start}
 
-This specification defines the following interaction start modes as an array of string values under the `start` key:
+Interaction start modes are specified by a JSON object with one required field and optional parameters:
+
+`mode`:
+: The interaction start mode.
+
+Individual modes MAY define additional parameters to be required in the object.
+
+If the start mode defines no additional parameters, the method SHOULD be passed as a string instead. Both forms are considered equivalent to each other.
+
+For example, the following:
+
+~~~
+"start": [{
+    "mode": "redirect"
+}]
+~~~
+
+Is equivalent to the much shorter:
+
+~~~
+"start": ["redirect"]
+~~~
+
+This specification defines the following interaction start modes:
 
 `"redirect"`:
 : Indicates that the client instance can direct the end user to an arbitrary URI
@@ -1350,6 +1373,8 @@ This specification defines the following interaction start modes as an array of 
 `"user_code_uri"`:
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a short, dynamic URI. {{request-interact-usercodeuri}}
+
+Additional start modes are defined in [a registry TBD](#IANA).
 
 #### Redirect to an Arbitrary URI {#request-interact-redirect}
 
@@ -5032,11 +5057,72 @@ Specification document(s):
 
 ## Interaction Start Modes {#IANA-interaction-start-modes}
 
+This document defines a means for the client instance to begin interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Start Modes". Initial values for this registry are given in {{IANA-interaction-start-modes-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-start-modes-template}}.
+
+Each interaction start mode MUST declare if it has any additional parameters.
+
+### Registration Template {#IANA-interaction-start-modes-template}
+
+{: vspace="0"}
+Mode:
+: An identifier for the interaction start mode.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-interaction-start-modes-contents}
+
+|Mode|Specification document(s)|
+|redirect|{{request-interact-redirect}} of {{&SELF}}|
+|app|{{request-interact-app}} of {{&SELF}}|
+|user_code|{{request-interact-usercode}} of {{&SELF}}|
+|user_code_uri|{{request-interact-usercodeuri}} of {{&SELF}}|
+
 ## Interaction Finish Methods {#IANA-interaction-finish-methods}
+
+This document defines a means for the client instance to be notified of the end of interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Finish Methods". Initial values for this registry are given in {{IANA-interaction-finish-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-finish-methods-template}}.
+
+### Registration Template {#IANA-interaction-finish-methods-template}
+
+{: vspace="0"}
+Method:
+: An identifier for the interaction finish method.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-interaction-finish-methods-contents}
+
+|Mode|Specification document(s)|
+|redirect|{{request-interact-callback-redirect}} of {{&SELF}}|
+|push|{{request-interact-callback-push}} of {{&SELF}}|
 
 ## Interaction Hints {#IANA-interaction-hints}
 
+This document defines a set of hints that a client instance can provide to the AS to facilitate interaction with the end user, for which IANA is asked to create and maintain a new registry titled "Interaction Hints". Initial values for this registry are given in {{IANA-interaction-hints-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-hints-template}}.
 
+### Registration Template {#IANA-interaction-hints-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-interaction-hints-contents}
+
+|Mode|Specification document(s)|
+|ui_locales|{{request-interact-hint}} of {{&SELF}}|
 
 ## Grant Response Parameters {#IANA-grant-response}
 
@@ -5071,6 +5157,30 @@ Specification document(s):
 |error|string|{{response-error}} of {{&SELF}}|
 
 ## Interaction Mode Responses {#IANA-interaction-response}
+
+This document defines a means for the AS to provide to the client instance information that is required to complete a particular interaction mode, for which IANA is asked to create and maintain a new registry titled "Interaction Mode Responses". Initial values for this registry are given in {{IANA-interaction-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-response-template}}.
+
+### Registration Template {#IANA-interaction-response-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-interaction-response-contents}
+
+|Name|Specification document(s)|
+|redirect|{{response-interact}} of {{&SELF}}|
+|app|{{response-interact}} of {{&SELF}}|
+|user_code|{{response-interact}} of {{&SELF}}|
+|user_code_uri|{{response-interact}} of {{&SELF}}|
+|finish|{{response-interact}} of {{&SELF}}|
+|expires_in|{{response-interact}} of {{&SELF}}|
 
 ## Subject Information Response Fields {#IANA-subject-response}
 
