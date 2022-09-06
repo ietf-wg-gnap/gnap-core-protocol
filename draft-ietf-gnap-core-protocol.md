@@ -4930,7 +4930,52 @@ Specification document(s):
 
 ## Subject Information Request Fields {#IANA-subject-request}
 
+This document defines a means to request subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Request Fields". Initial values for this registry are given in {{IANA-subject-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-subject-request-template}}.
+
+### Registration Template {#IANA-subject-request-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-subject-request-contents}
+
+|Name|Type|Specification document(s)|
+|sub_id_formats|array of strings|{{request-subject}} of {{&SELF}}|
+|assertion_formats|array of strings|{{request-subject}} of {{&SELF}}|
+
 ## Assertion Formats {#IANA-assertion-formats}
+
+This document defines a means to pass identity assertions between the AS and client instance, for which IANA is asked to create and maintain a new registry titled "Assertion Formats". Initial values for this registry are given in {{IANA-assertion-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-assertion-formats-template}}.
+
+Each assertion format definition MUST specify the serialization format of the assertion value as used within GNAP.
+
+### Registration Template {#IANA-assertion-formats-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the assertion format.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-assertion-formats-contents}
+
+|Name|Specification document(s)|
+|id_token|{{request-subject}} and {{response-subject}} of {{&SELF}}|
+|saml2|{{request-subject}} and {{response-subject}} of {{&SELF}}|
 
 ## Client Instance Fields {#IANA-client-instance}
 
@@ -4979,6 +5024,30 @@ Specification document(s):
 ## Interaction Mode Responses {#IANA-interaction-response}
 
 ## Subject Information Response Fields {#IANA-subject-response}
+
+This document defines a means to return subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Response Fields". Initial values for this registry are given in {{IANA-subject-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-subject-response-template}}.
+
+### Registration Template {#IANA-subject-response-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-subject-response-contents}
+
+|Name|Type|Specification document(s)|
+|sub_ids|array of objects|{{response-subject}} of {{&SELF}}|
+|assertions|array of objects|{{response-subject}} of {{&SELF}}|
+|updated_at|string|{{response-subject}} of {{&SELF}}|
 
 ## Error Responses {#IANA-error-response}
 
