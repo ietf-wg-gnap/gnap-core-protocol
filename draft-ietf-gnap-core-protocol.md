@@ -5154,7 +5154,7 @@ Specification document(s):
 |interact|object|{{response-interact}} of {{&SELF}}|
 |subject|object|{{response-subject}} of {{&SELF}}|
 |instance_id|string|{{response-dynamic-handles}} of {{&SELF}}|
-|error|string|{{response-error}} of {{&SELF}}|
+|error|object|{{response-error}} of {{&SELF}}|
 
 ## Interaction Mode Responses {#IANA-interaction-response}
 
@@ -5210,16 +5210,110 @@ Specification document(s):
 
 ## Error Responses {#IANA-error-response}
 
+This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Responses". Initial values for this registry are given in {{IANA-error-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-error-response-template}}.
+
+### Registration Template {#IANA-error-response-template}
+
+{: vspace="0"}
+Error:
+: A unique string code for the error.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-error-response-contents}
+
+|Error|Specification document(s)|
+|invalid_request|{{response-error}} of {{&SELF}}|
+|invalid_client|{{response-error}} of {{&SELF}}|
+|user_denied|{{response-error}} of {{&SELF}}|
+|too_fast|{{response-error}} of {{&SELF}}|
+|unknown_request|{{response-error}} of {{&SELF}}|
+|request_denied|{{response-error}} of {{&SELF}}|
+|invalid_interaction|{{response-error}} of {{&SELF}}|
 
 ## Key Proofing Methods {#IANA-key-proof-methods}
 
+This document defines methods that the client instance can use to prove possession of a key, for which IANA is asked to create and maintain a new registry titled "Key Proofing Methods". Initial values for this registry are given in {{IANA-key-proof-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-key-proof-methods-template}}.
+
+### Registration Template {#IANA-key-proof-methods-template}
+
+{: vspace="0"}
+Method:
+: A unique string code for the key proofing method.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-key-proof-methods-contents}
+
+|Method|Specification document(s)|
+|httpsig|{{httpsig-binding}} of {{&SELF}}|
+|mtls|{{mtls}} of {{&SELF}}|
+|jwsd|{{detached-jws}} of {{&SELF}}|
+|jws|{{attached-jws}} of {{&SELF}}|
+
 ## Key Formats {#IANA-key-formats}
+
+This document defines formats for a public key value, for which IANA is asked to create and maintain a new registry titled "Key Formats". Initial values for this registry are given in {{IANA-key-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-key-formats-template}}.
+
+### Registration Template {#IANA-key-formats-template}
+
+{: vspace="0"}
+Format:
+: A unique string code for the key format.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-key-formats-contents}
+
+|Format|Specification document(s)|
+|jwk|{{key-format}} of {{&SELF}}|
+|cert|{{key-format}} of {{&SELF}}|
+|cert#S256|{{key-format}} of {{&SELF}}|
 
 ## Authorization Server Discovery Fields {#IANA-as-discovery}
 
+This document defines a discovery document for an AS, for which IANA is asked to create and maintain a new registry titled "Authorization Server Discovery Fields". Initial values for this registry are given in {{IANA-as-discovery-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-as-discovery-template}}.
 
+### Registration Template {#IANA-as-discovery-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-as-discovery-contents}
+
+|Name|Type|Specification document(s)|
+|grant_request_endpoint|string|{{discovery}} of {{&SELF}}|
+|interaction_start_modes_supported|array of strings|{{discovery}} of {{&SELF}}|
+|interaction_finish_methods_supported|array of strings|{{discovery}} of {{&SELF}}|
+|key_proofs_supported|array of strings|{{discovery}} of {{&SELF}}|
+|sub_id_formats_supported|array of strings|{{discovery}} of {{&SELF}}|
+|assertion_formats_supported|array of strings|{{discovery}} of {{&SELF}}|
 
 # Security Considerations {#security}
+
+In addition to the normative requirements in this document, implementors are strongly encouraged to consider these additional security considerations in implementations and deployments of GNAP.
 
 ## TLS Protection in Transit {#security-tls}
 
