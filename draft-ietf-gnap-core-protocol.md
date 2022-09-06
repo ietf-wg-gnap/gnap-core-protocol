@@ -1162,7 +1162,7 @@ to present to the RO during any interactive sequences.
 }
 ~~~
 
-Additional display fields are defined by the [Client Instance Display Fields Registry](#IANA-client-display).
+Additional display fields are defined by the [Client Instance Display Fields Registry](#IANA-client-instance-display).
 
 The AS SHOULD use these values during interaction with the RO.
 The values are for informational purposes only and MUST NOT
@@ -1854,7 +1854,7 @@ The values of the `flags` field defined by this specification are as follows:
 
 Flag values MUST NOT be included more than once.
 
-Additional flags can be defined by extensions using the [Access Token Fields Registry](#IANA-token-fields).
+Additional flags can be defined by extensions using the [Access Token Fields Registry](#IANA-token-flags).
 
 The following non-normative example shows a single access token bound to the client instance's key
 used in the initial request, with a management URI, and that has access to three described resources
@@ -7043,7 +7043,30 @@ From here, the protocol continues as above.
 
 # Guidance for Extensions {#extensions}
 
+Extensions to this specification have a variety of places to alter the protocol, including many
+fields and objects that can have additional values in a [registry](#IANA) established by this
+specification. Extensions that add new fields, especially to the grant request and response, should
+endeavor to have any new fields be as orthogonal as possible to existing fields. That is to say,
+if functionality is sufficiently close to an existing field, the extension should attempt to
+use that field instead of defining a new one, in order to avoid confusion by developers.
 
+Most object fields in GNAP are specified with types. The use of [polymorphism](#polymorphism)
+within GNAP allows extensions to define new fields by not only choosing a new name but also by
+using an existing name with a new type. However, the extension's definition
+of a new type for a field needs to fit the same kind of item being extended. For example, a
+hypothetical extension could define a string value for the `access_token` request field,
+with a URL to download an access token request. Such an extension would be appropriate as
+the `access_token` field still defines the access tokens being requested. However, if an extension
+were to define a string value for the `access_token` request field, with the value instead
+being something unrelated to the access token request such as a value or key format, this would
+not be an appropriate means of extension.
+
+Additionally, the ability to deal with different types for a field is not expected to be equal
+between an AS and client software, with the client software being assumed to be both more varied
+and more simplified than the AS. Furthermore, the nature of the negotiation process in GNAP allows
+the AS more chance of recovery from unknown situations and parameters. As such, any extensions that
+change the type of any field returned to a client instance should only do so when the client
+instance has indicated specific support for that extension through some kind of request parameter.
 
 # JSON Structures and Polymorphism {#polymorphism}
 
@@ -7065,9 +7088,9 @@ different concrete data types for different specific purposes. Since each object
 member has exactly one value in JSON, each data type for an object member field
 is naturally mutually exclusive with other data types within a single JSON object.
 
-For example, a resource request for a single access token is composed of an array
+For example, a resource request for a single access token is composed of an object
 of resource request descriptions while a request for multiple access tokens is
-composed of an object whose member values are all arrays. Both of these represent requests
+composed of an array whose member values are all objects. Both of these represent requests
 for access, but the difference in syntax allows the client instance and AS to differentiate
 between the two request types in the same request.
 
