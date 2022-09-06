@@ -103,6 +103,9 @@ informative:
             -
                 ins: F. Helmschmidt
 
+entity:
+  SELF: "RFC nnnn"
+
 --- abstract
 
 GNAP defines a mechanism for delegating authorization to a
@@ -4758,6 +4761,8 @@ mechanism, but the AS also returns other proofing methods from the discovery doc
 will still deny a request from that client instance using a different proofing
 mechanism.
 
+Additional fields can be defined [in a registry TBD](#IANA).
+
 ## RS-first Method of AS Discovery {#rs-request-without-token}
 
 If the client instance calls an RS without an access token, or with an
@@ -4859,8 +4864,131 @@ not have grown to what it is.
 
 # IANA Considerations {#IANA}
 
-\[\[ TBD: There are a lot of items in the document that are expandable
-through the use of value registries. \]\]
+IANA is requested to create XX registries for the Grant Negotiation and Authorization Protocol and to populate those registries with initial values as described in this section.
+
+All use of value typing is based on {{RFC8259}} data types and MUST be one of the following: number, object, string, boolean, or array. When the type is array, the contents of the array MUST be specified, as in "array of objects". If a parameter is available in different types, each type SHOULD be registered separately.
+
+General guidance for extension parameters is found in {{extensions}}.
+
+## Grant Request Parameters {#IANA-grant-request}
+
+This document defines a GNAP grant request, for which IANA is asked to create and maintain a new registry titled "Grant Request Parameters". Initial values for this registry are given in {{IANA-grant-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-grant-request-template}}.
+
+Each grant request parameter's definition MUST specify the expected behavior of the AS for each potential state of the grant request.
+
+### Registration Template {#IANA-grant-request-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-grant-request-contents}
+
+|Name|Type|Specification document(s)|
+|acces_token|object|{{request-token-single}} of {{&SELF}}|
+|acces_token|array of objects|{{request-token-multiple}} of {{&SELF}}|
+|subject|object|{{request-subject}} of {{&SELF}}|
+|client|object|{{request-client}} of {{&SELF}}|
+|client|string|{{request-instance}} of {{&SELF}}|
+|user|object|{{request-user}} of {{&SELF}}|
+|user|string|{{request-user-reference}} of {{&SELF}}|
+|interact|object|{{request-interact}} of {{&SELF}}|
+|interact_ref|string|{{continue-after-interaction}} of {{&SELF}}|
+
+## Access Token Flags {#IANA-token-flags}
+
+This document defines a GNAP access token flags, for which IANA is asked to create and maintain a new registry titled "Access Token Flags". Initial values for this registry are given in {{IANA-token-flags-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-token-flags-template}}.
+
+Each flag MUST specify whether it can be requested by clients instances or is only allowed in responses from the AS.
+
+### Registration Template {#IANA-token-flags-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-token-flags-contents}
+
+|Name|Specification document(s)|
+|bearer|{{request-token-single}} and {{response-token-single}} of {{&SELF}}|
+|durable|{{response-token-single}} of {{&SELF}}|
+
+## Subject Information Request Fields {#IANA-subject-request}
+
+## Assertion Formats {#IANA-assertion-formats}
+
+## Client Instance Fields {#IANA-client-instance}
+
+## Client Instance Display Fields {#IANA-client-instance-display}
+
+## Interaction Start Modes {#IANA-interaction-start-modes}
+
+## Interaction Finish Methods {#IANA-interaction-finish-methods}
+
+## Interaction Hints {#IANA-interaction-hints}
+
+
+
+## Grant Response Parameters {#IANA-grant-response}
+
+This document defines a GNAP grant response, for which IANA is asked to create and maintain a new registry titled "Grant Response Parameters". Initial values for this registry are given in {{IANA-grant-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-grant-response-template}}.
+
+Each grant response parameter's definition MUST specify the states for which the client instance can expect this parameter.
+
+### Registration Template {#IANA-grant-response-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-grant-response-contents}
+
+|Name|Type|Specification document(s)|
+|continue|object|{{response-continue}} of {{&SELF}}|
+|acces_token|object|{{response-token-single}} of {{&SELF}}|
+|acces_token|array of objects|{{response-token-multiple}} of {{&SELF}}|
+|interact|object|{{response-interact}} of {{&SELF}}|
+|subject|object|{{response-subject}} of {{&SELF}}|
+|instance_id|string|{{response-dynamic-handles}} of {{&SELF}}|
+|error|string|{{response-error}} of {{&SELF}}|
+
+## Interaction Mode Responses {#IANA-interaction-response}
+
+## Subject Information Response Fields {#IANA-subject-response}
+
+## Error Responses {#IANA-error-response}
+
+
+## Key Proofing Methods {#IANA-key-proof-methods}
+
+## Key Formats {#IANA-key-formats}
+
+## Authorization Server Discovery Fields {#IANA-as-discovery}
+
 
 
 # Security Considerations {#security}
@@ -6604,6 +6732,10 @@ client instance additionally creates a nonce to protect the callback, separate
 from the state parameter that it has added to its return URI.
 
 From here, the protocol continues as above.
+
+# Guidance for Extensions {#extensions}
+
+
 
 # JSON Structures and Polymorphism {#polymorphism}
 
