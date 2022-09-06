@@ -4979,7 +4979,56 @@ Specification document(s):
 
 ## Client Instance Fields {#IANA-client-instance}
 
+This document defines a means to send information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Fields". Initial values for this registry are given in {{IANA-client-instance-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-client-instance-template}}.
+
+### Registration Template {#IANA-client-instance-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-client-instance-contents}
+
+|Name|Type|Specification document(s)|
+|key|object|{{key-format}} of {{&SELF}}|
+|key|string|{{key-reference}} of {{&SELF}}|
+|class_id|string|{{request-client}} of {{&SELF}}|
+|display|object|{{request-display}} of {{&SELF}}|
+
 ## Client Instance Display Fields {#IANA-client-instance-display}
+
+This document defines a means to send end-user facing displayable information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Display Fields". Initial values for this registry are given in {{IANA-client-instance-display-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-client-instance-display-template}}.
+
+### Registration Template {#IANA-client-instance-display-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    algorithm, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-client-instance-display-contents}
+
+|Name|Type|Specification document(s)|
+|name|string|{{request-display}} of {{&SELF}}|
+|uri|string|{{request-display}} of {{&SELF}}|
+|logo_uri|string|{{request-display}} of {{&SELF}}|
 
 ## Interaction Start Modes {#IANA-interaction-start-modes}
 
