@@ -764,8 +764,7 @@ client instance's request. Each field is described in detail in a section below.
 : Describes the modes that the client instance supports for allowing the RO to interact with the
     AS and modes for the client instance to receive updates when interaction is complete. REQUIRED if interaction is supported. See {{request-interact}}.
 
-Additional members of this request object can be defined by extensions to this protocol
-as described in {{request-extending}}.
+Additional members of this request object can be defined by extensions using the [Grant Request Parameters Registry](#IANA-grant-request).
 
 A non-normative example of a grant request is below:
 
@@ -873,7 +872,7 @@ The values of the `flags` field defined by this specification are as follows:
 
 Flag values MUST NOT be included more than once.
 
-Additional flags can be defined by extensions using [a registry TBD](#IANA).
+Additional flags can be defined by extensions using the [Access Token Flags Registry](#IANA-token-flags).
 
 
 In the following example, the client instance is requesting access to a complex resource
@@ -995,8 +994,7 @@ the values of the `label` fields in the request.
 
 If the client instance is requesting information about the RO from
 the AS, it sends a `subject` field as a JSON object. This object MAY
-contain the following fields (or additional fields defined in
-[a registry TBD](#IANA)).
+contain the following fields.
 
 `sub_id_formats` (array of strings):
 : An array of subject identifier subject formats
@@ -1006,8 +1004,10 @@ contain the following fields (or additional fields defined in
 `assertion_formats` (array of strings):
 : An array of requested assertion formats. Possible values include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
-    assertion formats are defined by [a registry TBD](#IANA).
+    assertion formats are defined by the [Assertion Formats Registry](#IANA-assertion-formats).
     REQUIRED if assertions are requested.
+
+Additional fields are defined in the [Subject Information Request Fields Registry](#IANA-subject-request).
 
 ~~~ json
 "subject": {
@@ -1082,11 +1082,11 @@ object with the following fields.
 }
 ~~~
 
-Additional fields are defined in [a registry TBD](#IANA).
+Additional fields are defined in the [Client Instance Fields Registry](#IANA-client-instance).
 
 The client instance MUST prove possession of any presented key by the `proof` mechanism
-associated with the key in the request.  Proof types
-are defined in [a registry TBD](#IANA) and an initial set of methods
+associated with the key in the request. Key proofing methods
+are defined in the [Key Proofing Methods Registry](#IANA-key-proof-methods) and an initial set of methods
 is described in {{binding-keys}}.
 
 If the same public key is sent by value on different access requests, the AS MUST
@@ -1162,7 +1162,7 @@ to present to the RO during any interactive sequences.
 }
 ~~~
 
-Additional display fields are defined by [a registry TBD](#IANA).
+Additional display fields are defined by the [Client Instance Display Fields Registry](#IANA-client-display).
 
 The AS SHOULD use these values during interaction with the RO.
 The values are for informational purposes only and MUST NOT
@@ -1374,7 +1374,7 @@ This specification defines the following interaction start modes:
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a short, dynamic URI. {{request-interact-usercodeuri}}
 
-Additional start modes are defined in [a registry TBD](#IANA).
+Additional start modes are defined in the [Interaction Start Modes Registry](#IANA-interaction-start-modes).
 
 #### Redirect to an Arbitrary URI {#request-interact-redirect}
 
@@ -1506,7 +1506,7 @@ indicates this by sending the following members of an object under the `finish` 
     If absent, the default value is `sha3-512`. OPTIONAL.
 
 This specification defines the following values for the `method` parameter,
-with other values defined by [a registry TBD](#IANA):
+with other values defined by the [Interaction Finish Methods Registry](#IANA-interaction-finish-methods):
 
 `"redirect"`:
 : Indicates that the client instance can receive a redirect from the end user's device
@@ -1591,7 +1591,7 @@ This specification defines the following properties under the `hints` key:
 
 The following sections detail requests for interaction
 hints. Additional interaction hints are defined in
-[a registry TBD](#IANA).
+the [Interaction Hints Registry](#IANA-interaction-hints).
 
 
 #### Indicate Desired Interaction Locales {#request-interact-locale}
@@ -1611,17 +1611,6 @@ with an array of locale strings as defined by {{RFC5646}}.
 If possible, the AS SHOULD use one of the locales in the array, with
 preference to the first item in the array supported by the AS. If none
 of the given locales are supported, the AS MAY use a default locale.
-
-### Extending Interaction Modes {#request-interact-extend}
-
-Additional interaction start modes, finish modes, and hints are defined in [a registry TBD](#IANA).
-
-## Extending The Grant Request {#request-extending}
-
-The request object MAY be extended by registering new items in
-[a registry TBD](#IANA). Extensions SHOULD be orthogonal to other parameters.
-Extensions MUST document any aspects where the extension item affects or influences
-the values or behavior of other request and response objects.
 
 # Grant Response {#response}
 
@@ -1650,6 +1639,8 @@ as the HTTP entity body. Each possible field is detailed in the sections below.
 
 `error` (object):
 : An error code indicating that something has gone wrong. REQUIRED for an error condition. If included, other fields MUST NOT be included. See {{response-error}}.
+
+Additional fields can be defined by extensions to GNAP in the [Grant Response Parameters Registry](#IANA-grant-response).
 
 In this example, the AS is returning an [interaction URI](#response-interact-redirect),
 a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
@@ -1863,7 +1854,7 @@ The values of the `flags` field defined by this specification are as follows:
 
 Flag values MUST NOT be included more than once.
 
-Additional flags can be defined by extensions using [a registry TBD](#IANA).
+Additional flags can be defined by extensions using the [Access Token Fields Registry](#IANA-token-fields).
 
 The following non-normative example shows a single access token bound to the client instance's key
 used in the initial request, with a management URI, and that has access to three described resources
@@ -2008,7 +1999,7 @@ interaction methods are included in the same `interact` object.
 `expires_in` (integer):
 : The number of integer seconds after which this set of interaction responses will expire and no longer be usable by the client instance. If the interaction methods expire, the client MAY re-start the interaction process for this grant request by sending an [update](#continue-modify) with a new [interaction request](#request-interact) section. OPTIONAL. If omitted, the interaction response modes returned do not expire.
 
-Additional interaction mode responses can be defined in [a registry TBD](#IANA).
+Additional interaction mode responses can be defined in the [Interaction Mode Responses Registry](#IANA-interaction-response).
 
 The AS MUST NOT respond with any interaction mode that the
 client instance did not indicate in its request. The AS MUST NOT respond with
@@ -2196,13 +2187,6 @@ If the AS returns a nonce, the client instance MUST NOT
 continue a grant request before it receives the associated
 interaction reference on the callback URI. See details in {{interaction-finish}}.
 
-### Extending Interaction Mode Responses {#response-interact-extend}
-
-Extensions to this specification can define new interaction
-mode responses in [a registry TBD](#IANA). Extensions MUST
-document the corresponding interaction request.
-
-
 ## Returning Subject Information {#response-subject}
 
 If information about the RO is requested and the AS
@@ -2224,7 +2208,7 @@ This field is an object with the following OPTIONAL properties.
 : An array containing assertions as objects each containing the assertion
     format and the assertion value as the JSON string serialization of the assertion.
     Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion.
-    Additional assertion formats are defined by [a registry TBD](#IANA).
+    Additional assertion formats are defined by the [Assertion Formats Registry](#IANA-assertion-formats).
     REQUIRED if returning assertions.
 
 `updated_at` (string):
@@ -2262,7 +2246,7 @@ claims. The details of an identity protocol and associated schema
 are outside the scope of this specification.
 
 Extensions to this specification MAY define additional response
-properties in [a registry TBD](#IANA).
+properties in the [Subject Information Response Fields Registry](#IANA-subject-response).
 
 The grant request MUST be in the _approved_ state to return this field in the response.
 
@@ -2320,7 +2304,7 @@ reason, it responds to the client instance with an error message.
 
 `error` (string):
 :   A single ASCII error code from the
-    following, with additional values available in [a registry TBD](#IANA).
+    following, with additional values available in the [Error Response Registry](#IANA-error-response).
     REQUIRED.
 
     `"invalid_request"`:
@@ -2361,11 +2345,6 @@ continue the grant request:
   "error": "user_denied"
 }
 ~~~
-
-## Extending the Response {#response-extend}
-
-Extensions to this specification MAY define additional fields for
-the grant response in [a registry TBD](#IANA).
 
 # Determining Authorization and Consent {#authorization}
 
@@ -3478,6 +3457,12 @@ additional discussion of public keys in {{security-symmetric}}.
     the processing requirements for each are detailed in
     {{binding-keys}}. REQUIRED.
 
+A key presented by value MUST be a public key in at least one
+supported format. If a key is sent in multiple
+formats, all the key format values MUST be equivalent. Note that
+while most formats present the full value of the public key, some
+formats present a value cryptographically derived from the public key.
+
 `jwk` (object):
 : The public key and its properties represented as a JSON Web Key {{RFC7517}}.
     A JWK MUST contain the `alg` (Algorithm) and `kid` (Key ID) parameters. The `alg`
@@ -3498,7 +3483,7 @@ additional discussion of public keys in {{security-symmetric}}.
     the full public key.
     OPTIONAL.
 
-Additional key formats are defined in [a registry TBD](#IANA).
+Additional key formats are defined in the [Key Formats Registry](#IANA-key-formats).
 
 This non-normative example shows a single key presented in multiple
 formats. This example key is intended to be used with the [HTTP Message Signatures]({{httpsig-binding}})
@@ -3626,10 +3611,9 @@ Values for the `method` defined by this specification are as follows:
 `"jws"`:
 : Attached JWS payload. See {{attached-jws}}.
 
-Additional proofing methods are defined by [a registry TBD](#IANA).
+Additional proofing methods are defined by the [Key Proofing Methods Registry](#IANA-key-proof-methods).
 
 For example, the `httpsig` method can be specified with its parameters as:
-
 
 ~~~ json
 {
@@ -4786,7 +4770,7 @@ mechanism, but the AS also returns other proofing methods from the discovery doc
 will still deny a request from that client instance using a different proofing
 mechanism.
 
-Additional fields can be defined [in a registry TBD](#IANA).
+Additional fields can be defined the [Authorization Server Discovery Fields Registry](#IANA-as-discovery).
 
 ## RS-first Method of AS Discovery {#rs-request-without-token}
 
@@ -4912,7 +4896,7 @@ Type:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -4943,7 +4927,7 @@ Name:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -4968,7 +4952,7 @@ Type:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -4992,7 +4976,7 @@ Name:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5017,7 +5001,7 @@ Type:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5044,7 +5028,7 @@ Type:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5069,7 +5053,7 @@ Mode:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5093,7 +5077,7 @@ Method:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5115,7 +5099,7 @@ Name:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5141,7 +5125,7 @@ Type:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5160,6 +5144,8 @@ Specification document(s):
 
 This document defines a means for the AS to provide to the client instance information that is required to complete a particular interaction mode, for which IANA is asked to create and maintain a new registry titled "Interaction Mode Responses". Initial values for this registry are given in {{IANA-interaction-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-response-template}}.
 
+Interaction mode responses MUST document the corresponding interaction start mode that triggers the response's inclusion.
+
 ### Registration Template {#IANA-interaction-response-template}
 
 {: vspace="0"}
@@ -5168,7 +5154,7 @@ Name:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5197,7 +5183,7 @@ Type:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5220,7 +5206,7 @@ Error:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5247,7 +5233,7 @@ Method:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5271,7 +5257,7 @@ Format:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
@@ -5297,7 +5283,7 @@ Type:
 
 Specification document(s):
 : Reference to the document(s) that specify the
-    algorithm, preferably including a URI that can be used
+    value, preferably including a URI that can be used
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
