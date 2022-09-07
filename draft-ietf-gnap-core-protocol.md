@@ -5815,23 +5815,6 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
     GNAP is designed to be interoperable with decentralized identity standards and to provide a human-centric authorization layer. In addition to the core protocol, GNAP supports various patterns of communication between RSs and ASs through extensions. GNAP tries to limit the odds of a consolidation to just a handful of super-popular AS services.
 
-# Component Data Models {#data-models}
-
-While different implementations of this protocol will have different
-realizations of all the components and artifacts enumerated here, the
-nature of the protocol implies some common structures and elements for
-certain components. This appendix seeks to enumerate those common
-elements.
-
-TBD: Client has keys, allowed requested resources, identifier(s),
-allowed requested subjects, allowed
-
-TBD: AS has "grant endpoint", interaction endpoints, store of trusted
-client keys, policies
-
-TBD: Token has RO, user, client, resource list, RS list,
-
-
 # Example Protocol Flows {#examples}
 
 The protocol defined in this specification provides a number of
