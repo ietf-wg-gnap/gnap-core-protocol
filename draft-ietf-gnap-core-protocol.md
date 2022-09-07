@@ -4691,6 +4691,10 @@ the use cases, diagrams, and insights provided in the XYZ and XAuth proposals th
 incorporated here. The editors would like to especially thank Mike Varley and the team at SecureKey
 for feedback and development of early versions of the XYZ protocol that fed into this standards work.
 
+Finally, the editors want to acknowledge the immense contributions of Aaron Parecki to the content
+of this document. We thank him for his insight, input, and hard work, without which GNAP would
+not have grown to what it is.
+
 # IANA Considerations {#IANA}
 
 \[\[ TBD: There are a lot of items in the document that are expandable
