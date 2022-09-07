@@ -19,12 +19,6 @@ author:
     uri: https://bspk.io/
     role: editor
 
-  - ins: A. Parecki
-    name: Aaron Parecki
-    email: aaron@parecki.com
-    organization: Okta
-    uri: https://aaronparecki.com
-
   - ins: F. Imbault
     name: Fabien Imbault
     organization: acert.io
