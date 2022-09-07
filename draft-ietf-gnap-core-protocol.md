@@ -1333,44 +1333,28 @@ request without authorization.
 
 ### Start Mode Definitions {#request-interact-start}
 
-Interaction start modes are specified by a JSON object with one required field and optional parameters:
+Interaction start modes are specified by a string, which consists of the start mode on its own, or by a JSON object with one required field and any number of optional parameters defined by the mode:
 
 `mode`:
 : The interaction start mode.
 
 Individual modes MAY define additional parameters to be required in the object.
 
-If the start mode defines no additional parameters, the method SHOULD be passed as a string instead. Both forms are considered equivalent to each other.
-
-For example, the following:
-
-~~~
-"start": [{
-    "mode": "redirect"
-}]
-~~~
-
-Is equivalent to the much shorter:
-
-~~~
-"start": ["redirect"]
-~~~
-
 This specification defines the following interaction start modes:
 
-`"redirect"`:
+`"redirect"` (string):
 : Indicates that the client instance can direct the end user to an arbitrary URI
     for interaction. {{request-interact-redirect}}
 
-`"app"`:
+`"app"` (string):
 : Indicates that the client instance can launch an application on the end user's
     device for interaction. {{request-interact-app}}
 
-`"user_code"`:
+`"user_code"` (string):
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a stable URI. {{request-interact-usercode}}
 
-`"user_code_uri"`:
+`"user_code_uri"` (string):
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a short, dynamic URI. {{request-interact-usercodeuri}}
 
@@ -5043,13 +5027,16 @@ Specification document(s):
 
 This document defines a means for the client instance to begin interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Start Modes". Initial values for this registry are given in {{IANA-interaction-start-modes-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-start-modes-template}}.
 
-Each interaction start mode MUST declare if it has any additional parameters.
+Each interaction start mode that uses an "object" type MUST declare all additional parameters.
 
 ### Registration Template {#IANA-interaction-start-modes-template}
 
 {: vspace="0"}
 Mode:
 : An identifier for the interaction start mode.
+
+Type:
+: The JSON type for the value, either "string" or "object", as described in {{request-interact-start}}.
 
 Specification document(s):
 : Reference to the document(s) that specify the
@@ -5059,11 +5046,11 @@ Specification document(s):
 
 ### Initial Contents {#IANA-interaction-start-modes-contents}
 
-|Mode|Specification document(s)|
-|redirect|{{request-interact-redirect}} of {{&SELF}}|
-|app|{{request-interact-app}} of {{&SELF}}|
-|user_code|{{request-interact-usercode}} of {{&SELF}}|
-|user_code_uri|{{request-interact-usercodeuri}} of {{&SELF}}|
+|Mode|Type|Specification document(s)|
+|redirect|string|{{request-interact-redirect}} of {{&SELF}}|
+|app|string|{{request-interact-app}} of {{&SELF}}|
+|user_code|string|{{request-interact-usercode}} of {{&SELF}}|
+|user_code_uri|string|{{request-interact-usercodeuri}} of {{&SELF}}|
 
 ## Interaction Finish Methods {#IANA-interaction-finish-methods}
 
