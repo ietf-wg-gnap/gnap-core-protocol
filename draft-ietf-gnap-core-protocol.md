@@ -3320,6 +3320,60 @@ NOTE: '\' line wrapping per RFC 8792
 
 \[\[ [See issue #103](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/103) \]\]
 
+### Binding a New Key to the Rotated Access Token {#rotate-access-token-key}
+
+If the client instance wishes to bind a new presentation key to an access token, the client
+instance MUST present both the new key and previous key in the access token rotation request.
+The client instance makes an HTTP POST as a JSON object with the following fields:
+
+`key`:
+: The new key value or reference in the format described in {{key-format}}. Note that keys
+    passed by value are always public keys.
+
+`previous_key`:
+: The previous key value or by reference in format described in {{key-format}}. Note that keys
+    passed by value are always public keys.
+
+The `proof` method and parameters for the new key MUST be the same as those established for the
+previous key.
+
+The client instance MUST prove possession of both keys simultaneously in the rotation request. The
+means of doing so varies depending on the proofing method in use. For example, the HTTP Message Signatures proofing method uses multiple signatures in the request as described in {{httpsig-rotate}}, as shown in this example.
+
+~~~ http-message
+POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
+Host: server.example.com
+Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+Signature-Input: sig1=..., sig2=("signature";key=sig1)...
+Signature: sig1=..., sig2=...
+Content-Digest: sha-256=...
+
+{
+    "key": {
+        "proof": "httpsig",
+        "jwk": {
+            "kty": "RSA",
+            "e": "AQAB",
+            "kid": "xyz-2",
+            "alg": "RS256",
+            "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+        }
+    },
+    "previous_key": {
+        "proof": "httpsig",
+        "jwk": {
+            "kty": "RSA",
+            "e": "AQAB",
+            "kid": "xyz-1",
+            "alg": "RS256",
+            "n": "eLaY6_It_r3ORwdf8ci_JtffXyaSx8xYkOB5rR4Jv0GM..."
+        }
+    },
+}
+~~~
+
+An attempt to change the `proof` method or parameters, including an attempt to rotate the key of a bearer token (which has no key), MUST result in an error returned from the AS.
+
 ## Revoking the Access Token {#revoke-access-token}
 
 If the client instance wishes to revoke the access token proactively, such as when
@@ -3387,7 +3441,8 @@ A key presented by value MUST be a public key in at least one
 supported format. If a key is sent in multiple
 formats, all the key format values MUST be equivalent. Note that
 while most formats present the full value of the public key, some
-formats present a value cryptographically derived from the public key.
+formats present a value cryptographically derived from the public key. See
+additional discussion of public keys in {{security-symmetric}}.
 
 `proof` (string or object):
 : The form of proof that the client instance will use when
@@ -3650,7 +3705,7 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-### HTTP Message Signing {#httpsig-binding}
+### HTTP Message Signatures {#httpsig-binding}
 
 This method is indicated by the method value `httpsig`. The signer creates an HTTP
 Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}. This method defines the following parameters:
@@ -3821,6 +3876,95 @@ calculate and verify the value of the `Digest` or `Content-Digest` header. The v
 MUST ensure that the signature covers all required message components. The verifier MUST validate
 the signature against the expected key of the signer.
 
+#### Key Rotation using HTTP Message Signatures {#httpsig-rotate}
+
+When rotating a key using HTTP Message Signatures, the message, which includes the new public key
+value or reference, is first signed with the old key. The message is then signed again with the new
+key, including the signature from the old key under the signature of the new key.
+
+For example, the following request to the token management endpoint for rotating a token value
+contains both the old and new keys in the request. The message is first signed using the old key
+and the resulting signature is placed in "sig1":
+
+~~~ http-message
+POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
+Host: server.example.com
+Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+Signature-Input: sig1=("authorization" "@method" "@created")\
+    ;keyid="xyz-1"
+Signature: sig1=...
+Content-Digest: sha-256=...
+
+{
+    "key": {
+        "proof": "httpsig",
+        "jwk": {
+            "kty": "RSA",
+            "e": "AQAB",
+            "kid": "xyz-2",
+            "alg": "RS256",
+            "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+        }
+    },
+    "previous_key": {
+        "proof": "httpsig",
+        "jwk": {
+            "kty": "RSA",
+            "e": "AQAB",
+            "kid": "xyz-1",
+            "alg": "RS256",
+            "n": "eLaY6_It_r3ORwdf8ci_JtffXyaSx8xYkOB5rR4Jv0GM..."
+        }
+    },
+}
+~~~
+
+The signer then creates a new signature using the new key using the signature
+value as its input to the signature base. Since the existing signature covers the required parts
+of the message, they do not need to be repeated.
+
+~~~
+"signature";key="sig1"
+"@signature-input": ("signature";key="sig1");keyid="xyz-2"
+~~~
+
+This signature is then added to the message:
+
+~~~ http-message
+POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
+Host: server.example.com
+Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+Signature-Input: sig1=("authorization" "@method" "@created")\
+    ;keyid="xyz-1", sig2=("signature";key="sig1");keyid="xyz-2"
+Signature: sig1=..., sig2=...
+Content-Digest: sha-256=...
+
+{
+    "key": {
+        "proof": "httpsig",
+        "jwk": {
+            "kty": "RSA",
+            "e": "AQAB",
+            "kid": "xyz-2",
+            "alg": "RS256",
+            "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
+        }
+    },
+    "previous_key": {
+        "proof": "httpsig",
+        "jwk": {
+            "kty": "RSA",
+            "e": "AQAB",
+            "kid": "xyz-1",
+            "alg": "RS256",
+            "n": "eLaY6_It_r3ORwdf8ci_JtffXyaSx8xYkOB5rR4Jv0GM..."
+        }
+    },
+}
+~~~
+
+The verifier MUST validate both signatures before processing the request for key rotation.
+
 ### Mutual TLS {#mtls}
 
 This method is indicated by the method value `mtls`. This method defines no
@@ -3911,6 +4055,13 @@ means of trust for this certificate could be in something other than
 a PKI system, such as a static registration or trust-on-first-use.
 See {{security-mtls}} and {{security-mtls-patterns}} for some additional
 considerations for this key proofing method.
+
+#### Key Rotation using MTLS
+
+Since it is not possible to present two client authenticated certificates to a mutual TLS
+connection simultaneously, dynamic key rotation for this proofing method is not defined.
+Instead, key rotation for MTLS-based client instances is expected to be managed through
+deployment practices, as discussed in {{security-mtls-patterns}}.
 
 ### Detached JWS {#detached-jws}
 
@@ -4091,6 +4242,13 @@ also uses a hardcoded hash. A future version of this document may address crypto
 these uses by replacing ath with a new header that upgrades the algorithm, and possibly defining a
 new header that indicates the HTTP content's hash method.
 
+#### Key Rotation using Detached JWS
+
+When rotating a key using Detached JWS, the message, which includes the new public key value or
+reference, is first signed with the old key using a JWS object with `typ` header value
+”gnap-binding-rotation+jwsd”. The value of the JWS object is then taken as the payload of a new JWS
+object, to be signed by the new key.
+
 ### Attached JWS {#attached-jws}
 
 This method is indicated by the method value `jws`. This method defines no
@@ -4253,6 +4411,10 @@ the `ath` hash algorithm is hardcoded, and computing the payload of the detached
 also uses a hardcoded hash. A future version of this document may address crypto-agility for both
 these uses by replacing ath with a new header that upgrades the algorithm, and possibly defining a
 new header that indicates the HTTP content's hash method.
+
+#### Key Rotation using Attached JWS
+
+When rotating a key using Attached JWS, the message, which includes the new public key value or reference, is first signed with the old key using a JWS object with `typ` header value ”gnap-binding-rotation+jwsd”. The value of the JWS object is then taken as the payload of a new JWS object, to be signed by the new key.
 
 # Resource Access Rights {#resource-access-rights}
 
@@ -5676,6 +5838,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 --- back
 
 # Document History {#history}
+
+- -11
+    - Added key rotation in token management.
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
