@@ -6272,6 +6272,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -11
     - Added key rotation in token management.
+    - Removed "Models" section.
+    - Rewrote guidance and requirements for extensions.
+    - Require all URIs to be absolute throughout protocol.
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
