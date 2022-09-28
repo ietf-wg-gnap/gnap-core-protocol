@@ -103,6 +103,9 @@ informative:
             -
                 ins: F. Helmschmidt
 
+entity:
+  SELF: "RFC nnnn"
+
 --- abstract
 
 GNAP defines a mechanism for delegating authorization to a
@@ -761,8 +764,7 @@ client instance's request. Each field is described in detail in a section below.
 : Describes the modes that the client instance supports for allowing the RO to interact with the
     AS and modes for the client instance to receive updates when interaction is complete. REQUIRED if interaction is supported. See {{request-interact}}.
 
-Additional members of this request object can be defined by extensions to this protocol
-as described in {{request-extending}}.
+Additional members of this request object can be defined by extensions using the [Grant Request Parameters Registry](#IANA-grant-request).
 
 A non-normative example of a grant request is below:
 
@@ -870,7 +872,7 @@ The values of the `flags` field defined by this specification are as follows:
 
 Flag values MUST NOT be included more than once.
 
-Additional flags can be defined by extensions using [a registry TBD](#IANA).
+Additional flags can be defined by extensions using the [Access Token Flags Registry](#IANA-token-flags).
 
 
 In the following example, the client instance is requesting access to a complex resource
@@ -992,8 +994,7 @@ the values of the `label` fields in the request.
 
 If the client instance is requesting information about the RO from
 the AS, it sends a `subject` field as a JSON object. This object MAY
-contain the following fields (or additional fields defined in
-[a registry TBD](#IANA)).
+contain the following fields.
 
 `sub_id_formats` (array of strings):
 : An array of subject identifier subject formats
@@ -1003,8 +1004,10 @@ contain the following fields (or additional fields defined in
 `assertion_formats` (array of strings):
 : An array of requested assertion formats. Possible values include
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
-    assertion formats are defined by [a registry TBD](#IANA).
+    assertion formats are defined by the [Assertion Formats Registry](#IANA-assertion-formats).
     REQUIRED if assertions are requested.
+
+Additional fields are defined in the [Subject Information Request Fields Registry](#IANA-subject-request).
 
 ~~~ json
 "subject": {
@@ -1079,11 +1082,11 @@ object with the following fields.
 }
 ~~~
 
-Additional fields are defined in [a registry TBD](#IANA).
+Additional fields are defined in the [Client Instance Fields Registry](#IANA-client-instance).
 
 The client instance MUST prove possession of any presented key by the `proof` mechanism
-associated with the key in the request.  Proof types
-are defined in [a registry TBD](#IANA) and an initial set of methods
+associated with the key in the request. Key proofing methods
+are defined in the [Key Proofing Methods Registry](#IANA-key-proof-methods) and an initial set of methods
 is described in {{binding-keys}}.
 
 If the same public key is sent by value on different access requests, the AS MUST
@@ -1159,7 +1162,7 @@ to present to the RO during any interactive sequences.
 }
 ~~~
 
-Additional display fields are defined by [a registry TBD](#IANA).
+Additional display fields are defined by the [Client Instance Display Fields Registry](#IANA-client-instance-display).
 
 The AS SHOULD use these values during interaction with the RO.
 The values are for informational purposes only and MUST NOT
@@ -1330,23 +1333,32 @@ request without authorization.
 
 ### Start Mode Definitions {#request-interact-start}
 
-This specification defines the following interaction start modes as an array of string values under the `start` key:
+Interaction start modes are specified by a string, which consists of the start mode on its own, or by a JSON object with one required field and any number of optional parameters defined by the mode:
 
-`"redirect"`:
+`mode`:
+: The interaction start mode.
+
+Individual modes MAY define additional parameters to be required in the object.
+
+This specification defines the following interaction start modes:
+
+`"redirect"` (string):
 : Indicates that the client instance can direct the end user to an arbitrary URI
     for interaction. {{request-interact-redirect}}
 
-`"app"`:
+`"app"` (string):
 : Indicates that the client instance can launch an application on the end user's
     device for interaction. {{request-interact-app}}
 
-`"user_code"`:
+`"user_code"` (string):
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a stable URI. {{request-interact-usercode}}
 
-`"user_code_uri"`:
+`"user_code_uri"` (string):
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a short, dynamic URI. {{request-interact-usercodeuri}}
+
+Additional start modes are defined in the [Interaction Start Modes Registry](#IANA-interaction-start-modes).
 
 #### Redirect to an Arbitrary URI {#request-interact-redirect}
 
@@ -1478,7 +1490,7 @@ indicates this by sending the following members of an object under the `finish` 
     If absent, the default value is `sha3-512`. OPTIONAL.
 
 This specification defines the following values for the `method` parameter,
-with other values defined by [a registry TBD](#IANA):
+with other values defined by the [Interaction Finish Methods Registry](#IANA-interaction-finish-methods):
 
 `"redirect"`:
 : Indicates that the client instance can receive a redirect from the end user's device
@@ -1563,7 +1575,7 @@ This specification defines the following properties under the `hints` key:
 
 The following sections detail requests for interaction
 hints. Additional interaction hints are defined in
-[a registry TBD](#IANA).
+the [Interaction Hints Registry](#IANA-interaction-hints).
 
 
 #### Indicate Desired Interaction Locales {#request-interact-locale}
@@ -1583,17 +1595,6 @@ with an array of locale strings as defined by {{RFC5646}}.
 If possible, the AS SHOULD use one of the locales in the array, with
 preference to the first item in the array supported by the AS. If none
 of the given locales are supported, the AS MAY use a default locale.
-
-### Extending Interaction Modes {#request-interact-extend}
-
-Additional interaction start modes, finish modes, and hints are defined in [a registry TBD](#IANA).
-
-## Extending The Grant Request {#request-extending}
-
-The request object MAY be extended by registering new items in
-[a registry TBD](#IANA). Extensions SHOULD be orthogonal to other parameters.
-Extensions MUST document any aspects where the extension item affects or influences
-the values or behavior of other request and response objects.
 
 # Grant Response {#response}
 
@@ -1622,6 +1623,8 @@ as the HTTP entity body. Each possible field is detailed in the sections below.
 
 `error` (object):
 : An error code indicating that something has gone wrong. REQUIRED for an error condition. If included, other fields MUST NOT be included. See {{response-error}}.
+
+Additional fields can be defined by extensions to GNAP in the [Grant Response Parameters Registry](#IANA-grant-response).
 
 In this example, the AS is returning an [interaction URI](#response-interact-redirect),
 a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
@@ -1835,7 +1838,7 @@ The values of the `flags` field defined by this specification are as follows:
 
 Flag values MUST NOT be included more than once.
 
-Additional flags can be defined by extensions using [a registry TBD](#IANA).
+Additional flags can be defined by extensions using the [Access Token Fields Registry](#IANA-token-flags).
 
 The following non-normative example shows a single access token bound to the client instance's key
 used in the initial request, with a management URI, and that has access to three described resources
@@ -1980,7 +1983,7 @@ interaction methods are included in the same `interact` object.
 `expires_in` (integer):
 : The number of integer seconds after which this set of interaction responses will expire and no longer be usable by the client instance. If the interaction methods expire, the client MAY re-start the interaction process for this grant request by sending an [update](#continue-modify) with a new [interaction request](#request-interact) section. OPTIONAL. If omitted, the interaction response modes returned do not expire.
 
-Additional interaction mode responses can be defined in [a registry TBD](#IANA).
+Additional interaction mode responses can be defined in the [Interaction Mode Responses Registry](#IANA-interaction-response).
 
 The AS MUST NOT respond with any interaction mode that the
 client instance did not indicate in its request. The AS MUST NOT respond with
@@ -2168,13 +2171,6 @@ If the AS returns a nonce, the client instance MUST NOT
 continue a grant request before it receives the associated
 interaction reference on the callback URI. See details in {{interaction-finish}}.
 
-### Extending Interaction Mode Responses {#response-interact-extend}
-
-Extensions to this specification can define new interaction
-mode responses in [a registry TBD](#IANA). Extensions MUST
-document the corresponding interaction request.
-
-
 ## Returning Subject Information {#response-subject}
 
 If information about the RO is requested and the AS
@@ -2196,7 +2192,7 @@ This field is an object with the following OPTIONAL properties.
 : An array containing assertions as objects each containing the assertion
     format and the assertion value as the JSON string serialization of the assertion.
     Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion.
-    Additional assertion formats are defined by [a registry TBD](#IANA).
+    Additional assertion formats are defined by the [Assertion Formats Registry](#IANA-assertion-formats).
     REQUIRED if returning assertions.
 
 `updated_at` (string):
@@ -2234,7 +2230,7 @@ claims. The details of an identity protocol and associated schema
 are outside the scope of this specification.
 
 Extensions to this specification MAY define additional response
-properties in [a registry TBD](#IANA).
+properties in the [Subject Information Response Fields Registry](#IANA-subject-response).
 
 The grant request MUST be in the _approved_ state to return this field in the response.
 
@@ -2292,7 +2288,7 @@ reason, it responds to the client instance with an error message.
 
 `error` (string):
 :   A single ASCII error code from the
-    following, with additional values available in [a registry TBD](#IANA).
+    following, with additional values available in the [Error Response Registry](#IANA-error-response).
     REQUIRED.
 
     `"invalid_request"`:
@@ -2333,11 +2329,6 @@ continue the grant request:
   "error": "user_denied"
 }
 ~~~
-
-## Extending the Response {#response-extend}
-
-Extensions to this specification MAY define additional fields for
-the grant response in [a registry TBD](#IANA).
 
 # Determining Authorization and Consent {#authorization}
 
@@ -3450,6 +3441,12 @@ additional discussion of public keys in {{security-symmetric}}.
     the processing requirements for each are detailed in
     {{binding-keys}}. REQUIRED.
 
+A key presented by value MUST be a public key in at least one
+supported format. If a key is sent in multiple
+formats, all the key format values MUST be equivalent. Note that
+while most formats present the full value of the public key, some
+formats present a value cryptographically derived from the public key.
+
 `jwk` (object):
 : The public key and its properties represented as a JSON Web Key {{RFC7517}}.
     A JWK MUST contain the `alg` (Algorithm) and `kid` (Key ID) parameters. The `alg`
@@ -3470,7 +3467,7 @@ additional discussion of public keys in {{security-symmetric}}.
     the full public key.
     OPTIONAL.
 
-Additional key formats are defined in [a registry TBD](#IANA).
+Additional key formats are defined in the [Key Formats Registry](#IANA-key-formats).
 
 This non-normative example shows a single key presented in multiple
 formats. This example key is intended to be used with the [HTTP Message Signatures]({{httpsig-binding}})
@@ -3598,10 +3595,9 @@ Values for the `method` defined by this specification are as follows:
 `"jws"`:
 : Attached JWS payload. See {{attached-jws}}.
 
-Additional proofing methods are defined by [a registry TBD](#IANA).
+Additional proofing methods are defined by the [Key Proofing Methods Registry](#IANA-key-proof-methods).
 
 For example, the `httpsig` method can be specified with its parameters as:
-
 
 ~~~ json
 {
@@ -4723,31 +4719,37 @@ server's discovery information. The AS MUST respond with a JSON document with Co
 
 `interaction_start_modes_supported` (array of strings):
 : A list of the AS's interaction start methods. The values of this list correspond to the
-    possible values for the [interaction start section](#request-interact-start) of the request.
+    possible values for the [interaction start section](#request-interact-start) of the request and
+    MUST be values from the [Interaction Start Modes Registry](#IANA-interaction-start-modes).
     OPTIONAL.
 
 `interaction_finish_methods_supported` (array of strings):
 : A list of the AS's interaction finish methods. The values of this list correspond to the
-    possible values for the method element of the [interaction finish section](#request-interact-finish) of the request.
+    possible values for the method element of the [interaction finish section](#request-interact-finish) of the request and MUST be values from
+    the [Interaction Finish Methods Registry](#IANA-interaction-finish-methods).
     OPTIONAL.
 
 `key_proofs_supported` (array of strings):
 : A list of the AS's supported key
     proofing mechanisms. The values of this list correspond to possible
     values of the `proof` field of the
-    [key section](#key-format) of the request.
+    [key section](#key-format) of the request and MUST be values from the
+    [Key Proofing Methods Registry](#IANA-key-proof-methods).
     OPTIONAL.
 
 `sub_id_formats_supported` (array of strings):
 : A list of the AS's supported
     subject identifier formats. The values of this list correspond to possible values
-    of the [subject identifier section](#request-subject) of the request.
+    of the [subject identifier section](#request-subject) of the request and MUST
+    be values from the Subject Identifier Formats Registry established by
+    {{I-D.ietf-secevent-subject-identifiers}}.
     OPTIONAL.
 
 `assertion_formats_supported` (array of strings):
 : A list of the AS's supported
     assertion formats. The values of this list correspond to possible
-    values of the [subject assertion section](#request-subject) of the request.
+    values of the [subject assertion section](#request-subject) of the request and MUST
+    be values from the [Assertion Formats Registry](#IANA-assertion-formats).
     OPTIONAL.
 
 The information returned from this method is for optimization
@@ -4757,6 +4759,8 @@ can be registered with the `mtls` key proofing
 mechanism, but the AS also returns other proofing methods from the discovery document, then the AS
 will still deny a request from that client instance using a different proofing
 mechanism.
+
+Additional fields can be defined the [Authorization Server Discovery Fields Registry](#IANA-as-discovery).
 
 ## RS-first Method of AS Discovery {#rs-request-without-token}
 
@@ -4859,11 +4863,436 @@ not have grown to what it is.
 
 # IANA Considerations {#IANA}
 
-\[\[ TBD: There are a lot of items in the document that are expandable
-through the use of value registries. \]\]
+IANA is requested to create XX registries for the Grant Negotiation and Authorization Protocol and to populate those registries with initial values as described in this section.
 
+All use of value typing is based on {{RFC8259}} data types and MUST be one of the following: number, object, string, boolean, or array. When the type is array, the contents of the array MUST be specified, as in "array of objects". If a parameter is available in different types, each type SHOULD be registered separately.
+
+General guidance for extension parameters is found in {{extensions}}.
+
+## Grant Request Parameters {#IANA-grant-request}
+
+This document defines a GNAP grant request, for which IANA is asked to create and maintain a new registry titled "Grant Request Parameters". Initial values for this registry are given in {{IANA-grant-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-grant-request-template}}.
+
+Each grant request parameter's definition MUST specify the expected behavior of the AS for each potential state of the grant request.
+
+### Registration Template {#IANA-grant-request-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-grant-request-contents}
+
+|Name|Type|Specification document(s)|
+|access_token|object|{{request-token-single}} of {{&SELF}}|
+|access_token|array of objects|{{request-token-multiple}} of {{&SELF}}|
+|subject|object|{{request-subject}} of {{&SELF}}|
+|client|object|{{request-client}} of {{&SELF}}|
+|client|string|{{request-instance}} of {{&SELF}}|
+|user|object|{{request-user}} of {{&SELF}}|
+|user|string|{{request-user-reference}} of {{&SELF}}|
+|interact|object|{{request-interact}} of {{&SELF}}|
+|interact_ref|string|{{continue-after-interaction}} of {{&SELF}}|
+
+## Access Token Flags {#IANA-token-flags}
+
+This document defines a GNAP access token flags, for which IANA is asked to create and maintain a new registry titled "Access Token Flags". Initial values for this registry are given in {{IANA-token-flags-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-token-flags-template}}.
+
+Each flag MUST specify whether it can be requested by clients instances or is only allowed in responses from the AS.
+
+### Registration Template {#IANA-token-flags-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-token-flags-contents}
+
+|Name|Specification document(s)|
+|bearer|{{request-token-single}} and {{response-token-single}} of {{&SELF}}|
+|durable|{{response-token-single}} of {{&SELF}}|
+
+## Subject Information Request Fields {#IANA-subject-request}
+
+This document defines a means to request subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Request Fields". Initial values for this registry are given in {{IANA-subject-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-subject-request-template}}.
+
+### Registration Template {#IANA-subject-request-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-subject-request-contents}
+
+|Name|Type|Specification document(s)|
+|sub_id_formats|array of strings|{{request-subject}} of {{&SELF}}|
+|assertion_formats|array of strings|{{request-subject}} of {{&SELF}}|
+
+## Assertion Formats {#IANA-assertion-formats}
+
+This document defines a means to pass identity assertions between the AS and client instance, for which IANA is asked to create and maintain a new registry titled "Assertion Formats". Initial values for this registry are given in {{IANA-assertion-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-assertion-formats-template}}.
+
+Each assertion format definition MUST specify the serialization format of the assertion value as used within GNAP.
+
+### Registration Template {#IANA-assertion-formats-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the assertion format.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-assertion-formats-contents}
+
+|Name|Specification document(s)|
+|id_token|{{request-subject}} and {{response-subject}} of {{&SELF}}|
+|saml2|{{request-subject}} and {{response-subject}} of {{&SELF}}|
+
+## Client Instance Fields {#IANA-client-instance}
+
+This document defines a means to send information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Fields". Initial values for this registry are given in {{IANA-client-instance-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-client-instance-template}}.
+
+### Registration Template {#IANA-client-instance-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-client-instance-contents}
+
+|Name|Type|Specification document(s)|
+|key|object|{{key-format}} of {{&SELF}}|
+|key|string|{{key-reference}} of {{&SELF}}|
+|class_id|string|{{request-client}} of {{&SELF}}|
+|display|object|{{request-display}} of {{&SELF}}|
+
+## Client Instance Display Fields {#IANA-client-instance-display}
+
+This document defines a means to send end-user facing displayable information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Display Fields". Initial values for this registry are given in {{IANA-client-instance-display-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-client-instance-display-template}}.
+
+### Registration Template {#IANA-client-instance-display-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-client-instance-display-contents}
+
+|Name|Type|Specification document(s)|
+|name|string|{{request-display}} of {{&SELF}}|
+|uri|string|{{request-display}} of {{&SELF}}|
+|logo_uri|string|{{request-display}} of {{&SELF}}|
+
+## Interaction Start Modes {#IANA-interaction-start-modes}
+
+This document defines a means for the client instance to begin interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Start Modes". Initial values for this registry are given in {{IANA-interaction-start-modes-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-start-modes-template}}.
+
+Each interaction start mode that uses an "object" type MUST declare all additional parameters.
+
+### Registration Template {#IANA-interaction-start-modes-template}
+
+{: vspace="0"}
+Mode:
+: An identifier for the interaction start mode.
+
+Type:
+: The JSON type for the value, either "string" or "object", as described in {{request-interact-start}}.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-interaction-start-modes-contents}
+
+|Mode|Type|Specification document(s)|
+|redirect|string|{{request-interact-redirect}} of {{&SELF}}|
+|app|string|{{request-interact-app}} of {{&SELF}}|
+|user_code|string|{{request-interact-usercode}} of {{&SELF}}|
+|user_code_uri|string|{{request-interact-usercodeuri}} of {{&SELF}}|
+
+## Interaction Finish Methods {#IANA-interaction-finish-methods}
+
+This document defines a means for the client instance to be notified of the end of interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Finish Methods". Initial values for this registry are given in {{IANA-interaction-finish-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-finish-methods-template}}.
+
+### Registration Template {#IANA-interaction-finish-methods-template}
+
+{: vspace="0"}
+Method:
+: An identifier for the interaction finish method.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-interaction-finish-methods-contents}
+
+|Mode|Specification document(s)|
+|redirect|{{request-interact-callback-redirect}} of {{&SELF}}|
+|push|{{request-interact-callback-push}} of {{&SELF}}|
+
+## Interaction Hints {#IANA-interaction-hints}
+
+This document defines a set of hints that a client instance can provide to the AS to facilitate interaction with the end user, for which IANA is asked to create and maintain a new registry titled "Interaction Hints". Initial values for this registry are given in {{IANA-interaction-hints-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-hints-template}}.
+
+### Registration Template {#IANA-interaction-hints-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-interaction-hints-contents}
+
+|Mode|Specification document(s)|
+|ui_locales|{{request-interact-hint}} of {{&SELF}}|
+
+## Grant Response Parameters {#IANA-grant-response}
+
+This document defines a GNAP grant response, for which IANA is asked to create and maintain a new registry titled "Grant Response Parameters". Initial values for this registry are given in {{IANA-grant-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-grant-response-template}}.
+
+Each grant response parameter's definition MUST specify the states for which the client instance can expect this parameter.
+
+### Registration Template {#IANA-grant-response-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-grant-response-contents}
+
+|Name|Type|Specification document(s)|
+|continue|object|{{response-continue}} of {{&SELF}}|
+|acces_token|object|{{response-token-single}} of {{&SELF}}|
+|acces_token|array of objects|{{response-token-multiple}} of {{&SELF}}|
+|interact|object|{{response-interact}} of {{&SELF}}|
+|subject|object|{{response-subject}} of {{&SELF}}|
+|instance_id|string|{{response-dynamic-handles}} of {{&SELF}}|
+|error|object|{{response-error}} of {{&SELF}}|
+
+## Interaction Mode Responses {#IANA-interaction-response}
+
+This document defines a means for the AS to provide to the client instance information that is required to complete a particular interaction mode, for which IANA is asked to create and maintain a new registry titled "Interaction Mode Responses". Initial values for this registry are given in {{IANA-interaction-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-response-template}}.
+
+Interaction mode responses MUST document the corresponding interaction start mode that triggers the response's inclusion.
+
+### Registration Template {#IANA-interaction-response-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-interaction-response-contents}
+
+|Name|Specification document(s)|
+|redirect|{{response-interact}} of {{&SELF}}|
+|app|{{response-interact}} of {{&SELF}}|
+|user_code|{{response-interact}} of {{&SELF}}|
+|user_code_uri|{{response-interact}} of {{&SELF}}|
+|finish|{{response-interact}} of {{&SELF}}|
+|expires_in|{{response-interact}} of {{&SELF}}|
+
+## Subject Information Response Fields {#IANA-subject-response}
+
+This document defines a means to return subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Response Fields". Initial values for this registry are given in {{IANA-subject-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-subject-response-template}}.
+
+### Registration Template {#IANA-subject-response-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-subject-response-contents}
+
+|Name|Type|Specification document(s)|
+|sub_ids|array of objects|{{response-subject}} of {{&SELF}}|
+|assertions|array of objects|{{response-subject}} of {{&SELF}}|
+|updated_at|string|{{response-subject}} of {{&SELF}}|
+
+## Error Responses {#IANA-error-response}
+
+This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Responses". Initial values for this registry are given in {{IANA-error-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-error-response-template}}.
+
+### Registration Template {#IANA-error-response-template}
+
+{: vspace="0"}
+Error:
+: A unique string code for the error.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-error-response-contents}
+
+|Error|Specification document(s)|
+|invalid_request|{{response-error}} of {{&SELF}}|
+|invalid_client|{{response-error}} of {{&SELF}}|
+|user_denied|{{response-error}} of {{&SELF}}|
+|too_fast|{{response-error}} of {{&SELF}}|
+|unknown_request|{{response-error}} of {{&SELF}}|
+|request_denied|{{response-error}} of {{&SELF}}|
+|invalid_interaction|{{response-error}} of {{&SELF}}|
+
+## Key Proofing Methods {#IANA-key-proof-methods}
+
+This document defines methods that the client instance can use to prove possession of a key, for which IANA is asked to create and maintain a new registry titled "Key Proofing Methods". Initial values for this registry are given in {{IANA-key-proof-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-key-proof-methods-template}}.
+
+### Registration Template {#IANA-key-proof-methods-template}
+
+{: vspace="0"}
+Method:
+: A unique string code for the key proofing method.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-key-proof-methods-contents}
+
+|Method|Specification document(s)|
+|httpsig|{{httpsig-binding}} of {{&SELF}}|
+|mtls|{{mtls}} of {{&SELF}}|
+|jwsd|{{detached-jws}} of {{&SELF}}|
+|jws|{{attached-jws}} of {{&SELF}}|
+
+## Key Formats {#IANA-key-formats}
+
+This document defines formats for a public key value, for which IANA is asked to create and maintain a new registry titled "Key Formats". Initial values for this registry are given in {{IANA-key-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-key-formats-template}}.
+
+### Registration Template {#IANA-key-formats-template}
+
+{: vspace="0"}
+Format:
+: A unique string code for the key format.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-key-formats-contents}
+
+|Format|Specification document(s)|
+|jwk|{{key-format}} of {{&SELF}}|
+|cert|{{key-format}} of {{&SELF}}|
+|cert#S256|{{key-format}} of {{&SELF}}|
+
+## Authorization Server Discovery Fields {#IANA-as-discovery}
+
+This document defines a discovery document for an AS, for which IANA is asked to create and maintain a new registry titled "Authorization Server Discovery Fields". Initial values for this registry are given in {{IANA-as-discovery-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-as-discovery-template}}.
+
+### Registration Template {#IANA-as-discovery-template}
+
+{: vspace="0"}
+Name:
+: An identifier for the parameter.
+
+Type:
+: The JSON type allowed for the value.
+
+Specification document(s):
+: Reference to the document(s) that specify the
+    value, preferably including a URI that can be used
+    to retrieve a copy of the document(s). An indication of the
+    relevant sections may also be included but is not required.
+
+### Initial Contents {#IANA-as-discovery-contents}
+
+|Name|Type|Specification document(s)|
+|grant_request_endpoint|string|{{discovery}} of {{&SELF}}|
+|interaction_start_modes_supported|array of strings|{{discovery}} of {{&SELF}}|
+|interaction_finish_methods_supported|array of strings|{{discovery}} of {{&SELF}}|
+|key_proofs_supported|array of strings|{{discovery}} of {{&SELF}}|
+|sub_id_formats_supported|array of strings|{{discovery}} of {{&SELF}}|
+|assertion_formats_supported|array of strings|{{discovery}} of {{&SELF}}|
 
 # Security Considerations {#security}
+
+In addition to the normative requirements in this document, implementors are strongly encouraged to consider these additional security considerations in implementations and deployments of GNAP.
 
 ## TLS Protection in Transit {#security-tls}
 
@@ -6605,6 +7034,35 @@ from the state parameter that it has added to its return URI.
 
 From here, the protocol continues as above.
 
+# Guidance for Extensions {#extensions}
+
+Extensions to this specification have a variety of places to alter the protocol, including many
+fields and objects that can have additional values in a [registry](#IANA) established by this
+specification. Extensions that add new fields, especially to the grant request and response, should
+endeavor to have any new fields be as orthogonal as possible to existing fields. That is to say,
+if functionality is sufficiently close to an existing field, the extension should attempt to
+use that field instead of defining a new one, in order to avoid confusion by developers.
+
+Most object fields in GNAP are specified with types, and those types can allow different but
+related behavior. For example, the `access` array can include either strings or objects, as
+discussed in {{resource-access-rights}}. The use of [polymorphism](#polymorphism)
+within GNAP allows extensions to define new fields by not only choosing a new name but also by
+using an existing name with a new type. However, the extension's definition
+of a new type for a field needs to fit the same kind of item being extended. For example, a
+hypothetical extension could define a string value for the `access_token` request field,
+with a URL to download an access token request. Such an extension would be appropriate as
+the `access_token` field still defines the access tokens being requested. However, if an extension
+were to define a string value for the `access_token` request field, with the value instead
+being something unrelated to the access token request such as a value or key format, this would
+not be an appropriate means of extension.
+
+Additionally, the ability to deal with different types for a field is not expected to be equal
+between an AS and client software, with the client software being assumed to be both more varied
+and more simplified than the AS. Furthermore, the nature of the negotiation process in GNAP allows
+the AS more chance of recovery from unknown situations and parameters. As such, any extensions that
+change the type of any field returned to a client instance should only do so when the client
+instance has indicated specific support for that extension through some kind of request parameter.
+
 # JSON Structures and Polymorphism {#polymorphism}
 
 GNAP makes use of polymorphism within the [JSON](#RFC8259) structures used for
@@ -6625,9 +7083,9 @@ different concrete data types for different specific purposes. Since each object
 member has exactly one value in JSON, each data type for an object member field
 is naturally mutually exclusive with other data types within a single JSON object.
 
-For example, a resource request for a single access token is composed of an array
+For example, a resource request for a single access token is composed of an object
 of resource request descriptions while a request for multiple access tokens is
-composed of an object whose member values are all arrays. Both of these represent requests
+composed of an array whose member values are all objects. Both of these represent requests
 for access, but the difference in syntax allows the client instance and AS to differentiate
 between the two request types in the same request.
 
