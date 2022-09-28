@@ -4719,31 +4719,37 @@ server's discovery information. The AS MUST respond with a JSON document with Co
 
 `interaction_start_modes_supported` (array of strings):
 : A list of the AS's interaction start methods. The values of this list correspond to the
-    possible values for the [interaction start section](#request-interact-start) of the request.
+    possible values for the [interaction start section](#request-interact-start) of the request and
+    MUST be values from the [Interaction Start Modes Registry](#IANA-interaction-start-modes).
     OPTIONAL.
 
 `interaction_finish_methods_supported` (array of strings):
 : A list of the AS's interaction finish methods. The values of this list correspond to the
-    possible values for the method element of the [interaction finish section](#request-interact-finish) of the request.
+    possible values for the method element of the [interaction finish section](#request-interact-finish) of the request and MUST be values from
+    the [Interaction Finish Methods Registry](#IANA-interaction-finish-methods).
     OPTIONAL.
 
 `key_proofs_supported` (array of strings):
 : A list of the AS's supported key
     proofing mechanisms. The values of this list correspond to possible
     values of the `proof` field of the
-    [key section](#key-format) of the request.
+    [key section](#key-format) of the request and MUST be values from the
+    [Key Proofing Methods Registry](#IANA-key-proof-methods).
     OPTIONAL.
 
 `sub_id_formats_supported` (array of strings):
 : A list of the AS's supported
     subject identifier formats. The values of this list correspond to possible values
-    of the [subject identifier section](#request-subject) of the request.
+    of the [subject identifier section](#request-subject) of the request and MUST
+    be values from the Subject Identifier Formats Registry established by
+    {{I-D.ietf-secevent-subject-identifiers}}.
     OPTIONAL.
 
 `assertion_formats_supported` (array of strings):
 : A list of the AS's supported
     assertion formats. The values of this list correspond to possible
-    values of the [subject assertion section](#request-subject) of the request.
+    values of the [subject assertion section](#request-subject) of the request and MUST
+    be values from the [Assertion Formats Registry](#IANA-assertion-formats).
     OPTIONAL.
 
 The information returned from this method is for optimization
@@ -4887,8 +4893,8 @@ Specification document(s):
 ### Initial Contents {#IANA-grant-request-contents}
 
 |Name|Type|Specification document(s)|
-|acces_token|object|{{request-token-single}} of {{&SELF}}|
-|acces_token|array of objects|{{request-token-multiple}} of {{&SELF}}|
+|access_token|object|{{request-token-single}} of {{&SELF}}|
+|access_token|array of objects|{{request-token-multiple}} of {{&SELF}}|
 |subject|object|{{request-subject}} of {{&SELF}}|
 |client|object|{{request-client}} of {{&SELF}}|
 |client|string|{{request-instance}} of {{&SELF}}|
@@ -7037,7 +7043,9 @@ endeavor to have any new fields be as orthogonal as possible to existing fields.
 if functionality is sufficiently close to an existing field, the extension should attempt to
 use that field instead of defining a new one, in order to avoid confusion by developers.
 
-Most object fields in GNAP are specified with types. The use of [polymorphism](#polymorphism)
+Most object fields in GNAP are specified with types, and those types can allow different but 
+related behavior. For example, the `access` array can include either strings or objects, as
+discussed in {{resource-access-rights}}. The use of [polymorphism](#polymorphism)
 within GNAP allows extensions to define new fields by not only choosing a new name but also by
 using an existing name with a new type. However, the extension's definition
 of a new type for a field needs to fit the same kind of item being extended. For example, a
