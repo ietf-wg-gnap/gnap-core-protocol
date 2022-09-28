@@ -1149,10 +1149,10 @@ to present to the RO during any interactive sequences.
 : Display name of the client software. RECOMMENDED.
 
 `uri` (string):
-: User-facing web page of the client software. This MUST be an absolute URI. OPTIONAL.
+: User-facing web page of the client software. This URI MUST be an absolute URI. OPTIONAL.
 
 `logo_uri` (string)
-: Display image to represent the client software. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype. OPTIONAL.
+: Display image to represent the client software. This URI MUST be an absolute URI. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype. OPTIONAL.
 
 ~~~ json
 "display": {
