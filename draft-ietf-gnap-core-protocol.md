@@ -7043,7 +7043,7 @@ endeavor to have any new fields be as orthogonal as possible to existing fields.
 if functionality is sufficiently close to an existing field, the extension should attempt to
 use that field instead of defining a new one, in order to avoid confusion by developers.
 
-Most object fields in GNAP are specified with types, and those types can allow different but 
+Most object fields in GNAP are specified with types, and those types can allow different but
 related behavior. For example, the `access` array can include either strings or objects, as
 discussed in {{resource-access-rights}}. The use of [polymorphism](#polymorphism)
 within GNAP allows extensions to define new fields by not only choosing a new name but also by
