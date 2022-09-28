@@ -3333,10 +3333,12 @@ instance MUST present both the new key and previous key in the access token rota
 The client instance makes an HTTP POST as a JSON object with the following fields:
 
 `key`:
-: The new key value or reference in the format described in {{key-format}}.
+: The new key value or reference in the format described in {{key-format}}. Note that keys
+    passed by value are always public keys.
 
 `previous_key`:
-: The previous key value or by reference in format described in {{key-format}}.
+: The previous key value or by reference in format described in {{key-format}}. Note that keys
+    passed by value are always public keys.
 
 The `proof` method and parameters for the new key MUST be the same as those established for the
 previous key.
@@ -3348,7 +3350,7 @@ means of doing so varies depending on the proofing method in use. For example, t
 POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
 Host: server.example.com
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Signature-Input: sig1=..., sig2=("signnature";key=sig1)...
+Signature-Input: sig1=..., sig2=("signature";key=sig1)...
 Signature: sig1=..., sig2=...
 Content-Digest: sha-256=...
 
@@ -3445,7 +3447,8 @@ A key presented by value MUST be a public key in at least one
 supported format. If a key is sent in multiple
 formats, all the key format values MUST be equivalent. Note that
 while most formats present the full value of the public key, some
-formats present a value cryptographically derived from the public key.
+formats present a value cryptographically derived from the public key. See
+additional discussion of public keys in {{security-symmetric}}.
 
 `proof` (string or object):
 : The form of proof that the client instance will use when
