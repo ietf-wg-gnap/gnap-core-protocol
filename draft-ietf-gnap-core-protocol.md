@@ -4765,11 +4765,11 @@ Additional fields can be defined the [Authorization Server Discovery Fields Regi
 ## RS-first Method of AS Discovery {#rs-request-without-token}
 
 If the client instance calls an RS without an access token, or with an
-invalid access token, the RS MAY respond to the client instance with an
-authentication header indicating that GNAP needs to be used
+invalid access token, the RS SHOULD respond to the client instance with a
+WWW-Authenticate header field indicating that GNAP needs to be used
 to access the resource. The address of the GNAP
 endpoint MUST be sent in the "as_uri" parameter. The RS MAY
-additionally return a resource reference that the client instance MAY use in
+additionally return a resource reference that the client instance SHOULD use in
 its access token request. This
 resource reference MUST be sufficient for at least the action
 the client instance was attempting to take at the RS and MAY be more
@@ -6270,6 +6270,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -11
     - Added key rotation in token management.
+    - Make response from RS a "SHOULD" instead of a "MAY".
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
