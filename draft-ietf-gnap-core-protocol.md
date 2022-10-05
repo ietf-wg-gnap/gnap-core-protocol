@@ -3430,7 +3430,7 @@ be used when presenting the access token.
 
 A key presented by value MUST be a public key in at least one
 supported format. If a key is sent in multiple
-formats, all the key format values MUST be equivalent. Note that
+formats, all the key format values MUST be equivalent as discussed in {{security-multiple-key-formats}}. Note that
 while most formats present the full value of the public key, some
 formats present a value cryptographically derived from the public key. See
 additional discussion of public keys in {{security-symmetric}}.
@@ -6191,6 +6191,24 @@ it is not usually feasible to provide notification and warning to someone before
 needs to be executed, as is the case with redirection URLs. As such, SSRF is somewhat more difficult
 to manage at runtime, and systems should generally refuse to fetch a URI if unsure.
 
+## Multiple Equivalent Key Formats {#security-multiple-key-formats}
+
+When key values are presented in multiple formats as discussed in {{key-format}}, each different
+format of the key has to be equivalent to all others. For example, an RSA key presented in JWK
+format under the `jwks` field could also be presented in a PEM-formatted certificate under the
+`cert` field. Receivers of these key definitions need to be able to make sure that it's the same
+key represented in each field and not simply use one of the key formats without checking for
+equivalence. If equivalence is not checked, it is possible for an attacker to insert their own
+key into one of the formats without needing to have control over the other formats. This could
+potentially lead to a situation where one key is used by part of the system (such as identifying
+the client instance) and a different key in a different format in the same message is used for
+other things, like calculating signature validity.
+
+To combat this, the receiver ought to always parse and compare all given formats of the key
+presented in the message. If the keys do not match, the message needs to be rejected. It is
+also reasonable for the receiver to reject a message if they cannot parse or understand all
+formats that the key is given in.
+
 # Privacy Considerations {#privacy}
 
 The privacy considerations in this section are modeled after the list of privacy threats in {{RFC6973}}, "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
@@ -6270,6 +6288,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -11
     - Added key rotation in token management.
+    - Discussed security issues of multiple key formats.
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
