@@ -2737,6 +2737,17 @@ This is often part of facilitating [interaction](#authorization), but it could
 also be used to allow the AS and client instance to continue negotiating the parameters of
 the [original grant request](#request) through modification of the request.
 
+The ability to continue an already-started request allows the client instance to perform several
+important functions, including presenting additional information from interaction,
+modifying the initial request, and revoking a grant request in progress.
+
+The AS MAY make use of long polling mechanisms such as discussed in {{RFC6202}}. Instead of
+returning the current status immediately, the long polling technique
+allows the AS additional time to process and fulfill the request before returning the HTTP response
+to the client instance. For example, when the AS receives a continuation request but the
+grant request is in the _processing_ state, the AS could wait until the grant request has moved
+to the _pending_ or _approved_ state before returning the response message.
+
 To enable this ongoing negotiation, the AS provides a continuation API to the client software.
 The AS returns a `continue` field
 [in the response](#response-continue) that contains information the client instance needs to
@@ -2773,10 +2784,6 @@ is being accessed, using a combination of the continuation URI,
 the provided continuation access token, and the client instance identified by the key signature.
 If the AS cannot determine a single active grant request to map the
 continuation request to, the AS MUST return an error.
-
-The ability to continue an already-started request allows the client instance to perform several
-important functions, including presenting additional information from interaction,
-modifying the initial request, and getting the current state of the request.
 
 All requests to the continuation API are protected by this bound continuation access token.
 For example, here the client instance makes a POST request to a stable continuation endpoint
