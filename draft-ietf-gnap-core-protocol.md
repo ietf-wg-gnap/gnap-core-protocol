@@ -6278,6 +6278,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -11
     - Added key rotation in token management.
+    - Add note on long-polling in continuation requests.
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
