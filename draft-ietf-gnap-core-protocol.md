@@ -52,6 +52,7 @@ normative:
     RFC8174:
     RFC8259:
     RFC8705:
+    RFC9110:
     I-D.ietf-gnap-resource-servers:
     I-D.ietf-httpbis-message-signatures:
     I-D.ietf-httpbis-digest-headers:
@@ -1764,9 +1765,9 @@ properties.
 
 `value` (string):
 : The value of the access token as a
-    string. The value is opaque to the client instance. The value SHOULD be
-    limited to ASCII characters to facilitate transmission over HTTP
-    headers within other protocols without requiring additional encoding.
+    string. The value is opaque to the client instance. The value MUST be
+    limited to the `token86` character set defined in {{RFC9110}} to facilitate transmission over HTTP
+    headers and within other protocols without requiring additional encoding.
     REQUIRED.
 
 `label` (string):
@@ -6270,6 +6271,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -11
     - Added key rotation in token management.
+    - Make token character set more strict.
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
