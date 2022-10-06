@@ -1714,7 +1714,7 @@ contains a JSON object with the following properties.
 
 `access_token` (object):
 : A unique access token for continuing the request, called the "continuation access token".
-    The value of this property MUST be in the format specified
+    The value of this property MUST be an object in the format specified
     in {{response-token-single}}. This access token MUST be bound to the
     client instance's key used in the request and MUST NOT be a bearer token. As a consequence,
     the `flags` array of this access token MUST NOT contain the string `bearer` and the
@@ -1766,7 +1766,7 @@ properties.
 `value` (string):
 : The value of the access token as a
     string. The value is opaque to the client instance. The value MUST be
-    limited to the `token86` character set defined in {{RFC9110}} to facilitate transmission over HTTP
+    limited to the `token68` character set defined in {{Section 11.2 of RFC9110}} to facilitate transmission over HTTP
     headers and within other protocols without requiring additional encoding.
     REQUIRED.
 
