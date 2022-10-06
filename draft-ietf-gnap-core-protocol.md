@@ -1150,10 +1150,10 @@ to present to the RO during any interactive sequences.
 : Display name of the client software. RECOMMENDED.
 
 `uri` (string):
-: User-facing web page of the client software. OPTIONAL.
+: User-facing web page of the client software. This URI MUST be an absolute URI. OPTIONAL.
 
 `logo_uri` (string)
-: Display image to represent the client software. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype. OPTIONAL.
+: Display image to represent the client software. This URI MUST be an absolute URI. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype. OPTIONAL.
 
 ~~~ json
 "display": {
@@ -1467,7 +1467,8 @@ indicates this by sending the following members of an object under the `finish` 
 `uri` (string):
 : Indicates the URI that the AS will either send the RO to
     after interaction or send an HTTP POST request. This URI MAY be unique per request and MUST
-    be hosted by or accessible by the client instance. This URI MUST NOT contain
+    be hosted by or accessible by the client instance. This URI MUST be an absolute
+    URI, and MUST NOT contain
     any fragment component. This URI MUST be protected by HTTPS, be
     hosted on a server local to the RO's browser ("localhost"), or
     use an application-specific URI scheme. If the client instance needs any
@@ -1699,7 +1700,7 @@ contains a JSON object with the following properties.
 `uri` (string):
 : The URI at which the client instance can make
     continuation requests. This URI MAY vary per
-    request, or MAY be stable at the AS.
+    request, or MAY be stable at the AS. This URI MUST be an an absolute URI.
     The client instance MUST use this
     value exactly as given when making a [continuation request](#continue-request).
     REQUIRED.
@@ -1777,7 +1778,8 @@ properties.
 
 `manage` (string):
 : The management URI for this
-    access token. If provided, the client instance MAY manage its access
+    access token. This URI MUST be an absolute URI.
+    If provided, the client instance MAY manage its access
     token as described in {{token-management}}. This management
     URI is a function of the AS and is separate from the RS
     the client instance is requesting access to.
@@ -1976,7 +1978,7 @@ interaction methods are included in the same `interact` object.
 : Display a short user code. REQUIRED if the `user_code` interaction start mode is possible for this request. See {{response-interact-usercode}}.
 
 `user_code_uri` (object):
-: Display a short user code and URL. REQUIRED if the `user_code_uri` interaction start mode is possible for this request. {{response-interact-usercodeuri}}
+: Display a short user code and URI. REQUIRED if the `user_code_uri` interaction start mode is possible for this request. {{response-interact-usercodeuri}}
 
 `finish` (string):
 : A nonce used by the client instance to verify the callback after interaction is completed. REQUIRED if the interaction finish method requested by the client instance is possible for this request. See {{response-interact-finish}}.
@@ -2082,7 +2084,7 @@ dynamic URI to the end user at runtime.
 
 As this interaction mode is designed to facilitate interaction
 via a secondary device, it is not expected that the client instance redirect
-the end user to the URL given here at runtime.
+the end user to the URI given here at runtime.
 If the client instance is capable of communicating an
 short arbitrary URI to the end user for use with the user code, the client
 instance can instead use the ["user_code_uri"](#request-interact-usercodeuri) method instead.
@@ -2115,9 +2117,9 @@ object that contains the following members.
 `uri` (string):
 : The interaction URI that the client instance
     will direct the RO to. This URI MUST be short enough to be
-    communicated to the end user. It is RECOMMENDED that this URI
+    communicated to the end user by the client instance. It is RECOMMENDED that this URI
     be short enough for an end user to type in manually. The URI
-    MUST NOT contain the `code` value.
+    MUST NOT contain the `code` value. This URI MUST be an absolute URI.
     REQUIRED.
 
 ~~~ json
@@ -4091,7 +4093,7 @@ claims:
 : The HTTP Method used to make this request, as a case-sensitive ASCII string. Note that most public HTTP methods are in uppercase ASCII by convention. REQUIRED.
 
 `uri` (string):
-: The HTTP URI used for this request, including all path and query components and no fragment component. REQUIRED.
+: The HTTP URI used for this request. This value MUST be an absolute URI, including all path and query components and no fragment component. REQUIRED.
 
 `created` (integer):
 : A timestamp of when the signature was created, in integer seconds since UNIX Epoch. REQUIRED.
@@ -4719,8 +4721,8 @@ server's discovery information. The AS MUST respond with a JSON document with Co
 
 `grant_request_endpoint` (string):
 : The location of the
-    AS's grant request endpoint. The location MUST be a URL {{RFC3986}}
-    with a scheme component that MUST be https, a host component, and optionally,
+    AS's grant request endpoint. The location MUST be an absolute URL {{RFC3986}}
+    with a scheme component (which MUST be "https"), a host component, and optionally,
     port, path and query components and no fragment components. This URL MUST
     match the URL the client instance used to make the discovery request.
     REQUIRED.
@@ -4773,11 +4775,11 @@ Additional fields can be defined the [Authorization Server Discovery Fields Regi
 ## RS-first Method of AS Discovery {#rs-request-without-token}
 
 If the client instance calls an RS without an access token, or with an
-invalid access token, the RS MAY respond to the client instance with an
-authentication header indicating that GNAP needs to be used
+invalid access token, the RS SHOULD respond to the client instance with a
+WWW-Authenticate header field indicating that GNAP needs to be used
 to access the resource. The address of the GNAP
 endpoint MUST be sent in the "as_uri" parameter. The RS MAY
-additionally return a resource reference that the client instance MAY use in
+additionally return a resource reference that the client instance SHOULD use in
 its access token request. This
 resource reference MUST be sufficient for at least the action
 the client instance was attempting to take at the RS and MAY be more
@@ -6279,6 +6281,10 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 - -11
     - Added key rotation in token management.
     - Add note on long-polling in continuation requests.
+    - Removed "Models" section.
+    - Rewrote guidance and requirements for extensions.
+    - Require all URIs to be absolute throughout protocol.
+    - Make response from RS a "SHOULD" instead of a "MAY".
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
