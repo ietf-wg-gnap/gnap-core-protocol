@@ -53,6 +53,7 @@ normative:
     RFC8174:
     RFC8259:
     RFC8705:
+    RFC9110:
     I-D.ietf-gnap-resource-servers:
     I-D.ietf-httpbis-message-signatures:
     I-D.ietf-httpbis-digest-headers:
@@ -1715,7 +1716,7 @@ contains a JSON object with the following properties.
 
 `access_token` (object):
 : A unique access token for continuing the request, called the "continuation access token".
-    The value of this property MUST be in the format specified
+    The value of this property MUST be an object in the format specified
     in {{response-token-single}}. This access token MUST be bound to the
     client instance's key used in the request and MUST NOT be a bearer token. As a consequence,
     the `flags` array of this access token MUST NOT contain the string `bearer` and the
@@ -1766,9 +1767,9 @@ properties.
 
 `value` (string):
 : The value of the access token as a
-    string. The value is opaque to the client instance. The value SHOULD be
-    limited to ASCII characters to facilitate transmission over HTTP
-    headers within other protocols without requiring additional encoding.
+    string. The value is opaque to the client instance. The value MUST be
+    limited to the `token68` character set defined in {{Section 11.2 of RFC9110}} to facilitate transmission over HTTP
+    headers and within other protocols without requiring additional encoding.
     REQUIRED.
 
 `label` (string):
@@ -6280,6 +6281,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -11
     - Added key rotation in token management.
+    - Make token character set more strict.
     - Add note on long-polling in continuation requests.
     - Removed "Models" section.
     - Rewrote guidance and requirements for extensions.
