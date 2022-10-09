@@ -3439,24 +3439,17 @@ proof of that key MUST be presented in that request. For a key used as part of a
 access token response in {{response-token-single}}, the proof of that key MUST
 be used when presenting the access token.
 
-A key presented by value MUST be a public key in at least one
-supported format. If a key is sent in multiple
-formats, all the key format values MUST be equivalent. Note that
-while most formats present the full value of the public key, some
-formats present a value cryptographically derived from the public key. See
-additional discussion of public keys in {{security-symmetric}}.
-
 `proof` (string or object):
 : The form of proof that the client instance will use when
     presenting the key. The valid values of this field and
     the processing requirements for each are detailed in
     {{binding-keys}}. REQUIRED.
 
-A key presented by value MUST be a public key in at least one
-supported format. If a key is sent in multiple
-formats, all the key format values MUST be equivalent. Note that
+A key presented by value MUST be a public key and MUST be presented in one and only one
+supported format, as discussed in {{security-multiple-key-formats}}. Note that
 while most formats present the full value of the public key, some
-formats present a value cryptographically derived from the public key.
+formats present a value cryptographically derived from the public key. See
+additional discussion of the presentation of public keys in {{security-symmetric}}.
 
 `jwk` (object):
 : The public key and its properties represented as a JSON Web Key {{RFC7517}}.
@@ -3480,9 +3473,10 @@ formats present a value cryptographically derived from the public key.
 
 Additional key formats are defined in the [Key Formats Registry](#IANA-key-formats).
 
-This non-normative example shows a single key presented in multiple
-formats. This example key is intended to be used with the [HTTP Message Signatures]({{httpsig-binding}})
+This non-normative example shows a single key presented in two different formats. This example key is intended to be used with the [HTTP Message Signatures]({{httpsig-binding}})
 proofing mechanism, as indicated by the `httpsig` value of the `proof` field.
+
+As a JSON Web Key:
 
 ~~~ json
 "key": {
@@ -3493,7 +3487,15 @@ proofing mechanism, as indicated by the `httpsig` value of the `proof` field.
         "kid": "xyz-1",
         "alg": "RS256",
         "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
-    },
+    }
+}
+~~~
+
+As a certificate in PEM format:
+
+~~~ json
+"key": {
+    "proof": "httpsig",
     "cert": "MIIEHDCCAwSgAwIBAgIBATANBgkqhkiG9w0BAQsFA..."
 }
 ~~~
@@ -6202,6 +6204,25 @@ it is not usually feasible to provide notification and warning to someone before
 needs to be executed, as is the case with redirection URLs. As such, SSRF is somewhat more difficult
 to manage at runtime, and systems should generally refuse to fetch a URI if unsure.
 
+## Multiple Key Formats {#security-multiple-key-formats}
+
+Keys presented by value are allowed to be in only a single format,
+as discussed in {{key-format}}. Presenting the same key in multiple formats is not allowed
+and is considered an error in the request. If multiple keys formats were allowed,
+receivers of these key definitions need to be able to make sure that it's the same
+key represented in each field and not simply use one of the key formats without checking for
+equivalence. If equivalence were not carefully checked, it is possible for an attacker to insert
+their own key into one of the formats without needing to have control over the other formats. This
+could potentially lead to a situation where one key is used by part of the system (such as
+identifying the client instance) and a different key in a different format in the same message is used for other things, like calculating signature validity.
+
+To combat this, all keys presented by value have to be in exactly one supported format known
+by the receiver. Normally, a client instance is going to be configured with its keys in a
+single format, and it will simply present that format as-is to the AS in its request. A client
+instance capable of multiple formats can use [AS discovery](#discovery) to determine which formats
+are supported, if desired. An AS should be generous in supporting many different key formats to
+allow different types of client software and client instance deployments.
+
 # Privacy Considerations {#privacy}
 
 The privacy considerations in this section are modeled after the list of privacy threats in {{RFC6973}}, "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
@@ -6281,6 +6302,8 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -11
     - Added key rotation in token management.
+    - Restrict keys to a single format per message.
+    - Discussed security issues of multiple key formats.
     - Make token character set more strict.
     - Add note on long-polling in continuation requests.
     - Removed "Models" section.
