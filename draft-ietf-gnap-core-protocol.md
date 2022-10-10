@@ -5376,7 +5376,7 @@ TLS functions at the socket layer, ensuring that only the parties on either end 
 connection can read the information passed along that connection. Each time a new socket connection
 is made, such as for a new HTTP request, a new trust is re-established that is unrelated to previous
 connections. It is not possible with TLS alone to know that the same party is making
-a set of calls. Hence the methods {{binding-keys}} described in GNAP. 
+a set of calls. Hence the methods {{binding-keys}} described in GNAP.
 
 ## Protection of Client Instance Key Material {#security-keys}
 
