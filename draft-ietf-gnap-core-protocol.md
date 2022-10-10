@@ -79,6 +79,7 @@ informative:
     RFC6973:
     I-D.ietf-httpbis-client-cert-field:
     I-D.ietf-oauth-security-topics:
+    I-D.ietf-uta-rfc6125bis:
     promise-theory:
       target: 'http://markburgess.org/promises.html'
       title: Promise theory
@@ -3582,6 +3583,8 @@ The client software MUST reject as an error a situation where the `flags` field 
 and the `key` field is present with any value.
 
 ## Proving Possession of a Key with a Request {#binding-keys}
+Each time a new connection is established, both the client and the server (or the server only when using {{mtls}}) MUST validate
+the other party's identity, such as those described in {{!I-D.ietf-uta-6125bis}}).
 
 Any keys presented by the client instance to the AS or RS MUST be validated as
 part of the request in which they are presented. The type of binding
@@ -5372,11 +5375,8 @@ have their own tradeoffs discussed elsewhere in this section.
 TLS functions at the socket layer, ensuring that only the parties on either end of that socket
 connection can read the information passed along that connection. Each time a new socket connection
 is made, such as for a new HTTP request, a new trust is re-established that is unrelated to previous
-connections. As such, it is not possible with TLS alone to know that the same party is making
-a set of calls, and therefore TLS alone cannot provide the continuity of security needed
-for GNAP. However, mutual TLS (MTLS) does provide such security characteristics through the
-use of the TLS client certificate, and thus MTLS is acceptable as a key-presentation mechanism
-when applied as described in {{mtls}}.
+connections. It is not possible with TLS alone to know that the same party is making
+a set of calls. Hence the methods {{binding-keys}} described in GNAP. 
 
 ## Protection of Client Instance Key Material {#security-keys}
 
