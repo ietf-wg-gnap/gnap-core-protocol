@@ -3380,7 +3380,7 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-An attempt to change the `proof` method or parameters, including an attempt to rotate the key ofError Response a bearer token (which has no key), MUST result in a "request_denied" error returned from the AS.
+An attempt to change the `proof` method or parameters, including an attempt to rotate the key of a bearer token (which has no key), MUST result in a "request_denied" error code returned from the AS.
 
 ## Revoking the Access Token {#revoke-access-token}
 
