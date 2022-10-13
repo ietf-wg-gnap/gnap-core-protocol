@@ -2290,9 +2290,12 @@ If the AS determines that the request cannot be issued for any
 reason, it responds to the client instance with an error message.
 
 
-`error` (string):
+`error` (object):
+:   An error contains a "code" and, optionally, its associated "description"
+
+`code` (string):
 :   A single ASCII error code from the
-    following, with additional values available in the [Error Response Registry](#IANA-error-response).
+    following, with additional values available in the [Error Code Registry](#IANA-error-code).
     REQUIRED.
 
     `"invalid_request"`:
@@ -2319,7 +2322,7 @@ reason, it responds to the client instance with an error message.
     : The client instance has provided an interaction reference that is incorrect
         for this request or the interaction modes in use have expired.
 
-`error_description` (string):
+`description` (string):
 :   A human-readable string description of the error intended for the
     developer of the client.
     OPTIONAL.
@@ -2330,7 +2333,10 @@ continue the grant request:
 
 ~~~ json
 {
-  "error": "user_denied"
+  "error": {
+      "code": "user_denied",
+      "description": "The RO denied the request"
+  }
 }
 ~~~
 
@@ -3374,7 +3380,7 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-An attempt to change the `proof` method or parameters, including an attempt to rotate the key of a bearer token (which has no key), MUST result in an error returned from the AS.
+An attempt to change the `proof` method or parameters, including an attempt to rotate the key ofError Response a bearer token (which has no key), MUST result in a "request_denied" error returned from the AS.
 
 ## Revoking the Access Token {#revoke-access-token}
 
@@ -5200,11 +5206,11 @@ Specification document(s):
 |assertions|array of objects|{{response-subject}} of {{&SELF}}|
 |updated_at|string|{{response-subject}} of {{&SELF}}|
 
-## Error Responses {#IANA-error-response}
+## Error Codes {#IANA-error-code}
 
-This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Responses". Initial values for this registry are given in {{IANA-error-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-error-response-template}}.
+This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-error-response-template}}.
 
-### Registration Template {#IANA-error-response-template}
+### Registration Template {#IANA-error-code-template}
 
 {: vspace="0"}
 Error:
