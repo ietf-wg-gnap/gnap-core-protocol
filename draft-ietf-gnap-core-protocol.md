@@ -4796,7 +4796,7 @@ The content of the resource reference is opaque to the client instance.
 NOTE: '\' line wrapping per RFC 8792
 
 WWW-Authenticate: \
-  GNAP as_uri=https://server.example/tx,access=FWWIKYBQ6U56NL1
+  GNAP as_uri=https://server.example/tx;access=FWWIKYBQ6U56NL1
 ~~~
 
 The client instance then makes a request to the "as_uri" as described in
@@ -4808,7 +4808,7 @@ The client instance MAY request multiple access tokens.
 In this non-normative example, the client instance is requesting a single access
 token using the resource reference `FWWIKYBQ6U56NL1` received from the RS
 in addition to the `dolphin-metadata` resource reference that the client instance
-has been configured with out of band.
+has been configured out of band.
 
 ~~~ http-message
 POST /tx HTTP/1.1
