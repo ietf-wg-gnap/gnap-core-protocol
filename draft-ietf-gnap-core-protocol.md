@@ -4832,6 +4832,10 @@ Content-Digest: sha-256=...
 If issued, the resulting access token would contain sufficient access to be used
 at both referenced resources.
 
+## Dynamic grant endpoint discovery {#grant-discovery}
+
+Except in the previous case where "as_uri" is provided by the RS at runtime, no other method are detailed on how the grant endpoint is provided. This is intentional, as many cases are just fine with static setups (just as in OAuth 2). However, the dynamic nature of GNAP makes it a good candidate for further extensions that would be able to handle more advanced scenarios.
+
 # Acknowledgements {#Acknowledgements}
 
 The editors would like to thank the feedback of the following individuals for their reviews,
