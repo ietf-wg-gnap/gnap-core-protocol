@@ -2286,12 +2286,10 @@ This non-normative example shows an instance identifier along side an issued acc
 
 ## Error Response {#response-error}
 
-If the AS determines that the request cannot be issued for any
-reason, it responds to the client instance with an error message.
-
+If the AS determines that the request cannot be issued for any reason, it responds to the client instance with an "error" response.
 
 `error` (object):
-:   An error contains a "code" and, optionally, its associated "description"
+: An error contains an error "code" and, optionally, its associated error "description"
 
 `code` (string):
 :   A single ASCII error code from the
@@ -2336,7 +2334,7 @@ continue the grant request:
     "error": {
         "code": "user_denied",
         "description": "The RO denied the request"
-    },
+    }
 }
 ~~~
 
