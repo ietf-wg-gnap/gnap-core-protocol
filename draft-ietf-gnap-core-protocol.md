@@ -2333,10 +2333,10 @@ continue the grant request:
 
 ~~~ json
 {
-  "error": {
-      "code": "user_denied",
-      "description": "The RO denied the request"
-  }
+    "error": {
+        "code": "user_denied",
+        "description": "The RO denied the request"
+    },
 }
 ~~~
 
