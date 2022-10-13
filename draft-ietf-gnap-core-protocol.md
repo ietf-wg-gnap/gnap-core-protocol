@@ -4834,7 +4834,15 @@ at both referenced resources.
 
 ## Dynamic grant endpoint discovery {#grant-discovery}
 
-Except in the previous case where "as_uri" is provided by the RS at runtime, no other method are detailed on how the grant endpoint is provided. This is intentional, as many cases are just fine with static setups (just as in OAuth 2). However, the dynamic nature of GNAP makes it a good candidate for further extensions that would be able to handle more advanced scenarios.
+Additional methods of discovering the appropriate grant endpoint for a given application
+are outside the scope of this specification. This limitation is intentional, as many applications
+rely on static configuration between the client instance and AS, as is common in OAuth 2.0.
+However, the dynamic nature of GNAP makes it a prime candidate for other extensions defining methods
+for discovery of the appropriate AS grant endpoint at runtime. Advanced use cases could define
+contextual methods for contextually  providing this endpoint to the client instance securely.
+Furthermore, GNAP's design intentionally requires the client instance to only know the grant
+endpoint and not additional parameters, since other functions and values can be disclosed
+and negotiated during the grant process.
 
 # Acknowledgements {#Acknowledgements}
 
