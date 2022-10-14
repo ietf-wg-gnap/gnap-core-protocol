@@ -6310,6 +6310,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Rewrote guidance and requirements for extensions.
     - Require all URIs to be absolute throughout protocol.
     - Make response from RS a "SHOULD" instead of a "MAY".
+    - Added interoperability profiles.
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
