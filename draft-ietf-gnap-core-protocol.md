@@ -7089,7 +7089,11 @@ In addition, GNAP defines a set of interoperability profiles which gather togeth
 to fix options into common configurations that are likely to be useful to large populations of
 similar applications.
 
-Conformant implementations of these profiles MUST implement at least the features as specified in the profile and MAY implement additional features or profiles.
+Conformant AS implementations of these profiles MUST implement at least the features as specified
+in the profile and MAY implement additional features or profiles. Conformant client implementations
+of these profiles MUST implement at least the features as specified, except where a subset of the
+features allows the protocol to function (such as using polling instead of a push finish method for
+the Secondary Device profile).
 
 ## Web-based Redirection
 
