@@ -739,6 +739,33 @@ the abstract as functions of the AS here.
     subject information for details.
 
 
+### Cross-User Authentication {#sequence-cross-user}
+
+In this scenario, the end user and resource owner are two different people.
+In this scenario, the client instance already knows who the end user
+is, likely through a separate authentication process. The
+end user, operating the client instance, needs to get subject information
+about another person in the system, the RO. The RO is given an opportunity
+to release this information using an asynchronous interaction method
+with the AS. This scenario would apply, for instance, when the end user
+is an agent in a call-center and the resource owner is a customer
+authorizing the call center agent to access their account on their behalf.
+
+~~~ aasvg
+{::include diagram/crossuser.md}
+~~~
+
+1. The end user is authenticated to the client instance. The RO communicates a human-readable 
+    identifier to the end user, such as an email address or account number. This communication
+    happens out of band from the protocol, such as over the phone between parties. Note that the
+    RO is not interacting with the client instance.
+    
+2. The end user communicates the identifier to the client instance. The means by which the 
+    identifier is communicated to the client instance is out of scope for this specification.
+
+3. The client instance [requests access to subject information](#request). The request includes
+    the RO's identifier in the [user information field](#request-user).
+
 # Requesting Access {#request}
 
 To start a request, the client instance sends a [JSON](#RFC8259) document with an object as its root. Each
