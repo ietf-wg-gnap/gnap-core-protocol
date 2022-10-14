@@ -774,6 +774,10 @@ and the AS.
 3. The client instance [requests access to subject information](#request). The request includes
     the RO's identifier in the [subject information request](#request-subject) `sub_ids` field,
     and the end user's identifier in the [user information field](#request-user) of the request.
+    The request includes no interaction start methods, since the end user is not expected to
+    be the one interacting with the AS. The request does include the
+    [push based interaction finish method](#request-interact-callback-push) to allow the AS
+    to signal to the client instance when the interaction with the RO has concluded.
 
 4. The AS sees that the identifier for the end user and subject being requested are different.
     The AS determines that it can reach out to the RO asynchronously for approval. While it
@@ -788,18 +792,16 @@ and the AS.
     user was identified in (3) via the user field, the AS can show this information to the
     RO during the authorization request.
 
-7. The client instance continues to [poll the AS](#continue-poll).
+7. The RO completes the authorization with the AS. The AS marks the request as _approved_.
 
-8. Since authorization (6) has not concluded and the request is _pending_, the AS again returns a
-    [continuation response](#response-continue) to the client instance.
+8. The RO pushes the [interaction finish message](#interaction-pushback) to the client instance.
 
-9. The RO completes the authorization with the AS, marking the request as _approved_.
+9. The client instance validates the interaction finish message and
+    [continues the grant request](#continue-after-interaction).
 
-10. The client instance continues to [poll the AS](#continue-poll).
+10. The AS returns the RO's [subject information](#response-subject) to the client instance.
 
-11. The AS returns the RO's [subject information](#response-subject) to the client instance.
-
-12. The client instance can display or otherwise utilize the RO's user information in its session
+11. The client instance can display or otherwise utilize the RO's user information in its session
     with the end user. Note that since the client instance requested different sets of user
     information in (3), the client instance does not conflate the end user with the RO.
 
