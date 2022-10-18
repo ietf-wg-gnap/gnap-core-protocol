@@ -4835,6 +4835,18 @@ Content-Digest: sha-256=...
 If issued, the resulting access token would contain sufficient access to be used
 at both referenced resources.
 
+## Dynamic grant endpoint discovery {#grant-discovery}
+
+Additional methods of discovering the appropriate grant endpoint for a given application
+are outside the scope of this specification. This limitation is intentional, as many applications
+rely on static configuration between the client instance and AS, as is common in OAuth 2.0.
+However, the dynamic nature of GNAP makes it a prime candidate for other extensions defining methods
+for discovery of the appropriate AS grant endpoint at runtime. Advanced use cases could define
+contextual methods for contextually  providing this endpoint to the client instance securely.
+Furthermore, GNAP's design intentionally requires the client instance to only know the grant
+endpoint and not additional parameters, since other functions and values can be disclosed
+and negotiated during the grant process.
+
 # Acknowledgements {#Acknowledgements}
 
 The editors would like to thank the feedback of the following individuals for their reviews,
