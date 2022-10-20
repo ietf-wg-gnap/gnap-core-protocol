@@ -6325,6 +6325,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Rewrote guidance and requirements for extensions.
     - Require all URIs to be absolute throughout protocol.
     - Make response from RS a "SHOULD" instead of a "MAY".
+    - Added interoperability profiles.
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
@@ -7088,6 +7089,53 @@ client instance additionally creates a nonce to protect the callback, separate
 from the state parameter that it has added to its return URI.
 
 From here, the protocol continues as above.
+
+# Interoperability Profiles
+
+The GNAP specification has many different modes, options, and mechanisms, allowing it
+to solve a wide variety of problems in a wide variety of deployments. The wide applicability
+of GNAP makes it difficult, if not impossible, to define a set of mandatory-to-implement
+features, since one environment's required feature would be impossible to do in another environment.
+While this is a large problem in many systems, GNAP's back-and-forth negotiation process
+allows parties to declare at runtime everything that they support and then have the other party
+select from that the subset of items that they also support, leading to functional compatibility
+in many parts of the protocol even in an open world scenario.
+
+In addition, GNAP defines a set of interoperability profiles which gather together core requirements
+to fix options into common configurations that are likely to be useful to large populations of
+similar applications.
+
+Conformant AS implementations of these profiles MUST implement at least the features as specified
+in the profile and MAY implement additional features or profiles. Conformant client implementations
+of these profiles MUST implement at least the features as specified, except where a subset of the
+features allows the protocol to function (such as using polling instead of a push finish method for
+the Secondary Device profile).
+
+## Web-based Redirection
+
+Implementations conformant to the Web-based Redirection profile of GNAP MUST implement all of the following features:
+
+- *Interaction Start Methods*: `redirect`
+- *Interaction Finish Methods*: `redirect`
+- *Interaction Hash Algorithms*: `sha3-512`
+- *Key Proofing Methods*: `httpsig` with no additional parameters
+- *Key Formats*: `jwks` with signature algorithm included in the key
+- *JOSE Signature Algorithm*: PS256
+- *Subject Identifier Formats*: `opaque`
+- *Assertion Formats*: `id_token`
+
+## Secondary Device
+
+Implementations conformant to the Secondary Device profile of GNAP MUST implement all of the following features:
+
+- *Interaction Start Methods*: `user_code` and `user_code_uri`
+- *Interaction Finish Methods*: `push`
+- *Interaction Hash Algorithms*: `sha3-512`
+- *Key Proofing Methods*: `httpsig` with no additional parameters
+- *Key Formats*: `jwks` with signature algorithm included in the key
+- *JOSE Signature Algorithm*: PS256
+- *Subject Identifier Formats*: `opaque`
+- *Assertion Formats*: `id_token`
 
 # Guidance for Extensions {#extensions}
 
