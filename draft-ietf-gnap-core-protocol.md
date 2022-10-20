@@ -80,6 +80,7 @@ informative:
     RFC6973:
     I-D.ietf-httpbis-client-cert-field:
     I-D.ietf-oauth-security-topics:
+    I-D.ietf-uta-rfc6125bis:
     promise-theory:
       target: 'http://markburgess.org/promises.html'
       title: Promise theory
@@ -5384,14 +5385,19 @@ the presenter of the access token is the same party that the token was issued to
 by their keys. While non-bound bearer tokens are an option in GNAP, these types of tokens
 have their own tradeoffs discussed elsewhere in this section.
 
-TLS functions at the socket layer, ensuring that only the parties on either end of that socket
-connection can read the information passed along that connection. Each time a new socket connection
-is made, such as for a new HTTP request, a new trust is re-established that is unrelated to previous
-connections. As such, it is not possible with TLS alone to know that the same party is making
-a set of calls, and therefore TLS alone cannot provide the continuity of security needed
-for GNAP. However, mutual TLS (MTLS) does provide such security characteristics through the
-use of the TLS client certificate, and thus MTLS is acceptable as a key-presentation mechanism
-when applied as described in {{mtls}}.
+TLS functions at the transport layer, ensuring that only the parties on either end of that
+connection can read the information passed along that connection. Each time a new connection
+is made, such as for a new HTTP request, a new trust is re-established that is mostly unrelated to previous
+connections. While modern TLS does make use of session resumption, this still needs to be augmented
+with authentication methods to determine the identity of parties on the
+connections. In other words, it is not possible with TLS alone to know that the same party is making
+a set of calls over time, since each time a new TLS connection is established, both the client and the server (or the server only when using {{mtls}}) have to validate
+the other party's identity. Such a verification can be achieved via methods described in {{!I-D.ietf-uta-6125bis}}), but these are not enough to establish the identity of the client instance in many cases.
+
+To counter this, GNAP defines a set of key binding methods in {{binding-keys}} that allow authentication and
+proof of possession by the caller, which is usually the client instance. These methods are intended to be used in
+addition to TLS on all connections.
+
 
 ## Protection of Client Instance Key Material {#security-keys}
 
