@@ -3583,8 +3583,6 @@ The client software MUST reject as an error a situation where the `flags` field 
 and the `key` field is present with any value.
 
 ## Proving Possession of a Key with a Request {#binding-keys}
-Each time a new connection is established, both the client and the server (or the server only when using {{mtls}}) MUST validate
-the other party's identity. For instance such a verification can be achieved via methods described in {{!I-D.ietf-uta-6125bis}}).
 
 Any keys presented by the client instance to the AS or RS MUST be validated as
 part of the request in which they are presented. The type of binding
