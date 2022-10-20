@@ -40,6 +40,7 @@ normative:
     RFC2119:
     RFC2397:
     RFC3986:
+    RFC4107:
     RFC4648:
     RFC5646:
     RFC6202:
@@ -79,6 +80,7 @@ informative:
     RFC6973:
     I-D.ietf-httpbis-client-cert-field:
     I-D.ietf-oauth-security-topics:
+    I-D.ietf-uta-rfc6125bis:
     promise-theory:
       target: 'http://markburgess.org/promises.html'
       title: Promise theory
@@ -257,7 +259,7 @@ Access Token
     Note: an access token can be first issued to an client instance (requiring authorization by the RO) and subsequently rotated.
 
 Grant
-: (verb): to permit an instance of client software to receive some attributes at a specific time and valid for a specific duration and/or to exercise some set of delegated rights to access a protected resource (noun): the act of granting.
+: (verb): to permit an instance of client software to receive some attributes at a specific time and valid for a specific duration and/or to exercise some set of delegated rights to access a protected resource; (noun): the act of granting permission to a client instance.
 
 Privilege
 : right or attribute associated with a subject.
@@ -1164,6 +1166,8 @@ object with the following fields.
 ~~~
 
 Additional fields are defined in the [Client Instance Fields Registry](#IANA-client-instance).
+
+Both the `display` and `class_id` are self-declarative and thus the AS SHOULD exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret the class_id field, it SHOULD return an `invalid_client` error or choose to return lesser levels of privileges. See additional discussion of client instance impersonation in {{security-impersonation}}.
 
 The client instance MUST prove possession of any presented key by the `proof` mechanism
 associated with the key in the request. Key proofing methods
@@ -4911,6 +4915,18 @@ Content-Digest: sha-256=...
 If issued, the resulting access token would contain sufficient access to be used
 at both referenced resources.
 
+## Dynamic grant endpoint discovery {#grant-discovery}
+
+Additional methods of discovering the appropriate grant endpoint for a given application
+are outside the scope of this specification. This limitation is intentional, as many applications
+rely on static configuration between the client instance and AS, as is common in OAuth 2.0.
+However, the dynamic nature of GNAP makes it a prime candidate for other extensions defining methods
+for discovery of the appropriate AS grant endpoint at runtime. Advanced use cases could define
+contextual methods for contextually  providing this endpoint to the client instance securely.
+Furthermore, GNAP's design intentionally requires the client instance to only know the grant
+endpoint and not additional parameters, since other functions and values can be disclosed
+and negotiated during the grant process.
+
 # Acknowledgements {#Acknowledgements}
 
 The editors would like to thank the feedback of the following individuals for their reviews,
@@ -5449,14 +5465,19 @@ the presenter of the access token is the same party that the token was issued to
 by their keys. While non-bound bearer tokens are an option in GNAP, these types of tokens
 have their own tradeoffs discussed elsewhere in this section.
 
-TLS functions at the socket layer, ensuring that only the parties on either end of that socket
-connection can read the information passed along that connection. Each time a new socket connection
-is made, such as for a new HTTP request, a new trust is re-established that is unrelated to previous
-connections. As such, it is not possible with TLS alone to know that the same party is making
-a set of calls, and therefore TLS alone cannot provide the continuity of security needed
-for GNAP. However, mutual TLS (MTLS) does provide such security characteristics through the
-use of the TLS client certificate, and thus MTLS is acceptable as a key-presentation mechanism
-when applied as described in {{mtls}}.
+TLS functions at the transport layer, ensuring that only the parties on either end of that
+connection can read the information passed along that connection. Each time a new connection
+is made, such as for a new HTTP request, a new trust is re-established that is mostly unrelated to previous
+connections. While modern TLS does make use of session resumption, this still needs to be augmented
+with authentication methods to determine the identity of parties on the
+connections. In other words, it is not possible with TLS alone to know that the same party is making
+a set of calls over time, since each time a new TLS connection is established, both the client and the server (or the server only when using {{mtls}}) have to validate
+the other party's identity. Such a verification can be achieved via methods described in {{!I-D.ietf-uta-6125bis}}), but these are not enough to establish the identity of the client instance in many cases.
+
+To counter this, GNAP defines a set of key binding methods in {{binding-keys}} that allow authentication and
+proof of possession by the caller, which is usually the client instance. These methods are intended to be used in
+addition to TLS on all connections.
+
 
 ## Protection of Client Instance Key Material {#security-keys}
 
@@ -5524,7 +5545,7 @@ of a GNAP-protected ecosystem.
 ## Symmetric and Asymmetric Client Instance Keys {#security-symmetric}
 
 The cryptographic methods used by GNAP for key-proofing can support both asymmetric and symmetric
-cryptography, and can be extended to use a wide variety of mechanisms. While symmetric
+cryptography, and can be extended to use a wide variety of mechanisms. Implementers will find useful the available guidelines on cryptographic key management provided in {{!RFC4107}}. While symmetric
 cryptographic systems have some benefits in speed and simplicity, they have a distinct drawback
 that both parties need access to the same key in order to do both signing and verification of
 the message. This means that when the client instance calls the AS to request a token, the
@@ -6428,6 +6449,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Make response from RS a "SHOULD" instead of a "MAY".
     - Added a way for the client instance to ask for a specific user's information, separate from the end-user.
     - Added security considerations for asynchronous authorization.
+    - Added interoperability profiles.
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
@@ -7191,6 +7213,53 @@ client instance additionally creates a nonce to protect the callback, separate
 from the state parameter that it has added to its return URI.
 
 From here, the protocol continues as above.
+
+# Interoperability Profiles
+
+The GNAP specification has many different modes, options, and mechanisms, allowing it
+to solve a wide variety of problems in a wide variety of deployments. The wide applicability
+of GNAP makes it difficult, if not impossible, to define a set of mandatory-to-implement
+features, since one environment's required feature would be impossible to do in another environment.
+While this is a large problem in many systems, GNAP's back-and-forth negotiation process
+allows parties to declare at runtime everything that they support and then have the other party
+select from that the subset of items that they also support, leading to functional compatibility
+in many parts of the protocol even in an open world scenario.
+
+In addition, GNAP defines a set of interoperability profiles which gather together core requirements
+to fix options into common configurations that are likely to be useful to large populations of
+similar applications.
+
+Conformant AS implementations of these profiles MUST implement at least the features as specified
+in the profile and MAY implement additional features or profiles. Conformant client implementations
+of these profiles MUST implement at least the features as specified, except where a subset of the
+features allows the protocol to function (such as using polling instead of a push finish method for
+the Secondary Device profile).
+
+## Web-based Redirection
+
+Implementations conformant to the Web-based Redirection profile of GNAP MUST implement all of the following features:
+
+- *Interaction Start Methods*: `redirect`
+- *Interaction Finish Methods*: `redirect`
+- *Interaction Hash Algorithms*: `sha3-512`
+- *Key Proofing Methods*: `httpsig` with no additional parameters
+- *Key Formats*: `jwks` with signature algorithm included in the key
+- *JOSE Signature Algorithm*: PS256
+- *Subject Identifier Formats*: `opaque`
+- *Assertion Formats*: `id_token`
+
+## Secondary Device
+
+Implementations conformant to the Secondary Device profile of GNAP MUST implement all of the following features:
+
+- *Interaction Start Methods*: `user_code` and `user_code_uri`
+- *Interaction Finish Methods*: `push`
+- *Interaction Hash Algorithms*: `sha3-512`
+- *Key Proofing Methods*: `httpsig` with no additional parameters
+- *Key Formats*: `jwks` with signature algorithm included in the key
+- *JOSE Signature Algorithm*: PS256
+- *Subject Identifier Formats*: `opaque`
+- *Assertion Formats*: `id_token`
 
 # Guidance for Extensions {#extensions}
 
