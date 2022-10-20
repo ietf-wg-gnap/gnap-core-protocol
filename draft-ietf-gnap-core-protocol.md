@@ -5372,9 +5372,11 @@ the presenter of the access token is the same party that the token was issued to
 by their keys. While non-bound bearer tokens are an option in GNAP, these types of tokens
 have their own tradeoffs discussed elsewhere in this section.
 
-TLS functions at the socket layer, ensuring that only the parties on either end of that socket
-connection can read the information passed along that connection. Each time a new socket connection
-is made, such as for a new HTTP request, a new trust is re-established that is unrelated to previous
+TLS functions at the transport layer, ensuring that only the parties on either end of that
+connection can read the information passed along that connection. Each time a new connection
+is made, such as for a new HTTP request, a new trust is re-established that is mostly unrelated to previous
+connections. While modern TLS does make use of session resumption, this still needs to be augmented
+with authentication methods to determine the identity of parties on the
 connections. It is not possible with TLS alone to know that the same party is making
 a set of calls. Hence the methods {{binding-keys}} described in GNAP.
 
