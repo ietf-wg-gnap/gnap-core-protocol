@@ -781,8 +781,8 @@ and the AS.
 
 4. The AS sees that the identifier for the end user and subject being requested are different.
     The AS determines that it can reach out to the RO asynchronously for approval. While it
-    is doing so, the AS returns a [continuation response](#response-continue) with a `wait` field
-    to allow the client instance to keep polling.
+    is doing so, the AS returns a [continuation response](#response-continue) with a `finish` nonce
+    to allow the client instance to keep polling after interaction with the RO has concluded.
 
 5. The AS contacts the RO and has them authenticate to the system. The means for doing this are
     outside the scope of this specification, but the identity of the RO is known from the subject
@@ -795,6 +795,8 @@ and the AS.
 7. The RO completes the authorization with the AS. The AS marks the request as _approved_.
 
 8. The RO pushes the [interaction finish message](#interaction-pushback) to the client instance.
+    Note that in the case the RO cannot be reached or the RO denies the request, the AS still sends the interaction
+    finish message to the client instance, after which the client instance can negotiate next steps if possible.
 
 9. The client instance validates the interaction finish message and
     [continues the grant request](#continue-after-interaction).
@@ -1081,7 +1083,7 @@ contain the following fields.
 `sub_ids` (array of objects):
 : An array of subject identifiers representing the subject that information
     is being requested for. Each object is a subject identifier as defined by
-    {{I-D.ietf-secevent-subject-identifiers}}. All identifiers MUST identify
+    {{I-D.ietf-secevent-subject-identifiers}}. All identifiers in the `sub_ids` array MUST identify
     the same subject. If omitted, the AS SHOULD assume
     that subject information requests are about the current user and SHOULD
     require direct interaction or proof of presence before releasing information. OPTIONAL.
@@ -6320,6 +6322,9 @@ requests for authentication of the end user and requests for information about a
 Confusing these states could lead to an attacker having their account associated with a privileged
 user. Client instances can mitigate this by having distinct code paths for primary end user
 authentication and requesting subject information about secondary users, such as in a call center.
+In such use cases, the client software used by the resource owner (the caller) and the end-user
+(the agent) are generally distinct, allowing the AS to differentiate between the agent's corporate device
+making the request and the caller's personal device approving the request.
 
 Second, RO's interacting asynchronously do not usually have the same context as an end user in an
 application attempting to perform the task needing authorization. As such, the asynchronous requests
