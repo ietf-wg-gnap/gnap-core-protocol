@@ -3535,6 +3535,8 @@ as an extension.
 The security of GNAP relies on the cryptographic security of the keys themselves.
 When symmetric keys are used in GNAP, a key management system or secure key derivation mechanism MUST be used to supply the keys. Symmetric keys MUST NOT be a human memorable password or a value derived from one. Symmetric keys MUST NOT be passed by value from the client instance to the AS.
 
+Additional security considerations apply when [rotating keys] {#security-key-rotation}.
+
 ## Presenting Access Tokens {#use-access-token}
 
 The method the client instance uses to send an access token depends on whether
@@ -5889,6 +5891,12 @@ including all private signing information, to the client instance alongside the 
 token itself. This approach would make interception of the return from the token endpoint
 equivalent to that of a bearer token, since all information required to use the access token
 would be present in the request.
+
+## Key Rotation Policy {#security-key-rotation}
+
+The AS can define its own policy regarding the timeout of the "previous_key", either making it immediately obsolete or allowing for a limited grace period during which both the "previous_key" and the current key can be used for signing requests. Such a grace period can be useful when there are multiple running instances of the client and it's tough, or even impossible, to update the keys on all these instances immediately (just as an example, the client instance could be deployed as a service in kubernetes).
+
+Narrowly restricting the exposure opportunities for exploit in terms of time, place, and method, especially if the time and place happens only once, makes exploit significantly more difficult. Therefore the "previous_key" (or any previous one before it) is expected to no longer have rotation authority.   
 
 ## Interaction Finish Modes and Polling {#security-polling}
 
