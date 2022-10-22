@@ -2338,7 +2338,7 @@ continue the grant request:
 }
 ~~~
 
-Alternatively, the AS MAY choose to only return the error as codes and provide a error as a string. The following response is considered equivalent to the previous example : 
+Alternatively, the AS MAY choose to only return the error as codes and provide a error as a string. The following response is considered equivalent to the previous example :
 ~~~ json
 {
     "error": "user_denied"
