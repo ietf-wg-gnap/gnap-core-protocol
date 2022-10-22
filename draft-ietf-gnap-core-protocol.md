@@ -3378,7 +3378,7 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-An attempt to change the `proof` method or parameters, including an attempt to rotate the key of a bearer token (which has no key), MUST result in a "request_denied" error code returned from the AS.
+An attempt to change the `proof` method or parameters, including an attempt to rotate the key of a bearer token (which has no key), MUST result in a "invalid_rotation" error code returned from the AS.
 
 ## Revoking the Access Token {#revoke-access-token}
 
@@ -5229,6 +5229,7 @@ Specification document(s):
 |too_fast|{{response-error}} of {{&SELF}}|
 |unknown_request|{{response-error}} of {{&SELF}}|
 |request_denied|{{response-error}} of {{&SELF}}|
+|invalid_rotation|{{response-error}} of {{&SELF}}|
 |invalid_interaction|{{response-error}} of {{&SELF}}|
 
 ## Key Proofing Methods {#IANA-key-proof-methods}
