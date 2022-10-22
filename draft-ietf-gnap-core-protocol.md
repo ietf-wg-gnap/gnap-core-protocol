@@ -2316,6 +2316,9 @@ If the AS determines that the request cannot be issued for any reason, it respon
 
     `"invalid_code"`
     : The code provided by the user is refused.
+    
+    `"invalid_continuation"`:
+    : The continuation of the referenced grant could not be processed.
 
     `"user_denied"`:
     : The RO denied the request.
@@ -2325,7 +2328,7 @@ If the AS determines that the request cannot be issued for any reason, it respon
 
     `"unknown_interaction"`:
     : The interaction integrity could not be established.
-
+    
     `"too_fast"`:
     : The client instance did not respect the timeout in the wait response.
 
@@ -5251,6 +5254,7 @@ Specification document(s):
 |user_denied|{{response-error}} of {{&SELF}}|
 |request_denied|{{response-error}} of {{&SELF}}|
 |unknown_interaction|{{response-error}} of {{&SELF}}|
+|unknown_grant|{{response-error}} of {{&SELF}}|
 |too_fast|{{response-error}} of {{&SELF}}|
 |too_many_attempts|{{response-error}} of {{&SELF}}|
 
