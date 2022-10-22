@@ -5251,10 +5251,10 @@ Specification document(s):
 |invalid_code|{{response-error}} of {{&SELF}}|
 |invalid_flag|{{response-error}} of {{&SELF}}|
 |invalid_rotation|{{response-error}} of {{&SELF}}|
+|invalid_continuation|{{response-error}} of {{&SELF}}|
 |user_denied|{{response-error}} of {{&SELF}}|
 |request_denied|{{response-error}} of {{&SELF}}|
 |unknown_interaction|{{response-error}} of {{&SELF}}|
-|unknown_grant|{{response-error}} of {{&SELF}}|
 |too_fast|{{response-error}} of {{&SELF}}|
 |too_many_attempts|{{response-error}} of {{&SELF}}|
 
