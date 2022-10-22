@@ -4780,9 +4780,9 @@ Additional fields can be defined the [Authorization Server Discovery Fields Regi
 If the client instance calls an RS without an access token, or with an invalid access token, the RS SHOULD be explicit about the fact that GNAP needs to be used to access the resource, by responding with the WWW-Authenticate header field and a GNAP challenge.
 
 In some situations, the client instance might want to know with which specific AS it needs to negotiate for access to that RS.
-The RS MAY additionally return the address of the GNAP endpoint in the "as_uri" parameter, as well as a referer parameter to indicate which RS initiated the discovery process and an opaque reference that the client instance SHOULD both then use in its access token request. The "referer" parameter MUST be the URI of the RS, and the client MUST check its value to protect itself. The opaque reference MUST be sufficient for at least the action the client instance was attempting to take at the RS and MAY be more powerful.
+The RS MAY additionally return the address of the GNAP endpoint in the `as_uri` parameter, a `referrer` parameter to indicate which RS initiated the discovery process, and an opaque `access` reference. The client instance SHOULD then use both the `referrer` and `access` parameters in its access token request. The `referrer` parameter MUST be the URI of the RS, and the client instance MUST check its value to protect itself. The opaque `access` reference MUST be sufficient for at least the action the client instance was attempting to take at the RS and MAY be more powerful.
 
-The means for the RS to determine the opaque reference are out of scope of this specification, but some dynamic methods are discussed in
+The means for the RS to determine the value for the `access` reference are out of scope of this specification, but some dynamic methods are discussed in
 {{I-D.ietf-gnap-resource-servers}}.
 
 When receiving the following response from the RS:
@@ -4791,17 +4791,19 @@ When receiving the following response from the RS:
 NOTE: '\' line wrapping per RFC 8792
 
 WWW-Authenticate: \
-  GNAP as_uri=https://as.example/tx;opaque=FWWIKYBQ6U56NL1;referer=https://rs.example
+  GNAP as_uri=https://as.example/tx\
+  ;access=FWWIKYBQ6U56NL1\
+  ;referrer=https://rs.example
 ~~~
 
-The client instance then makes a request to the "as_uri" as described in {{request}}, with the value of "referer" passed as a header and the "opaque" reference passed unchanged into the `access` array in the `access_token` portion of the request. The client instance MAY request additional resources and other information.
+The client instance then makes a request to the `as_uri` as described in {{request}}, with the value of `referrer` passed as an HTTP Referer header field and the `access` reference passed unchanged into the `access` array in the `access_token` portion of the request. The client instance MAY request additional resources and other information.
 
-In this non-normative example, the client instance is requesting a single access token using the opaque reference `FWWIKYBQ6U56NL1` received from the RS in addition to the `dolphin-metadata` that the client instance has been configured out of band.
+In this non-normative example, the client instance is requesting a single access token using the opaque access reference `FWWIKYBQ6U56NL1` received from the RS in addition to the `dolphin-metadata` that the client instance has been configured with out of band.
 
 ~~~ http-message
 POST /tx HTTP/1.1
 Host: as.example
-Referer: rs.example
+Referer: https://rs.example/resource
 Content-Type: application/json
 Signature-Input: sig1=...
 Signature: sig1=...
@@ -4818,7 +4820,7 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-The client includes the "Referer" header as a way for the AS to know that the process is initiated through a discovery process.
+The client instance includes the Referer header field as a way for the AS to know that the process is initiated through a discovery process at the RS.
 
 If issued, the resulting access token would contain sufficient access to be used at both referenced resources.
 
@@ -6217,7 +6219,7 @@ allow different types of client software and client instance deployments.
 
 ## Compromised RS {#security-compromised-rs}
 
-An attacker may aim to gain access to confidential or sensitive resources. The measures for hardening and monitoring server systems is out of the scope of this document.
+An attacker may aim to gain access to confidential or sensitive resources. The measures for hardening and monitoring resource server systems (beyond protection with access tokens) is out of the scope of this document, but the use of GNAP to protect a system does not absolve the resource server of following best practices.
 GNAP generally considers a breach can occur, and therefore advises to prefer key-bound tokens whenever possible, which at least limits the impact of access token leakage by a compromised or malicious RS.
 
 # Privacy Considerations {#privacy}
