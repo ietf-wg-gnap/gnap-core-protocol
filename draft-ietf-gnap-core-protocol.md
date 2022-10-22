@@ -5206,7 +5206,7 @@ Specification document(s):
 
 ## Error Codes {#IANA-error-code}
 
-This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-error-response-template}}.
+This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-error-code-template}}.
 
 ### Registration Template {#IANA-error-code-template}
 
@@ -5220,7 +5220,7 @@ Specification document(s):
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
-### Initial Contents {#IANA-error-response-contents}
+### Initial Contents {#IANA-error-code-contents}
 
 |Error|Specification document(s)|
 |invalid_request|{{response-error}} of {{&SELF}}|
