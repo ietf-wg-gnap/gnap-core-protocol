@@ -2338,6 +2338,13 @@ continue the grant request:
 }
 ~~~
 
+Alternatively, the AS MAY choose to only return the error as codes and provide a error as a string. The following response is considered equivalent to the previous example : 
+~~~ json
+{
+    "error": "user_denied"
+}
+~~~
+
 # Determining Authorization and Consent {#authorization}
 
 When the client instance makes its [initial request](#request) to the AS for delegated access, it
@@ -6306,6 +6313,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 - -11
+    - Error as object or string, more complete set of error codes
     - Added key rotation in token management.
     - Restrict keys to a single format per message.
     - Discussed security issues of multiple key formats.
