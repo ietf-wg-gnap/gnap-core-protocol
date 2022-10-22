@@ -5896,7 +5896,7 @@ would be present in the request.
 
 The AS can define its own policy regarding the timeout of the "previous_key", either making it immediately obsolete or allowing for a limited grace period during which both the "previous_key" and the current key can be used for signing requests. Such a grace period can be useful when there are multiple running instances of the client and it's tough, or even impossible, to update the keys on all these instances immediately (just as an example, the client instance could be deployed as a service in kubernetes).
 
-Narrowly restricting the exposure opportunities for exploit in terms of time, place, and method, especially if the time and place happens only once, makes exploit significantly more difficult. Therefore the "previous_key" (or any previous one before it) is expected to no longer have rotation authority.   
+Narrowly restricting the exposure opportunities for exploit in terms of time, place, and method, especially if the time and place happens only once, makes exploit significantly more difficult. Therefore the "previous_key" (or any previous one before it) is expected to no longer have rotation authority.
 
 ## Interaction Finish Modes and Polling {#security-polling}
 
