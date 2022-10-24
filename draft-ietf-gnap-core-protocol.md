@@ -1704,7 +1704,7 @@ as the HTTP entity body. Each possible field is detailed in the sections below.
     future requests. OPTIONAL. See {{response-dynamic-handles}}.
 
 `error` (object or string):
-: An error code indicating that something has gone wrong. REQUIRED for an error condition. If included, other fields MUST NOT be included. See {{response-error}}.
+: An error code indicating that something has gone wrong. REQUIRED for an error condition. See {{response-error}}.
 
 Additional fields can be defined by extensions to GNAP in the [Grant Response Parameters Registry](#IANA-grant-response).
 
@@ -2359,62 +2359,60 @@ This non-normative example shows an instance identifier along side an issued acc
 
 ## Error Response {#response-error}
 
-If the AS determines that the request cannot be issued for any reason, it responds to the client instance with an "error" response.
-
-`error` (object):
-: An error contains an error "code" and, optionally, its associated error "description"
+If the AS determines that the request cannot be issued for any reason, it responds to the client instance with an "error" response. When returned as an object, the object contains the following fields:
 
 `code` (string):
-:   A single ASCII error code from the
-    following, with additional values available in the [Error Code Registry](#IANA-error-code).
+:   A single ASCII error code defining the error.
     REQUIRED.
-
-    `"invalid_request"`:
-    :     The request is missing a required parameter, includes an
-          invalid parameter value or is otherwise malformed.
-
-    `"invalid_client"`:
-    :     The request was made from a client that was not recognized
-          or allowed by the AS, or the client's signature validation failed.
-
-    `"invalid_interaction"`
-    : The client instance has provided an interaction reference that is incorrect
-        for this request or the interaction modes in use have expired.
-
-    `"invalid_flag"`
-    : The flag configuration is not valid.
-
-    `"invalid_rotation"`
-    : The rotation request is not valid.
-
-    `"invalid_code"`
-    : The code provided by the user is refused.
-
-    `"invalid_continuation"`:
-    : The continuation of the referenced grant could not be processed.
-
-    `"user_denied"`:
-    : The RO denied the request.
-
-    `"request_denied"`:
-    : The request was denied for an unspecified reason.
-
-    `"unknown_user"`:
-    : The user presented in the request is not known to the AS or does not match the user present during interaction.
-
-    `"unknown_interaction"`:
-    : The interaction integrity could not be established.
-
-    `"too_fast"`:
-    : The client instance did not respect the timeout in the wait response.
-
-    `"too_many_attempts"`:
-    : A limit has been reached in the number of reasonable attempts.
 
 `description` (string):
 :   A human-readable string description of the error intended for the
     developer of the client.
     OPTIONAL.
+
+
+This specification defines the following `code` values:
+
+`"invalid_request"`:
+: The request is missing a required parameter, includes an
+    invalid parameter value or is otherwise malformed.
+
+`"invalid_client"`:
+: The request was made from a client that was not recognized
+    or allowed by the AS, or the client's signature validation failed.
+
+`"invalid_interaction"`
+: The client instance has provided an interaction reference that is incorrect
+    for this request or the interaction modes in use have expired.
+
+`"invalid_flag"`
+: The flag configuration is not valid.
+
+`"invalid_rotation"`
+: The rotation request is not valid.
+
+`"invalid_continuation"`:
+: The continuation of the referenced grant could not be processed.
+
+`"user_denied"`:
+: The RO denied the request.
+
+`"request_denied"`:
+: The request was denied for an unspecified reason.
+
+`"unknown_user"`:
+: The user presented in the request is not known to the AS or does not match the user present during interaction.
+
+`"unknown_interaction"`:
+: The interaction integrity could not be established.
+
+`"too_fast"`:
+: The client instance did not respect the timeout in the wait response.
+
+`"too_many_attempts"`:
+: A limit has been reached in the number of reasonable attempts.
+
+Additional error codes can be defined in the [Error Code Registry](#IANA-error-code).
 
 For example, if the RO denied the request while interacting with the AS,
 the AS would return the following error when the client instance tries to
@@ -2436,6 +2434,8 @@ Alternatively, the AS MAY choose to only return the error as codes and provide a
     "error": "user_denied"
 }
 ~~~
+
+If an error is returned and the client instance can continue, the AS MAY include the `continue` field in the response, as defined {{response-continue}}. This allows the client instance to modify its request for access, potentially leading to prompting the RO again. Other fields MUST NOT be included in the response.
 
 # Determining Authorization and Consent {#authorization}
 
@@ -2990,7 +2990,24 @@ NOTE: '\' line wrapping per RFC 8792
 With this example, the client instance can not make an additional continuation request because
 a `continue` field is not included.
 
-## Continuing During Pending Interaction {#continue-poll}
+For another example, if the RO has denied the client instance's request, the AS responds with the following response:
+
+~~~
+{
+    "error": "user_denied",
+    "continue": {
+        "access_token": {
+            "value": "33OMUKMKSKU80UPRY5NM"
+        },
+        "uri": "https://server.example.com/continue",
+        "wait": 30
+    }
+}
+~~~
+
+In this example, the AS includes the `continue` field in the response. Therefore, the client instance can continue the grant negotiation process, perhaps modifying the request as discussed in {{continue-modify}}.
+
+## Continuing During Pending Interaction (Polling) {#continue-poll}
 
 When the client instance does not include a `finish` parameter, the client instance will often need to
 poll the AS until the RO has authorized the request. To do so, the client instance makes a POST
@@ -3055,6 +3072,18 @@ NOTE: '\' line wrapping per RFC 8792
 
 See {{security-polling}} for considerations on polling for continuation without an interaction
 `finish` method.
+
+In error conditions, the AS responds to the client instance with the error code as discussed in {{response-error}}. For example, if the client instance has polled too many times before the RO has approved the request, the AS would respond with a message like this:
+
+~~~
+{
+    "error": "too_many_attempts"
+}
+~~~
+
+Since this response does not include a `continue` section, the client instance cannot continue to
+poll the AS for additional updates and the grant request is _finalized_. If the client instance
+still needs access to the resource, it will need to start with a new grant request.
 
 ## Modifying an Existing Request {#continue-modify}
 
