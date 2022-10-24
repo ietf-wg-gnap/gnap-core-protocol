@@ -1234,7 +1234,7 @@ RO and MUST NOT be taken as declarative statements that a particular
 RO is present at the client instance and acting as the end user. Assertions SHOULD be validated by the AS.
 
 If the identified end user does not match the RO present at the AS
-during an interaction step, the AS SHOULD reject the request with an "user_denied" error.
+during an interaction step, the AS SHOULD reject the request with an "unknown_user" error.
 
 If the AS trusts the client instance to present verifiable assertions, the AS MAY
 decide, based on its policy, to skip interaction with the RO, even
@@ -1267,7 +1267,7 @@ user identifiers or structured assertions. For the client instance to send
 either of these, use the full [user request object](#request-user) instead.
 
 If the AS does not recognize the user reference, it MUST
-return a "user_denied" error.
+return an "unknown_user" error.
 
 ## Interacting with the User {#request-interact}
 
@@ -2326,6 +2326,9 @@ If the AS determines that the request cannot be issued for any reason, it respon
     `"request_denied"`:
     : The request was denied for an unspecified reason.
 
+    `"unknown_user"`:
+    : The user presented in the request is not known to the AS or does not match the user present during interaction.
+
     `"unknown_interaction"`:
     : The interaction integrity could not be established.
 
@@ -2354,6 +2357,7 @@ continue the grant request:
 ~~~
 
 Alternatively, the AS MAY choose to only return the error as codes and provide a error as a string. The following response is considered equivalent to the previous example :
+
 ~~~ json
 {
     "error": "user_denied"
@@ -2485,7 +2489,7 @@ In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
 The URI value is used to identify the grant request being authorized.
 If the URI cannot be associated with a currently active
-request, the AS MUST display an "invalid_interaction" error to the RO and MUST NOT attempt
+request, the AS MUST display an error to the RO and MUST NOT attempt
 to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
 If the URI is not hosted by the AS directly, the means of communication between
 the AS and this URI are out of scope for this specification.
@@ -2514,7 +2518,7 @@ In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
 The value of the user code is used to identify the grant request being authorized.
 If the user code cannot be associated with a currently active
-request, the AS MUST display an "invalid_code" error to the RO and MUST NOT attempt
+request, the AS MUST display an error to the RO and MUST NOT attempt
 to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
 If the interaction component at the user code URI is not hosted by the AS directly, the means of communication between
 the AS and this URI, including communication of the user code itself, are out of scope for this specification.
@@ -2522,8 +2526,8 @@ the AS and this URI, including communication of the user code itself, are out of
 When the RO enters this code at the user code URI,
 the AS MUST uniquely identify the pending request that the code was associated
 with. If the AS does not recognize the entered code, the interaction component MUST
-display an "invalid_code" error to the user. If the AS detects too many unrecognized code
-enter attempts, the interaction component SHOULD display an "too_many_attempts" error to the user and
+display an error to the user. If the AS detects too many unrecognized code
+enter attempts, the interaction component SHOULD display an error to the user indicating too many attempts and
 MAY take additional actions such as slowing down the input interactions.
 The user should be warned as such an error state is approached, if possible.
 
@@ -2546,7 +2550,7 @@ In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
 The value of the user code is used to identify the grant request being authorized.
 If the user code cannot be associated with a currently active
-request, the AS MUST display an "invalid_code" error to the RO and MUST NOT attempt
+request, the AS MUST display an error to the RO and MUST NOT attempt
 to redirect the RO back to any client instance even if a [redirect finish method is supplied](#request-interact-callback-redirect).
 If the interaction component at the user code URI is not hosted by the AS directly, the means of communication between
 the AS and this URI, including communication of the user code itself, are out of scope for this specification.
@@ -2554,8 +2558,8 @@ the AS and this URI, including communication of the user code itself, are out of
 When the RO enters this code at the given URI,
 the AS MUST uniquely identify the pending request that the code was associated
 with. If the AS does not recognize the entered code, the interaction component MUST
-display an "invalid_code" error to the user. If the AS detects too many unrecognized code
-enter attempts, the interaction component SHOULD display an "too_many_attempts" error to the user and
+display an error to the user. If the AS detects too many unrecognized code
+enter attempts, the interaction component SHOULD display an error to the user indicating too many attempts and
 MAY take additional actions such as slowing down the input interactions.
 The user should be warned as such an error state is approached, if possible.
 
