@@ -3614,6 +3614,8 @@ as an extension.
 The security of GNAP relies on the cryptographic security of the keys themselves.
 When symmetric keys are used in GNAP, a key management system or secure key derivation mechanism MUST be used to supply the keys. Symmetric keys MUST NOT be a human memorable password or a value derived from one. Symmetric keys MUST NOT be passed by value from the client instance to the AS.
 
+Additional security considerations apply when [rotating keys]{#security-key-rotation}.
+
 ## Presenting Access Tokens {#use-access-token}
 
 The method the client instance uses to send an access token depends on whether
@@ -5969,6 +5971,14 @@ including all private signing information, to the client instance alongside the 
 token itself. This approach would make interception of the return from the token endpoint
 equivalent to that of a bearer token, since all information required to use the access token
 would be present in the request.
+
+## Key Rotation Policy {#security-key-rotation}
+
+When keys are rotated, there could be a delay in the propagation of that rotation to various components in the AS's ecosystem. The AS can define its own policy regarding the timeout of the `previous_key`, either making it immediately obsolete or allowing for a limited grace period during which both the `previous_key` and the current key can be used for signing requests. Such a grace period can be useful when there are multiple running copies of the client that are coordinated with each other. For example, the client software could be deployed as a cloud service with multiple orchestrated nodes. Each of these copies is deployed using the same key and therefore all the nodes represent the same client instance to the AS. In such cases, it can be difficult, or even impossible, to update the keys on all these copies in the same instant.
+
+The need for accommodating such known delays in the system needs to be balanced with the risk of allowing an old key to still be used. Narrowly restricting the exposure opportunities for exploit at the AS in terms of time, place, and method makes exploit significantly more difficult, especially if the exception happens only once. For example, the AS can reject requests from the `previous_key` (or any previous one before it) to cause rotation to a new key, or at least ensure that the rotation happens to the same known key.
+
+See also the related considerations for token values in {{security-network-management}}.
 
 ## Interaction Finish Modes and Polling {#security-polling}
 
