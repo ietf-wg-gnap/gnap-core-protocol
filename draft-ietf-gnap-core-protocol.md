@@ -1181,8 +1181,6 @@ If the AS does not know the client instance's public key ahead of time, the AS
 MAY accept or reject the request based on AS policy, attestations
 within the `client` request, and other mechanisms.
 
-\[\[ [See issue #44](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/44) \]\]
-
 The client instance MUST NOT send a symmetric key by value in the request, as doing so would expose
 the key directly instead of simply proving possession of it. See considerations on symmetric keys
 in {{security-symmetric}}.
@@ -1492,8 +1490,6 @@ request, the AS returns an app interaction response with an app URI
 payload {{response-interact-app}}. The client instance manages
 this interaction method as described in {{interaction-app}}.
 
-\[\[ [See issue #54](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/54) \]\]
-
 #### Display a Short User Code {#request-interact-usercode}
 
 If the client instance is capable of displaying or otherwise communicating
@@ -1596,8 +1592,6 @@ Requests to the callback URI MUST be processed as described in
 {{interaction-finish}}, and the AS MUST require
 presentation of an interaction callback reference as described in
 {{continue-after-interaction}}.
-
-\[\[ [See issue #58](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/58) \]\]
 
 #### Receive an HTTP Callback Through the Browser {#request-interact-callback-redirect}
 
@@ -1710,7 +1704,7 @@ as the HTTP entity body. Each possible field is detailed in the sections below.
     future requests. OPTIONAL. See {{response-dynamic-handles}}.
 
 `error` (object or string):
-: An error code indicating that something has gone wrong. REQUIRED for an error condition. If included, other fields MUST NOT be included. See {{response-error}}.
+: An error code indicating that something has gone wrong. REQUIRED for an error condition. See {{response-error}}.
 
 Additional fields can be defined by extensions to GNAP in the [Grant Response Parameters Registry](#IANA-grant-response).
 
@@ -1979,8 +1973,6 @@ with access to two described resources.
 If the client instance [requested a single access token](#request-token-single), the AS MUST NOT respond with the multiple
 access token structure.
 
-\[\[ [See issue #69](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/69) \]\]
-
 ### Multiple Access Tokens {#response-token-multiple}
 
 If the client instance has requested multiple access tokens and the AS has
@@ -2134,8 +2126,6 @@ specification. The client instance MUST NOT alter the URI in any way. The
 client instance MAY attempt to detect if an installed application will
 service the URI being sent before attempting to launch the
 application URI. See details of the interaction in {{interaction-app}}.
-
-\[\[ [See issue #71](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/71) \]\]
 
 ### Display of a Short User Code {#response-interact-usercode}
 
@@ -2367,66 +2357,62 @@ This non-normative example shows an instance identifier along side an issued acc
 
 ~~~
 
-\[\[ [See issue #78](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/78) \]\]
-
 ## Error Response {#response-error}
 
-If the AS determines that the request cannot be issued for any reason, it responds to the client instance with an "error" response.
-
-`error` (object):
-: An error contains an error "code" and, optionally, its associated error "description"
+If the AS determines that the request cannot be issued for any reason, it responds to the client instance with an "error" response. When returned as an object, the object contains the following fields:
 
 `code` (string):
-:   A single ASCII error code from the
-    following, with additional values available in the [Error Code Registry](#IANA-error-code).
+:   A single ASCII error code defining the error.
     REQUIRED.
-
-    `"invalid_request"`:
-    :     The request is missing a required parameter, includes an
-          invalid parameter value or is otherwise malformed.
-
-    `"invalid_client"`:
-    :     The request was made from a client that was not recognized
-          or allowed by the AS, or the client's signature validation failed.
-
-    `"invalid_interaction"`
-    : The client instance has provided an interaction reference that is incorrect
-        for this request or the interaction modes in use have expired.
-
-    `"invalid_flag"`
-    : The flag configuration is not valid.
-
-    `"invalid_rotation"`
-    : The rotation request is not valid.
-
-    `"invalid_code"`
-    : The code provided by the user is refused.
-
-    `"invalid_continuation"`:
-    : The continuation of the referenced grant could not be processed.
-
-    `"user_denied"`:
-    : The RO denied the request.
-
-    `"request_denied"`:
-    : The request was denied for an unspecified reason.
-
-    `"unknown_user"`:
-    : The user presented in the request is not known to the AS or does not match the user present during interaction.
-
-    `"unknown_interaction"`:
-    : The interaction integrity could not be established.
-
-    `"too_fast"`:
-    : The client instance did not respect the timeout in the wait response.
-
-    `"too_many_attempts"`:
-    : A limit has been reached in the number of reasonable attempts.
 
 `description` (string):
 :   A human-readable string description of the error intended for the
     developer of the client.
     OPTIONAL.
+
+
+This specification defines the following `code` values:
+
+`"invalid_request"`:
+: The request is missing a required parameter, includes an
+    invalid parameter value or is otherwise malformed.
+
+`"invalid_client"`:
+: The request was made from a client that was not recognized
+    or allowed by the AS, or the client's signature validation failed.
+
+`"invalid_interaction"`
+: The client instance has provided an interaction reference that is incorrect
+    for this request or the interaction modes in use have expired.
+
+`"invalid_flag"`
+: The flag configuration is not valid.
+
+`"invalid_rotation"`
+: The rotation request is not valid.
+
+`"invalid_continuation"`:
+: The continuation of the referenced grant could not be processed.
+
+`"user_denied"`:
+: The RO denied the request.
+
+`"request_denied"`:
+: The request was denied for an unspecified reason.
+
+`"unknown_user"`:
+: The user presented in the request is not known to the AS or does not match the user present during interaction.
+
+`"unknown_interaction"`:
+: The interaction integrity could not be established.
+
+`"too_fast"`:
+: The client instance did not respect the timeout in the wait response.
+
+`"too_many_attempts"`:
+: A limit has been reached in the number of reasonable attempts.
+
+Additional error codes can be defined in the [Error Code Registry](#IANA-error-code).
 
 For example, if the RO denied the request while interacting with the AS,
 the AS would return the following error when the client instance tries to
@@ -2448,6 +2434,8 @@ Alternatively, the AS MAY choose to only return the error as codes and provide a
     "error": "user_denied"
 }
 ~~~
+
+If an error is returned and the client instance can continue, the AS MAY include the `continue` field in the response, as defined {{response-continue}}. This allows the client instance to modify its request for access, potentially leading to prompting the RO again. Other fields MUST NOT be included in the response.
 
 # Determining Authorization and Consent {#authorization}
 
@@ -2884,8 +2872,6 @@ ongoing request for each call within that request.
 
 Access tokens other than the continuation access tokens MUST NOT be usable for continuation requests.
 
-\[\[ [See issue #85](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/85) \]\]
-
 For example, here the client instance makes a POST request to a unique URI and signs
 the request with HTTP Message Signatures:
 
@@ -2942,7 +2928,6 @@ this token SHOULD be a new access token, invalidating the previous access token.
 If the AS does not return a new `continue` response, the client instance
 MUST NOT make an additional continuation request. If a client instance does so,
 the AS MUST return an "invalid_continuation" error.
-\[\[ [See issue #87](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/87) \]\]
 
 For continuation functions that require the client instance to send a message body, the body MUST be
 a JSON object.
@@ -2978,7 +2963,6 @@ newly-created [access tokens](#response-token) or
 newly-released [subject information](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. The response
 SHOULD NOT contain any [interaction responses](#response-interact).
-\[\[ [See issue #89](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/89) \]\]
 
 If the grant request is in the _pending_ state, the [grant response](#response) MUST NOT contain access tokens or subject information, and MAY contain a new [interaction responses](#response-interact) to any interaction methods that have not been exhausted at the AS.
 
@@ -3006,9 +2990,24 @@ NOTE: '\' line wrapping per RFC 8792
 With this example, the client instance can not make an additional continuation request because
 a `continue` field is not included.
 
-\[\[ [See issue #88](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/88) \]\]
+For another example, if the RO has denied the client instance's request, the AS responds with the following response:
 
-## Continuing During Pending Interaction {#continue-poll}
+~~~
+{
+    "error": "user_denied",
+    "continue": {
+        "access_token": {
+            "value": "33OMUKMKSKU80UPRY5NM"
+        },
+        "uri": "https://server.example.com/continue",
+        "wait": 30
+    }
+}
+~~~
+
+In this example, the AS includes the `continue` field in the response. Therefore, the client instance can continue the grant negotiation process, perhaps modifying the request as discussed in {{continue-modify}}.
+
+## Continuing During Pending Interaction (Polling) {#continue-poll}
 
 When the client instance does not include a `finish` parameter, the client instance will often need to
 poll the AS until the RO has authorized the request. To do so, the client instance makes a POST
@@ -3050,8 +3049,6 @@ next continuation request.
 }
 ~~~
 
-\[\[ [See issue #91](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/91) \]\]
-
 If the request is successful in causing the AS to issue access tokens and
 release subject information, the response could look like this example:
 
@@ -3075,6 +3072,18 @@ NOTE: '\' line wrapping per RFC 8792
 
 See {{security-polling}} for considerations on polling for continuation without an interaction
 `finish` method.
+
+In error conditions, the AS responds to the client instance with the error code as discussed in {{response-error}}. For example, if the client instance has polled too many times before the RO has approved the request, the AS would respond with a message like this:
+
+~~~
+{
+    "error": "too_many_attempts"
+}
+~~~
+
+Since this response does not include a `continue` section, the client instance cannot continue to
+poll the AS for additional updates and the grant request is _finalized_. If the client instance
+still needs access to the resource, it will need to start with a new grant request.
 
 ## Modifying an Existing Request {#continue-modify}
 
@@ -3435,8 +3444,6 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-\[\[ [See issue #103](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/103) \]\]
-
 ### Binding a New Key to the Rotated Access Token {#rotate-access-token-key}
 
 If the client instance wishes to bind a new presentation key to an access token, the client
@@ -3644,7 +3651,7 @@ as an extension.
 The security of GNAP relies on the cryptographic security of the keys themselves.
 When symmetric keys are used in GNAP, a key management system or secure key derivation mechanism MUST be used to supply the keys. Symmetric keys MUST NOT be a human memorable password or a value derived from one. Symmetric keys MUST NOT be passed by value from the client instance to the AS.
 
-Additional security considerations apply when [rotating keys]{#security-key-rotation}.
+Additional security considerations apply when [rotating keys](#security-key-rotation).
 
 ## Presenting Access Tokens {#use-access-token}
 
@@ -3692,8 +3699,6 @@ Authorization: Bearer OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
 The `Form-Encoded Body Parameter` and `URI Query Parameter` methods of {{RFC6750}} MUST NOT
 be used.
 
-
-\[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
 
 The client software MUST reject as an "invalid_flag" error a situation where the `flags` field contains the `bearer` flag
 and the `key` field is present with any value.
@@ -3783,8 +3788,6 @@ an access token bound to the [client instance's key](#request-client), and that 
 MUST be proved in all continuation requests
 {{continue-request}}. Token management requests {{token-management}} are similarly bound
 to either the access token's own key or, in the case of bearer tokens, the client instance's key.
-
-\[\[ [See issue #105](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/105) \]\]
 
 In the following sections, unless otherwise noted, the `RS256` JOSE Signature Algorithm is applied
 using the following RSA key (presented here in JWK format):
@@ -5386,7 +5389,6 @@ Specification document(s):
 |invalid_request|{{response-error}} of {{&SELF}}|
 |invalid_client|{{response-error}} of {{&SELF}}|
 |invalid_interaction|{{response-error}} of {{&SELF}}|
-|invalid_code|{{response-error}} of {{&SELF}}|
 |invalid_flag|{{response-error}} of {{&SELF}}|
 |invalid_rotation|{{response-error}} of {{&SELF}}|
 |invalid_continuation|{{response-error}} of {{&SELF}}|
@@ -6541,6 +6543,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 > Note: To be removed by RFC editor before publication.
+
+- -12
+    - 
 
 - -11
     - Error as object or string, more complete set of error codes
