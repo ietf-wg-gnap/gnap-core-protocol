@@ -7,7 +7,7 @@
 |        |                                  |        |         |      |
 |        |<-(3)-- Interaction Needed -------+        |         |      |
 |        |                                  |        |         |      |
-|        +=(4)== Redirect for Interaction ====================>|      |
+|        +==(4)== Redirect for Interaction ===================>|      |
 |        |                                  |        |         |      |
 |        |                                  |        |<==(5)==>|      |
 |        |                                  |        |  AuthN  |      |
