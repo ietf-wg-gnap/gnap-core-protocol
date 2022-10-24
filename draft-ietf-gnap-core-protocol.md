@@ -3651,7 +3651,7 @@ as an extension.
 The security of GNAP relies on the cryptographic security of the keys themselves.
 When symmetric keys are used in GNAP, a key management system or secure key derivation mechanism MUST be used to supply the keys. Symmetric keys MUST NOT be a human memorable password or a value derived from one. Symmetric keys MUST NOT be passed by value from the client instance to the AS.
 
-Additional security considerations apply when [rotating keys]{#security-key-rotation}.
+Additional security considerations apply when [rotating keys](#security-key-rotation).
 
 ## Presenting Access Tokens {#use-access-token}
 
@@ -6543,6 +6543,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 > Note: To be removed by RFC editor before publication.
+
+- -12
+    - 
 
 - -11
     - Error as object or string, more complete set of error codes
