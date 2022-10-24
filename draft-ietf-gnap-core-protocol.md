@@ -5389,7 +5389,6 @@ Specification document(s):
 |invalid_request|{{response-error}} of {{&SELF}}|
 |invalid_client|{{response-error}} of {{&SELF}}|
 |invalid_interaction|{{response-error}} of {{&SELF}}|
-|invalid_code|{{response-error}} of {{&SELF}}|
 |invalid_flag|{{response-error}} of {{&SELF}}|
 |invalid_rotation|{{response-error}} of {{&SELF}}|
 |invalid_continuation|{{response-error}} of {{&SELF}}|
