@@ -5476,6 +5476,21 @@ Specification document(s):
 |sub_id_formats_supported|array of strings|{{discovery}} of {{&SELF}}|
 |assertion_formats_supported|array of strings|{{discovery}} of {{&SELF}}|
 
+# Implementation Status {#implementation}
+
+> Note: To be removed by RFC editor before publication.
+
+**GNAP Authorization Service in Rust** implementation by David Skyberg.
+<https://github.com/dskyberg/gnap>. Prototype implementation of AS and Client in Rust. MIT license.
+
+**Rafiki** from Interledger Foundation. <https://github.com/interledger/rafiki> Production implementation of AS in JavaScript. Apache 2.0 license.
+
+**Sample GNAP Client in PHP** implementation by Aaron Pareckit. <https://github.com/aaronpk/gnap-client-php> Prototype implementation of web application client and CLI client in PHP, with common support library. CC0 license.
+
+**SUNET Auth Server** from SUNET. <https://github.com/SUNET/sunet-auth-server> Production implementation of AS in Python. BSD license.
+
+**XYZ** from Bespoke Engineering, implementation by Justin Richer. <https://github.com/bspk/oauth.xyz-java>. Advanced prototype implementation of AS, Client, and RS in Java, with common support library. Prototype implementation of SPA Client in pure JavaScript. Apache 2.0 license.
+
 # Security Considerations {#security}
 
 In addition to the normative requirements in this document, implementors are strongly encouraged to consider these additional security considerations in implementations and deployments of GNAP.
@@ -6525,6 +6540,8 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 # Document History {#history}
 
+> Note: To be removed by RFC editor before publication.
+
 - -11
     - Error as object or string, more complete set of error codes
     - Added key rotation in token management.
@@ -6540,6 +6557,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Added security considerations for asynchronous authorization.
     - Added security considerations for compromised RS.
     - Added interoperability profiles.
+    - Added implementation status section.
 
 - -10
     - Added note on relating access rights sent as strings to rights sent as objects.
