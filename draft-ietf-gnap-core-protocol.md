@@ -1418,12 +1418,14 @@ request without authorization.
 
 ### Start Mode Definitions {#request-interact-start}
 
-Interaction start modes are specified by a string, which consists of the start mode on its own, or by a JSON object with one required field and any number of optional parameters defined by the mode:
+Interaction start modes are specified by a string, which consists of the start mode name on its
+own, or by a JSON object with one required field and any number of parameters defined by
+the mode.
 
 `mode`:
-: The interaction start mode.
+: The interaction start mode. REQUIRED.
 
-Individual modes MAY define additional parameters to be required in the object.
+Individual modes defined as objects MAY define additional parameters to be required in the object.
 
 This specification defines the following interaction start modes:
 
@@ -3668,61 +3670,57 @@ and the `key` field is present with any value.
 
 Any keys presented by the client instance to the AS or RS MUST be validated as
 part of the request in which they are presented. The type of binding
-used is indicated by the `proof` parameter of the key object in {{key-format}}. This
-parameter is formally specified by an object with at least the following member:
+used is indicated by the `proof` parameter of the key object in {{key-format}}.
+Key proof methods are specified either by a string, which consists of the key proof
+method name on its own, or by a JSON object with one required field and any number of optional
+parameters defined by the method:
 
 `method`:
 : The name of the key proofing method to be used.
     REQUIRED.
 
-Individual methods MAY define additional parameters as members in this object.
+Individual methods defined as objects MAY define additional parameters as members in this object.
 
 Values for the `method` defined by this specification are as follows:
 
-`"httpsig"`:
+`"httpsig"` (string or object):
 : HTTP Signing signature headers. See {{httpsig-binding}}.
 
-`"mtls"`:
+`"mtls"` (string):
 : Mutual TLS certificate verification. See {{mtls}}.
 
-`"jwsd"`:
+`"jwsd"` (string):
 : A detached JWS signature header. See {{detached-jws}}.
 
-`"jws"`:
+`"jws"` (string):
 : Attached JWS payload. See {{attached-jws}}.
 
 Additional proofing methods are defined by the [Key Proofing Methods Registry](#IANA-key-proof-methods).
 
-For example, the `httpsig` method can be specified with its parameters as:
+In cases where a method's parameters can be set to omitted or set to default values, methods MAY be
+defined as both an object and a string. For example, the `httpsig` method can be specified as an
+object with its parameters explicitly declared, such as:
 
 ~~~ json
 {
     "proof": {
         "method": "httpsig",
-        "alg": "rsa-pss-sha512",
-        "content-digest-alg": "sha512"
+        "alg": "ecdsa-p384-sha384",
+        "content-digest-alg": "sha-256"
     }
 }
 ~~~
 
-If additional parameters are not required or used for a specific method, the method MAY be passed
-as a string instead of an object. For example, the `mtls` method with no additional parameters could be sent by the client instance as:
+The `httpsig` method also defines defines default behavior when it is passed as a string form:
 
 ~~~ json
 {
-    "proof": "mtls"
+    "proof": "httpsig"
 }
 ~~~
 
-The AS would map this to the equivalent expanded form as follows:
-
-~~~ json
-{
-    "proof": {
-        "method": "mtls"
-    }
-}
-~~~
+This is explicitly defined as the signature algorithm  specified by the associated key
+material and the content digest is calculated using sha-512.
 
 All key binding methods used by this specification MUST cover all relevant portions
 of the request, including anything that would change the nature of the request, to allow
@@ -3799,19 +3797,43 @@ NOTE: '\' line wrapping per RFC 8792
 
 ### HTTP Message Signatures {#httpsig-binding}
 
-This method is indicated by the method value `httpsig`. The signer creates an HTTP
-Message Signature as described in {{I-D.ietf-httpbis-message-signatures}}. This method defines the following parameters:
+This method is indicated by the method value `httpsig` and can be declared in either object
+form or string form.
+
+When the proof method is specified in object form, the following parameters are defined:
 
 `alg`:
-: The explicit HTTP signature algorithm, from the HTTP Signature Algorithm registry. If
-    this parameter is omitted, the signing algorithm MUST be derived from the key
-    material (such as using the JWS algorithm in a JWK formatted key). OPTIONAL.
+: The HTTP signature algorithm, from the HTTP Signature Algorithm registry. REQUIRED.
 
 `content-digest-alg`:
-: The algorithm used for the Content-Digest field, used to protect the body. If this
-    parameter is omitted, its value is `sha-256`. OPTIONAL.
+: The algorithm used for the Content-Digest field, used to protect the body. REQUIRED.
 
-The covered components of the signature MUST include the following:
+This example uses the ECDSA signing algorithm over the P384 curve and the SHA-256 hashing
+algorithm for the content digest.
+
+~~~ json
+{
+    "proof": {
+        "method": "httpsig",
+        "alg": "ecdsa-p384-sha384",
+        "content-digest-alg": "sha-256"
+    }
+}
+~~~
+
+When the proof method is specified in string form, the signing algorithm MUST be derived from the
+key material (such as using the JWS algorithm in a JWK formatted key), and the content digest
+algorithm MUST be `sha-512`.
+
+~~~ json
+{
+    "proof": "httpsig"
+}
+~~~
+
+When using this method, the signer creates an HTTP Message Signature as described in
+{{I-D.ietf-httpbis-message-signatures}}. The covered components of the signature MUST include the
+following:
 
 `"@method"`:
 : The method used in the HTTP request.
@@ -4059,9 +4081,15 @@ The verifier MUST validate both signatures before processing the request for key
 
 ### Mutual TLS {#mtls}
 
-This method is indicated by the method value `mtls`. This method defines no
-additional parameters. The signer presents its TLS client
-certificate during TLS negotiation with the verifier.
+This method is indicated by the method value `mtls` in string form.
+
+~~~ json
+{
+    "proof": "mtls"
+}
+~~~
+
+The signer presents its TLS client certificate during TLS negotiation with the verifier.
 
 In this example, the certificate is communicated to the application
 through the `Client-Cert` header from a TLS reverse proxy, leading
@@ -4157,8 +4185,15 @@ deployment practices, as discussed in {{security-mtls-patterns}}.
 
 ### Detached JWS {#detached-jws}
 
-This method is indicated by the method value `jwsd`. This method defines no
-additional parameters. A JWS {{RFC7515}} object is created as follows:
+This method is indicated by the method value `jwsd` in string form.
+
+~~~ json
+{
+    "proof": "jwsd"
+}
+~~~
+
+The signer creates a JWS {{RFC7515}} object as follows:
 
 To protect the request, the JOSE header of the signature contains the following
 claims:
@@ -4343,8 +4378,15 @@ object, to be signed by the new key.
 
 ### Attached JWS {#attached-jws}
 
-This method is indicated by the method value `jws`. This method defines no
-additional parameters. A JWS {{RFC7515}} object is created as follows:
+This method is indicated by the method value `jws` in string form.
+
+~~~ json
+{
+    "proof": "jws"
+}
+~~~
+
+The signer creates a JWS {{RFC7515}} object as follows:
 
 To protect the request, the JWS header contains the following claims.
 
@@ -4860,42 +4902,33 @@ Additional fields can be defined the [Authorization Server Discovery Fields Regi
 
 ## RS-first Method of AS Discovery {#rs-request-without-token}
 
-If the client instance calls an RS without an access token, or with an
-invalid access token, the RS SHOULD respond to the client instance with a
-WWW-Authenticate header field indicating that GNAP needs to be used
-to access the resource. The address of the GNAP
-endpoint MUST be sent in the "as_uri" parameter. The RS MAY
-additionally return a resource reference that the client instance SHOULD use in
-its access token request. This
-resource reference MUST be sufficient for at least the action
-the client instance was attempting to take at the RS and MAY be more
-powerful.
-The means for the RS to determine the resource reference are out of scope
-of this specification, but some dynamic methods are discussed in
+If the client instance calls an RS without an access token, or with an invalid access token, the RS SHOULD be explicit about the fact that GNAP needs to be used to access the resource, by responding with the WWW-Authenticate header field and a GNAP challenge.
+
+In some situations, the client instance might want to know with which specific AS it needs to negotiate for access to that RS.
+The RS MAY additionally return the address of the GNAP endpoint in the `as_uri` parameter, a `referrer` parameter to indicate which RS initiated the discovery process, and an opaque `access` reference. The client instance SHOULD then use both the `referrer` and `access` parameters in its access token request. The `referrer` parameter MUST be the URI of the RS, and the client instance MUST check its value to protect itself. The opaque `access` reference MUST be sufficient for at least the action the client instance was attempting to take at the RS and MAY be more powerful.
+
+The means for the RS to determine the value for the `access` reference are out of scope of this specification, but some dynamic methods are discussed in
 {{I-D.ietf-gnap-resource-servers}}.
-The content of the resource reference is opaque to the client instance.
+
+When receiving the following response from the RS:
 
 ~~~ http-message
 NOTE: '\' line wrapping per RFC 8792
 
 WWW-Authenticate: \
-  GNAP as_uri=https://server.example/tx,access=FWWIKYBQ6U56NL1
+  GNAP as_uri=https://as.example/tx\
+  ;access=FWWIKYBQ6U56NL1\
+  ;referrer=https://rs.example
 ~~~
 
-The client instance then makes a request to the "as_uri" as described in
-{{request}}, with the value of "access" as one of the members
-of the `access` array in the `access_token` portion of the request. The
-client instance MAY request additional resources and other information.
-The client instance MAY request multiple access tokens.
+The client instance then makes a request to the `as_uri` as described in {{request}}, with the value of `referrer` passed as an HTTP Referer header field and the `access` reference passed unchanged into the `access` array in the `access_token` portion of the request. The client instance MAY request additional resources and other information.
 
-In this non-normative example, the client instance is requesting a single access
-token using the resource reference `FWWIKYBQ6U56NL1` received from the RS
-in addition to the `dolphin-metadata` resource reference that the client instance
-has been configured with out of band.
+In this non-normative example, the client instance is requesting a single access token using the opaque access reference `FWWIKYBQ6U56NL1` received from the RS in addition to the `dolphin-metadata` that the client instance has been configured with out of band.
 
 ~~~ http-message
 POST /tx HTTP/1.1
-Host: server.example.com
+Host: as.example
+Referer: https://rs.example/resource
 Content-Type: application/json
 Signature-Input: sig1=...
 Signature: sig1=...
@@ -4912,8 +4945,11 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-If issued, the resulting access token would contain sufficient access to be used
-at both referenced resources.
+The client instance includes the Referer header field as a way for the AS to know that the process is initiated through a discovery process at the RS.
+
+If issued, the resulting access token would contain sufficient access to be used at both referenced resources.
+
+Security considerations, especially related to the potential of a [compromised RS]{#security-compromised-rs} redirecting the requests of an otherwise properly authenticated client, need to be carefully considered when allowing such a discovery process. This risk can be mitigated by an alternative pre-registration process so that the client knows which AS protects which RS.
 
 ## Dynamic grant endpoint discovery {#grant-discovery}
 
@@ -5333,6 +5369,9 @@ This document defines methods that the client instance can use to prove possessi
 Method:
 : A unique string code for the key proofing method.
 
+Type:
+: The JSON type allowed for the value.
+
 Specification document(s):
 : Reference to the document(s) that specify the
     value, preferably including a URI that can be used
@@ -5341,11 +5380,12 @@ Specification document(s):
 
 ### Initial Contents {#IANA-key-proof-methods-contents}
 
-|Method|Specification document(s)|
-|httpsig|{{httpsig-binding}} of {{&SELF}}|
-|mtls|{{mtls}} of {{&SELF}}|
-|jwsd|{{detached-jws}} of {{&SELF}}|
-|jws|{{attached-jws}} of {{&SELF}}|
+|Method|Type|Specification document(s)|
+|httpsig|string|{{httpsig-binding}} of {{&SELF}}|
+|httpsig|object|{{httpsig-binding}} of {{&SELF}}|
+|mtls|string|{{mtls}} of {{&SELF}}|
+|jwsd|string|{{detached-jws}} of {{&SELF}}|
+|jws|string|{{attached-jws}} of {{&SELF}}|
 
 ## Key Formats {#IANA-key-formats}
 
@@ -6360,6 +6400,9 @@ appropriate security decision. Furthermore, audit capability, and the ability to
 decisions that may be ongoing, is particularly important in the asynchronous case.
 
 
+An attacker may aim to gain access to confidential or sensitive resources. The measures for hardening and monitoring resource server systems (beyond protection with access tokens) is out of the scope of this document, but the use of GNAP to protect a system does not absolve the resource server of following best practices.
+GNAP generally considers a breach can occur, and therefore advises to prefer key-bound tokens whenever possible, which at least limits the impact of access token leakage by a compromised or malicious RS.
+
 # Privacy Considerations {#privacy}
 
 The privacy considerations in this section are modeled after the list of privacy threats in {{RFC6973}}, "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
@@ -6449,6 +6492,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Make response from RS a "SHOULD" instead of a "MAY".
     - Added a way for the client instance to ask for a specific user's information, separate from the end-user.
     - Added security considerations for asynchronous authorization.
+    - Added security considerations for compromised RS.
     - Added interoperability profiles.
 
 - -10
@@ -7277,11 +7321,18 @@ within GNAP allows extensions to define new fields by not only choosing a new na
 using an existing name with a new type. However, the extension's definition
 of a new type for a field needs to fit the same kind of item being extended. For example, a
 hypothetical extension could define a string value for the `access_token` request field,
-with a URL to download an access token request. Such an extension would be appropriate as
+with a URL to download a hosted access token request. Such an extension would be appropriate as
 the `access_token` field still defines the access tokens being requested. However, if an extension
 were to define a string value for the `access_token` request field, with the value instead
 being something unrelated to the access token request such as a value or key format, this would
-not be an appropriate means of extension.
+not be an appropriate means of extension. (Note that this specific extension example would create
+another form of SSRF attack surface as discussed in {{security-ssrf}}.)
+
+For another example, both interaction [interaction start modes](#request-interact-start) and
+[key proofing methods](#binding-keys) can be defined as either strings or objects. An extension
+could take a method defined as a string, such as `app`, and define an object-based version with
+additional parameters. This extension should still define a method to launch an application on the
+end user's device, just like `app` does when specified as a string.
 
 Additionally, the ability to deal with different types for a field is not expected to be equal
 between an AS and client software, with the client software being assumed to be both more varied
