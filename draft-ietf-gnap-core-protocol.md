@@ -638,6 +638,9 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 
 An example set of protocol messages for this method can be found in {{example-async}}.
 
+Additional considerations for asynchronous interactions like this are discussed in
+{{security-async}}.
+
 ### Software-only Authorization {#sequence-no-user}
 
 In this example flow, the AS policy allows the client instance to make a call on its own behalf,
@@ -740,6 +743,74 @@ the abstract as functions of the AS here.
     might not match what the client instance requested, see the section on
     subject information for details.
 
+
+### Cross-User Authentication {#sequence-cross-user}
+
+In this scenario, the end user and resource owner are two different people.
+In this scenario, the client instance already knows who the end user
+is, likely through a separate authentication process. The
+end user, operating the client instance, needs to get subject information
+about another person in the system, the RO. The RO is given an opportunity
+to release this information using an asynchronous interaction method
+with the AS. This scenario would apply, for instance, when the end user
+is an agent in a call-center and the resource owner is a customer
+authorizing the call center agent to access their account on their behalf.
+
+~~~ aasvg
+{::include diagram/crossuser.md}
+~~~
+
+Precondition: The end user is authenticated to the client instance, and the client
+instance has an identifier representing the end user that it can present to the AS.
+This identifier should be unique to the particular session with the client instance
+and the AS.
+
+1.  The RO communicates a human-readable
+    identifier to the end user, such as an email address or account number. This communication
+    happens out of band from the protocol, such as over the phone between parties. Note that the
+    RO is not interacting with the client instance.
+
+2. The end user communicates the identifier to the client instance. The means by which the
+    identifier is communicated to the client instance is out of scope for this specification.
+
+3. The client instance [requests access to subject information](#request). The request includes
+    the RO's identifier in the [subject information request](#request-subject) `sub_ids` field,
+    and the end user's identifier in the [user information field](#request-user) of the request.
+    The request includes no interaction start methods, since the end user is not expected to
+    be the one interacting with the AS. The request does include the
+    [push based interaction finish method](#request-interact-callback-push) to allow the AS
+    to signal to the client instance when the interaction with the RO has concluded.
+
+4. The AS sees that the identifier for the end user and subject being requested are different.
+    The AS determines that it can reach out to the RO asynchronously for approval. While it
+    is doing so, the AS returns a [continuation response](#response-continue) with a `finish` nonce
+    to allow the client instance to keep polling after interaction with the RO has concluded.
+
+5. The AS contacts the RO and has them authenticate to the system. The means for doing this are
+    outside the scope of this specification, but the identity of the RO is known from the subject
+    identifier sent in (3).
+
+6. The RO is prompted to authorize the end user's request via the client instance. Since the end
+    user was identified in (3) via the user field, the AS can show this information to the
+    RO during the authorization request.
+
+7. The RO completes the authorization with the AS. The AS marks the request as _approved_.
+
+8. The RO pushes the [interaction finish message](#interaction-pushback) to the client instance.
+    Note that in the case the RO cannot be reached or the RO denies the request, the AS still sends the interaction
+    finish message to the client instance, after which the client instance can negotiate next steps if possible.
+
+9. The client instance validates the interaction finish message and
+    [continues the grant request](#continue-after-interaction).
+
+10. The AS returns the RO's [subject information](#response-subject) to the client instance.
+
+11. The client instance can display or otherwise utilize the RO's user information in its session
+    with the end user. Note that since the client instance requested different sets of user
+    information in (3), the client instance does not conflate the end user with the RO.
+
+Additional considerations for asynchronous interactions like this are discussed in
+{{security-async}}.
 
 # Requesting Access {#request}
 
@@ -1010,6 +1081,14 @@ contain the following fields.
     `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion. Additional
     assertion formats are defined by the [Assertion Formats Registry](#IANA-assertion-formats).
     REQUIRED if assertions are requested.
+
+`sub_ids` (array of objects):
+: An array of subject identifiers representing the subject that information
+    is being requested for. Each object is a subject identifier as defined by
+    {{I-D.ietf-secevent-subject-identifiers}}. All identifiers in the `sub_ids` array MUST identify
+    the same subject. If omitted, the AS SHOULD assume
+    that subject information requests are about the current user and SHOULD
+    require direct interaction or proof of presence before releasing information. OPTIONAL.
 
 Additional fields are defined in the [Subject Information Request Fields Registry](#IANA-subject-request).
 
@@ -5016,6 +5095,7 @@ Specification document(s):
 |Name|Type|Specification document(s)|
 |sub_id_formats|array of strings|{{request-subject}} of {{&SELF}}|
 |assertion_formats|array of strings|{{request-subject}} of {{&SELF}}|
+|sub_ids|array of objects|{{request-subject}} of {{&SELF}}|
 
 ## Assertion Formats {#IANA-assertion-formats}
 
@@ -6284,7 +6364,41 @@ instance capable of multiple formats can use [AS discovery](#discovery) to deter
 are supported, if desired. An AS should be generous in supporting many different key formats to
 allow different types of client software and client instance deployments.
 
-## Compromised RS {#security-compromised-rs}
+## Asynchronous Interactions {#security-async}
+
+GNAP allows the RO to be contacted by the AS asynchronously, outside the regular flow of the
+protocol. This allows for some advanced use cases, such as cross-user authentication or information
+release, but such advanced use cases have some distinct issues that implementors need to be fully
+aware of before using these features.
+
+First, in many applications, the return of a subject information to the client instance could
+indicate to the client instance that the end-user is the party represented by that information,
+functionally allowing the end-user to authenticate to the client application. While the details of
+a fully functional authentication protocol are outside the scope of GNAP, it is a common
+exercise for a client instance to be requesting information about the end user. This is facilitated
+by the several [interaction methods](#interaction-start) defined in GNAP that allow the end user
+to begin interaction directly with the AS. However, when the subject of the information is
+intentionally not the end-user, the client application will need some way to differentiate between
+requests for authentication of the end user and requests for information about a different user.
+Confusing these states could lead to an attacker having their account associated with a privileged
+user. Client instances can mitigate this by having distinct code paths for primary end user
+authentication and requesting subject information about secondary users, such as in a call center.
+In such use cases, the client software used by the resource owner (the caller) and the end-user
+(the agent) are generally distinct, allowing the AS to differentiate between the agent's corporate device
+making the request and the caller's personal device approving the request.
+
+Second, RO's interacting asynchronously do not usually have the same context as an end user in an
+application attempting to perform the task needing authorization. As such, the asynchronous requests
+for authorization coming to the RO from the AS might have very little to do with what the RO is
+doing at the time. This situation can consequently lead to authorization fatigue on the part of the
+RO, where any incoming authorization request is quickly approved and dispatched without the RO
+making a proper verification of the request. An attacker can exploit this fatigue and get the RO
+to authorize the attacker's system for access. To mitigate this, AS systems deploying asynchronous
+authorization should only prompt the RO when the RO is expecting such a request, and significant
+user experience engineering efforts need to be employed to ensure the RO can clearly make the
+appropriate security decision. Furthermore, audit capability, and the ability to undo access
+decisions that may be ongoing, is particularly important in the asynchronous case.
+
 
 An attacker may aim to gain access to confidential or sensitive resources. The measures for hardening and monitoring resource server systems (beyond protection with access tokens) is out of the scope of this document, but the use of GNAP to protect a system does not absolve the resource server of following best practices.
 GNAP generally considers a breach can occur, and therefore advises to prefer key-bound tokens whenever possible, which at least limits the impact of access token leakage by a compromised or malicious RS.
@@ -6376,6 +6490,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Rewrote guidance and requirements for extensions.
     - Require all URIs to be absolute throughout protocol.
     - Make response from RS a "SHOULD" instead of a "MAY".
+    - Added a way for the client instance to ask for a specific user's information, separate from the end-user.
+    - Added security considerations for asynchronous authorization.
+    - Added security considerations for compromised RS.
     - Added interoperability profiles.
 
 - -10
