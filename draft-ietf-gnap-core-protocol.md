@@ -1007,7 +1007,7 @@ Additionally, each object in the array MUST include the `label` field, and
 all values of these fields MUST be unique within the request. If the
 client instance does not include a `label` value for any entry in the
 array, or the values of the `label` field are not unique within the array,
-the AS MUST return an error.
+the AS MUST return an "invalid_request" error.
 
 The following non-normative example shows a request for two
 separate access tokens, `token1` and `token2`.
@@ -1216,7 +1216,7 @@ ensure that the key used to [sign the request](#binding-keys) is
 associated with the instance identifier.
 
 If the AS does not recognize the instance identifier, the request MUST be rejected
-with an error.
+with an "invalid_client" error.
 
 If the client instance is identified in this manner, the registered key for the client instance
 MAY be a symmetric key known to the AS. See considerations on symmetric keys
@@ -1317,7 +1317,7 @@ RO and MUST NOT be taken as declarative statements that a particular
 RO is present at the client instance and acting as the end user. Assertions SHOULD be validated by the AS.
 
 If the identified end user does not match the RO present at the AS
-during an interaction step, the AS SHOULD reject the request with an error.
+during an interaction step, the AS SHOULD reject the request with an "unknown_user" error.
 
 If the AS trusts the client instance to present verifiable assertions, the AS MAY
 decide, based on its policy, to skip interaction with the RO, even
@@ -1350,7 +1350,7 @@ user identifiers or structured assertions. For the client instance to send
 either of these, use the full [user request object](#request-user) instead.
 
 If the AS does not recognize the user reference, it MUST
-return an error.
+return an "unknown_user" error.
 
 ## Interacting with the User {#request-interact}
 
@@ -1412,7 +1412,7 @@ device, but it cannot accept a redirect or push callback.
 
 If the client instance does not provide a suitable interaction mechanism, the
 AS cannot contact the RO asynchronously, and the AS determines
-that interaction is required, then the AS SHOULD return an
+that interaction is required, then the AS SHOULD return an "invalid_interaction"
 error since the client instance will be unable to complete the
 request without authorization.
 
@@ -1709,7 +1709,7 @@ as the HTTP entity body. Each possible field is detailed in the sections below.
 : An identifier this client instance can use to identify itself when making
     future requests. OPTIONAL. See {{response-dynamic-handles}}.
 
-`error` (object):
+`error` (object or string):
 : An error code indicating that something has gone wrong. REQUIRED for an error condition. If included, other fields MUST NOT be included. See {{response-error}}.
 
 Additional fields can be defined by extensions to GNAP in the [Grant Response Parameters Registry](#IANA-grant-response).
@@ -2371,13 +2371,14 @@ This non-normative example shows an instance identifier along side an issued acc
 
 ## Error Response {#response-error}
 
-If the AS determines that the request cannot be issued for any
-reason, it responds to the client instance with an error message.
+If the AS determines that the request cannot be issued for any reason, it responds to the client instance with an "error" response.
 
+`error` (object):
+: An error contains an error "code" and, optionally, its associated error "description"
 
-`error` (string):
+`code` (string):
 :   A single ASCII error code from the
-    following, with additional values available in the [Error Response Registry](#IANA-error-response).
+    following, with additional values available in the [Error Code Registry](#IANA-error-code).
     REQUIRED.
 
     `"invalid_request"`:
@@ -2388,23 +2389,41 @@ reason, it responds to the client instance with an error message.
     :     The request was made from a client that was not recognized
           or allowed by the AS, or the client's signature validation failed.
 
-    `"user_denied"`:
-    : The RO denied the request.
-
-    `"too_fast"`:
-    : The client instance did not respect the timeout in the wait response.
-
-    `"unknown_request"`:
-    : The request referenced an unknown ongoing access request.
-
-    `"request_denied"`:
-    : The request was denied for an unspecified reason.
-
     `"invalid_interaction"`
     : The client instance has provided an interaction reference that is incorrect
         for this request or the interaction modes in use have expired.
 
-`error_description` (string):
+    `"invalid_flag"`
+    : The flag configuration is not valid.
+
+    `"invalid_rotation"`
+    : The rotation request is not valid.
+
+    `"invalid_code"`
+    : The code provided by the user is refused.
+
+    `"invalid_continuation"`:
+    : The continuation of the referenced grant could not be processed.
+
+    `"user_denied"`:
+    : The RO denied the request.
+
+    `"request_denied"`:
+    : The request was denied for an unspecified reason.
+
+    `"unknown_user"`:
+    : The user presented in the request is not known to the AS or does not match the user present during interaction.
+
+    `"unknown_interaction"`:
+    : The interaction integrity could not be established.
+
+    `"too_fast"`:
+    : The client instance did not respect the timeout in the wait response.
+
+    `"too_many_attempts"`:
+    : A limit has been reached in the number of reasonable attempts.
+
+`description` (string):
 :   A human-readable string description of the error intended for the
     developer of the client.
     OPTIONAL.
@@ -2415,7 +2434,18 @@ continue the grant request:
 
 ~~~ json
 {
-  "error": "user_denied"
+    "error": {
+        "code": "user_denied",
+        "description": "The RO denied the request"
+    }
+}
+~~~
+
+Alternatively, the AS MAY choose to only return the error as codes and provide a error as a string. The following response is considered equivalent to the previous example :
+
+~~~ json
+{
+    "error": "user_denied"
 }
 ~~~
 
@@ -2582,7 +2612,7 @@ When the RO enters this code at the user code URI,
 the AS MUST uniquely identify the pending request that the code was associated
 with. If the AS does not recognize the entered code, the interaction component MUST
 display an error to the user. If the AS detects too many unrecognized code
-enter attempts, the interaction component SHOULD display an error to the user and
+enter attempts, the interaction component SHOULD display an error to the user indicating too many attempts and
 MAY take additional actions such as slowing down the input interactions.
 The user should be warned as such an error state is approached, if possible.
 
@@ -2614,7 +2644,7 @@ When the RO enters this code at the given URI,
 the AS MUST uniquely identify the pending request that the code was associated
 with. If the AS does not recognize the entered code, the interaction component MUST
 display an error to the user. If the AS detects too many unrecognized code
-enter attempts, the interaction component SHOULD display an error to the user and
+enter attempts, the interaction component SHOULD display an error to the user indicating too many attempts and
 MAY take additional actions such as slowing down the input interactions.
 The user should be warned as such an error state is approached, if possible.
 
@@ -2703,7 +2733,7 @@ https://client.example.net/return/123455\
 
 When receiving the request, the client instance MUST parse the query
 parameters to calculate and validate the hash value as described in
-{{interaction-hash}}. If the hash validates, the client instance
+{{interaction-hash}}, or else return an "unknown_interaction" error. If the hash validates, the client instance
 sends a continuation request to the AS as described in
 {{continue-after-interaction}} using the interaction
 reference value received here.
@@ -2749,7 +2779,7 @@ When processing such a call, the AS MUST protect itself against SSRF attacks as 
 
 When receiving the request, the client instance MUST parse the JSON object
 and validate the hash value as described in
-{{interaction-hash}}. If the hash validates, the client instance sends
+{{interaction-hash}}, or else return an "unknown_interaction" error. If the hash validates, the client instance sends
 a continuation request to the AS as described in {{continue-after-interaction}} using the interaction
 reference value received here.
 
@@ -2872,7 +2902,7 @@ The AS MUST be able to tell from the client instance's request which specific on
 is being accessed, using a combination of the continuation URI,
 the provided continuation access token, and the client instance identified by the key signature.
 If the AS cannot determine a single active grant request to map the
-continuation request to, the AS MUST return an error.
+continuation request to, the AS MUST return an "invalid_continuation" error.
 
 All requests to the continuation API are protected by this bound continuation access token.
 For example, here the client instance makes a POST request to a stable continuation endpoint
@@ -2898,7 +2928,7 @@ client instance MUST NOT call the continuation URI prior to waiting the number o
 seconds indicated. If no `wait` period is indicated, the client instance
 MUST NOT poll immediately and SHOULD
 wait at least 5 seconds. If the client instance does not respect the
-given wait period, the AS MUST return the error `too_fast` defined in {{response-error}}.
+given wait period, the AS MUST return the "too_fast" error defined in {{response-error}}.
 
 The response from the AS is a JSON object and MAY contain any of the
 fields described in {{response}}, as described in more detail in the
@@ -2911,7 +2941,7 @@ The new `continue` response MUST include a continuation access token as well, an
 this token SHOULD be a new access token, invalidating the previous access token.
 If the AS does not return a new `continue` response, the client instance
 MUST NOT make an additional continuation request. If a client instance does so,
-the AS MUST return an error.
+the AS MUST return an "invalid_continuation" error.
 \[\[ [See issue #87](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/87) \]\]
 
 For continuation functions that require the client instance to send a message body, the body MUST be
@@ -2940,7 +2970,7 @@ Content-Digest: sha-256=...
 Since the interaction reference is a one-time-use value as described in {{interaction-callback}},
 if the client instance needs to make additional continuation calls after this request, the client instance
 MUST NOT include the interaction reference. If the AS detects a client instance submitting the same
-interaction reference multiple times, the AS MUST return an error and SHOULD invalidate
+interaction reference multiple times, the AS MUST return a "too_many_attempts" error and SHOULD invalidate
 the ongoing request.
 
 If the grant request is in the _approved_ state, the [grant response](#response) MAY contain any
@@ -3459,7 +3489,7 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-An attempt to change the `proof` method or parameters, including an attempt to rotate the key of a bearer token (which has no key), MUST result in an error returned from the AS.
+An attempt to change the `proof` method or parameters, including an attempt to rotate the key of a bearer token (which has no key), MUST result in a "invalid_rotation" error code returned from the AS.
 
 ## Revoking the Access Token {#revoke-access-token}
 
@@ -3665,7 +3695,7 @@ be used.
 
 \[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
 
-The client software MUST reject as an error a situation where the `flags` field contains the `bearer` flag
+The client software MUST reject as an "invalid_flag" error a situation where the `flags` field contains the `bearer` flag
 and the `key` field is present with any value.
 
 ## Proving Possession of a Key with a Request {#binding-keys}
@@ -5334,11 +5364,11 @@ Specification document(s):
 |assertions|array of objects|{{response-subject}} of {{&SELF}}|
 |updated_at|string|{{response-subject}} of {{&SELF}}|
 
-## Error Responses {#IANA-error-response}
+## Error Codes {#IANA-error-code}
 
-This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Responses". Initial values for this registry are given in {{IANA-error-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-error-response-template}}.
+This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-error-code-template}}.
 
-### Registration Template {#IANA-error-response-template}
+### Registration Template {#IANA-error-code-template}
 
 {: vspace="0"}
 Error:
@@ -5350,16 +5380,21 @@ Specification document(s):
     to retrieve a copy of the document(s). An indication of the
     relevant sections may also be included but is not required.
 
-### Initial Contents {#IANA-error-response-contents}
+### Initial Contents {#IANA-error-code-contents}
 
 |Error|Specification document(s)|
 |invalid_request|{{response-error}} of {{&SELF}}|
 |invalid_client|{{response-error}} of {{&SELF}}|
-|user_denied|{{response-error}} of {{&SELF}}|
-|too_fast|{{response-error}} of {{&SELF}}|
-|unknown_request|{{response-error}} of {{&SELF}}|
-|request_denied|{{response-error}} of {{&SELF}}|
 |invalid_interaction|{{response-error}} of {{&SELF}}|
+|invalid_code|{{response-error}} of {{&SELF}}|
+|invalid_flag|{{response-error}} of {{&SELF}}|
+|invalid_rotation|{{response-error}} of {{&SELF}}|
+|invalid_continuation|{{response-error}} of {{&SELF}}|
+|user_denied|{{response-error}} of {{&SELF}}|
+|request_denied|{{response-error}} of {{&SELF}}|
+|unknown_interaction|{{response-error}} of {{&SELF}}|
+|too_fast|{{response-error}} of {{&SELF}}|
+|too_many_attempts|{{response-error}} of {{&SELF}}|
 
 ## Key Proofing Methods {#IANA-key-proof-methods}
 
@@ -6491,6 +6526,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 - -11
+    - Error as object or string, more complete set of error codes
     - Added key rotation in token management.
     - Restrict keys to a single format per message.
     - Discussed security issues of multiple key formats.
