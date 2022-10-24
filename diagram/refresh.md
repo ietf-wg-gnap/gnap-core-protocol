@@ -9,7 +9,7 @@
 |        |                             |        |   |        |
 |        |<-(4)--- Success Response ---+        |   |        |
 |        |                             |        |   |        |
-|        |                             |        |   |        |
+|        |       ( Time Passes )       |        |   |        |
 |        |                             |        |   |        |
 |        +--(5)--- Access Resource --->|        |   |        |
 |        |                             |        |   |        |
