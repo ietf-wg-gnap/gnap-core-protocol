@@ -1181,8 +1181,6 @@ If the AS does not know the client instance's public key ahead of time, the AS
 MAY accept or reject the request based on AS policy, attestations
 within the `client` request, and other mechanisms.
 
-\[\[ [See issue #44](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/44) \]\]
-
 The client instance MUST NOT send a symmetric key by value in the request, as doing so would expose
 the key directly instead of simply proving possession of it. See considerations on symmetric keys
 in {{security-symmetric}}.
@@ -1492,8 +1490,6 @@ request, the AS returns an app interaction response with an app URI
 payload {{response-interact-app}}. The client instance manages
 this interaction method as described in {{interaction-app}}.
 
-\[\[ [See issue #54](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/54) \]\]
-
 #### Display a Short User Code {#request-interact-usercode}
 
 If the client instance is capable of displaying or otherwise communicating
@@ -1596,8 +1592,6 @@ Requests to the callback URI MUST be processed as described in
 {{interaction-finish}}, and the AS MUST require
 presentation of an interaction callback reference as described in
 {{continue-after-interaction}}.
-
-\[\[ [See issue #58](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/58) \]\]
 
 #### Receive an HTTP Callback Through the Browser {#request-interact-callback-redirect}
 
@@ -1979,8 +1973,6 @@ with access to two described resources.
 If the client instance [requested a single access token](#request-token-single), the AS MUST NOT respond with the multiple
 access token structure.
 
-\[\[ [See issue #69](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/69) \]\]
-
 ### Multiple Access Tokens {#response-token-multiple}
 
 If the client instance has requested multiple access tokens and the AS has
@@ -2134,8 +2126,6 @@ specification. The client instance MUST NOT alter the URI in any way. The
 client instance MAY attempt to detect if an installed application will
 service the URI being sent before attempting to launch the
 application URI. See details of the interaction in {{interaction-app}}.
-
-\[\[ [See issue #71](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/71) \]\]
 
 ### Display of a Short User Code {#response-interact-usercode}
 
@@ -2366,8 +2356,6 @@ This non-normative example shows an instance identifier along side an issued acc
 }
 
 ~~~
-
-\[\[ [See issue #78](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/78) \]\]
 
 ## Error Response {#response-error}
 
@@ -2884,8 +2872,6 @@ ongoing request for each call within that request.
 
 Access tokens other than the continuation access tokens MUST NOT be usable for continuation requests.
 
-\[\[ [See issue #85](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/85) \]\]
-
 For example, here the client instance makes a POST request to a unique URI and signs
 the request with HTTP Message Signatures:
 
@@ -2942,7 +2928,6 @@ this token SHOULD be a new access token, invalidating the previous access token.
 If the AS does not return a new `continue` response, the client instance
 MUST NOT make an additional continuation request. If a client instance does so,
 the AS MUST return an "invalid_continuation" error.
-\[\[ [See issue #87](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/87) \]\]
 
 For continuation functions that require the client instance to send a message body, the body MUST be
 a JSON object.
@@ -2978,7 +2963,6 @@ newly-created [access tokens](#response-token) or
 newly-released [subject information](#response-subject). The response MAY contain
 a new ["continue" response](#response-continue) as described above. The response
 SHOULD NOT contain any [interaction responses](#response-interact).
-\[\[ [See issue #89](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/89) \]\]
 
 If the grant request is in the _pending_ state, the [grant response](#response) MUST NOT contain access tokens or subject information, and MAY contain a new [interaction responses](#response-interact) to any interaction methods that have not been exhausted at the AS.
 
@@ -3005,8 +2989,6 @@ NOTE: '\' line wrapping per RFC 8792
 
 With this example, the client instance can not make an additional continuation request because
 a `continue` field is not included.
-
-\[\[ [See issue #88](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/88) \]\]
 
 ## Continuing During Pending Interaction {#continue-poll}
 
@@ -3049,8 +3031,6 @@ next continuation request.
     }
 }
 ~~~
-
-\[\[ [See issue #91](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/91) \]\]
 
 If the request is successful in causing the AS to issue access tokens and
 release subject information, the response could look like this example:
@@ -3435,8 +3415,6 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-\[\[ [See issue #103](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/103) \]\]
-
 ### Binding a New Key to the Rotated Access Token {#rotate-access-token-key}
 
 If the client instance wishes to bind a new presentation key to an access token, the client
@@ -3693,8 +3671,6 @@ The `Form-Encoded Body Parameter` and `URI Query Parameter` methods of {{RFC6750
 be used.
 
 
-\[\[ [See issue #104](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/104) \]\]
-
 The client software MUST reject as an "invalid_flag" error a situation where the `flags` field contains the `bearer` flag
 and the `key` field is present with any value.
 
@@ -3783,8 +3759,6 @@ an access token bound to the [client instance's key](#request-client), and that 
 MUST be proved in all continuation requests
 {{continue-request}}. Token management requests {{token-management}} are similarly bound
 to either the access token's own key or, in the case of bearer tokens, the client instance's key.
-
-\[\[ [See issue #105](https://github.com/ietf-wg-gnap/gnap-core-protocol/issues/105) \]\]
 
 In the following sections, unless otherwise noted, the `RS256` JOSE Signature Algorithm is applied
 using the following RSA key (presented here in JWK format):
