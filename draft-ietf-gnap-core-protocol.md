@@ -5487,7 +5487,7 @@ Specification document(s):
 
 **Rafiki** from Interledger Foundation. <https://github.com/interledger/rafiki> Production implementation of AS in JavaScript. Apache 2.0 license.
 
-**Sample GNAP Client in PHP** implementation by Aaron Pareckit. <https://github.com/aaronpk/gnap-client-php> Prototype implementation of web application client and CLI client in PHP, with common support library. CC0 license.
+**Sample GNAP Client in PHP** implementation by Aaron Parecki. <https://github.com/aaronpk/gnap-client-php> Prototype implementation of web application client and CLI client in PHP, with common support library. CC0 license.
 
 **SUNET Auth Server** from SUNET. <https://github.com/SUNET/sunet-auth-server> Production implementation of AS in Python. BSD license.
 
