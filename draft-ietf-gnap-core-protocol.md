@@ -6545,7 +6545,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 > Note: To be removed by RFC editor before publication.
 
 - -12
-    - 
+    -
 
 - -11
     - Error as object or string, more complete set of error codes
