@@ -5483,7 +5483,9 @@ Specification document(s):
 > Note: To be removed by RFC editor before publication.
 
 **GNAP Authorization Service in Rust** implementation by David Skyberg.
-<https://github.com/dskyberg/gnap>. Prototype implementation of AS and Client in Rust. MIT license.
+<https://github.com/dskyberg/gnap> Prototype implementation of AS and client in Rust. MIT license.
+
+**GNAP JS Client** from Interop Alliance, implementation by Dmitri Zagidulin. <https://github.com/interop-alliance/gnap-client-js> Prototype implementation of client in JavaScript. MIT License.
 
 **Rafiki** from Interledger Foundation. <https://github.com/interledger/rafiki> Production implementation of AS in JavaScript. Apache 2.0 license.
 
@@ -5491,7 +5493,9 @@ Specification document(s):
 
 **SUNET Auth Server** from SUNET. <https://github.com/SUNET/sunet-auth-server> Production implementation of AS in Python. BSD license.
 
-**XYZ** from Bespoke Engineering, implementation by Justin Richer. <https://github.com/bspk/oauth.xyz-java>. Advanced prototype implementation of AS, Client, and RS in Java, with common support library. Prototype implementation of SPA Client in pure JavaScript. Apache 2.0 license.
+**Verified.ME** from SecureKey. <https://verified.me/> Production implementation of AS, client and RS. Proprietary license.
+
+**XYZ** from Bespoke Engineering, implementation by Justin Richer. <https://github.com/bspk/oauth.xyz-java> Advanced prototype implementation of AS, client, and RS in Java, with common support library. Prototype implementation of SPA client in JavaScript. Apache 2.0 license.
 
 # Security Considerations {#security}
 
