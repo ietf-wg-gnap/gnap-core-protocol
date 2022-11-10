@@ -3448,21 +3448,22 @@ NOTE: '\' line wrapping per RFC 8792
 
 If the client instance wishes to bind a new presentation key to an access token, the client
 instance MUST present both the new key and previous key in the access token rotation request.
-The client instance makes an HTTP POST as a JSON object with the following fields:
+The client instance makes an HTTP POST as a JSON object with the following field:
 
 `key`:
 : The new key value or reference in the format described in {{key-format}}. Note that keys
-    passed by value are always public keys.
-
-`previous_key`:
-: The previous key value or by reference in format described in {{key-format}}. Note that keys
-    passed by value are always public keys.
+    passed by value are always public keys. REQUIRED when doing key rotation.
 
 The `proof` method and parameters for the new key MUST be the same as those established for the
 previous key.
 
-The client instance MUST prove possession of both keys simultaneously in the rotation request. The
-means of doing so varies depending on the proofing method in use. For example, the HTTP Message Signatures proofing method uses multiple signatures in the request as described in {{httpsig-rotate}}, as shown in this example.
+The client instance MUST prove possession of both the currently-bound key and the newly-requested
+key simultaneously in the rotation request. Specifically, the signature from the previous key MUST
+cover the value or reference of the new key, and the signature of the new key MUST cover the
+signature value of the old key. The
+means of doing so varies depending on the proofing method in use. For example, the HTTP Message
+Signatures proofing method uses multiple signatures in the request as described in
+{{httpsig-rotate}}, as shown in this example.
 
 ~~~ http-message
 POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
@@ -3482,17 +3483,7 @@ Content-Digest: sha-256=...
             "alg": "RS256",
             "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
         }
-    },
-    "previous_key": {
-        "proof": "httpsig",
-        "jwk": {
-            "kty": "RSA",
-            "e": "AQAB",
-            "kid": "xyz-1",
-            "alg": "RS256",
-            "n": "eLaY6_It_r3ORwdf8ci_JtffXyaSx8xYkOB5rR4Jv0GM..."
-        }
-    },
+    }
 }
 ~~~
 
@@ -3830,6 +3821,17 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
+Key proofing methods SHOULD define a mechanism to allow the rotation of keys discussed
+in {{rotate-access-token-key}}. Key rotation mechanisms MUST define a way for presenting
+proof of two keys simultaneously with the following attributes:
+
+- The value of or reference to the new key material MUST be signed by the existing key.
+    Generally speaking, this amounts to using the existing key to sign the body of the
+    message.
+- The signature of the old key MUST be signed by the new key.
+    Generally speaking, this means including the signature value of the old key under the
+    coverage of the new key.
+
 ### HTTP Message Signatures {#httpsig-binding}
 
 This method is indicated by the method value `httpsig` and can be declared in either object
@@ -4032,7 +4034,7 @@ value or reference, is first signed with the old key. The message is then signed
 key, including the signature from the old key under the signature of the new key.
 
 For example, the following request to the token management endpoint for rotating a token value
-contains both the old and new keys in the request. The message is first signed using the old key
+contains both the new key in the request. The message is first signed using the old key
 and the resulting signature is placed in "sig1":
 
 ~~~ http-message
@@ -4054,17 +4056,7 @@ Content-Digest: sha-256=...
             "alg": "RS256",
             "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
         }
-    },
-    "previous_key": {
-        "proof": "httpsig",
-        "jwk": {
-            "kty": "RSA",
-            "e": "AQAB",
-            "kid": "xyz-1",
-            "alg": "RS256",
-            "n": "eLaY6_It_r3ORwdf8ci_JtffXyaSx8xYkOB5rR4Jv0GM..."
-        }
-    },
+    }
 }
 ~~~
 
@@ -4098,17 +4090,7 @@ Content-Digest: sha-256=...
             "alg": "RS256",
             "n": "kOB5rR4Jv0GMeLaY6_It_r3ORwdf8ci_JtffXyaSx8xY..."
         }
-    },
-    "previous_key": {
-        "proof": "httpsig",
-        "jwk": {
-            "kty": "RSA",
-            "e": "AQAB",
-            "kid": "xyz-1",
-            "alg": "RS256",
-            "n": "eLaY6_It_r3ORwdf8ci_JtffXyaSx8xYkOB5rR4Jv0GM..."
-        }
-    },
+    }
 }
 ~~~
 
@@ -6026,9 +6008,9 @@ would be present in the request.
 
 ## Key Rotation Policy {#security-key-rotation}
 
-When keys are rotated, there could be a delay in the propagation of that rotation to various components in the AS's ecosystem. The AS can define its own policy regarding the timeout of the `previous_key`, either making it immediately obsolete or allowing for a limited grace period during which both the `previous_key` and the current key can be used for signing requests. Such a grace period can be useful when there are multiple running copies of the client that are coordinated with each other. For example, the client software could be deployed as a cloud service with multiple orchestrated nodes. Each of these copies is deployed using the same key and therefore all the nodes represent the same client instance to the AS. In such cases, it can be difficult, or even impossible, to update the keys on all these copies in the same instant.
+When keys are rotated, there could be a delay in the propagation of that rotation to various components in the AS's ecosystem. The AS can define its own policy regarding the timeout of the previously-bound key, either making it immediately obsolete or allowing for a limited grace period during which both the previously-bound key and the current key can be used for signing requests. Such a grace period can be useful when there are multiple running copies of the client that are coordinated with each other. For example, the client software could be deployed as a cloud service with multiple orchestrated nodes. Each of these copies is deployed using the same key and therefore all the nodes represent the same client instance to the AS. In such cases, it can be difficult, or even impossible, to update the keys on all these copies in the same instant.
 
-The need for accommodating such known delays in the system needs to be balanced with the risk of allowing an old key to still be used. Narrowly restricting the exposure opportunities for exploit at the AS in terms of time, place, and method makes exploit significantly more difficult, especially if the exception happens only once. For example, the AS can reject requests from the `previous_key` (or any previous one before it) to cause rotation to a new key, or at least ensure that the rotation happens to the same known key.
+The need for accommodating such known delays in the system needs to be balanced with the risk of allowing an old key to still be used. Narrowly restricting the exposure opportunities for exploit at the AS in terms of time, place, and method makes exploit significantly more difficult, especially if the exception happens only once. For example, the AS can reject requests from the previously-bound key (or any previous one before it) to cause rotation to a new key, or at least ensure that the rotation happens to the same known key.
 
 See also the related considerations for token values in {{security-network-management}}.
 
@@ -6545,7 +6527,8 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 > Note: To be removed by RFC editor before publication.
 
 - -12
-    -
+    - Remove `previous_key` from key rotation.
+    - Defined requirements for key rotation methods.
 
 - -11
     - Error as object or string, more complete set of error codes
