@@ -1007,7 +1007,7 @@ Additionally, each object in the array MUST include the `label` field, and
 all values of these fields MUST be unique within the request. If the
 client instance does not include a `label` value for any entry in the
 array, or the values of the `label` field are not unique within the array,
-the AS MUST return an "invalid_request" error.
+the AS MUST return an "invalid_request" error ({{response-error}}).
 
 The following non-normative example shows a request for two
 separate access tokens, `token1` and `token2`.
@@ -1167,7 +1167,7 @@ object with the following fields.
 
 Additional fields are defined in the [Client Instance Fields Registry](#IANA-client-instance).
 
-Both the `display` and `class_id` are self-declarative and thus the AS SHOULD exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret the class_id field, it SHOULD return an `invalid_client` error or choose to return lesser levels of privileges. See additional discussion of client instance impersonation in {{security-impersonation}}.
+Both the `display` and `class_id` are self-declarative and thus the AS SHOULD exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret the class_id field, it SHOULD return an `invalid_client` error ({{response-error}}) or choose to return lesser levels of privileges. See additional discussion of client instance impersonation in {{security-impersonation}}.
 
 The client instance MUST prove possession of any presented key by the `proof` mechanism
 associated with the key in the request. Key proofing methods
@@ -1214,7 +1214,7 @@ ensure that the key used to [sign the request](#binding-keys) is
 associated with the instance identifier.
 
 If the AS does not recognize the instance identifier, the request MUST be rejected
-with an "invalid_client" error.
+with an `invalid_client` error ({{response-error}}).
 
 If the client instance is identified in this manner, the registered key for the client instance
 MAY be a symmetric key known to the AS. See considerations on symmetric keys
@@ -1315,7 +1315,7 @@ RO and MUST NOT be taken as declarative statements that a particular
 RO is present at the client instance and acting as the end user. Assertions SHOULD be validated by the AS.
 
 If the identified end user does not match the RO present at the AS
-during an interaction step, the AS SHOULD reject the request with an "unknown_user" error.
+during an interaction step, the AS SHOULD reject the request with an `unknown_user` error  ({{response-error}}).
 
 If the AS trusts the client instance to present verifiable assertions, the AS MAY
 decide, based on its policy, to skip interaction with the RO, even
@@ -1348,7 +1348,7 @@ user identifiers or structured assertions. For the client instance to send
 either of these, use the full [user request object](#request-user) instead.
 
 If the AS does not recognize the user reference, it MUST
-return an "unknown_user" error.
+return an `unknown_user` error ({{response-error}}).
 
 ## Interacting with the User {#request-interact}
 
@@ -1410,8 +1410,8 @@ device, but it cannot accept a redirect or push callback.
 
 If the client instance does not provide a suitable interaction mechanism, the
 AS cannot contact the RO asynchronously, and the AS determines
-that interaction is required, then the AS SHOULD return an "invalid_interaction"
-error since the client instance will be unable to complete the
+that interaction is required, then the AS SHOULD return an `invalid_interaction`
+error ({{response-error}}) since the client instance will be unable to complete the
 request without authorization.
 
 ### Start Mode Definitions {#request-interact-start}
@@ -2389,7 +2389,10 @@ This specification defines the following `code` values:
 : The flag configuration is not valid.
 
 `"invalid_rotation"`
-: The rotation request is not valid.
+: The token rotation request is not valid.
+
+`"key_rotation_not_supported"`
+: The AS does not allow rotation of this access token's key.
 
 `"invalid_continuation"`:
 : The continuation of the referenced grant could not be processed.
@@ -2721,7 +2724,7 @@ https://client.example.net/return/123455\
 
 When receiving the request, the client instance MUST parse the query
 parameters to calculate and validate the hash value as described in
-{{interaction-hash}}, or else return an "unknown_interaction" error. If the hash validates, the client instance
+{{interaction-hash}}, or else return an `unknown_interaction` error ({{response-error}}). If the hash validates, the client instance
 sends a continuation request to the AS as described in
 {{continue-after-interaction}} using the interaction
 reference value received here.
@@ -2767,7 +2770,7 @@ When processing such a call, the AS MUST protect itself against SSRF attacks as 
 
 When receiving the request, the client instance MUST parse the JSON object
 and validate the hash value as described in
-{{interaction-hash}}, or else return an "unknown_interaction" error. If the hash validates, the client instance sends
+{{interaction-hash}}, or else return an `unknown_interaction` error ({{response-error}}). If the hash validates, the client instance sends
 a continuation request to the AS as described in {{continue-after-interaction}} using the interaction
 reference value received here.
 
@@ -2888,7 +2891,7 @@ The AS MUST be able to tell from the client instance's request which specific on
 is being accessed, using a combination of the continuation URI,
 the provided continuation access token, and the client instance identified by the key signature.
 If the AS cannot determine a single active grant request to map the
-continuation request to, the AS MUST return an "invalid_continuation" error.
+continuation request to, the AS MUST return an `invalid_continuation` error ({{response-error}}).
 
 All requests to the continuation API are protected by this bound continuation access token.
 For example, here the client instance makes a POST request to a stable continuation endpoint
@@ -2914,7 +2917,7 @@ client instance MUST NOT call the continuation URI prior to waiting the number o
 seconds indicated. If no `wait` period is indicated, the client instance
 MUST NOT poll immediately and SHOULD
 wait at least 5 seconds. If the client instance does not respect the
-given wait period, the AS MUST return the "too_fast" error defined in {{response-error}}.
+given wait period, the AS MUST return the `too_fast` error ({{response-error}}).
 
 The response from the AS is a JSON object and MAY contain any of the
 fields described in {{response}}, as described in more detail in the
@@ -2927,7 +2930,7 @@ The new `continue` response MUST include a continuation access token as well, an
 this token SHOULD be a new access token, invalidating the previous access token.
 If the AS does not return a new `continue` response, the client instance
 MUST NOT make an additional continuation request. If a client instance does so,
-the AS MUST return an "invalid_continuation" error.
+the AS MUST return an `invalid_continuation` error ({{response-error}}).
 
 For continuation functions that require the client instance to send a message body, the body MUST be
 a JSON object.
@@ -2955,7 +2958,7 @@ Content-Digest: sha-256=...
 Since the interaction reference is a one-time-use value as described in {{interaction-callback}},
 if the client instance needs to make additional continuation calls after this request, the client instance
 MUST NOT include the interaction reference. If the AS detects a client instance submitting the same
-interaction reference multiple times, the AS MUST return a "too_many_attempts" error and SHOULD invalidate
+interaction reference multiple times, the AS MUST return a `too_many_attempts` error ({{response-error}}) and SHOULD invalidate
 the ongoing request.
 
 If the grant request is in the _approved_ state, the [grant response](#response) MAY contain any
@@ -3444,6 +3447,8 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
+If the AS is unable or unwilling to rotate the value of the access token, the AS responds with an `invalid_rotation` error ({{response-error}}). Upon receiving such an error, the client instance SHOULD consider the access token to not have changed its state.
+
 ### Binding a New Key to the Rotated Access Token {#rotate-access-token-key}
 
 If the client instance wishes to bind a new presentation key to an access token, the client
@@ -3496,7 +3501,11 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-An attempt to change the `proof` method or parameters, including an attempt to rotate the key of a bearer token (which has no key), MUST result in a "invalid_rotation" error code returned from the AS.
+Failure to present the appropriate proof of either the new key or the previous key for the access token, as defined by the proof method, MUST result in an `invalid_rotation` error code from the AS ({{response-error}}).
+
+An attempt to change the `proof` method or parameters, including an attempt to rotate the key of a bearer token (which has no key), MUST result in an `invalid_rotation` error code returned from the AS ({{response-error}}).
+
+If the AS does not allow rotation of the access token's key for any reason, including but not limited to lack of permission for this client instance or lack of capability by the AS, the AS MUST return a `key_rotation_not_supported` error code ({{response-error}}).
 
 ## Revoking the Access Token {#revoke-access-token}
 
@@ -3700,7 +3709,7 @@ The `Form-Encoded Body Parameter` and `URI Query Parameter` methods of {{RFC6750
 be used.
 
 
-The client software MUST reject as an "invalid_flag" error a situation where the `flags` field contains the `bearer` flag
+The client software MUST reject as an `invalid_flag` error a situation where the `flags` field contains the `bearer` flag
 and the `key` field is present with any value.
 
 ## Proving Possession of a Key with a Request {#binding-keys}
@@ -4925,13 +4934,18 @@ server's discovery information. The AS MUST respond with a JSON document with Co
     be values from the [Assertion Formats Registry](#IANA-assertion-formats).
     OPTIONAL.
 
+`key_rotation_supported` (boolean):
+: The boolean "true" indicates that [rotation of access token bound keys by the client](#rotate-access-token-key) is supported by the AS.
+    The absence of this field or a boolean "false" value indicates that this feature is not supported.
+
 The information returned from this method is for optimization
 purposes only. The AS MAY deny any request, or any portion of a request,
 even if it lists a capability as supported. For example, a given client instance
 can be registered with the `mtls` key proofing
 mechanism, but the AS also returns other proofing methods from the discovery document, then the AS
 will still deny a request from that client instance using a different proofing
-mechanism.
+mechanism. Similarly, an AS with `key_rotation_supported` set to "true" can still deny
+any request for rotating any access token's key for a variety of reasons.
 
 Additional fields can be defined the [Authorization Server Discovery Fields Registry](#IANA-as-discovery).
 
@@ -5391,6 +5405,7 @@ Specification document(s):
 |invalid_interaction|{{response-error}} of {{&SELF}}|
 |invalid_flag|{{response-error}} of {{&SELF}}|
 |invalid_rotation|{{response-error}} of {{&SELF}}|
+|key_rotation_not_supported|{{response-error}} of {{&SELF}}|
 |invalid_continuation|{{response-error}} of {{&SELF}}|
 |user_denied|{{response-error}} of {{&SELF}}|
 |request_denied|{{response-error}} of {{&SELF}}|
@@ -5477,6 +5492,7 @@ Specification document(s):
 |key_proofs_supported|array of strings|{{discovery}} of {{&SELF}}|
 |sub_id_formats_supported|array of strings|{{discovery}} of {{&SELF}}|
 |assertion_formats_supported|array of strings|{{discovery}} of {{&SELF}}|
+|key_rotation_supported|boolean|{{discovery}} of {{&SELF}}|
 
 # Implementation Status {#implementation}
 
