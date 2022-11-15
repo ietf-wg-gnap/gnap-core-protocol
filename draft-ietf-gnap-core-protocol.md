@@ -6559,6 +6559,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Make default hash algorithm SHA256 instead of SHA3-512.
     - Remove `previous_key` from key rotation.
     - Defined requirements for key rotation methods.
+    - Add specificity to context of subject identifier being the AS.
 
 - -11
     - Error as object or string, more complete set of error codes
