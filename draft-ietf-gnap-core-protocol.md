@@ -60,6 +60,31 @@ normative:
     I-D.ietf-httpbis-digest-headers:
     I-D.ietf-secevent-subject-identifiers:
     I-D.ietf-oauth-rar:
+    SP80063C:
+      title: "Digital Identity Guidelines: Federation and Assertions"
+      target: https://doi.org/10.6028/NIST.SP.800-63c
+      date: June 2017
+      author:
+        -
+          ins: P. Grassi
+        -
+          ins: E. Nadeau
+        -
+          ins: J. Richer
+        -
+          ins: S. Squire
+        -
+          ins: J. Fenton
+        -
+          ins: N. Lefkovitz
+        -
+          ins: J. Danker
+        -
+          ins: Y. Choong
+        -
+          ins: K. Greene
+        -
+          ins: M. Theofanos
     OIDC:
       title: OpenID Connect Core 1.0 incorporating errata set 1
       target: https://openid.net/specs/openid-connect-core-1_0.html
@@ -2307,6 +2332,13 @@ is suitable for communication with the current user. To get such information,
 the client instance MUST use an identity protocol to request and receive additional identity
 claims. The details of an identity protocol and associated schema
 are outside the scope of this specification.
+
+The client instance MUST interpret all subject information in the context of the AS that the
+subject information is received from, as is discussed in Section 6 of {{SP80063C}}. For example, one AS could
+return an email identifier of  "user@example" for one account, and a different AS could return that
+same email identifier of "user@example" for a completely different account. A client instance talking to
+both AS's needs to differentiate between these two accounts by accounting for the AS source
+of each identifier.
 
 Extensions to this specification MAY define additional response
 properties in the [Subject Information Response Fields Registry](#IANA-subject-response).
@@ -6550,6 +6582,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Make default hash algorithm SHA256 instead of SHA3-512.
     - Remove `previous_key` from key rotation.
     - Defined requirements for key rotation methods.
+    - Add specificity to context of subject identifier being the AS.
 
 - -11
     - Error as object or string, more complete set of error codes
