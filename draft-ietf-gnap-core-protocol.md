@@ -3754,7 +3754,7 @@ The `httpsig` method also defines defines default behavior when it is passed as 
 ~~~
 
 This is explicitly defined as the signature algorithm  specified by the associated key
-material and the content digest is calculated using sha-512.
+material and the content digest is calculated using sha-256.
 
 All key binding methods used by this specification MUST cover all relevant portions
 of the request, including anything that would change the nature of the request, to allow
@@ -3840,7 +3840,7 @@ When the proof method is specified in object form, the following parameters are 
 `content-digest-alg`:
 : The algorithm used for the Content-Digest field, used to protect the body. REQUIRED.
 
-This example uses the ECDSA signing algorithm over the P384 curve and the SHA-256 hashing
+This example uses the ECDSA signing algorithm over the P384 curve and the SHA-512 hashing
 algorithm for the content digest.
 
 ~~~ json
@@ -3848,14 +3848,14 @@ algorithm for the content digest.
     "proof": {
         "method": "httpsig",
         "alg": "ecdsa-p384-sha384",
-        "content-digest-alg": "sha-256"
+        "content-digest-alg": "sha-512"
     }
 }
 ~~~
 
 When the proof method is specified in string form, the signing algorithm MUST be derived from the
 key material (such as using the JWS algorithm in a JWK formatted key), and the content digest
-algorithm MUST be `sha-512`.
+algorithm MUST be `sha-256`.
 
 ~~~ json
 {
@@ -7353,7 +7353,7 @@ Implementations conformant to the Web-based Redirection profile of GNAP MUST imp
 - *Interaction Finish Methods*: `redirect`
 - *Interaction Hash Algorithms*: `sha-256`
 - *Key Proofing Methods*: `httpsig` with no additional parameters
-- *Key Formats*: `jwks` with signature algorithm included in the key
+- *Key Formats*: `jwks` with signature algorithm included in the key's `alg` parameter
 - *JOSE Signature Algorithm*: PS256
 - *Subject Identifier Formats*: `opaque`
 - *Assertion Formats*: `id_token`
@@ -7366,7 +7366,7 @@ Implementations conformant to the Secondary Device profile of GNAP MUST implemen
 - *Interaction Finish Methods*: `push`
 - *Interaction Hash Algorithms*: `sha-256`
 - *Key Proofing Methods*: `httpsig` with no additional parameters
-- *Key Formats*: `jwks` with signature algorithm included in the key
+- *Key Formats*: `jwks` with signature algorithm included in the key's `alg` parameter
 - *JOSE Signature Algorithm*: PS256
 - *Subject Identifier Formats*: `opaque`
 - *Assertion Formats*: `id_token`
