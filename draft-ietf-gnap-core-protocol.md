@@ -1571,7 +1571,7 @@ indicates this by sending the following members of an object under the `finish` 
 `hash_method` (string):
 : An identifier of a hash calculation mechanism to be used for the callback hash in {{interaction-hash}},
     as defined in the [IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg).
-    If absent, the default value is `sha3-512`. OPTIONAL.
+    If absent, the default value is `sha-256`. OPTIONAL.
 
 This specification defines the following values for the `method` parameter,
 with other values defined by the [Interaction Finish Methods Registry](#IANA-interaction-finish-methods):
@@ -2807,9 +2807,18 @@ The "hash_method" value MUST be one of the hash name strings defined in the
 [IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg).
 
 If the "hash_method" value is not present in the client instance's
-request, the algorithm defaults to "sha3-512".
+request, the algorithm defaults to "sha-256".
 
-For example, the "sha3-512" hash method consists of hashing the input string
+For example, the "sha-256" hash method consists of hashing the input string
+with the 256-bit SHA2 algorithm. The byte array is then encoded
+using URL-Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
+hash value.
+
+~~~
+jdHcrti02HLCwGU3qhUZ3wZXt8IjrV_BtE3oUyOuKNk
+~~~
+
+The "sha3-512" hash method consists of hashing the input string
 with the 512-bit SHA3 algorithm. The byte array is then encoded
 using URL-Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
 hash value.
@@ -2819,18 +2828,6 @@ NOTE: '\' line wrapping per RFC 8792
 
 p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM\
   7XHPAdJzTZMtKBsaraJ64A
-~~~
-
-The "sha2-512" hash method consists of hashing the input string
-with the 512-bit SHA2 algorithm. The byte array is then encoded
-using URL-Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
-hash value.
-
-~~~
-NOTE: '\' line wrapping per RFC 8792
-
-62SbcD3Xs7L40rjgALA-ymQujoh2LB2hPJyX9vlcr1H6ecChZ8BNKkG_HrOKP_Bp\
-  j84rh4mC9aE9x7HPBFcIHw
 ~~~
 
 # Continuing a Grant Request {#continue-request}
@@ -3748,7 +3745,7 @@ The `httpsig` method also defines defines default behavior when it is passed as 
 ~~~
 
 This is explicitly defined as the signature algorithm  specified by the associated key
-material and the content digest is calculated using sha-512.
+material and the content digest is calculated using sha-256.
 
 All key binding methods used by this specification MUST cover all relevant portions
 of the request, including anything that would change the nature of the request, to allow
@@ -3845,7 +3842,7 @@ When the proof method is specified in object form, the following parameters are 
 `content-digest-alg`:
 : The algorithm used for the Content-Digest field, used to protect the body. REQUIRED.
 
-This example uses the ECDSA signing algorithm over the P384 curve and the SHA-256 hashing
+This example uses the ECDSA signing algorithm over the P384 curve and the SHA-512 hashing
 algorithm for the content digest.
 
 ~~~ json
@@ -3853,14 +3850,14 @@ algorithm for the content digest.
     "proof": {
         "method": "httpsig",
         "alg": "ecdsa-p384-sha384",
-        "content-digest-alg": "sha-256"
+        "content-digest-alg": "sha-512"
     }
 }
 ~~~
 
 When the proof method is specified in string form, the signing algorithm MUST be derived from the
 key material (such as using the JWS algorithm in a JWK formatted key), and the content digest
-algorithm MUST be `sha-512`.
+algorithm MUST be `sha-256`.
 
 ~~~ json
 {
@@ -6527,6 +6524,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 > Note: To be removed by RFC editor before publication.
 
 - -12
+    - Make default hash algorithm SHA256 instead of SHA3-512.
     - Remove `previous_key` from key rotation.
     - Defined requirements for key rotation methods.
 
@@ -7337,9 +7335,9 @@ Implementations conformant to the Web-based Redirection profile of GNAP MUST imp
 
 - *Interaction Start Methods*: `redirect`
 - *Interaction Finish Methods*: `redirect`
-- *Interaction Hash Algorithms*: `sha3-512`
+- *Interaction Hash Algorithms*: `sha-256`
 - *Key Proofing Methods*: `httpsig` with no additional parameters
-- *Key Formats*: `jwks` with signature algorithm included in the key
+- *Key Formats*: `jwks` with signature algorithm included in the key's `alg` parameter
 - *JOSE Signature Algorithm*: PS256
 - *Subject Identifier Formats*: `opaque`
 - *Assertion Formats*: `id_token`
@@ -7350,9 +7348,9 @@ Implementations conformant to the Secondary Device profile of GNAP MUST implemen
 
 - *Interaction Start Methods*: `user_code` and `user_code_uri`
 - *Interaction Finish Methods*: `push`
-- *Interaction Hash Algorithms*: `sha3-512`
+- *Interaction Hash Algorithms*: `sha-256`
 - *Key Proofing Methods*: `httpsig` with no additional parameters
-- *Key Formats*: `jwks` with signature algorithm included in the key
+- *Key Formats*: `jwks` with signature algorithm included in the key's `alg` parameter
 - *JOSE Signature Algorithm*: PS256
 - *Subject Identifier Formats*: `opaque`
 - *Assertion Formats*: `id_token`
