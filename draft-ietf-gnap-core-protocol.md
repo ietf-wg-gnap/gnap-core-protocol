@@ -3901,6 +3901,8 @@ MUST also include the following:
 
 Other message components MAY also be included.
 
+The signer MUST include the `tag` signature  parameter with the value `gnap`, and the verifier MUST verify that the parameter exists with this value. The signer MUST include the `created` signature parameter with a timestamp of when the signature was created, and the verifier MUST ensure that the creation timestamp is sufficiently close to the current time given expected network delay and clock skew. The signer SHOULD include the `nonce` parameter with a unique and unguessable value. When included, the verifier MUST determine that the nonce value is unique within a reasonably short time period such as several minutes.
+
 If the signer's key presented is a JWK, the `keyid` parameter of the signature MUST be set
 to the `kid` value of the JWK, the signing algorithm used MUST be the JWS
 algorithm denoted by the key's `alg` field, and the explicit `alg` signature
@@ -3967,7 +3969,8 @@ NOTE: '\' line wrapping per RFC 8792
 "content-length": 988
 "content-type": application/json
 "@signature-params": ("@method" "@target-uri" "content-digest" \
-  "content-length" "content-type");created=1618884473;keyid="gnap-rsa"
+  "content-length" "content-type");created=1618884473\
+  ;keyid="gnap-rsa";nonce="NAOEJF12ER2";tag="gnap"
 ~~~
 
 This leads to the following full HTTP message request:
@@ -3982,13 +3985,14 @@ Content-Length: 988
 Content-Digest: sha-256=:q2XBmzRDCREcS2nWo/6LYwYyjrlN1bRfv+HKLbeGAG\
   g=:
 Signature-Input: sig1=("@method" "@target-uri" "content-digest" \
-  "content-length" "content-type");created=1618884473;keyid="gnap-rsa"
-Signature: sig1=:EWJgAONk3D6542Scj8g51rYeMHw96cH2XiCMxcyL511wyemGcw\
-  5PosYVO3eK+v+h1H+LiO4BjapL5ffZV+SgU8Q2v+qEDA4FrP0+/ni9W+lazjIrzNs\
-  FAojwTlngMkAjZyDC/5+qUYB0KeEb4gnAhmuikv28DF30MT28yxCjeui2NGyzpPxB\
-  cWk1K2Cxb6hS1WXUSZufFN9jOzrTg2c8/jcKkROKbLZLshF/oCuxAAgDabTqJy+qk\
-  kz/Z/U5hI181qlTzNIYijnAvXzezlsLPZcMpJ1Au9APyBYAtDipAzyD6+IZl3rhzP\
-  2leuCMCOvDxg9qA83LVtsqfjNJO+dEHA==:
+  "content-length" "content-type");created=1618884473\
+  ;keyid="gnap-rsa";nonce="NAOEJF12ER2";tag="gnap"
+Signature: sig1=:c2uwTa6ok3iHZsaRKl1ediKlgd5cCAYztbym68XgX8gSOgK0Bt\
+  +zLJ19oGjSAHDjJxX2gXP2iR6lh9bLMTfPzbFVn4Eh+5UlceP+0Z5mES7v0R1+eHe\
+  OqBl0YlYKaSQ11YT7n+cwPnCSdv/6+62m5zwXEEftnBeA1ECorfTuPtau/yrTYEvD\
+  9A/JqR2h9VzAE17kSlSSsDHYA6ohsFqcRJavX29duPZDfYgkZa76u7hJ23yVxoUpu\
+  2J+7VUdedN/72N3u3/z2dC8vQXbzCPTOiLru12lb6vnBZoDbUGsRR/zHPauxhj9T+\
+  218o5+tgwYXw17othJSxIIOZ9PkIgz4g==:
 
 {
     "access_token": {
@@ -4047,8 +4051,8 @@ and the resulting signature is placed in "sig1":
 POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
 Host: server.example.com
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Signature-Input: sig1=("authorization" "@method" "@created")\
-    ;keyid="xyz-1"
+Signature-Input: sig1=("authorization" "@method")\
+    ;keyid="xyz-1";created=161888447;tag="gnap"
 Signature: sig1=...
 Content-Digest: sha-256=...
 
@@ -4072,7 +4076,8 @@ of the message, they do not need to be repeated.
 
 ~~~
 "signature";key="sig1"
-"@signature-input": ("signature";key="sig1");keyid="xyz-2"
+"@signature-input": ("signature";key="sig1");keyid="xyz-2"\
+  ;tag="gnap";created=161888447
 ~~~
 
 This signature is then added to the message:
@@ -4081,8 +4086,10 @@ This signature is then added to the message:
 POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
 Host: server.example.com
 Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Signature-Input: sig1=("authorization" "@method" "@created")\
-    ;keyid="xyz-1", sig2=("signature";key="sig1");keyid="xyz-2"
+Signature-Input: sig1=("authorization" "@method")\
+    ;keyid="xyz-1";created=161888447;tag="gnap", \
+    sig2=("signature";key="sig1");keyid="xyz-2";tag="gnap";\
+    ;created=161888447
 Signature: sig1=..., sig2=...
 Content-Digest: sha-256=...
 
