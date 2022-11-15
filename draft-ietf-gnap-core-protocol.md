@@ -2334,7 +2334,7 @@ claims. The details of an identity protocol and associated schema
 are outside the scope of this specification.
 
 The client instance MUST interpret all subject information in the context of the AS that the
-subject information is received from, as is discussed in {{SP80063C}}. For example, one AS could
+subject information is received from, as is discussed in Section 6 of {{SP80063C}}. For example, one AS could
 return an email identifier of  "user@example" for one account, and a different AS could return that
 same email identifier of "user@example" for a completely different account. A client instance talking to
 both AS's needs to differentiate between these two accounts by accounting for the AS source
