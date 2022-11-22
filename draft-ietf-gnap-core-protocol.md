@@ -148,7 +148,7 @@ passed directly to the software.
 # Introduction
 
 This protocol allows a piece of software, the client instance, to request delegated
-authorization to resource servers and to request direct information. This delegation is
+authorization to resource servers and to request direct subject information. This delegation is
 facilitated by an authorization server usually on
 behalf of a resource owner. The end user operating the software may interact
 with the authorization server to authenticate, provide consent, and
@@ -405,7 +405,7 @@ provide views of GNAP under more specific circumstances.
 - (2) The client instance [requests access at the AS](#request).
 
 - (3) The AS processes the request and determines what is needed to fulfill
-    the request. (See {{authorization}}.)
+    the request (See {{authorization}}).
     The AS sends its [response to the client instance](#response).
 
 - (B) If interaction is required, the
@@ -530,7 +530,7 @@ An example set of protocol messages for this method can be found in {{example-au
 
 In this example flow, the client instance is a device that is capable of presenting a short,
 human-readable code to the user and directing the user to enter that code at
-a known URI. The URI the user enters the code at is an interactive service hosted by the
+a known URI. The user enters the code at a URI that is an interactive service hosted by the
 AS in this example. The client instance is not capable of presenting an arbitrary URI to the user,
 nor is it capable of accepting incoming HTTP requests from the user's browser.
 The client instance polls the AS while it is waiting for the RO to authorize the request.
@@ -946,7 +946,7 @@ composed of the following fields.
 
 `access` (array of objects/strings):
 : Describes the rights that the client instance is requesting for one or more access tokens to be
-    used at RS's. REQUIRED. See {{resource-access-rights}}.
+    used at the RS. REQUIRED. See {{resource-access-rights}}.
 
 `label` (string):
 : A unique name chosen by the client instance to refer to the resulting access token. The value of this
@@ -1018,7 +1018,7 @@ described by a pair of access request object.
 ~~~
 
 If access is approved, the resulting access token is valid for the described resource
-and is bound to the client instance's key (or its most recent rotation). The token
+and, since no flag is provided in this example, is bound to the client instance's key (or its most recent rotation). The token
 is labeled "token1-23". The token response structure is described in {{response-token-single}}.
 
 ### Requesting Multiple Access Tokens {#request-token-multiple}
@@ -1336,7 +1336,7 @@ or by reference.
 
 
 Subject identifiers are hints to the AS in determining the
-RO and MUST NOT be taken as declarative statements that a particular
+RO and MUST NOT be taken as authoritative statements that a particular
 RO is present at the client instance and acting as the end user. Assertions SHOULD be validated by the AS.
 
 If the identified end user does not match the RO present at the AS
@@ -2844,7 +2844,7 @@ The "hash_method" value MUST be one of the hash name strings defined in the
 If the "hash_method" value is not present in the client instance's
 request, the algorithm defaults to "sha-256".
 
-For example, the "sha-256" hash method consists of hashing the input string
+The "sha-256" hash method consists of hashing the input string
 with the 256-bit SHA2 algorithm. The byte array is then encoded
 using URL-Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
 hash value.
@@ -3366,7 +3366,7 @@ Signature-Input: sig1=...
 Signature: sig1=...
 ~~~
 
-If the request is successfully revoked, the AS responds with an HTTP 202 (No Content).
+If the request is successfully revoked, the AS responds with an HTTP 204 (No Content).
 The AS SHOULD revoke all associated access tokens, if possible. The AS SHOULD disable all
 token rotation and other token management functions on such access tokens, if possible.
 Once the grant request is in the _revoked_ state, it MUST NOT be moved to any other state.
@@ -3481,7 +3481,7 @@ If the AS is unable or unwilling to rotate the value of the access token, the AS
 ### Binding a New Key to the Rotated Access Token {#rotate-access-token-key}
 
 If the client instance wishes to bind a new presentation key to an access token, the client
-instance MUST present both the new key and previous key in the access token rotation request.
+instance MUST present both the new key and the proof of previous key material in the access token rotation request.
 The client instance makes an HTTP POST as a JSON object with the following field:
 
 `key`:
@@ -3815,7 +3815,7 @@ control of the party calling any follow-up or continuation requests. To facilita
 this requirement, the [continuation response](#response-continue) includes
 an access token bound to the [client instance's key](#request-client), and that key (or its most recent rotation)
 MUST be proved in all continuation requests
-{{continue-request}}. Token management requests {{token-management}} are similarly bound
+{{continue-request}}. Token management requests ({{token-management}}) are similarly bound
 to either the access token's own key or, in the case of bearer tokens, the client instance's key.
 
 In the following sections, unless otherwise noted, the `RS256` JOSE Signature Algorithm is applied
@@ -4796,7 +4796,7 @@ field. The second access request includes the `actions` and
 ~~~
 
 If this request is approved,
-the [resulting access token](#response-token-single)'s access rights will be
+the resulting access token's access rights will be
 the union of the requested types of access for each of the two APIs, just as above.
 
 ## Requesting Resources By Reference {#resource-access-reference}
@@ -6499,6 +6499,7 @@ user experience engineering efforts need to be employed to ensure the RO can cle
 appropriate security decision. Furthermore, audit capability, and the ability to undo access
 decisions that may be ongoing, is particularly important in the asynchronous case.
 
+## Compromised RS {#security-compromised-rs}
 
 An attacker may aim to gain access to confidential or sensitive resources. The measures for hardening and monitoring resource server systems (beyond protection with access tokens) is out of the scope of this document, but the use of GNAP to protect a system does not absolve the resource server of following best practices.
 GNAP generally considers a breach can occur, and therefore advises to prefer key-bound tokens whenever possible, which at least limits the impact of access token leakage by a compromised or malicious RS.
