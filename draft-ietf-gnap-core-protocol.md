@@ -471,7 +471,7 @@ that returns from the interaction.
 {::include diagram/redirect.md}
 ~~~
 
-1. The client instance establishes a verifiable session to the user, in the role of the end user.
+1. The client instance establishes a secure session to the user, in the role of the end user.
 
 2. The client instance [requests access to the resource](#request). The client instance indicates that
     it can [redirect to an arbitrary URI](#request-interact-redirect) and
