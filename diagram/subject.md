@@ -1,19 +1,19 @@
 +--------+                                  +--------+          .----.
-| Client |                                  |   AS   |         | User |
-|Instance|                                  |        |         |      |
+| Client |                                  |   AS   |         | End  |
+|Instance|                                  |        |         | User |
 |        +--(1)--- Request Access --------->|        |         |      |
 |        |                                  |        |         |      |
 |        |<-(2)-- Interaction Needed -------+        |         |      |
 |        |                                  |        |         |      |
 |        +==(3)== Facilitate Interaction =====================>|      |
-|        |                                  |        |         |      |
-|        |                                  |        |<==(4)==>|      |
+|        |                                  |        |         +------+
+|        |                                  |        |<==(4)==>|  RO  |
 |        |                                  |        |  AuthN  |      |
 |        |                                  |        |         |      |
 |        |                                  |        |<==(5)==>|      |
-|        |                                  |        |  AuthZ  |      |
-|        |                                  |        |         |      |
-|        |<=(6)== Signal Continuation =========================+      |
+|        |                                  |        |  AuthZ  +------+
+|        |                                  |        |         | End  |
+|        |<=(6)== Signal Continuation =========================+ User |
 |        |                                  |        |          `----`
 |        +--(7)--- Continue Request ------->|        |
 |        |                                  |        |

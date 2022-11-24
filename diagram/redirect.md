@@ -1,6 +1,6 @@
 +--------+                                  +--------+          .----.
-| Client |                                  |   AS   |         | User |
-|Instance|                                  |        |         |      |
+| Client |                                  |   AS   |         | End  |
+|Instance|                                  |        |         | User |
 |        |<=(1)== Start Session ===============================+      |
 |        |                                  |        |         |      |
 |        +--(2)--- Request Access --------->|        |         |      |
@@ -8,14 +8,14 @@
 |        |<-(3)-- Interaction Needed -------+        |         |      |
 |        |                                  |        |         |      |
 |        +==(4)== Redirect for Interaction ===================>|      |
-|        |                                  |        |         |      |
+|        |                                  |        |         +------+
 |        |                                  |        |<==(5)==>|      |
-|        |                                  |        |  AuthN  |      |
+|        |                                  |        |  AuthN  |  RO  |
 |        |                                  |        |         |      |
 |        |                                  |        |<==(6)==>|      |
-|        |                                  |        |  AuthZ  |      |
-|        |                                  |        |         |      |
-|        |<=(7)== Redirect for Continuation ===================+      |
+|        |                                  |        |  AuthZ  +------+
+|        |                                  |        |         | End  |
+|        |<=(7)== Redirect for Continuation ===================+ User |
 |        |                                  |        |          `----`
 |        +--(8)--- Continue Request ------->|        |
 |        |                                  |        |

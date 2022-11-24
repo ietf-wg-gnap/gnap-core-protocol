@@ -138,19 +138,18 @@ entity:
 --- abstract
 
 GNAP defines a mechanism for delegating authorization to a
-piece of software, and conveying that delegation to the software. This
-delegation can include access to a set of APIs as well as information
+piece of software, and conveying the results and artifacts of that delegation to the software. This
+delegation can include access to a set of APIs as well as subject information
 passed directly to the software.
-
 
 --- middle
 
 # Introduction
 
 This protocol allows a piece of software, the client instance, to request delegated
-authorization to resource servers and to request direct subject information. This delegation is
+authorization to resource servers and subject information. This delegation is
 facilitated by an authorization server usually on
-behalf of a resource owner. The end user operating the software may interact
+behalf of a resource owner. The end user operating the software can interact
 with the authorization server to authenticate, provide consent, and
 authorize the request.
 
@@ -161,6 +160,8 @@ over time by multiple parties acting in distinct roles.
 This specification focuses on the portions of the delegation process facing the client instance.
 In particular, this specification defines interoperable methods for a client instance to request, negotiate,
 and receive access to information facilitated by the authorization server.
+This specification additionally defines methods for the client instance to access
+protected resources at a resource server.
 This specification also discusses discovery mechanisms for the client instance to
 configure itself dynamically.
 The means for an authorization server and resource server to interoperate are
@@ -252,7 +253,6 @@ components participate in the delegation protocol, they are both considered
 part of the client instance. If there are several copies of the client software
 that run separately but all share the same key material, such as a
 deployed cluster, then this cluster is considered a single client instance.
-
 In these cases, the distinct components of what is considered a GNAP client instance
 may use any number of different communication mechanisms between them, all of which
 would be considered an implementation detail of the client instances and out of scope of GNAP.
@@ -284,7 +284,8 @@ Access Token
     Note: an access token can be first issued to an client instance (requiring authorization by the RO) and subsequently rotated.
 
 Grant
-: (verb): to permit an instance of client software to receive some attributes at a specific time and valid for a specific duration and/or to exercise some set of delegated rights to access a protected resource; (noun): the act of granting permission to a client instance.
+: (verb): to permit an instance of client software to receive some attributes at a specific time and valid for a specific duration and/or to exercise some set of delegated rights to access a protected resource;
+: (noun): the act of granting permission to a client instance.
 
 Privilege
 : right or attribute associated with a subject.
@@ -292,7 +293,7 @@ Privilege
     Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end user. This process is refered to as privilege delegation.
 
 Protected Resource
-: protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid access token is provided.
+: protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid and sufficient access token is provided.
 
     Note: to avoid complex sentences, the specification document may simply refer to "resource" instead of "protected resource".
 
@@ -300,10 +301,10 @@ Right
 : ability given to a subject to perform a given operation on a resource under the control of an RS.
 
 Subject
-: person, organization or device. It decides whether and under which conditions its attributes can be disclosed to other parties.
+: person, organization or device. The subject decides whether and under which conditions its attributes can be disclosed to other parties.
 
 Subject Information
-: statement asserted by an AS about a subject.
+: set of statements asserted by an AS about a subject.
 
 
 
@@ -325,13 +326,13 @@ Looking back on each trust relationship:
 
 - RS/RO: the RS promises it protects its resources from unauthorized access, and only accepts valid access tokens issued by a trusted AS. In case tokens are key bound, proper validation is expected from the RS.
 
-- AS/RO: the AS is expected to follow the decisions made by the RO, either through interactive consent requests, repeated interactions or automated rules (as described in {{sequence}}). Privacy considerations aim to reduce the risk of an honest but too curious AS, or the consequences of an unexpected user data exposure.
+- AS/RO: the AS is expected to follow the decisions made by the RO, either through interactive consent requests, repeated interactions, or automated rules (as described in {{sequence}}). Privacy considerations aim to reduce the risk of an honest but too-curious AS, or the consequences of an unexpected user data exposure.
 
 - AS/RS: the AS promises to issue valid access tokens to legitimate client requests (i.e. after carrying out appropriate due diligence, as defined in the GNAP protocol). Some optional configurations are covered by {{I-D.ietf-gnap-resource-servers}}.
 
 A global assumption made by GNAP is that authorization requests are security and privacy sensitive, and appropriate measures are respectively detailed in {{security}} and {{privacy}}.
 
-A formal trust model is out of scope of this specification, but might be carried out thanks to {{promise-theory}}.
+A formal trust model is out of scope of this specification, but one could be developed using techniques such as {{promise-theory}}.
 
 ## Protocol Flow {#protocol}
 
@@ -350,7 +351,7 @@ The underlying requested grant moves through several states as different actions
 : When a request needs to be approved by a RO, or interaction with the end user is required, the grant request enters a state of _pending_. In this state, no access tokens can be granted and no subject information can be released to the client instance. While a grant request is in this state, the AS seeks to gather the required [consent and authorization](#authorization) for the requested access. A grant request in this state is always associated with a _continuation access token_ bound to the client instance's key. If no [interaction finish method](#request-interact-finish) is associated with this request, the client instance can send a [polling continue request](#continue-poll) to the AS. This returns a [continue response](#response-continue) while the grant request remains in this state, allowing the client instance to continue to check the state of the pending grant request. If an [interaction finish method](#request-interact-finish) is specified in the grant request, the client instance can [continue the request after interaction](#continue-after-interaction) to the AS to move this request to the _processing_ state to be re-evaluated by the AS. Note that this occurs whether the grant request has been approved or denied by the RO, since the AS needs to take into account the full context of the request before determining the next step for the grant request. When other information is made available in the context of the grant request, such as through the asynchronous actions of the RO, the AS moves this request to the _processing_ state to be re-evaluated. If the AS determines that no additional interaction can occur, such as all the interaction methods have timed out or a [revocation request](#continue-delete) is received from the client instance, the grant request can be moved to the _finalized_ state.
 
 *Approved*
-: When a request has been approved by an RO and no further interaction with the end user is required, the grant request enters a state of _approved_. In this state, responses to the client instance can include [access tokens for API access](#response-token) and [subject information](#response-subject). If continuation and updates are allowed for this grant request, the AS can include the [contination response](#response-continue). In this state, [post-interaction continuation requests](#continue-after-interaction) are not allowed, since all interaction is assumed to have been completed. If the client instance sends a [polling continue request](#continue-poll) while the request is in this state, [new access tokens](#response-token) can be issued in the response. Note that this always creates a new access token, but existing access tokens can be rotated and managed using the [token management API](#token-management). The client instance can send an [update continuation request](#continue-modify) to modify the requested access, causing the AS to move the request back to the _processing_ state for re-evaluation. If the AS determines that no additional tokens can be issued, and that no additional updates are to be accepted (such as the continuation access tokens have expired), the grant is moved to the _finalized_ state.
+: When a request has been approved by an RO and no further interaction with the end user is required, the grant request enters a state of _approved_. In this state, responses to the client instance can include [access tokens for API access](#response-token) and [subject information](#response-subject). If continuation and updates are allowed for this grant request, the AS can include the [contination response](#response-continue). In this state, [post-interaction continuation requests](#continue-after-interaction) are not allowed, since all interaction is assumed to have been completed. If the client instance sends a [polling continue request](#continue-poll) while the request is in this state, [new access tokens](#response-token) can be issued in the response. Note that this always creates a new access token, but any existing access tokens could be rotated and revoked using the [token management API](#token-management). The client instance can send an [update continuation request](#continue-modify) to modify the requested access, causing the AS to move the request back to the _processing_ state for re-evaluation. If the AS determines that no additional tokens can be issued, and that no additional updates are to be accepted (such as the continuation access tokens have expired), the grant is moved to the _finalized_ state.
 
 *Finalized*
 : After the access tokens are issued, if the AS does not allow any additional updates on the grant request, the grant request enters the _finalized_ state. This state is also entered when an existing grant request is [revoked by the client instance](#continue-delete) or otherwise revoked by the AS (such as through out-of-band action by the RO). This state can also be entered if the AS determines that no additional processing is possible, for example if the RO has denied the requested access or if interaction is required but no compatible interaction methods are available. Once in this state, no new access tokens can be issued, no subject information can be returned, and no interactions can take place. Once in this state, the grant request is dead and cannot be revived. If future access is desired by the client instance, a new grant request can be created, unrelated to this grant request.
@@ -435,18 +436,15 @@ provide views of GNAP under more specific circumstances.
 - (8) The client instance [calls the RS](#use-access-token) using the access token
     until the RS or client instance determine that the token is no longer valid.
 
-- (9) When the token no longer works, the client instance fetches an
-    [updated access token](#rotate-access-token) based on the
-    rights granted in (5).
+- (9) When the token no longer works, the client instance
+    [rotates the access token](#rotate-access-token).
 
-- (10) The AS issues a [new access token](#response-token) to the client instance.
+- (10) The AS issues a [new access token](#response-token) to the client instance
+    with the same rights as the original access token returned in (5).
 
 - (11) The client instance [uses the new access token](#use-access-token) to call the RS.
 
-- (12) The RS determines if the new token is sufficient for the request.
-    The means of the RS determining this access are
-    out of scope of this specification, but some options are discussed in
-    {{I-D.ietf-gnap-resource-servers}}.
+- (12) The RS determines if the new token is sufficient for the request, as in (7).
 
 - (13) The client instance [disposes of the token](#revoke-access-token) once the client instance
     has completed its access of the RS and no longer needs the token.
@@ -454,7 +452,7 @@ provide views of GNAP under more specific circumstances.
 The following sections and {{examples}} contain specific guidance on how to use
 GNAP in different situations and deployments. For example, it is possible for the
 client instance to never request an access token and never call an RS, just as it is
-possible for there not to be a user involved in the delegation process.
+possible to have no end user involved in the delegation process.
 
 ### Redirect-based Interaction {#sequence-redirect}
 
@@ -471,7 +469,7 @@ that returns from the interaction.
 {::include diagram/redirect.md}
 ~~~
 
-1. The client instance establishes a verifiable session to the user, in the role of the end user.
+1. The client instance establishes a session with the user, in the role of the end user.
 
 2. The client instance [requests access to the resource](#request). The client instance indicates that
     it can [redirect to an arbitrary URI](#request-interact-redirect) and
@@ -535,9 +533,9 @@ AS in this example. The client instance is not capable of presenting an arbitrar
 nor is it capable of accepting incoming HTTP requests from the user's browser.
 The client instance polls the AS while it is waiting for the RO to authorize the request.
 The user's interaction is assumed to occur on a secondary device. In this example
-it is assumed that the user is both the end user and RO, though the user is not assumed
+it is assumed that the user is both the end user and RO. Note that since the user is not assumed
 to be interacting with the client instance through the same web browser used for interaction at
-the AS.
+the AS, the user is not shown as being connected to the client instance in this diagram.
 
 ~~~ aasvg
 {::include diagram/usercode.md}
@@ -615,7 +613,8 @@ The client instance polls the AS while it is waiting for the RO to authorize the
     send any interaction modes to the server, indicating that
     it does not expect to interact with the RO. The client instance can also signal
     which RO it requires authorization from, if known, by using the
-    [user request section](#request-user). It's also possible for the AS to determine which
+    [subject request](#request-subject) and
+    [user request](#request-user) sections. It's also possible for the AS to determine which
     RO needs to be contacted by the nature of what access is being requested.
 
 2. The AS determines that interaction is needed, but the client instance cannot interact
@@ -627,7 +626,8 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 
 3. The AS determines which RO to contact based on the request in (1), through a
     combination of the [user request](#request-user), the
-    [resources request](#request-token), and other policy information. The AS
+    [subject request](#request-subject), the
+    [access request](#request-token), and other policy information. The AS
     contacts the RO and authenticates them.
 
 4. The RO authorizes the pending request from the client instance.
@@ -679,8 +679,9 @@ Since there is no explicit RO, the client instance does not interact with an RO.
 1. The client instance [requests access to the resource](#request). The client instance does not
     send any interaction modes to the server.
 
-2. The AS determines that the request has been authorized,
-    the AS grants access to the resource
+2. The AS determines that the request has been authorized based on the identity of
+    the client instance making the request and the [access requested](#request-token).
+    The AS grants access to the resource
     in the form of [access tokens](#response-token) to the client instance.
     Note that [direct subject information](#response-subject) is not
     generally applicable in this use case, as there is no user involved.
@@ -725,7 +726,7 @@ expired access token at the AS using the token's management URI.
     see the token rotation section for details.
 
 8. The AS validates the rotation request including the signature
-    and keys presented in (5) and returns a
+    and keys presented in (7) and returns a
     [new access token](#response-token-single). The response includes
     a new access token and can also include updated token management
     information, which the client instance will store in place of the values
@@ -772,7 +773,7 @@ the abstract as functions of the AS here.
 ### Cross-User Authentication {#sequence-cross-user}
 
 In this scenario, the end user and resource owner are two different people.
-In this scenario, the client instance already knows who the end user
+Here, the client instance already knows who the end user
 is, likely through a separate authentication process. The
 end user, operating the client instance, needs to get subject information
 about another person in the system, the RO. The RO is given an opportunity
@@ -789,6 +790,9 @@ Precondition: The end user is authenticated to the client instance, and the clie
 instance has an identifier representing the end user that it can present to the AS.
 This identifier should be unique to the particular session with the client instance
 and the AS.
+The client instance is also known to the AS and allowed to access this
+advanced functionality where the information of someone other than
+the end user is returned to the client instance.
 
 1.  The RO communicates a human-readable
     identifier to the end user, such as an email address or account number. This communication
@@ -809,7 +813,7 @@ and the AS.
 4. The AS sees that the identifier for the end user and subject being requested are different.
     The AS determines that it can reach out to the RO asynchronously for approval. While it
     is doing so, the AS returns a [continuation response](#response-continue) with a `finish` nonce
-    to allow the client instance to keep polling after interaction with the RO has concluded.
+    to allow the client instance to continue the grant request after interaction with the RO has concluded.
 
 5. The AS contacts the RO and has them authenticate to the system. The means for doing this are
     outside the scope of this specification, but the identity of the RO is known from the subject
@@ -928,8 +932,6 @@ Sending a request to the grant endpoint creates a grant request in the _processi
 The request MUST be sent as a JSON object in the body of the HTTP
 POST request with Content-Type `application/json`,
 unless otherwise specified by the signature mechanism.
-
-The authorization server MUST include the HTTP "Cache-Control" response header field {{RFC7234}} with a value set to "no-store".
 
 ## Requesting Access to Resources {#request-token}
 
@@ -1134,21 +1136,17 @@ Subject identifier types requested by the client instance serve only to identify
 the RO in the context of the AS and can't be used as communication
 channels by the client instance, as discussed in {{response-subject}}.
 
-The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
-
-The "formats" and "assertions" request fields are independent of each other, and a
-returned assertion MAY use a different subject identifier than other assertions and
-subject identifiers in the response. All subject identifiers and assertions returned
-MUST refer to the same person.
-
 ## Identifying the Client Instance {#request-client}
 
-When sending a non-continuation request to the AS, the client instance MUST identify
-itself by including the `client` field of the request and by signing the
-request as described in {{binding-keys}}. Note that for a
-[continuation request](#continue-request), the client instance is identified by its
-association with the request being continued and so this field is
-not sent under those circumstances.
+When sending new grant request to the AS, the client instance MUST identify
+itself by including its client information in the `client` field of the request and by signing the
+request with its unique key as described in {{binding-keys}}. Note that once a
+grant has been created and is in the _pending_ or _accepted_ states, the AS can
+determine which client is associated with the grant by dereferencing the
+continuation access token sent in the [continuation request](#continue-request).
+As a consequence, the `client` field is not sent or accepted for continuation requests.
+
+Client information MUST either be sent by value as an object or by reference as a string (see {{request-instance}}).
 
 When client instance information is sent
 by value, the `client` field of the request consists of a JSON
@@ -1167,7 +1165,7 @@ object with the following fields.
 `display` (object):
 : An object containing additional information that the AS
     MAY display to the RO during interaction, authorization,
-    and management. OPTIONAL.
+    and management. OPTIONAL. ({{request-display}})
 
 ~~~ json
 "client": {
@@ -1308,7 +1306,7 @@ client instances with unknown keys have to be interactively approved by an RO.
 If the client instance knows the identity of the end user through one or more
 identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
-or by reference.
+or by reference (see {{request-user-reference}}).
 
 `sub_ids` (array of objects):
 : An array of subject identifiers for the
@@ -1340,9 +1338,11 @@ RO and MUST NOT be taken as authoritative statements that a particular
 RO is present at the client instance and acting as the end user. Assertions SHOULD be validated by the AS.
 
 If the identified end user does not match the RO present at the AS
-during an interaction step, the AS SHOULD reject the request with an `unknown_user` error  ({{response-error}}).
+during an interaction step, and the AS is not explicitly allowing a cross-user
+authorization, the AS SHOULD reject the request with an `unknown_user` error  ({{response-error}}).
 
-If the AS trusts the client instance to present verifiable assertions, the AS MAY
+If the AS trusts the client instance to present verifiable assertions or known subject identifiers,
+such as an opaque identifier issued by the AS for this specific client instance, the AS MAY
 decide, based on its policy, to skip interaction with the RO, even
 if the client instance provides one or more interaction modes in its request.
 
@@ -1433,6 +1433,22 @@ device, but it cannot accept a redirect or push callback.
 }
 ~~~
 
+In this non-normative example, the client instance is indicating that it can
+not start any interaction with the end-user, but that the AS can
+[push an interaction finish message](#request-interact-callback-push) when
+authorization from the RO is received asynchronously.
+
+~~~ json
+"interact": {
+    "start": [],
+    "finish": {
+        "method": "push",
+        "uri": "https://client.example.net/return/123455",
+        "nonce": "LKLTI25DK82FX4T4QFZC"
+    }
+}
+~~~
+
 If the client instance does not provide a suitable interaction mechanism, the
 AS cannot contact the RO asynchronously, and the AS determines
 that interaction is required, then the AS SHOULD return an `invalid_interaction`
@@ -1481,7 +1497,7 @@ launching a browser on the end user's device, providing a scannable
 image encoding, and printing out a URI to an interactive
 console. While this URI is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
-or relationship to the AS grant URI.
+or relationship to the grant endpoint URI.
 
 ~~~ json
 "interact": {
@@ -1512,7 +1528,7 @@ this specification.
 
 If this interaction mode is supported for this client instance and
 request, the AS returns an app interaction response with an app URI
-payload {{response-interact-app}}. The client instance manages
+payload ({{response-interact-app}}). The client instance manages
 this interaction method as described in {{interaction-app}}.
 
 #### Display a Short User Code {#request-interact-usercode}
@@ -1526,7 +1542,7 @@ URI to the RO, and so this URI is usually communicated out of band to the
 RO through documentation or other messaging outside of GNAP.
 While this URI is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
-or relationship to the AS grant URI.
+or relationship to the grant endpoint URI.
 
 ~~~ json
 "interact": {
@@ -1548,7 +1564,7 @@ by including `user_code_uri` in the array under the `start` key. This
 code is to be entered at the dynamic URL given in the response.
 While this URL is generally hosted at the AS, the client
 instance can make no assumptions about its contents, composition,
-or relationship to the AS grant URL.
+or relationship to the grant endpoint URI.
 
 ~~~ json
 "interact": {
@@ -1561,7 +1577,7 @@ request, the AS returns a user code and interaction URL as specified
 in {{response-interact-usercodeuri}}. The client instance manages this interaction
 method as described in {{interaction-usercodeuri}}.
 
-### Finish Interaction Methods {#request-interact-finish}
+### Interaction Finish Methods {#request-interact-finish}
 
 If the client instance is capable of receiving a message from the AS indicating
 that the RO has completed their interaction, the client instance
@@ -1610,9 +1626,9 @@ with other values defined by the [Interaction Finish Methods Registry](#IANA-int
     after interaction with the RO has concluded. {{request-interact-callback-push}}
 
 
-If this interaction mode is supported for this client instance and
-request, the AS returns a nonce for use in validating
-[the callback response](#response-interact-finish).
+If interaction finishing is supported for this client instance and
+request, the AS [returns a nonce](#response-interact-finish) used by the client
+instance to validate the callback.
 Requests to the callback URI MUST be processed as described in
 {{interaction-finish}}, and the AS MUST require
 presentation of an interaction callback reference as described in
@@ -1708,7 +1724,6 @@ of the given locales are supported, the AS MAY use a default locale.
 In response to a client instance's request, the AS responds with a JSON object
 as the HTTP entity body. Each possible field is detailed in the sections below.
 
-
 `continue` (object):
 : Indicates that the client instance can continue the request by making one or
     more continuation requests. REQUIRED if continuation calls are allowed for this client instance on this grant request. See {{response-continue}}.
@@ -1719,7 +1734,7 @@ as the HTTP entity body. Each possible field is detailed in the sections below.
 
 `interact` (object):
 : Indicates that interaction through some set of defined mechanisms
-    needs to take place. REQUIRED if interaction is needed or allowed. See {{response-interact}}.
+    needs to take place. REQUIRED if interaction is expected. See {{response-interact}}.
 
 `subject` (object):
 : Claims about the RO as known and declared by the AS. REQUIRED if subject information is included. See {{response-subject}}.
@@ -1796,10 +1811,14 @@ simultaneously as an opaque identifier, an email address, and a decentralized id
 }
 ~~~
 
+The response MUST be sent as a JSON object in the body of the HTTP response with Content-Type `application/json`, unless otherwise specified by the specific response (eg, an empty response with no Content-Type).
+
+The authorization server MUST include the HTTP Cache-Control response header field {{RFC7234}} with a value set to "no-store".
+
 ## Request Continuation {#response-continue}
 
-If the AS determines that the request can be continued with
-additional requests, it responds with the `continue` field. This field
+If the AS determines that the grant request can be continued by the
+client instance, the AS responds with the `continue` field. This field
 contains a JSON object with the following properties.
 
 `uri` (string):
@@ -1899,13 +1918,12 @@ properties.
     {{resource-access-rights}}. If included, this MUST reflect the rights
     associated with the issued access token. These rights MAY vary
     from what was requested by the client instance.
-    `REQUIRED`.
+    REQUIRED.
 
 `expires_in` (integer):
 : The number of seconds in
     which the access will expire. The client instance MUST NOT use the access
-    token past this time. An RS MUST NOT accept an access token
-    past this time. Note that the access token MAY be revoked by the
+    token past this time. Note that the access token MAY be revoked by the
     AS or RS at any point prior to its expiration.
     OPTIONAL.
 
@@ -1914,7 +1932,7 @@ properties.
     client instance's presented key. The key MUST be an object or string in a format
     described in {{key-format}}. The client instance MUST be able to
     dereference or process the key information in order to be able
-    to sign the request.
+    to [sign subsequent requests using the access token](#use-access-token).
     OPTIONAL.
 
 `flags` (array of strings):
@@ -1927,10 +1945,7 @@ The values of the `flags` field defined by this specification are as follows:
 `"bearer"`:
 : This flag indicates whether the token is a bearer token, not bound to a key and proofing mechanism.
     If the `bearer` flag is present, the access token is a bearer token, and the `key`
-    field in this response MUST be omitted. If the `bearer` flag is omitted and the `key` field
-    in this response is omitted, the token is bound the [key used by the client instance](#request-client)
-    in its request for access. If the `bearer` flag is omitted, and the `key` field is present,
-    the token is bound to the key and proofing mechanism indicated in the `key` field.
+    field in this response MUST be omitted.
     See {{security-bearer-tokens}} for additional considerations on the use of bearer tokens.
 
 `"durable"`:
@@ -1947,6 +1962,14 @@ The values of the `flags` field defined by this specification are as follows:
 Flag values MUST NOT be included more than once.
 
 Additional flags can be defined by extensions using the [Access Token Fields Registry](#IANA-token-flags).
+
+If the `bearer` flag and the `key` field
+in this response are omitted, the token is bound the [key used by the client instance](#request-client)
+in its request for access. If the `bearer` flag is omitted, and the `key` field is present,
+the token is bound to the key and proofing mechanism indicated in the `key` field.
+The means by which the AS determines how to bind an access token to a key
+other than that presented by the client instance is out of scope for this
+specification, but common practices include pre-registering specific keys in a static fashion.
 
 The following non-normative example shows a single access token bound to the client instance's key
 used in the initial request, with a management URI, and that has access to three described resources
@@ -2034,15 +2057,12 @@ NOTE: '\' line wrapping per RFC 8792
 Each access token corresponds to one of the objects in the `access_token` array of
 the client instance's [request](#request-token-multiple).
 
-The multiple access token response MUST be used when multiple access tokens are
-requested, even if only one access token is issued as a result of the request.
 The AS MAY refuse to issue one or more of the
 requested access tokens, for any reason. In such cases the refused token is omitted
 from the response and all of the other issued access
 tokens are included in the response the requested names appropriate names.
-
 If the client instance [requested multiple access tokens](#request-token-multiple), the AS MUST NOT respond with a
-single access token structure, even if only a single access token is granted. In such cases, the AS responds
+single access token structure, even if only a single access token is granted. In such cases, the AS MUST respond
 with a multiple access token structure containing one access token.
 
 ~~~ json
@@ -2057,9 +2077,7 @@ with a multiple access token structure containing one access token.
 ]
 ~~~
 
-Each access token MAY be bound to different keys with different proofing mechanisms.
-
-The `manage` URI MUST NOT contain the access token `value`.
+The parameters of each access token are separate. For example, each access token MAY be bound to different keys with different proofing mechanisms.
 
 ## Interaction Modes {#response-interact}
 
@@ -2087,7 +2105,7 @@ interaction methods are included in the same `interact` object.
 : A nonce used by the client instance to verify the callback after interaction is completed. REQUIRED if the interaction finish method requested by the client instance is possible for this request. See {{response-interact-finish}}.
 
 `expires_in` (integer):
-: The number of integer seconds after which this set of interaction responses will expire and no longer be usable by the client instance. If the interaction methods expire, the client MAY re-start the interaction process for this grant request by sending an [update](#continue-modify) with a new [interaction request](#request-interact) section. OPTIONAL. If omitted, the interaction response modes returned do not expire.
+: The number of integer seconds after which this set of interaction responses will expire and no longer be usable by the client instance. If the interaction methods expire, the client MAY re-start the interaction process for this grant request by sending an [update](#continue-modify) with a new [interaction request](#request-interact) section. OPTIONAL. If omitted, the interaction response modes returned do not expire but MAY be invalidated by the AS at any time.
 
 Additional interaction mode responses can be defined in the [Interaction Mode Responses Registry](#IANA-interaction-response).
 
@@ -2115,10 +2133,11 @@ information such as user identifiers or access tokens.
 ~~~
 
 The URI returned is a function of the AS, but the URI itself MAY be completely
-distinct from the URI the client instance uses to [request access](#request), allowing an
+distinct from the grant endpoint URI that the client instance uses to [request access](#request), allowing an
 AS to separate its user-interactive functionality from its back-end security
-functionality. If the AS does not directly host the functionality accessed through
-the given URI, then the means for the interaction functionality to communicate
+functionality. The AS will need to dereference the specific grant
+request and its information from the URI alone. If the AS does not directly host the functionality accessed through
+the redirect URI, then the means for the interaction functionality to communicate
 with the rest of the AS are out of scope for this specification.
 
 The client instance sends the end user to the URI to interact with the AS. The
@@ -2165,7 +2184,6 @@ characters (such as letters or numbers). The time in which this
 code will be accepted SHOULD be short lived, such as several
 minutes. It is RECOMMENDED that this code be no more than eight
 characters in length.
-REQUIRED.
 
 ~~~ json
 "interact": {
@@ -2185,13 +2203,13 @@ dynamic URI to the end user at runtime.
 
 As this interaction mode is designed to facilitate interaction
 via a secondary device, it is not expected that the client instance redirect
-the end user to the URI given here at runtime.
+the end user to the URI where the code is entered.
 If the client instance is capable of communicating an
 short arbitrary URI to the end user for use with the user code, the client
-instance can instead use the ["user_code_uri"](#request-interact-usercodeuri) method instead.
+instance SHOULD instead use the ["user_code_uri"](#request-interact-usercodeuri) mode.
 If the client instance is capable of communicating a long arbitrary URI to the end user,
 such as through a scannable code, the
-client instance can use the ["redirect"](#request-interact-redirect) mode
+client instance SHOULD use the ["redirect"](#request-interact-redirect) mode
 for this purpose instead of or in addition to the user code mode.
 
 See details of the interaction in {{interaction-usercode}}.
@@ -2244,7 +2262,7 @@ the URI needs to be short enough to allow the end user to type or copy it to a s
 device without mistakes.
 
 The URI returned is a function of the AS, but the URI itself MAY be completely
-distinct from the URI the client instance uses to [request access](#request), allowing an
+distinct from the grant endpoint URI that the client instance uses to [request access](#request), allowing an
 AS to separate its user-interactive functionality from its back-end security
 functionality. If the AS does not directly host the functionality accessed through
 the given URI, then the means for the interaction functionality to communicate
@@ -2266,12 +2284,10 @@ that the client instance will use in validating the callback as defined in
 }
 ~~~
 
-When the interaction is completed, the interaction component MUST contact the client instance
-using either a redirect or launch of the RO's browser
-or through an HTTP POST to the client instance's callback URI using the method indicated in the
-[interaction request](#request-interact-finish) as described in {{interaction-finish}}.
+When the interaction is completed, the interaction component of the AS MUST contact the client instance using the means defined by the finish method
+as described in {{interaction-finish}}.
 
-If the AS returns a nonce, the client instance MUST NOT
+If the AS returns the finish field, the client instance MUST NOT
 continue a grant request before it receives the associated
 interaction reference on the callback URI. See details in {{interaction-finish}}.
 
@@ -2283,7 +2299,7 @@ information in the "subject" response field. The AS MUST return the `subject` fi
 the RO and the end user are the same party. This can be accomplished through some forms of
 [interaction with the RO](#authorization).
 
-This field is an object with the following OPTIONAL properties.
+This field is an object with the following properties.
 
 
 `sub_ids` (array of objects):
@@ -2294,9 +2310,7 @@ This field is an object with the following OPTIONAL properties.
 
 `assertions` (array of objects):
 : An array containing assertions as objects each containing the assertion
-    format and the assertion value as the JSON string serialization of the assertion.
-    Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion.
-    Additional assertion formats are defined by the [Assertion Formats Registry](#IANA-assertion-formats).
+    object described below.
     REQUIRED if returning assertions.
 
 `updated_at` (string):
@@ -2306,6 +2320,20 @@ This field is an object with the following OPTIONAL properties.
     information through an identity API. The definition of such an
     identity API is out of scope for this specification.
     RECOMMENDED.
+
+Assertion objects contain the following fields:
+
+`format` (string):
+: The assertion format.
+    Possible formats include `id_token` for an {{OIDC}} ID Token and `saml2` for a SAML 2 assertion.
+    Additional assertion formats are defined by the [Assertion Formats Registry](#IANA-assertion-formats).
+    REQUIRED.
+
+`value` (string):
+: The assertion value as the JSON string serialization of the assertion.
+    REQUIRED.
+
+The following non-normative example contains an opaque identifier and an OpenID Connect ID Token:
 
 ~~~ json
 "subject": {
@@ -2324,7 +2352,7 @@ Subject identifiers returned by the AS SHOULD uniquely identify the RO at the
 AS. Some forms of subject identifier are opaque to the client instance (such as the subject of an
 issuer and subject pair), while others forms (such as email address and phone number) are
 intended to allow the client instance to correlate the identifier with other account information
-at the client instance. The AS MUST ensure that the returned subject identifiers only apply to the authenticated end user. The client instance MUST NOT request or use any returned subject identifiers for communication
+at the client instance. The client instance MUST NOT request or use any returned subject identifiers for communication
 purposes (see {{request-subject}}). That is, a subject identifier returned in the format of an email address or
 a phone number only identifies the RO to the AS and does not indicate that the
 AS has validated that the represented email address or phone number in the identifier
@@ -2333,10 +2361,20 @@ the client instance MUST use an identity protocol to request and receive additio
 claims. The details of an identity protocol and associated schema
 are outside the scope of this specification.
 
+The AS MUST ensure that the returned subject information represents the RO. In most cases,
+the AS will also ensure that the returned subject information represents the end user authenticated
+interactively at the AS.
+The AS SHOULD NOT re-use subject identifiers for multiple different ROs.
+
+The "sub_ids" and "assertions" response fields are independent of each other. That is, a
+returned assertion MAY use a different subject identifier than other assertions and
+subject identifiers in the response. However, all subject identifiers and assertions returned
+MUST refer to the same party.
+
 The client instance MUST interpret all subject information in the context of the AS that the
 subject information is received from, as is discussed in Section 6 of {{SP80063C}}. For example, one AS could
-return an email identifier of  "user@example" for one account, and a different AS could return that
-same email identifier of "user@example" for a completely different account. A client instance talking to
+return an email identifier of  "user@example.com" for one RO, and a different AS could return that
+same email identifier of "user@example.com" for a completely different RO. A client instance talking to
 both AS's needs to differentiate between these two accounts by accounting for the AS source
 of each identifier.
 
