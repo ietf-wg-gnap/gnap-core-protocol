@@ -151,7 +151,7 @@ authorization to resource servers and subject information. This delegation is
 facilitated by an authorization server usually on
 behalf of a resource owner. The end user operating the software can interact
 with the authorization server to authenticate, provide consent, and
-authorize the request.
+authorize the request as a resource owner.
 
 The process by which the delegation happens is known as a grant, and
 GNAP allows for the negotiation of the grant process
@@ -202,7 +202,7 @@ on the role by the overall protocol.
 ~~~
 
 Authorization Server (AS)
-: server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information).
+: server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information). The AS is uniquely defined by the _grant endpoint URI_, which the absolute URI where grant requests are started by clients.
 
 Client
 : application that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end user or it runs autonomously on behalf of a resource owner.
@@ -843,8 +843,10 @@ Additional considerations for asynchronous interactions like this are discussed 
 
 # Requesting Access {#request}
 
-To start a request, the client instance sends a [JSON](#RFC8259) document with an object as its root. Each
-member of the request object represents a different aspect of the
+To start a request, the client instance sends an HTTP POST with a [JSON](#RFC8259) document
+to the grant endpoint of the AS. The grant endpoint is a URI that uniquely identifies
+the AS to client instances and serves as the identifier for the AS. The document is a JSON object
+where each field represents a different aspect of the
 client instance's request. Each field is described in detail in a section below.
 
 `access_token` (object / array of objects):
@@ -1305,7 +1307,7 @@ client instances with unknown keys have to be interactively approved by an RO.
 If the client instance knows the identity of the end user through one or more
 identifiers or assertions, the client instance MAY send that information to the
 AS in the "user" field. The client instance MAY pass this information by value
-or by reference (see {{request-user-reference}}).
+or by reference (See {{request-user-reference}}).
 
 `sub_ids` (array of objects):
 : An array of subject identifiers for the
@@ -2084,7 +2086,9 @@ with a multiple access token structure containing one access token.
 ]
 ~~~
 
-The parameters of each access token are separate. For example, each access token MAY be bound to different keys with different proofing mechanisms.
+The parameters of each access token are separate. For example, each access token is expected to
+have a unique value and (if present) label, and likely has different access rights associated with
+it. Each access token could also be bound to different keys with different proofing mechanisms.
 
 ## Interaction Modes {#response-interact}
 
@@ -2811,7 +2815,7 @@ potentially contains credentials.
 NOTE: '\' line wrapping per RFC 8792
 
 https://client.example.net/return/123455\
-  ?hash=jdHcrti02HLCwGU3qhUZ3wZXt8IjrV_BtE3oUyOuKNk\
+  ?hash=x-gguKWTj8rQf7d7i3w3UhzvuJ5bpOlKyAlVpLxBffY\
   &interact_ref=4IFWWIKYBC2PQ6U56NL1
 ~~~
 
@@ -2887,12 +2891,13 @@ using a single newline (`\n`) character to separate them:
 * the grant endpoint URI the client instance used to make its [initial request](#request)
 
 There is no padding or whitespace before or after any of the lines,
-and no trailing newline character.
+and no trailing newline character. The following example shows a constructed
+hash base string consisting of these four elements.
 
 ~~~
-VJLO6A4CAYLBXHTR0KRO
+VJLO6A4CATR0KRO
 MBDOFXG4Y5CVJCX821LH
-4IFWWIKYBC2PQ6U56NL1
+4IFWWIKYB2PQ6U56NL1
 https://server.example.com/tx
 ~~~
 
@@ -2907,24 +2912,22 @@ If the "hash_method" value is not present in the client instance's
 request, the algorithm defaults to "sha-256".
 
 For example, the "sha-256" hash method consists of hashing the input string
-with the 256-bit SHA2 algorithm. The byte array is then encoded
-using URL-Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
-hash value.
+with the 256-bit SHA2 algorithm. The following is the encoded "sha-256" hash of the above example
+hash base string.
 
 ~~~
-jdHcrti02HLCwGU3qhUZ3wZXt8IjrV_BtE3oUyOuKNk
+x-gguKWTj8rQf7d7i3w3UhzvuJ5bpOlKyAlVpLxBffY
 ~~~
 
-The "sha3-512" hash method consists of hashing the input string
-with the 512-bit SHA3 algorithm. The byte array is then encoded
-using URL-Safe Base64 with no padding {{!RFC4648}}. The resulting string is the
-hash value.
+For another example, the "sha3-512" hash method consists of hashing the input string
+with the 512-bit SHA3 algorithm. The following is the encoded "sha3-512" hash of the above example
+hash base string.
 
 ~~~
 NOTE: '\' line wrapping per RFC 8792
 
-p28jsq0Y2KK3WS__a42tavNC64ldGTBroywsWxT4md_jZQ1R2HZT8BOWYHcLmObM\
-  7XHPAdJzTZMtKBsaraJ64A
+pyUkVJSmpqSJMaDYsk5G8WCvgY91l-agUPe1wgn-cc5rUtN69gPI2-S_s-Eswed8iB4\
+  PJ_a5Hg6DNi7qGgKwSQ
 ~~~
 
 # Continuing a Grant Request {#continue-request}
@@ -3198,7 +3201,7 @@ more access, the AS could require additional interaction with the RO to gather a
 If the client instance is asking for more limited access, the AS could determine that sufficient authorization
 has been granted to the client instance and return the more limited access rights immediately.
 If the grant request was previously in the _approved_ state, the AS could decide to remember the larger scale of access rights associated
-with the grant request, allowing the client instance to make subsequence requests of different
+with the grant request, allowing the client instance to make subsequent requests of different
 subsets of granted access. The details of this are out of scope for this specification.
 
 The client instance MAY include the `interact` field as described in {{request-interact}}.
@@ -4989,7 +4992,7 @@ by the AS, and the details are out of scope for this specification.
 
 By design, GNAP minimizes the need for any pre-flight
 discovery. To begin a request, the client instance only needs to know the grant endpoint of
-the AS (a single URL) and which keys it will use to sign the request. Everything else
+the AS (a single URI) and which keys it will use to sign the request. Everything else
 can be negotiated dynamically in the course of the protocol.
 
 However, the AS can have limits on its allowed functionality. If the
@@ -5837,12 +5840,14 @@ information. As a natural consequence, any RS that a bearer token is presented t
 capability of presenting that bearer token to another RS, as long as the token is valid. It also
 means that any party that is able capture of the token value in storage or in transit is able to
 use the access token. While bearer tokens are inherently simpler, this simplicity has been misapplied
-and abused in making needlessly insecure systems.
+and abused in making needlessly insecure systems. The downsides of bearer tokens have become more
+pertinent lately as stronger authentication systems have caused some attacks to shift to target
+tokens and APIs.
 
 In GNAP, key-bound access tokens are the default due to their higher security properties. While
 bearer tokens can be used in GNAP, their use should be limited to cases where the simplicity
 benefits outweigh the significant security downsides. One common deployment pattern is to use a
-gateway that takes in key-bbound tokens on the outside, and verifies the signatures on the incoming
+gateway that takes in key-bound tokens on the outside, and verifies the signatures on the incoming
 requests, but translates the requests to a bearer token for use by trusted internal systems. The
 bearer tokens are never issued or available outside of the internal systems, greatly limiting the
 exposure of the less secure tokens but allowing the internal deployment to benefit from the
@@ -6565,26 +6570,27 @@ to manage at runtime, and systems should generally refuse to fetch a URI if unsu
 
 ## Multiple Key Formats {#security-multiple-key-formats}
 
-Keys presented by value are allowed to be in only a single format,
-as discussed in {{key-format}}. Presenting the same key in multiple formats is not allowed
-and is considered an error in the request. If multiple keys formats were allowed,
+All keys presented by value are allowed to be in only a single format. While it would seem
+beneficial to allow keys to be sent in multiple formats, in case the receiver doesn't understand
+one or more of the formats used, there would be security issues with such a feature.
+If multiple keys formats were allowed,
 receivers of these key definitions would need to be able to make sure that it's the same
 key represented in each field and not simply use one of the key formats without checking for
 equivalence. If equivalence were not carefully checked, it is possible for an attacker to insert
 their own key into one of the formats without needing to have control over the other formats. This
 could potentially lead to a situation where one key is used by part of the system (such as
 identifying the client instance) and a different key in a different format in the same message is
-used for other things (such as calculating signature validity). However, the primary reason to allow
-keys to be presented in multiple formats simultaneously is the assumption that the receiver cannot
-understand one or more of the formats in use. In such cases, it is impossible for the receiver to
-ensure that all formats contain the same key information.
+used for other things (such as calculating signature validity). However, in such cases, it is
+impossible for the receiver to ensure that all formats contain the same key information since it is
+assumed that the receiver cannot understand all of the formats.
 
 To combat this, all keys presented by value have to be in exactly one supported format known
-by the receiver. Normally, a client instance is going to be configured with its keys in a
+by the receiver as discussed in {{key-format}}. In most cases, a client instance is going to be configured with its keys in a
 single format, and it will simply present that format as-is to the AS in its request. A client
 instance capable of multiple formats can use [AS discovery](#discovery) to determine which formats
 are supported, if desired. An AS should be generous in supporting many different key formats to
-allow different types of client software and client instance deployments.
+allow different types of client software and client instance deployments. An AS implementation
+should try to support multiple formats to allow a variety of client software to connect.
 
 ## Asynchronous Interactions {#security-async}
 
@@ -6634,7 +6640,7 @@ The privacy considerations in this section are modeled after the list of privacy
 
 Surveillance is the observation or monitoring of an individual's communications or activities. Surveillance can be conducted by observers or eavesdroppers at any point along the communications path.
 
-GNAP assumes the TLS protection used throughout the spec is intact. Without the protection of TLS, there are many points throughout the use of GNAP that would lead to possible surveillance. Even with the proper use of TLS, surveillance could occur by several parties throughout the protocol.
+GNAP assumes the TLS protection used throughout the spec is intact. Without the protection of TLS, there are many points throughout the use of GNAP that would lead to possible surveillance. Even with the proper use of TLS, surveillance could occur by several parties outside of the TLS-protected channels, as discussed in the sections below.
 
 ### Surveillance by the Client
 
@@ -6992,7 +6998,7 @@ NOTE: '\' line wrapping per RFC 8792
 
 HTTP 302 Found
 Location: https://client.example.net/return/123455\
-  ?hash=jdHcrti02HLCwGU3qhUZ3wZXt8IjrV_BtE3oUyOuKNk\
+  ?hash=x-gguKWTj8rQf7d7i3w3UhzvuJ5bpOlKyAlVpLxBffY\
   &interact_ref=4IFWWIKYBC2PQ6U56NL1
 ~~~
 
