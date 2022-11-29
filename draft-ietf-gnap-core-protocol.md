@@ -6005,7 +6005,7 @@ delegation of authority to any client software not pre-registered.
 An AS can also provide warnings and caveats to resource owners during the authorization process, allowing
 the user to make an informed decision regarding the software they are authorizing. For example, if the AS
 has done vetting of the client software and this specific instance, it can present a different authorization
-screen compared to a client instance that is presenting all of its information at runtime
+screen compared to a client instance that is presenting all of its information at runtime.
 
 Finally, an AS can use platform attestations and other signals from the client instance at runtime
 to determine whether the software making the request is legitimate or not. The details of such
