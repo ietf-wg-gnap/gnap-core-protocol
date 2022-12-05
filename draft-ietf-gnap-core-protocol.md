@@ -4150,6 +4150,8 @@ If the HTTP Message includes a message body, the verifier MUST
 calculate and verify the value of the `Content-Digest` header. The verifier MUST validate
 the signature against the expected key of the signer.
 
+A received message MAY include multiple signatures, each with its own label. The verifier MUST examine all included signatures until it finds (at least) one that's acceptable according to its policy and meets the requirements in this section.
+
 #### Key Rotation using HTTP Message Signatures {#httpsig-rotate}
 
 When rotating a key using HTTP Message Signatures, the message, which includes the new public key
