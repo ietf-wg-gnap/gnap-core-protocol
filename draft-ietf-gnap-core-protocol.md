@@ -5145,11 +5145,13 @@ Jacky Yuan,
 Joseph Heenan,
 Justin Richer,
 Kathleen Moriarty,
+Leif Johansson,
 Mike Jones,
 Mike Varley,
 Nat Sakimura,
 Takahiko Kawasaki,
-Takahiro Tsuchiya.
+Takahiro Tsuchiya,
+Yaron Sheffer.
 
 The editors would also like to thank the GNAP working group design team of
 Kathleen Moriarty, Fabien Imbault, Dick Hardt, Mike Jones, and Justin Richer, who incorporated
