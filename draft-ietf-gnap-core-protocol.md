@@ -2869,7 +2869,7 @@ When processing such a call, the AS MUST protect itself against SSRF attacks as 
 
 When receiving the request, the client instance MUST parse the JSON object
 and validate the hash value as described in
-{{interaction-hash}}, or else return an `unknown_interaction` error ({{response-error}}). If the hash validates, the client instance sends
+{{interaction-hash}}. If either fails, the client instance MUST return an `unknown_interaction` error ({{response-error}}). If the hash validates, the client instance sends
 a continuation request to the AS as described in {{continue-after-interaction}} using the interaction
 reference value received here.
 
