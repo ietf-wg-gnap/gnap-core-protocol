@@ -2751,7 +2751,7 @@ of the required actions are out of scope for this specification.
 
 If an interaction ["finish"](#response-interact-finish) method is
 associated with the current request, the AS MUST follow the appropriate
-method at upon completion of interaction in order to signal the client
+method upon completion of interaction in order to signal the client
 instance to continue, except for some limited error cases discussed below.
 If a finish method is not available, the AS SHOULD instruct the RO to
 return to the client instance upon completion.
@@ -3459,7 +3459,7 @@ MUST be sent [with the appropriate binding for the access token](#use-access-tok
 on the key bound to the access token.
 
 If the token is a bearer token, the client instance MUST present proof of the
-[client instance's](#request-client) (or its most recent rotation) as described in
+[client instance's key](#request-client) (or its most recent rotation) as described in
 {{binding-keys}}. Note that this is usually the same key used in the initial grant request.
 
 The AS MUST validate the proof and assure that it is associated with
