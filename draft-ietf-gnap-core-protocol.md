@@ -6437,7 +6437,7 @@ All assertion processing needs to account for the security aspects of the assert
 use. In particular, the processor needs to parse the assertion from a JSON string object,
 and apply the appropriate cryptographic processes to ensure the integrity of the assertion.
 
-For example, when SAML 2 assertions are used, the receiver hast to parse an XML document. There are
+For example, when SAML 2 assertions are used, the receiver has to parse an XML document. There are
 many well-known security vulnerabilities in XML parsers, and the XML standard itself can be
 attacked through the use of processing instructions and entity expansions to cause problems
 with the processor. Therefore, any system capable of processing SAML 2 assertions also needs to
