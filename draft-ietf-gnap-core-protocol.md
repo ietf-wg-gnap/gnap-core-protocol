@@ -2751,7 +2751,7 @@ of the required actions are out of scope for this specification.
 
 If an interaction ["finish"](#response-interact-finish) method is
 associated with the current request, the AS MUST follow the appropriate
-method at upon completion of interaction in order to signal the client
+method upon completion of interaction in order to signal the client
 instance to continue, except for some limited error cases discussed below.
 If a finish method is not available, the AS SHOULD instruct the RO to
 return to the client instance upon completion.
@@ -3459,7 +3459,7 @@ MUST be sent [with the appropriate binding for the access token](#use-access-tok
 on the key bound to the access token.
 
 If the token is a bearer token, the client instance MUST present proof of the
-[client instance's](#request-client) (or its most recent rotation) as described in
+[client instance's key](#request-client) (or its most recent rotation) as described in
 {{binding-keys}}. Note that this is usually the same key used in the initial grant request.
 
 The AS MUST validate the proof and assure that it is associated with
@@ -6437,7 +6437,7 @@ All assertion processing needs to account for the security aspects of the assert
 use. In particular, the processor needs to parse the assertion from a JSON string object,
 and apply the appropriate cryptographic processes to ensure the integrity of the assertion.
 
-For example, when SAML 2 assertions are used, the receiver hast to parse an XML document. There are
+For example, when SAML 2 assertions are used, the receiver has to parse an XML document. There are
 many well-known security vulnerabilities in XML parsers, and the XML standard itself can be
 attacked through the use of processing instructions and entity expansions to cause problems
 with the processor. Therefore, any system capable of processing SAML 2 assertions also needs to
