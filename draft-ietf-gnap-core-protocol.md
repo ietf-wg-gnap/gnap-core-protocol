@@ -2199,7 +2199,7 @@ characters in length.
 
 ~~~ json
 "interact": {
-    "user_code": "A1BC-3DFF"
+    "user_code": "A1BC3DFF"
 }
 ~~~
 
@@ -2257,7 +2257,7 @@ object that contains the following members.
 ~~~ json
 "interact": {
     "user_code_uri": {
-        "code": "A1BC-3DFF",
+        "code": "A1BC3DFF",
         "uri": "https://srv.ex/device"
     }
 }
@@ -2683,6 +2683,14 @@ request and MUST be protected by HTTPS or equivalent means.
 When the end user is directed to enter a short code through the ["user_code"](#response-interact-usercode)
 mode, the client instance communicates the user code to the end user and
 directs the end user to enter that code at an associated URI.
+The client instance MAY
+format the user code in such a way as to facilitate memorability and transfer of the
+code, so long as this formatting does not alter the value as accepted at the user code
+URI. For example, a client instance receiving the user code "A1BC3DFF" could choose to
+display this to the user as "A1BC 3DFF", breaking up the long string into two shorter
+strings. In this example, the space in between the two parts would be removed upon its
+entry into the user code URI.
+
 This mode is designed to be used when the client instance is not able to communicate or facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
 in the client software's documentation. As a consequence, these URIs SHOULD be short.
@@ -2713,6 +2721,14 @@ The user should be warned as such an error state is approached, if possible.
 When the end user is directed to enter a short code through the ["user_code_uri"](#response-interact-usercodeuri)
 mode, the client instance communicates the user code and associated URI to the end user and
 directs the end user to enter that code at the URI.
+The client instance MAY
+format the user code in such a way as to facilitate memorability and transfer of the
+code, so long as this formatting does not alter the value as accepted at the user code
+URI. For example, a client instance receiving the user code "A1BC3DFF" could choose to
+display this to the user as "A1BC 3DFF", breaking up the long string into two shorter
+strings. In this example, the space in between the two parts would be removed upon its
+entry into the user code URI.
+
 This mode is used when the client instance is not able to facilitate launching
 a complex arbitrary URI but can communicate arbitrary values like URIs. As a consequence, these URIs
 SHOULD be short to allow the URI to be typed by the end user.
@@ -7129,7 +7145,7 @@ Cache-Control: no-store
     "interact": {
         "redirect": "https://srv.ex/MXKHQ",
         "user_code": {
-            "code": "A1BC-3DFF"
+            "code": "A1BC3DFF"
         }
     },
     "continue": {
