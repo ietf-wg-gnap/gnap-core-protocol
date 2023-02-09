@@ -2776,9 +2776,10 @@ interaction reference, as described in
 {{interaction-hash}}. The client instance will use this value to
 validate the "finish" call.
 
-The AS MUST send the hash and interaction reference based on
-the interaction finish mode as described in the following
-sections.
+All interaction finish methods MUST define a way
+to convey the hash and interaction reference back to the client instance. When an
+interaction finish method is used, the client instance MUST present the interaction
+reference back to the AS as part of its [continuation request](#continuation-after-interaction).
 
 Note that in many error cases, such as when the RO has denied
 access, the "finish" method is still enacted by the AS.
