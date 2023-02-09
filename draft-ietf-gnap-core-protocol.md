@@ -945,7 +945,7 @@ as described in the following sections.
 
 ### Requesting a Single Access Token {#request-token-single}
 
-To request a single access token, the client instance sends an `acccess_token` object
+To request a single access token, the client instance sends an `access_token` object
 composed of the following fields.
 
 `access` (array of objects/strings):
