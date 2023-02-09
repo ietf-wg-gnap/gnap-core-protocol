@@ -6737,7 +6737,7 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -13
     - Clarify that user codes are ungessable.
-    - 
+    - Fix user code examples.
 
 - -12
     - Make default hash algorithm SHA256 instead of SHA3-512.
