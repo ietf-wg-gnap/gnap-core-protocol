@@ -2189,9 +2189,10 @@ If the client instance indicates that it can
 and the AS supports this mode for the client instance's
 request, the AS responds with a "user_code" field. This field is string
 containing a unique short code that the user
-can type into a web page. This string MUST be
+can type into a web page. To facilitate usability, this string MUST be
 case-insensitive, MUST consist of only easily typeable
-characters (such as letters or numbers). The time in which this
+characters (such as letters or numbers). The string MUST be randomly generated
+so as to be unguessable by an attacker within the time it is accepted. The time in which this
 code will be accepted SHOULD be short lived, such as several
 minutes. It is RECOMMENDED that this code be no more than eight
 characters in length.
@@ -2236,9 +2237,10 @@ object that contains the following members.
 
 `code` (string):
 : A unique short code that the end user
-    can type into a provided URI. This string MUST be
+    can type into a provided URI. To facilitate usability, this string MUST be
     case-insensitive, MUST consist of only easily typeable
-    characters (such as letters or numbers). The time in which this
+    characters (such as letters or numbers). The string MUST be randomly generated
+    so as to be unguessable by an attacker within the time it is accepted. The time in which this
     code will be accepted SHOULD be short lived, such as several
     minutes. It is RECOMMENDED that this code be no more than eight
     characters in length.
@@ -6371,7 +6373,7 @@ the client software's programmed behavior.
 ## Exhaustion of Random Value Space {#security-random-exhaustion}
 
 Several parts of the GNAP process make use of unguessable randomized values, such as nonces,
-tokens, and randomized URIs. Since these values are intended to be unique, a sufficiently
+tokens, user codes, and randomized URIs. Since these values are intended to be unique, a sufficiently
 powerful attacker could make a large number of requests to trigger generation of randomized
 values in an attempt to exhaust the random number generation space. While this attack is
 particularly applicable to the AS, client software could likewise be targeted by an attacker
@@ -6716,6 +6718,10 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 > Note: To be removed by RFC editor before publication.
+
+- -13
+    - Clarify that user codes are ungessable.
+    - 
 
 - -12
     - Make default hash algorithm SHA256 instead of SHA3-512.
