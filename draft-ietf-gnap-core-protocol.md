@@ -1630,7 +1630,7 @@ with other values defined by the [Interaction Finish Methods Registry](#IANA-int
 If interaction finishing is supported for this client instance and
 request, the AS will [return a nonce](#response-interact-finish) used by the client
 instance to validate the callback.
-All interaction finish methods MUST use this nonce to allow the client verify the connection
+All interaction finish methods MUST use this nonce to allow the client to verify the connection
 between the pending interaction request and the callback. GNAP does this through the use of the
 interaction hash, defined in {{interaction-hash}}.
 All requests to the callback URI MUST be processed as described in
