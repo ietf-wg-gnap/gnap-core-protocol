@@ -945,7 +945,7 @@ as described in the following sections.
 
 ### Requesting a Single Access Token {#request-token-single}
 
-To request a single access token, the client instance sends an `acccess_token` object
+To request a single access token, the client instance sends an `access_token` object
 composed of the following fields.
 
 `access` (array of objects/strings):
@@ -6210,7 +6210,7 @@ See also the related considerations for token values in {{security-network-manag
 ## Interaction Finish Modes and Polling {#security-polling}
 
 During the interaction process, the client instance usually hands control of the user experience
-over to another component, beit the system browser, another application, or some action
+over to another component, be it the system browser, another application, or some action
 the resource owner is instructed to take on another device. By using an interaction finish
 method, the client instance can be securely notified by the AS when the interaction is completed
 and the next phase of the protocol should occur. This process includes information that the
@@ -6338,7 +6338,7 @@ is stopped in several places.
 When starting an interactive grant request, a client application has a number of protocol elements
 that it needs to manage, including nonces, references, keys, access tokens, and other elements.
 During the interaction process, the client instance usually hands control of the user experience
-over to another component, beit the system browser, another application, or some action
+over to another component, be it the system browser, another application, or some action
 the resource owner is instructed to take on another device. In order for the client instance
 to make its continuation call, it will need to recall all of these protocol elements at a future time. Usually
 this means the client instance will need to store these protocol elements in some retrievable
