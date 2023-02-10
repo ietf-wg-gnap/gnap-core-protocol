@@ -1485,6 +1485,8 @@ This specification defines the following interaction start modes:
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a short, dynamic URI. {{request-interact-usercodeuri}}
 
+All interaction start method definitions MUST provide enough information to uniquely identify the grant request during the interaction. In the `redirect` and `app` modes, this is done using a unique URI (including its parameters). In the `user_code` and `user_code_uri` mode, this is done using the value of the user code.
+
 Additional start modes are defined in the [Interaction Start Modes Registry](#IANA-interaction-start-modes).
 
 #### Redirect to an Arbitrary URI {#request-interact-redirect}
@@ -1626,12 +1628,19 @@ with other values defined by the [Interaction Finish Methods Registry](#IANA-int
 
 
 If interaction finishing is supported for this client instance and
-request, the AS [returns a nonce](#response-interact-finish) used by the client
+request, the AS will [return a nonce](#response-interact-finish) used by the client
 instance to validate the callback.
-Requests to the callback URI MUST be processed as described in
-{{interaction-finish}}, and the AS MUST require
-presentation of an interaction callback reference as described in
-{{continue-after-interaction}}.
+All interaction finish methods MUST use this nonce to allow the client to verify the connection
+between the pending interaction request and the callback. GNAP does this through the use of the
+interaction hash, defined in {{interaction-hash}}.
+All requests to the callback URI MUST be processed as described in
+{{interaction-finish}}.
+
+All interaction finish methods MUST require presentation of an interaction reference for continuing
+this grant request. This means that the the interaction
+reference MUST be returned by the AS and MUST be presented by the client as described in
+{{continue-after-interaction}}. The means by which the interaction reference is returned to the
+client instance is specific to the interaction finish method.
 
 #### Receive an HTTP Callback Through the Browser {#request-interact-callback-redirect}
 
@@ -2767,9 +2776,10 @@ interaction reference, as described in
 {{interaction-hash}}. The client instance will use this value to
 validate the "finish" call.
 
-The AS MUST send the hash and interaction reference based on
-the interaction finish mode as described in the following
-sections.
+All interaction finish methods MUST define a way
+to convey the hash and interaction reference back to the client instance. When an
+interaction finish method is used, the client instance MUST present the interaction
+reference back to the AS as part of its [continuation request](#continue-after-interaction).
 
 Note that in many error cases, such as when the RO has denied
 access, the "finish" method is still enacted by the AS.
@@ -6716,6 +6726,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 > Note: To be removed by RFC editor before publication.
+
+- -13
+    - Clarify expectations for extensions to interaction start and finish methods.
 
 - -12
     - Make default hash algorithm SHA256 instead of SHA3-512.
