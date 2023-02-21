@@ -963,7 +963,7 @@ as described in the following sections.
 
 ### Requesting a Single Access Token {#request-token-single}
 
-To request a single access token, the client instance sends an `acccess_token` object
+To request a single access token, the client instance sends an `access_token` object
 composed of the following fields.
 
 `access` (array of objects/strings):
@@ -2237,16 +2237,17 @@ If the client instance indicates that it can
 and the AS supports this mode for the client instance's
 request, the AS responds with a "user_code" field. This field is string
 containing a unique short code that the user
-can type into a web page. This string MUST be
+can type into a web page. To facilitate usability, this string MUST be
 case-insensitive, MUST consist of only easily typeable
-characters (such as letters or numbers). The time in which this
+characters (such as letters or numbers). The string MUST be randomly generated
+so as to be unguessable by an attacker within the time it is accepted. The time in which this
 code will be accepted SHOULD be short lived, such as several
 minutes. It is RECOMMENDED that this code be no more than eight
 characters in length.
 
 ~~~ json
 "interact": {
-    "user_code": "A1BC-3DFF"
+    "user_code": "A1BC3DFF"
 }
 ~~~
 
@@ -2284,9 +2285,10 @@ object that contains the following members.
 
 `code` (string):
 : A unique short code that the end user
-    can type into a provided URI. This string MUST be
+    can type into a provided URI. To facilitate usability, this string MUST be
     case-insensitive, MUST consist of only easily typeable
-    characters (such as letters or numbers). The time in which this
+    characters (such as letters or numbers). The string MUST be randomly generated
+    so as to be unguessable by an attacker within the time it is accepted. The time in which this
     code will be accepted SHOULD be short lived, such as several
     minutes. It is RECOMMENDED that this code be no more than eight
     characters in length.
@@ -2303,7 +2305,7 @@ object that contains the following members.
 ~~~ json
 "interact": {
     "user_code_uri": {
-        "code": "A1BC-3DFF",
+        "code": "A1BC3DFF",
         "uri": "https://srv.ex/device"
     }
 }
@@ -2729,6 +2731,14 @@ request and MUST be protected by HTTPS or equivalent means.
 When the end user is directed to enter a short code through the ["user_code"](#response-interact-usercode)
 mode, the client instance communicates the user code to the end user and
 directs the end user to enter that code at an associated URI.
+The client instance MAY
+format the user code in such a way as to facilitate memorability and transfer of the
+code, so long as this formatting does not alter the value as accepted at the user code
+URI. For example, a client instance receiving the user code "A1BC3DFF" could choose to
+display this to the user as "A1BC 3DFF", breaking up the long string into two shorter
+strings. In this example, the space in between the two parts would be removed upon its
+entry into the user code URI.
+
 This mode is designed to be used when the client instance is not able to communicate or facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
 in the client software's documentation. As a consequence, these URIs SHOULD be short.
@@ -2759,6 +2769,14 @@ The user should be warned as such an error state is approached, if possible.
 When the end user is directed to enter a short code through the ["user_code_uri"](#response-interact-usercodeuri)
 mode, the client instance communicates the user code and associated URI to the end user and
 directs the end user to enter that code at the URI.
+The client instance MAY
+format the user code in such a way as to facilitate memorability and transfer of the
+code, so long as this formatting does not alter the value as accepted at the user code
+URI. For example, a client instance receiving the user code "A1BC3DFF" could choose to
+display this to the user as "A1BC 3DFF", breaking up the long string into two shorter
+strings. In this example, the space in between the two parts would be removed upon its
+entry into the user code URI.
+
 This mode is used when the client instance is not able to facilitate launching
 a complex arbitrary URI but can communicate arbitrary values like URIs. As a consequence, these URIs
 SHOULD be short to allow the URI to be typed by the end user.
@@ -5251,15 +5269,18 @@ not have grown to what it is.
 
 IANA is requested to create 16 registries for the Grant Negotiation and Authorization Protocol and to populate those registries with initial values as described in this section.
 
-All use of value typing is based on {{RFC8259}} data types and MUST be one of the following: number, object, string, boolean, or array. When the type is array, the contents of the array MUST be specified, as in "array of objects". When the type is object, the structure of the object MUST be specified in the definition. If a parameter is available in different types, each type SHOULD be registered separately.
+All use of value typing is based on {{RFC8259}} data types and MUST be one of the following: number, object, string, boolean, or array. When the type is array, the contents of the array MUST be specified, as in "array of objects" when one subtype is allowed or "array of strings/objects" when multiple simultaneous subtypes are allowed. When the type is object, the structure of the object MUST be specified in the definition. If a parameter is available in different types, each type SHOULD be registered separately.
 
 General guidance for extension parameters is found in {{extensions}}.
 
 ## Grant Request Parameters {#IANA-grant-request}
 
-This document defines a GNAP grant request, for which IANA is asked to create and maintain a new registry titled "Grant Request Parameters". Initial values for this registry are given in {{IANA-grant-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-grant-request-template}}.
+This document defines a GNAP grant request, for which IANA is asked to create and maintain a new registry titled "Grant Request Parameters". Initial values for this registry are given in {{IANA-grant-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
 
-Each grant request parameter's definition MUST specify the expected behavior of the AS for each potential state of the grant request.
+The Designated Expert (DE) is expected to ensure that all registrations follow the template presented in {{IANA-grant-request-template}}.
+The DE is expected to ensure that the request parameter's definition is sufficiently orthogonal to existing functionality provided by existing parameters.
+The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
+The DE is expected to ensure that the request parameter's definition specifies the expected behavior of the AS in response to the request parameter for each potential state of the grant request.
 
 ### Registration Template {#IANA-grant-request-template}
 
@@ -5291,9 +5312,10 @@ Specification document(s):
 
 ## Access Token Flags {#IANA-token-flags}
 
-This document defines a GNAP access token flags, for which IANA is asked to create and maintain a new registry titled "Access Token Flags". Initial values for this registry are given in {{IANA-token-flags-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-token-flags-template}}.
+This document defines a GNAP access token flags, for which IANA is asked to create and maintain a new registry titled "Access Token Flags". Initial values for this registry are given in {{IANA-token-flags-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
 
-Each flag MUST specify whether it can be requested by clients instances or is only allowed in responses from the AS.
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-token-flags-template}}.
+The DE is expected to ensure that the flag specifies whether it applies to requests for tokens to the AS, responses with tokens from the AS, or both.
 
 ### Registration Template {#IANA-token-flags-template}
 
@@ -5319,7 +5341,10 @@ Specification document(s):
 
 ## Subject Information Request Fields {#IANA-subject-request}
 
-This document defines a means to request subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Request Fields". Initial values for this registry are given in {{IANA-subject-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-subject-request-template}}.
+This document defines a means to request subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Request Fields". Initial values for this registry are given in {{IANA-subject-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-subject-request-template}}.
+The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
 
 ### Registration Template {#IANA-subject-request-template}
 
@@ -5345,9 +5370,10 @@ Specification document(s):
 
 ## Assertion Formats {#IANA-assertion-formats}
 
-This document defines a means to pass identity assertions between the AS and client instance, for which IANA is asked to create and maintain a new registry titled "Assertion Formats". Initial values for this registry are given in {{IANA-assertion-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-assertion-formats-template}}.
+This document defines a means to pass identity assertions between the AS and client instance, for which IANA is asked to create and maintain a new registry titled "Assertion Formats". Initial values for this registry are given in {{IANA-assertion-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
 
-Each assertion format definition MUST specify the serialization format of the assertion value as used within GNAP.
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-assertion-formats-template}}.
+The DE is expected to ensure that the definition specifies the serialization format of the assertion value as used within GNAP.
 
 ### Registration Template {#IANA-assertion-formats-template}
 
@@ -5369,7 +5395,10 @@ Specification document(s):
 
 ## Client Instance Fields {#IANA-client-instance}
 
-This document defines a means to send information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Fields". Initial values for this registry are given in {{IANA-client-instance-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-client-instance-template}}.
+This document defines a means to send information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Fields". Initial values for this registry are given in {{IANA-client-instance-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-client-instance-template}}.
+The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
 
 ### Registration Template {#IANA-client-instance-template}
 
@@ -5396,7 +5425,10 @@ Specification document(s):
 
 ## Client Instance Display Fields {#IANA-client-instance-display}
 
-This document defines a means to send end-user facing displayable information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Display Fields". Initial values for this registry are given in {{IANA-client-instance-display-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-client-instance-display-template}}.
+This document defines a means to send end-user facing displayable information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Display Fields". Initial values for this registry are given in {{IANA-client-instance-display-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-client-instance-display-template}}.
+The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
 
 ### Registration Template {#IANA-client-instance-display-template}
 
@@ -5422,9 +5454,13 @@ Specification document(s):
 
 ## Interaction Start Modes {#IANA-interaction-start-modes}
 
-This document defines a means for the client instance to begin interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Start Modes". Initial values for this registry are given in {{IANA-interaction-start-modes-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-start-modes-template}}.
+This document defines a means for the client instance to begin interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Start Modes". Initial values for this registry are given in {{IANA-interaction-start-modes-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
 
-Each interaction start mode that uses an "object" type MUST declare all additional parameters.
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-start-modes-template}}.
+The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
+The DE is expected to ensure that any registration using an "object" type declares all additional parameters, their optionality, and purpose.
+The DE is expected to ensure that all start modes clearly define what actions the client is expected to take to begin interaction, what the expected user experience is, and any security considerations for this communication from either party.
+The DE is expected to ensure that all start modes document incompatibilities with other start modes or finish methods, if applicable.
 
 ### Registration Template {#IANA-interaction-start-modes-template}
 
@@ -5451,7 +5487,11 @@ Specification document(s):
 
 ## Interaction Finish Methods {#IANA-interaction-finish-methods}
 
-This document defines a means for the client instance to be notified of the end of interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Finish Methods". Initial values for this registry are given in {{IANA-interaction-finish-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-finish-methods-template}}.
+This document defines a means for the client instance to be notified of the end of interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Finish Methods". Initial values for this registry are given in {{IANA-interaction-finish-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-finish-methods-template}}.
+The DE is expected to ensure that all finish methods clearly define what actions the AS is expected to take, what listening methods the client instance needs to enable, and any security considerations for this communication from either party.
+The DE is expected to ensure that all finish methods document incompatibilities with any start modes, if applicable.
 
 ### Registration Template {#IANA-interaction-finish-methods-template}
 
@@ -5473,7 +5513,10 @@ Specification document(s):
 
 ## Interaction Hints {#IANA-interaction-hints}
 
-This document defines a set of hints that a client instance can provide to the AS to facilitate interaction with the end user, for which IANA is asked to create and maintain a new registry titled "Interaction Hints". Initial values for this registry are given in {{IANA-interaction-hints-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-hints-template}}.
+This document defines a set of hints that a client instance can provide to the AS to facilitate interaction with the end user, for which IANA is asked to create and maintain a new registry titled "Interaction Hints". Initial values for this registry are given in {{IANA-interaction-hints-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-hints-template}}.
+The DE is expected to ensure that all interaction hints clearly document the expected behaviors of the AS in response to the hint, and that an AS not processing the hint does not impede the operation of the AS or client instance.
 
 ### Registration Template {#IANA-interaction-hints-template}
 
@@ -5494,9 +5537,12 @@ Specification document(s):
 
 ## Grant Response Parameters {#IANA-grant-response}
 
-This document defines a GNAP grant response, for which IANA is asked to create and maintain a new registry titled "Grant Response Parameters". Initial values for this registry are given in {{IANA-grant-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-grant-response-template}}.
+This document defines a GNAP grant response, for which IANA is asked to create and maintain a new registry titled "Grant Response Parameters". Initial values for this registry are given in {{IANA-grant-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
 
-Each grant response parameter's definition MUST specify the states for which the client instance can expect this parameter.
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-grant-response-template}}.
+The DE is expected to ensure that the response parameter's definition is sufficiently orthogonal to existing functionality provided by existing parameters.
+The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
+The DE is expected to ensure that the response parameter's definition specifies grant states for which the client instance can expect this parameter to appear in a response message.
 
 ### Registration Template {#IANA-grant-response-template}
 
@@ -5526,9 +5572,10 @@ Specification document(s):
 
 ## Interaction Mode Responses {#IANA-interaction-response}
 
-This document defines a means for the AS to provide to the client instance information that is required to complete a particular interaction mode, for which IANA is asked to create and maintain a new registry titled "Interaction Mode Responses". Initial values for this registry are given in {{IANA-interaction-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-interaction-response-template}}.
+This document defines a means for the AS to provide to the client instance information that is required to complete a particular interaction mode, for which IANA is asked to create and maintain a new registry titled "Interaction Mode Responses". Initial values for this registry are given in {{IANA-interaction-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
 
-Interaction mode responses MUST document the corresponding interaction start mode that triggers the response's inclusion.
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-response-template}}.
+If the name of the registration matches the name of an interaction start mode, the DE is expected to ensure that the response parameter is unambiguously associated with the interaction start mode of the same name.
 
 ### Registration Template {#IANA-interaction-response-template}
 
@@ -5554,7 +5601,10 @@ Specification document(s):
 
 ## Subject Information Response Fields {#IANA-subject-response}
 
-This document defines a means to return subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Response Fields". Initial values for this registry are given in {{IANA-subject-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-subject-response-template}}.
+This document defines a means to return subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Response Fields". Initial values for this registry are given in {{IANA-subject-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-subject-response-template}}.
+The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
 
 ### Registration Template {#IANA-subject-response-template}
 
@@ -5580,7 +5630,11 @@ Specification document(s):
 
 ## Error Codes {#IANA-error-code}
 
-This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-error-code-template}}.
+This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-error-code-template}}.
+The DE is expected to ensure that the error response is sufficiently unique from other errors to provide actionable information to the client instance.
+The DE is expected to ensure that the definition of the error response specifies all conditions in which the error response is returned, and what the client instance's expected action is.
 
 ### Registration Template {#IANA-error-code-template}
 
@@ -5612,7 +5666,11 @@ Specification document(s):
 
 ## Key Proofing Methods {#IANA-key-proof-methods}
 
-This document defines methods that the client instance can use to prove possession of a key, for which IANA is asked to create and maintain a new registry titled "Key Proofing Methods". Initial values for this registry are given in {{IANA-key-proof-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-key-proof-methods-template}}.
+This document defines methods that the client instance can use to prove possession of a key, for which IANA is asked to create and maintain a new registry titled "Key Proofing Methods". Initial values for this registry are given in {{IANA-key-proof-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-key-proof-methods-template}}.
+The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
+The DE is expected to ensure that the proofing method provides sufficient coverage of and binding to the protocol messages to which it is applied.
 
 ### Registration Template {#IANA-key-proof-methods-template}
 
@@ -5640,7 +5698,10 @@ Specification document(s):
 
 ## Key Formats {#IANA-key-formats}
 
-This document defines formats for a public key value, for which IANA is asked to create and maintain a new registry titled "Key Formats". Initial values for this registry are given in {{IANA-key-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-key-formats-template}}.
+This document defines formats for a public key value, for which IANA is asked to create and maintain a new registry titled "Key Formats". Initial values for this registry are given in {{IANA-key-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-key-formats-template}}.
+The DE is expected to ensure the key format specifies the structure and serialization of the key material.
 
 ### Registration Template {#IANA-key-formats-template}
 
@@ -5663,7 +5724,11 @@ Specification document(s):
 
 ## Authorization Server Discovery Fields {#IANA-as-discovery}
 
-This document defines a discovery document for an AS, for which IANA is asked to create and maintain a new registry titled "Authorization Server Discovery Fields". Initial values for this registry are given in {{IANA-as-discovery-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}} and shall follow the template presented in {{IANA-as-discovery-template}}.
+This document defines a discovery document for an AS, for which IANA is asked to create and maintain a new registry titled "Authorization Server Discovery Fields". Initial values for this registry are given in {{IANA-as-discovery-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+
+The DE is expected to ensure that all registrations follow the template presented in {{IANA-as-discovery-template}}.
+The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
+The DE is expected to ensure that the values in the discovery document are sufficient to provide optimization and hints to the client instance, but that knowledge of the discovered value is not required for starting a transaction with the AS.
 
 ### Registration Template {#IANA-as-discovery-template}
 
@@ -5784,7 +5849,7 @@ connections. While modern TLS does make use of session resumption, this still ne
 with authentication methods to determine the identity of parties on the
 connections. In other words, it is not possible with TLS alone to know that the same party is making
 a set of calls over time, since each time a new TLS connection is established, both the client and the server (or the server only when using {{mtls}}) have to validate
-the other party's identity. Such a verification can be achieved via methods described in {{!I-D.ietf-uta-6125bis}}), but these are not enough to establish the identity of the client instance in many cases.
+the other party's identity. Such a verification can be achieved via methods described in {{I-D.ietf-uta-rfc6125bis}}, but these are not enough to establish the identity of the client instance in many cases.
 
 To counter this, GNAP defines a set of key binding methods in {{binding-keys}} that allow authentication and
 proof of possession by the caller, which is usually the client instance. These methods are intended to be used in
@@ -6282,7 +6347,7 @@ See also the related considerations for token values in {{security-network-manag
 ## Interaction Finish Modes and Polling {#security-polling}
 
 During the interaction process, the client instance usually hands control of the user experience
-over to another component, beit the system browser, another application, or some action
+over to another component, be it the system browser, another application, or some action
 the resource owner is instructed to take on another device. By using an interaction finish
 method, the client instance can be securely notified by the AS when the interaction is completed
 and the next phase of the protocol should occur. This process includes information that the
@@ -6410,7 +6475,7 @@ is stopped in several places.
 When starting an interactive grant request, a client application has a number of protocol elements
 that it needs to manage, including nonces, references, keys, access tokens, and other elements.
 During the interaction process, the client instance usually hands control of the user experience
-over to another component, beit the system browser, another application, or some action
+over to another component, be it the system browser, another application, or some action
 the resource owner is instructed to take on another device. In order for the client instance
 to make its continuation call, it will need to recall all of these protocol elements at a future time. Usually
 this means the client instance will need to store these protocol elements in some retrievable
@@ -6453,7 +6518,7 @@ the client software's programmed behavior.
 ## Exhaustion of Random Value Space {#security-random-exhaustion}
 
 Several parts of the GNAP process make use of unguessable randomized values, such as nonces,
-tokens, and randomized URIs. Since these values are intended to be unique, a sufficiently
+tokens, user codes, and randomized URIs. Since these values are intended to be unique, a sufficiently
 powerful attacker could make a large number of requests to trigger generation of randomized
 values in an attempt to exhaust the random number generation space. While this attack is
 particularly applicable to the AS, client software could likewise be targeted by an attacker
@@ -6801,6 +6866,8 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 - -13
     - Editoral changes from chair review.
+    - Clarify that user codes are ungessable.
+    - Fix user code examples.
     - Clarify expectations for extensions to interaction start and finish methods.
 
 - -12
@@ -7209,7 +7276,7 @@ Cache-Control: no-store
     "interact": {
         "redirect": "https://srv.ex/MXKHQ",
         "user_code": {
-            "code": "A1BC-3DFF"
+            "code": "A1BC3DFF"
         }
     },
     "continue": {
