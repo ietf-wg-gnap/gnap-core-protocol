@@ -715,7 +715,7 @@ An example set of protocol messages for this method can be found in {{example-no
 
 In this example flow, the client instance receives an access token to access a resource server through
 some valid GNAP process. The client instance uses that token at the RS for some time, but eventually
-the access token expires. The client instance then gets a new access token by rotating the
+the access token expires. The client instance then gets a refreshed access token by rotating the
 expired access token at the AS using the token's management URI.
 
 ~~~ aasvg
@@ -744,9 +744,9 @@ expired access token at the AS using the token's management URI.
     see the token rotation section for details.
 
 8. The AS validates the rotation request including the signature
-    and keys presented in (7) and returns a
-    [new access token](#response-token-single). The response includes
-    a new access token and can also include updated token management
+    and keys presented in (7) and refreshes the
+    [access token](#response-token-single). The response includes
+    a new version of the access token and can also include updated token management
     information, which the client instance will store in place of the values
     returned in (2).
 
@@ -6997,7 +6997,7 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
 1. **Consent and authorization flexibility:**
 
-    OAuth 2.0 generally assumes the user has access to the a web browser. The type of interaction available is fixed by the grant type, and the most common interactive grant types start in the browser. OAuth 2.0 assumes that the user using the client software is the same user that will interact with the AS to approve access.
+    OAuth 2.0 generally assumes the user has access to a web browser. The type of interaction available is fixed by the grant type, and the most common interactive grant types start in the browser. OAuth 2.0 assumes that the user using the client software is the same user that will interact with the AS to approve access.
 
     GNAP allows various patterns to manage authorizations and consents required to fulfill this requested delegation, including information sent by the client instance, information supplied by external parties, and information gathered through the interaction process. GNAP allows a client instance to list different ways that it can start and finish an interaction, and these can be mixed together as needed for different use cases. GNAP interactions can use a browser, but don’t have to. Methods can use inter-application messaging protocols, out-of-band data transfer, or anything else. GNAP allows extensions to define new ways to start and finish an interaction, as new methods and platforms are expected to become available over time. GNAP is designed to allow the end user and the resource owner to be two different people, but still works in the optimized case of them being the same party.
 
@@ -7006,6 +7006,8 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
     OAuth 2.0 uses different “grant types” that start at different endpoints for different purposes. Many of these require discovery of several interrelated parameters.
 
     GNAP requests all start with the same type of request to the same endpoint at the AS. Next steps are negotiated between the client instance and AS based on software capabilities, policies surrounding requested access, and the overall context of the ongoing request. GNAP defines a continuation API that allows the client instance and AS to request and send additional information from each other over multiple steps. This continuation API uses the same access token protection that other GNAP-protected APIs use. GNAP allows discovery to optimize the requests but it isn’t required thanks to the negotiation capabilities.
+
+    GNAP is able to handle the life-cycle of an authorization request, and therefore simplifies the mental model surrounding OAuth2. For instance, there's no need for refresh tokens when the API enables proper rotation of access tokens.
 
 3. **Client instances:**
 
