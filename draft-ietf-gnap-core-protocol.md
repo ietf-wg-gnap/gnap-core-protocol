@@ -2543,10 +2543,10 @@ This specification defines the following `code` values:
 : The interaction integrity could not be established.
 
 `"too_fast"`:
-: The client instance did not respect the timeout in the wait response.
+: The client instance did not respect the timeout in the wait response before the next call.
 
 `"too_many_attempts"`:
-: A limit has been reached in the number of reasonable attempts.
+: A limit has been reached in the total number of reasonable attempts. This number is either defined statically or adjusted based on runtime conditions by the AS.
 
 Additional error codes can be defined in the [Error Code Registry](#IANA-error-code).
 
@@ -3258,7 +3258,8 @@ NOTE: '\' line wrapping per RFC 8792
 See {{security-polling}} for considerations on polling for continuation without an interaction
 `finish` method.
 
-In error conditions, the AS responds to the client instance with the error code as discussed in {{response-error}}. For example, if the client instance has polled too many times before the RO has approved the request, the AS would respond with a message like this:
+In error conditions, the AS responds to the client instance with the error code as discussed in {{response-error}}.
+For example, if the client instance has polled too many times before the RO has approved the request, the AS would respond with a message like this:
 
 ~~~
 {
