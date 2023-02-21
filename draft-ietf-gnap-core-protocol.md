@@ -5759,7 +5759,7 @@ connections. While modern TLS does make use of session resumption, this still ne
 with authentication methods to determine the identity of parties on the
 connections. In other words, it is not possible with TLS alone to know that the same party is making
 a set of calls over time, since each time a new TLS connection is established, both the client and the server (or the server only when using {{mtls}}) have to validate
-the other party's identity. Such a verification can be achieved via methods described in {{!I-D.ietf-uta-6125bis}}), but these are not enough to establish the identity of the client instance in many cases.
+the other party's identity. Such a verification can be achieved via methods described in {{I-D.ietf-uta-rfc6125bis}}, but these are not enough to establish the identity of the client instance in many cases.
 
 To counter this, GNAP defines a set of key binding methods in {{binding-keys}} that allow authentication and
 proof of possession by the caller, which is usually the client instance. These methods are intended to be used in
