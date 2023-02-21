@@ -2198,16 +2198,17 @@ If the client instance indicates that it can
 and the AS supports this mode for the client instance's
 request, the AS responds with a "user_code" field. This field is string
 containing a unique short code that the user
-can type into a web page. This string MUST be
+can type into a web page. To facilitate usability, this string MUST be
 case-insensitive, MUST consist of only easily typeable
-characters (such as letters or numbers). The time in which this
+characters (such as letters or numbers). The string MUST be randomly generated
+so as to be unguessable by an attacker within the time it is accepted. The time in which this
 code will be accepted SHOULD be short lived, such as several
 minutes. It is RECOMMENDED that this code be no more than eight
 characters in length.
 
 ~~~ json
 "interact": {
-    "user_code": "A1BC-3DFF"
+    "user_code": "A1BC3DFF"
 }
 ~~~
 
@@ -2245,9 +2246,10 @@ object that contains the following members.
 
 `code` (string):
 : A unique short code that the end user
-    can type into a provided URI. This string MUST be
+    can type into a provided URI. To facilitate usability, this string MUST be
     case-insensitive, MUST consist of only easily typeable
-    characters (such as letters or numbers). The time in which this
+    characters (such as letters or numbers). The string MUST be randomly generated
+    so as to be unguessable by an attacker within the time it is accepted. The time in which this
     code will be accepted SHOULD be short lived, such as several
     minutes. It is RECOMMENDED that this code be no more than eight
     characters in length.
@@ -2264,7 +2266,7 @@ object that contains the following members.
 ~~~ json
 "interact": {
     "user_code_uri": {
-        "code": "A1BC-3DFF",
+        "code": "A1BC3DFF",
         "uri": "https://srv.ex/device"
     }
 }
@@ -2690,6 +2692,14 @@ request and MUST be protected by HTTPS or equivalent means.
 When the end user is directed to enter a short code through the ["user_code"](#response-interact-usercode)
 mode, the client instance communicates the user code to the end user and
 directs the end user to enter that code at an associated URI.
+The client instance MAY
+format the user code in such a way as to facilitate memorability and transfer of the
+code, so long as this formatting does not alter the value as accepted at the user code
+URI. For example, a client instance receiving the user code "A1BC3DFF" could choose to
+display this to the user as "A1BC 3DFF", breaking up the long string into two shorter
+strings. In this example, the space in between the two parts would be removed upon its
+entry into the user code URI.
+
 This mode is designed to be used when the client instance is not able to communicate or facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
 in the client software's documentation. As a consequence, these URIs SHOULD be short.
@@ -2720,6 +2730,14 @@ The user should be warned as such an error state is approached, if possible.
 When the end user is directed to enter a short code through the ["user_code_uri"](#response-interact-usercodeuri)
 mode, the client instance communicates the user code and associated URI to the end user and
 directs the end user to enter that code at the URI.
+The client instance MAY
+format the user code in such a way as to facilitate memorability and transfer of the
+code, so long as this formatting does not alter the value as accepted at the user code
+URI. For example, a client instance receiving the user code "A1BC3DFF" could choose to
+display this to the user as "A1BC 3DFF", breaking up the long string into two shorter
+strings. In this example, the space in between the two parts would be removed upon its
+entry into the user code URI.
+
 This mode is used when the client instance is not able to facilitate launching
 a complex arbitrary URI but can communicate arbitrary values like URIs. As a consequence, these URIs
 SHOULD be short to allow the URI to be typed by the end user.
@@ -6428,7 +6446,7 @@ the client software's programmed behavior.
 ## Exhaustion of Random Value Space {#security-random-exhaustion}
 
 Several parts of the GNAP process make use of unguessable randomized values, such as nonces,
-tokens, and randomized URIs. Since these values are intended to be unique, a sufficiently
+tokens, user codes, and randomized URIs. Since these values are intended to be unique, a sufficiently
 powerful attacker could make a large number of requests to trigger generation of randomized
 values in an attempt to exhaust the random number generation space. While this attack is
 particularly applicable to the AS, client software could likewise be targeted by an attacker
@@ -6775,6 +6793,8 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 > Note: To be removed by RFC editor before publication.
 
 - -13
+    - Clarify that user codes are ungessable.
+    - Fix user code examples.
     - Clarify expectations for extensions to interaction start and finish methods.
 
 - -12
@@ -7183,7 +7203,7 @@ Cache-Control: no-store
     "interact": {
         "redirect": "https://srv.ex/MXKHQ",
         "user_code": {
-            "code": "A1BC-3DFF"
+            "code": "A1BC3DFF"
         }
     },
     "continue": {
