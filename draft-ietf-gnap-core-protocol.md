@@ -3275,10 +3275,12 @@ with the grant request, allowing the client instance to make subsequent requests
 subsets of granted access. The details of this processing are out of scope for this specification,
 but a one possible approach is as follows:
 
-1. A client instance requests access to A, and is granted by the RO. This results in an access token.
-2. The client instance later modifies the grant request to include A+B. Since the client instance was previously granted A under this grant request, the RO is prompted to allow the client instance access to A+B. This results in a new access token.
-3. The client instance makes another grant modification to ask only for B. Since the client instance was previously granted A+B under this grant request, the RO is not prompted and the access to B is granted in a new access token, with no access to A.
-3. The client instance makes another grant modification to ask only for A. Since the client instance was previously granted A+B under this grant request, the RO is not prompted and the access to A is granted in a new access token, with no access to B.
+1. A client instance requests access to `Foo`, and is granted by the RO. This results in an access token, `AT1`.
+2. The client instance later modifies the grant request to include `Foo` and `Bar` together. Since the client instance was previously granted `Foo` under this grant request, the RO is prompted to allow the client instance access to `Foo` and `Bar` together. This results in a new access token, `AT2` This access token has access to both `Foo` and `Bar`. The rights of the original access token `AT1` are not modified.
+3. The client instance makes another grant modification to ask only for `Bar`. Since the client instance was previously granted `Foo` and `Bar` together under this grant request, the RO is not prompted and the access to `Bar` is granted in a new access token, `AT3`. This new access token does not allow access to `Foo`.
+4. The original access token `AT1` expires and the client seeks a new access token to replace it. The client instance makes another grant modification to ask only for `Foo`. Since the client instance was previously granted `Foo` and `Bar` together under this grant request, the RO is not prompted and the access to `Foo` is granted in a new access token, `AT4`. This new access token does not allow access to `Bar`.
+
+All four access tokens are independent of each other and associated with the same underlying grant request. Each of these access tokens could possibly also be rotated using token management, if available. For example, instead of asking for a new token to replace `AT1`, the client instance could ask for a refresh of `AT1` using the rotation method of token management. This would result in a refreshed `AT1`, potentially with a different token value and expiration from the original `AT1` but with the same access rights of allowing only access to `Foo`.
 
 The client instance MAY include the `interact` field as described in {{request-interact}}.
 Inclusion of this field indicates that the client instance is capable of driving interaction with
