@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-latest
+docname: draft-ietf-gnap-core-protocol-13
 category: std
 
 ipr: trust200902
@@ -6870,6 +6870,11 @@ Throughout many parts of GNAP, the parties pass shared references between each o
     - Clarify that user codes are ungessable.
     - Fix user code examples.
     - Clarify expectations for extensions to interaction start and finish methods.
+    - Fix references.
+    - Add IANA designated expert instructions.
+    - Clarify new vs. updated access tokens, and call out no need for refresh tokens in OAuth 2 comparison section.
+    - Add instructions on assertion processing.
+    - Explicitly list user reference lifetime management.
 
 - -12
     - Make default hash algorithm SHA256 instead of SHA3-512.
