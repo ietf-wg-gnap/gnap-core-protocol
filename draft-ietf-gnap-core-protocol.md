@@ -5772,6 +5772,8 @@ Specification document(s):
 
 **SUNET Auth Server** from SUNET. <https://github.com/SUNET/sunet-auth-server> Production implementation of AS in Python. BSD license.
 
+**Trustbloc** from Gen Digital. <https://github.com/trustbloc/docs/blob/main/readthedocs/designs/auth.md> Production implementation of AS and client in Go. Apache 2.0 license.
+
 **Verified.ME** from SecureKey. <https://verified.me/> Production implementation of AS, client and RS. Proprietary license.
 
 **XYZ** from Bespoke Engineering, implementation by Justin Richer. <https://github.com/bspk/oauth.xyz-java> Advanced prototype implementation of AS, client, and RS in Java, with common support library. Prototype implementation of SPA client in JavaScript. Apache 2.0 license.
