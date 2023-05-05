@@ -6899,6 +6899,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 > Note: To be removed by RFC editor before publication.
 
+- -14
+    - Fix key rotation with HTTP Signatures based on security analysis.
+
 - -13
     - Editoral changes from chair review.
     - Clarify that user codes are ungessable.
