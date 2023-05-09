@@ -716,7 +716,7 @@ An example set of protocol messages for this method can be found in {{example-no
 In this example flow, the client instance receives an access token to access a resource server through
 some valid GNAP process. The client instance uses that token at the RS for some time, but eventually
 the access token expires. The client instance then gets a refreshed access token by rotating the
-expired access token at the AS using the token's management URI.
+expired access token's value at the AS using the token management API.
 
 ~~~ aasvg
 {::include diagram/refresh.md}
@@ -1824,14 +1824,16 @@ In this example, the AS is returning a bearer [access token](#response-token-sin
 an opaque identifier.
 
 ~~~ json
-NOTE: '\' line wrapping per RFC 8792
-
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
         "flags": ["bearer"],
-        "manage": "https://server.example.com/token/PRY5NM33O\
-            M4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": {
+            "uri": "https://server.example.com/token/PRY5NM33O",
+            "access_token": {
+                "value": "B8CDFONP21-4TB8N6.BW7ONM"
+            }
+        }
     },
     "subject": {
         "sub_ids": [ {
@@ -1895,6 +1897,7 @@ contains a JSON object with the following properties.
     client instance's key used in the request and MUST NOT be a bearer token. As a consequence,
     the `flags` array of this access token MUST NOT contain the string `bearer` and the
     `key` field MUST be omitted.
+    This access token MUST NOT have a `manage` field.
     The client instance MUST present the continuation access token in all requests to the continuation URI as described in {{use-access-token}}.
     REQUIRED.
 
@@ -1951,16 +1954,14 @@ properties.
     [token request](#request-token), if present.
     REQUIRED for multiple access tokens or if a `label` was included in the single access token request, OPTIONAL for a single access token where no `label` was included in the request.
 
-`manage` (string):
-: The management URI for this
-    access token. This URI MUST be an absolute URI.
+`manage` (object):
+: Access information for the token management API for this access token.
+    The management URI for this
+    access token.
     If provided, the client instance MAY manage its access
-    token as described in {{token-management}}. This management
-    URI is a function of the AS and is separate from the RS
+    token as described in {{token-management}}.
+    This management API is a function of the AS and is separate from the RS
     the client instance is requesting access to.
-    This URI MUST NOT include the
-    access token value and SHOULD be different for each access
-    token issued in a request.
     OPTIONAL.
 
 `access` (array of objects/strings):
@@ -1993,6 +1994,29 @@ properties.
 : A set of flags that represent attributes or behaviors of the access token
     issued by the AS.
     OPTIONAL.
+
+The value of the `manage` field is an object with the following properties:
+
+`uri` (string):
+    The URI of the token management API for this access token.
+    This URI MUST be an absolute URI.
+    This URI MUST NOT include the
+    access token value and SHOULD be different for each access
+    token issued in a request and MUST NOT include the value of the
+    access token being managed.
+    REQUIRED.
+
+`access_token` (object):
+: A unique access token for continuing the request, called the "token management access token".
+    The value of this property MUST be an object in the format specified
+    in {{response-token-single}}. This access token MUST be bound to the
+    client instance's key used in the request and MUST NOT be a bearer token. As a consequence,
+    the `flags` array of this access token MUST NOT contain the string `bearer` and the
+    `key` field MUST be omitted.
+    This access token MUST NOT have a `manage` field.
+    This access token MUST NOT have the same value as the token it is managing.
+    The client instance MUST present the continuation access token in all requests to the continuation URI as described in {{use-access-token}}.
+    REQUIRED.
 
 The values of the `flags` field defined by this specification are as follows:
 
@@ -2037,8 +2061,12 @@ NOTE: '\' line wrapping per RFC 8792
 
 "access_token": {
     "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-    "manage": "https://server.example.com/token/PRY5NM33O\
-        M4TB8N6BW7OZB8CDFONP219RP1L",
+    "manage": {
+        "uri": "https://server.example.com/token/PRY5NM33O",
+        "access_token": {
+            "value": "B8CDFONP21-4TB8N6.BW7ONM"
+        }
+    },
     "access": [
         {
             "type": "photo-api",
@@ -2099,8 +2127,12 @@ NOTE: '\' line wrapping per RFC 8792
     {
         "label": "token1",
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33O\
-            M4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": {
+            "uri": "https://server.example.com/token/PRY5NM33O",
+            "access_token": {
+                "value": "B8CDFONP21-4TB8N6.BW7ONM"
+            }
+        },
         "access": [ "finance" ]
     },
     {
@@ -2127,8 +2159,12 @@ with a multiple access token structure containing one access token.
     {
         "label": "token2",
         "value": "8N6BW7OZB8CDFONP219-OS9M2PMHKUR64TBRP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33O\
-            M4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": {
+            "uri": "https://server.example.com/token/PRY5NM33O",
+            "access_token": {
+                "value": "B8CDFONP21-4TB8N6.BW7ONM"
+            }
+        },
         "access": [ "fruits" ]
     }
 ]
@@ -3161,8 +3197,12 @@ NOTE: '\' line wrapping per RFC 8792
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33O\
-            M4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": {
+            "uri": "https://server.example.com/token/PRY5NM33O",
+            "access_token": {
+                "value": "B8CDFONP21-4TB8N6.BW7ONM"
+            }
+        }
     },
     "subject": {
         "sub_ids": [ {
@@ -3243,8 +3283,12 @@ NOTE: '\' line wrapping per RFC 8792
 {
     "access_token": {
         "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
-        "manage": "https://server.example.com/token/PRY5NM33O\
-            M4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": {
+            "uri": "https://server.example.com/token/PRY5NM33O",
+            "access_token": {
+                "value": "B8CDFONP21-4TB8N6.BW7ONM"
+            }
+        }
     },
     "subject": {
         "sub_ids": [ {
@@ -3299,7 +3343,7 @@ but a one possible approach is as follows:
 3. The client instance makes another grant modification to ask only for `Bar`. Since the client instance was previously granted `Foo` and `Bar` together under this grant request, the RO is not prompted and the access to `Bar` is granted in a new access token, `AT3`. This new access token does not allow access to `Foo`.
 4. The original access token `AT1` expires and the client seeks a new access token to replace it. The client instance makes another grant modification to ask only for `Foo`. Since the client instance was previously granted `Foo` and `Bar` together under this grant request, the RO is not prompted and the access to `Foo` is granted in a new access token, `AT4`. This new access token does not allow access to `Bar`.
 
-All four access tokens are independent of each other and associated with the same underlying grant request. Each of these access tokens could possibly also be rotated using token management, if available. For example, instead of asking for a new token to replace `AT1`, the client instance could ask for a refresh of `AT1` using the rotation method of token management. This would result in a refreshed `AT1`, potentially with a different token value and expiration from the original `AT1` but with the same access rights of allowing only access to `Foo`.
+All four access tokens are independent of each other and associated with the same underlying grant request. Each of these access tokens could possibly also be rotated using token management, if available. For example, instead of asking for a new token to replace `AT1`, the client instance could ask for a refresh of `AT1` using the rotation method of the token management API. This would result in a refreshed `AT1` with a different token value and expiration from the original `AT1` but with the same access rights of allowing only access to `Foo`.
 
 The client instance MAY include the `interact` field as described in {{request-interact}}.
 Inclusion of this field indicates that the client instance is capable of driving interaction with
@@ -3541,29 +3585,40 @@ Once the grant request is in the _finalized_ state, it MUST NOT be moved to any 
 
 # Token Management {#token-management}
 
-If an access token response includes the `manage` parameter as
+If an access token response includes the `manage` field as
 described in {{response-token-single}}, the client instance MAY call
 this URI to manage the access token with the rotate and revoke actions defined in
 the following sections. Other actions are undefined by this
 specification.
 
-The access token being managed acts as the access element for its own
-management API. The client instance MUST present proof of an appropriate key
-along with the access token.
+~~~ json
+{
+    "access_token": {
+        "value": "OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0",
+        "flags": ["bearer"],
+        "manage": {
+            "uri": "https://server.example.com/token/PRY5NM33O",
+            "access_token": {
+                "value": "B8CDFONP21-4TB8N6.BW7ONM"
+            }
+        }
+    }
+}
+~~~
 
-If the token is sender-constrained (i.e., not a bearer token), it
-MUST be sent [with the appropriate binding for the access token](#use-access-token) based
-on the key bound to the access token.
 
-If the token is a bearer token, the client instance MUST present proof of the
-[client instance's key](#request-client) (or its most recent rotation) as described in
-{{binding-keys}}. Note that this is usually the same key used in the initial grant request.
+The token management access token issued under the `manage` field is used to protect
+all calls to the token management API.
+The client instance MUST present proof of the key associated with the token
+along with the token management access token value.
 
-The AS MUST validate the proof and assure that it is associated with
-either the token itself or the client instance the token was issued to, as
-appropriate for the token's presentation type.
+The AS MUST validate the proof and ensure that it is associated with the
+token management access token.
 
-## Rotating the Access Token {#rotate-access-token}
+The AS MUST uniquely identify the token being managed from the token management URI,
+the token management access token, or a combination of both.
+
+## Rotating the Access Token Value {#rotate-access-token}
 
 If the client instance has an access token and that access token expires, the
 client instance might want to rotate the access token to a new value without expiration.
@@ -3577,9 +3632,9 @@ sending the access token in the appropriate header and signing the request
 with the appropriate key.
 
 ~~~ http-message
-POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
+POST /token/PRY5NM33O HTTP/1.1
 Host: server.example.com
-Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+Authorization: GNAP B8CDFONP21-4TB8N6.BW7ONM
 Signature-Input: sig1=...
 Signature: sig1=...
 Content-Digest: sha-256=...
@@ -3591,16 +3646,10 @@ access rights for this grant request, the client instance has to call the [conti
 functionality to get a new access token. The client instance can also create a new grant request
 with the required access rights.
 
-The AS validates that the token presented is associated with the management
+The AS validates that the token management access token presented is associated with the management
 URI, that the AS issued the token to the given client instance, and that
-the presented key is appropriate to the token.
-
-Note that in many cases, the access token will have expired for regular use at an RS. To facilitate
-token rotation, the AS SHOULD honor the rotation request of the expired access token
-since it is likely that the client instance is attempting to
-refresh the expired token. To support this, the AS MAY allow a longer lifetime for
-token management compared to its use at an RS. An AS MUST NOT
-honor a rotation request for an access token that has been explicitly revoked or otherwise disabled.
+the presented key is the correct key for the token management access token. The AS determines
+which access token is being rotated from the token management URI, the token management access token, or both.
 
 If the token is validated and the key is appropriate for the
 request, the AS MUST invalidate the current access token value associated
@@ -3625,8 +3674,12 @@ NOTE: '\' line wrapping per RFC 8792
 {
     "access_token": {
         "value": "FP6A8H6HY37MH13CK76LBZ6Y1UADG6VEUPEER5H2",
-        "manage": "https://server.example.com/token/PRY5NM33O\
-            M4TB8N6BW7OZB8CDFONP219RP1L",
+        "manage": {
+            "uri": "https://server.example.com/token/PRY5NM33O",
+            "access_token": {
+                "value": "B8CDFONP21-4TB8N6.BW7ONM"
+            }
+        },
         "expires_in": 3600,
         "access": [
             {
@@ -3675,9 +3728,9 @@ Signatures proofing method uses multiple signatures in the request as described 
 {{httpsig-rotate}}, as shown in this example.
 
 ~~~ http-message
-POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
+POST /token/PRY5NM33O HTTP/1.1
 Host: server.example.com
-Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+Authorization: GNAP B8CDFONP21-4TB8N6.BW7ONM
 Signature-Input: sig1=..., sig2=("signature";key=sig1)...
 Signature: sig1=..., sig2=...
 Content-Digest: sha-256=...
@@ -3715,9 +3768,9 @@ URI, presenting the access token and signing the request with
 the appropriate key.
 
 ~~~ http-message
-DELETE /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
+DELETE /token/PRY5NM33O HTTP/1.1
 Host: server.example.com
-Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
+Authorization: GNAP B8CDFONP21-4TB8N6.BW7ONM
 Signature-Input: sig1=...
 Signature: sig1=...
 ~~~
@@ -6899,7 +6952,8 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 > Note: To be removed by RFC editor before publication.
 
-- -14
+- 14
+    - Update token rotation to use URI + management token.
     - Fix key rotation with HTTP Signatures based on security analysis.
 
 - -13
