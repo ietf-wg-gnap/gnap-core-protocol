@@ -4252,21 +4252,30 @@ A received message MAY include multiple signatures, each with its own label. The
 #### Key Rotation using HTTP Message Signatures {#httpsig-rotate}
 
 When rotating a key using HTTP Message Signatures, the message, which includes the new public key
-value or reference, is first signed with the old key. The message is then signed again with the new
-key by including the signature from the old key under the signature of the new key.
+value or reference, is first signed with the old key following all of the requirements in {{httpsig-binding}}.
+The message is then signed again with the new key by following all of the requirements in {{httpsig-binding}} again
+with the following additional requirements:
+
+- The covered components MUST include the Signature and Signature-Input values from the signature generated with the old key
+- The tag value MUST be `gnap-rotate`
 
 For example, the following request to the token management endpoint for rotating a token value
-contains both the new key in the request. The message is first signed using the old key
-and the resulting signature is placed in "sig1":
+contains the new key in the request. The message is first signed using the old key
+and the resulting signature is placed in "old-key":
 
 ~~~ http-message
-POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
+NOTE: '\' line wrapping per RFC 8792
+
+POST /token/PRY5NM33 HTTP/1.1
 Host: server.example.com
-Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Signature-Input: sig1=("authorization" "@method")\
-    ;keyid="xyz-1";created=161888447;tag="gnap"
-Signature: sig1=...
-Content-Digest: sha-256=...
+Authorization: GNAP 4398.34-12-asvDa.a
+Content-Digest: sha-512=:Fb/A5vnawhuuJ5xk2RjGrbbxr6cvinZqd4+JPY85u/\
+  JNyTlmRmCOtyVhZ1Oz/cSS4tsYen6fzpCwizy6UQxNBQ==:
+Signature-Input: old-key=("@method" "@target-uri" "content-digest" \
+  "authorization");created=1618884475;keyid="test-key-ecc-p256"\
+  ;tag="gnap"
+Signature: old-key=:vN4IKYsJl2RLFe+tYEm4dHM4R4BToqx5D2FfH4ge5WOkgxo\
+  dI2QRrjB8rysvoSEGvAfiVJOWsGcPD1lU639Amw==:
 
 {
     "key": {
@@ -4282,28 +4291,51 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-The signer then creates a new signature using the new key using the signature
-value as its input to the signature base. Since the existing signature covers the required parts
-of the message, they do not need to be repeated.
+The signer then creates a new signature using the new key, adding the signature
+input and value to the signature base.
 
 ~~~
-"signature";key="sig1"
-"@signature-input": ("signature";key="sig1");keyid="xyz-2"\
-  ;tag="gnap";created=161888447
+NOTE: '\' line wrapping per RFC 8792
+
+"@method": POST
+"@target-uri": https://server.example.com/token/PRY5NM33
+"content-digest": sha-512=:Fb/A5vnawhuuJ5xk2RjGrbbxr6cvinZqd4+JPY85\
+  u/JNyTlmRmCOtyVhZ1Oz/cSS4tsYen6fzpCwizy6UQxNBQ==:
+"authorization": GNAP 4398.34-12-asvDa.a
+"signature";key="old-key": :YdDJjDn2Sq8FR82e5IcOLWmmf6wILoswlnRcz+n\
+  M+e8xjFDpWS2YmiMYDqUdri2UiJsZx63T1z7As9Kl6HTGkQ==:
+"signature-input";key="old-key": ("@method" "@target-uri" \
+  "content-digest" "authorization");created=1618884475\
+  ;keyid="test-key-ecc-p256";tag="gnap"
+"@signature-params": ("@method" "@target-uri" "content-digest" \
+  "authorization" "signature";key="old-key" "signature-input"\
+  ;key="old-key");created=1618884480;keyid="xyz-2";tag="gnap-rotate"
 ~~~
 
 This signature is then added to the message:
 
 ~~~ http-message
-POST /token/PRY5NM33OM4TB8N6BW7OZB8CDFONP219RP1L HTTP/1.1
+NOTE: '\' line wrapping per RFC 8792
+
+POST /token/PRY5NM33 HTTP/1.1
 Host: server.example.com
-Authorization: GNAP OS9M2PMHKUR64TB8N6BW7OZB8CDFONP219RP1LT0
-Signature-Input: sig1=("authorization" "@method")\
-    ;keyid="xyz-1";created=161888447;tag="gnap", \
-    sig2=("signature";key="sig1");keyid="xyz-2";tag="gnap";\
-    ;created=161888447
-Signature: sig1=..., sig2=...
-Content-Digest: sha-256=...
+Authorization: GNAP 4398.34-12-asvDa.a
+Content-Digest: sha-512=:Fb/A5vnawhuuJ5xk2RjGrbbxr6cvinZqd4+JPY85u/\
+  JNyTlmRmCOtyVhZ1Oz/cSS4tsYen6fzpCwizy6UQxNBQ==:
+Signature-Input: old-key=("@method" "@target-uri" "content-digest" \
+    "authorization");created=1618884475;keyid="test-key-ecc-p256"\
+    ;tag="gnap", \
+  new-key=("@method" "@target-uri" "content-digest" \
+    "authorization" "signature";key="old-key" "signature-input"\
+    ;key="old-key");created=1618884480;keyid="xyz-2";tag="gnap-rotate"
+Signature: old-key=:vN4IKYsJl2RLFe+tYEm4dHM4R4BToqx5D2FfH4ge5WOkgxo\
+    dI2QRrjB8rysvoSEGvAfiVJOWsGcPD1lU639Amw==:, \
+  new-key=:VWUExXQ0geWeTUKhCfDT7WJyT++OHSVbfPA1ukW0o7mmstdbvIz9iOuH\
+    DRFzRBm0MQPFVMpLDFXQdE3vi2SL3ZjzcX2qLwzAtyRB9+RsV2caAA80A5ZGMoo\
+    gUsKPk4FFDN7KRUZ0vT9Mo9ycx9Dq/996TOWtAmq5z0YUYEwwn+T6+NcW8rFtms\
+    s1ZfXG0EoAfV6ve25p+x40Y1rvDHsfkakTRB4J8jWVDybSe39tjIKQBo3uicDVw\
+    twewBMNidIa+66iF3pWj8w9RSb0cncEgvbkHgASqaZeXmxxG4gM8p1HH9v/OqQT\
+    Oggm5gTWmCQs4oxEmWsfTOxefunfh3X+Qw==:
 
 {
     "key": {
@@ -6866,6 +6898,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 > Note: To be removed by RFC editor before publication.
+
+- -14
+    - Fix key rotation with HTTP Signatures based on security analysis.
 
 - -13
     - Editoral changes from chair review.
