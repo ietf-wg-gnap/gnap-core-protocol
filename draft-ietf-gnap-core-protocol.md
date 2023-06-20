@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-14
+docname: draft-ietf-gnap-core-protocol
 category: std
 
 ipr: trust200902
