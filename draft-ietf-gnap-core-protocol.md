@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-13
+docname: draft-ietf-gnap-core-protocol-14
 category: std
 
 ipr: trust200902
@@ -215,25 +215,25 @@ on the role by the overall protocol.
 {::include diagram/roles.md}
 ~~~
 
-Authorization Server (AS)
+Authorization Server (AS):
 : server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information). The AS is uniquely defined by the _grant endpoint URI_, which the absolute URI where grant requests are started by clients.
 
-Client
+Client:
 : application that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end user or it runs autonomously on behalf of a resource owner.
 
     Example: a client can be a mobile application, a web application, etc.
 
     Note: this specification differentiates between a specific instance (the client instance, identified by its unique key) and the software running the instance (the client software). For some kinds of client software, there could be many instances of that software, each instance with a different key.
 
-Resource Server (RS)
+Resource Server (RS):
 : server that provides operations on protected resources, where operations require a valid access token issued by an AS.
 
-Resource Owner (RO)
+Resource Owner (RO):
 : subject entity that may grant or deny operations on resources it has authority upon.
 
     Note: the act of granting or denying an operation may be manual (i.e. through an interaction with a physical person) or automatic (i.e. through predefined organizational rules).
 
-End user
+End user:
 : natural person that operates a client instance.
 
     Note: that natural person may or may not be the same entity as the RO.
@@ -289,35 +289,35 @@ communications mechanisms which are considered out of scope of GNAP.
 In addition to the roles above, the protocol also involves several
 elements that are acted upon by the roles throughout the process.
 
-Attribute
+Attribute:
 : characteristics related to a subject.
 
-Access Token
+Access Token:
 : a data artifact representing a set of rights and/or attributes.
 
     Note: an access token can be first issued to a client instance (requiring authorization by the RO) and subsequently rotated.
 
-Grant
+Grant:
 : (verb): to permit an instance of client software to receive some attributes at a specific time and valid for a specific duration and/or to exercise some set of delegated rights to access a protected resource;
 : (noun): the act of granting permission to a client instance.
 
-Privilege
+Privilege:
 : right or attribute associated with a subject.
 
     Note: the RO defines and maintains the rights and attributes associated to the protected resource, and might temporarily delegate some set of those privileges to an end user. This process is refered to as privilege delegation.
 
-Protected Resource
+Protected Resource:
 : protected API (Application Programming Interface) served by an RS and that can be accessed by a client, if and only if a valid and sufficient access token is provided.
 
     Note: to avoid complex sentences, the specification document may simply refer to "resource" instead of "protected resource".
 
-Right
+Right:
 : ability given to a subject to perform a given operation on a resource under the control of an RS.
 
-Subject
+Subject:
 : person, organization or device. The subject decides whether and under which conditions its attributes can be disclosed to other parties.
 
-Subject Information
+Subject Information:
 : set of statements asserted by an AS about a subject.
 
 
@@ -358,16 +358,16 @@ The underlying requested grant moves through several states as different actions
 {::include diagram/states.md}
 ~~~
 
-*Processing*
+*Processing*:
 : When a [request for access](#request) is received by the AS, a new grant request is created and placed in the _processing_ state by the AS. This state is also entered when an existing grant request is updated by the client instance and when interaction is completed. In this state, the AS processes the context of the grant request to determine whether interaction with the end user or RO is required for approval of the request. The grant request has to exit this state before a response can be returned to the client instance. If approval is required, the request moves to the _pending_ state and the AS returns a [continue response](#response-continue) along with any appropriate [interaction responses](#response-interact). If no such approval is required, such as when the client instance is acting on its own behalf or the AS can determine that access has been fulfilled, the request moves to the _approved_ state where [access tokens for API access](#response-token) and [subject information](#response-subject) can be issued to the client instance. If the AS determines that no additional processing can occur (such as a timeout or an unrecoverable error), the grant request is moved to the _finalized_ state and is terminated.
 
-*Pending*
+*Pending*:
 : When a request needs to be approved by a RO, or interaction with the end user is required, the grant request enters a state of _pending_. In this state, no access tokens can be granted and no subject information can be released to the client instance. While a grant request is in this state, the AS seeks to gather the required [consent and authorization](#authorization) for the requested access. A grant request in this state is always associated with a _continuation access token_ bound to the client instance's key. If no [interaction finish method](#request-interact-finish) is associated with this request, the client instance can send a [polling continue request](#continue-poll) to the AS. This returns a [continue response](#response-continue) while the grant request remains in this state, allowing the client instance to continue to check the state of the pending grant request. If an [interaction finish method](#request-interact-finish) is specified in the grant request, the client instance can [continue the request after interaction](#continue-after-interaction) to the AS to move this request to the _processing_ state to be re-evaluated by the AS. Note that this occurs whether the grant request has been approved or denied by the RO, since the AS needs to take into account the full context of the request before determining the next step for the grant request. When other information is made available in the context of the grant request, such as through the asynchronous actions of the RO, the AS moves this request to the _processing_ state to be re-evaluated. If the AS determines that no additional interaction can occur, such as all the interaction methods have timed out or a [revocation request](#continue-delete) is received from the client instance, the grant request can be moved to the _finalized_ state.
 
-*Approved*
+*Approved*:
 : When a request has been approved by an RO and no further interaction with the end user is required, the grant request enters a state of _approved_. In this state, responses to the client instance can include [access tokens for API access](#response-token) and [subject information](#response-subject). If continuation and updates are allowed for this grant request, the AS can include the [continuation response](#response-continue). In this state, [post-interaction continuation requests](#continue-after-interaction) are not allowed and will result in an error, since all interaction is assumed to have been completed. If the client instance sends a [polling continue request](#continue-poll) while the request is in this state, [new access tokens](#response-token) can be issued in the response. Note that this always creates a new access token, but any existing access tokens could be rotated and revoked using the [token management API](#token-management). The client instance can send an [update continuation request](#continue-modify) to modify the requested access, causing the AS to move the request back to the _processing_ state for re-evaluation. If the AS determines that no additional tokens can be issued, and that no additional updates are to be accepted (such as the continuation access tokens have expired), the grant is moved to the _finalized_ state.
 
-*Finalized*
+*Finalized*:
 : After the access tokens are issued, if the AS does not allow any additional updates on the grant request, the grant request enters the _finalized_ state. This state is also entered when an existing grant request is [revoked by the client instance](#continue-delete) or otherwise revoked by the AS (such as through out-of-band action by the RO). This state can also be entered if the AS determines that no additional processing is possible, for example if the RO has denied the requested access or if interaction is required but no compatible interaction methods are available. Once in this state, no new access tokens can be issued, no subject information can be returned, and no interactions can take place. Once in this state, the grant request is dead and cannot be revived. If future access is desired by the client instance, a new grant request can be created, unrelated to this grant request.
 
 While it is possible to deploy an AS in a stateless environment, GNAP is a stateful protocol and such deployments will need a way to manage the current state of the grant request in a secure and deterministic fashion without relying on other components, such as the client software, to keep track of the current state.
@@ -4362,7 +4362,8 @@ NOTE: '\' line wrapping per RFC 8792
   ;keyid="test-key-ecc-p256";tag="gnap"
 "@signature-params": ("@method" "@target-uri" "content-digest" \
   "authorization" "signature";key="old-key" "signature-input"\
-  ;key="old-key");created=1618884480;keyid="xyz-2";tag="gnap-rotate"
+  ;key="old-key");created=1618884480;keyid="xyz-2"
+  ;tag="gnap-rotate"
 ~~~
 
 This signature is then added to the message:
@@ -4380,7 +4381,8 @@ Signature-Input: old-key=("@method" "@target-uri" "content-digest" \
     ;tag="gnap", \
   new-key=("@method" "@target-uri" "content-digest" \
     "authorization" "signature";key="old-key" "signature-input"\
-    ;key="old-key");created=1618884480;keyid="xyz-2";tag="gnap-rotate"
+    ;key="old-key");created=1618884480;keyid="xyz-2"
+    ;tag="gnap-rotate"
 Signature: old-key=:vN4IKYsJl2RLFe+tYEm4dHM4R4BToqx5D2FfH4ge5WOkgxo\
     dI2QRrjB8rysvoSEGvAfiVJOWsGcPD1lU639Amw==:, \
   new-key=:VWUExXQ0geWeTUKhCfDT7WJyT++OHSVbfPA1ukW0o7mmstdbvIz9iOuH\
