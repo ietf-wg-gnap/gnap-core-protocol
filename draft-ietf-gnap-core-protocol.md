@@ -27,26 +27,12 @@ author:
 
 normative:
     BCP195:
-      target: 'https://www.rfc-editor.org/info/bcp195'
-      title: Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)
-      date: May 2015
-      author:
-        -
-          ins: Y. Sheffer
-        -
-          ins: R. Holz
-        -
-          ins: P. Saint-Andre
-    RFC2119:
     RFC2397:
     RFC3339:
     RFC3986:
     RFC4107:
     RFC4648:
     RFC5646:
-    RFC6202:
-    RFC7231:
-    RFC7234:
     RFC7468:
     RFC7515:
     RFC7517:
@@ -55,37 +41,11 @@ normative:
     RFC8174:
     RFC8259:
     RFC8705:
-    RFC9110:
-    I-D.ietf-gnap-resource-servers:
+    HTTP: RFC9110
+    RFC9111:
     I-D.ietf-httpbis-message-signatures:
     I-D.ietf-httpbis-digest-headers:
     I-D.ietf-secevent-subject-identifiers:
-    I-D.ietf-oauth-rar:
-    SP80063C:
-      title: "Digital Identity Guidelines: Federation and Assertions"
-      target: https://doi.org/10.6028/NIST.SP.800-63c
-      date: June 2017
-      author:
-        -
-          ins: P. Grassi
-        -
-          ins: E. Nadeau
-        -
-          ins: J. Richer
-        -
-          ins: S. Squire
-        -
-          ins: J. Fenton
-        -
-          ins: N. Lefkovitz
-        -
-          ins: J. Danker
-        -
-          ins: Y. Choong
-        -
-          ins: K. Greene
-        -
-          ins: M. Theofanos
     OIDC:
       title: OpenID Connect Core 1.0 incorporating errata set 1
       target: https://openid.net/specs/openid-connect-core-1_0.html
@@ -116,8 +76,12 @@ normative:
             ins: E. Maler
 
 informative:
+    RFC6202:
     RFC6973:
+    RFC8792:
+    RFC9396:
     I-D.ietf-httpbis-client-cert-field:
+    I-D.ietf-gnap-resource-servers:
     I-D.ietf-oauth-security-topics:
     I-D.ietf-uta-rfc6125bis:
     promise-theory:
@@ -145,6 +109,31 @@ informative:
         author:
             -
                 ins: F. Helmschmidt
+    SP80063C:
+      title: "Digital Identity Guidelines: Federation and Assertions"
+      target: https://doi.org/10.6028/NIST.SP.800-63c
+      date: June 2017
+      author:
+        -
+          ins: P. Grassi
+        -
+          ins: E. Nadeau
+        -
+          ins: J. Richer
+        -
+          ins: S. Squire
+        -
+          ins: J. Fenton
+        -
+          ins: N. Lefkovitz
+        -
+          ins: J. Danker
+        -
+          ins: Y. Choong
+        -
+          ins: K. Greene
+        -
+          ins: M. Theofanos
 
 entity:
   SELF: "RFC nnnn"
@@ -202,7 +191,7 @@ of these can be found in {{example-oauth2}}.
 
 {::boilerplate bcp14-tagged}
 
-This document contains non-normative examples of partial and complete HTTP messages, JSON structures, URIs, query components, keys, and other elements. Whenever possible, the document uses URI as a generic term, since it aligns with {{!RFC3986}} recommendations and matches better with the intent that the identifier may be reachable through various/generic means (compared to URLs). Some examples use a single trailing backslash `\` to indicate line wrapping for long values, as per {{!RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
+This document contains non-normative examples of partial and complete HTTP messages, JSON structures, URIs, query components, keys, and other elements. Whenever possible, the document uses URI as a generic term, since it aligns with {{!RFC3986}} recommendations and matches better with the intent that the identifier may be reachable through various/generic means (compared to URLs). Some examples use a single trailing backslash `\` to indicate line wrapping for long values, as per {{RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
 
 ## Roles
 
@@ -1276,7 +1265,7 @@ to present to the RO during any interactive sequences.
 : User-facing information about the client software, such as a web page. This URI MUST be an absolute URI. OPTIONAL.
 
 `logo_uri` (string)
-: Display image to represent the client software. This URI MUST be an absolute URI. The logo MAY be passed by value by using a data: URI {{!RFC2397}} referencing an image mediatype. OPTIONAL.
+: Display image to represent the client software. This URI MUST be an absolute URI. The logo MAY be passed by value by using a data: URI {{RFC2397}} referencing an image mediatype. OPTIONAL.
 
 ~~~ json
 "display": {
@@ -1866,7 +1855,7 @@ simultaneously as an opaque identifier, an email address, and a decentralized id
 
 The response MUST be sent as a JSON object in the body of the HTTP response with Content-Type `application/json`, unless otherwise specified by the specific response (eg, an empty response with no Content-Type).
 
-The authorization server MUST include the HTTP Cache-Control response header field {{RFC7234}} with a value set to "no-store".
+The authorization server MUST include the HTTP Cache-Control response header field {{RFC9111}} with a value set to "no-store".
 
 ## Request Continuation {#response-continue}
 
@@ -1945,7 +1934,7 @@ properties.
 `value` (string):
 : The value of the access token as a
     string. The value is opaque to the client instance. The value MUST be
-    limited to the `token68` character set defined in {{Section 11.2 of RFC9110}} to facilitate transmission over HTTP
+    limited to the `token68` character set defined in {{Section 11.2 of HTTP}} to facilitate transmission over HTTP
     headers and within other protocols without requiring additional encoding.
     REQUIRED.
 
@@ -6314,9 +6303,9 @@ As already described in {{I-D.ietf-oauth-security-topics}}, a server should neve
 status code to redirect a request that potentially contains user credentials. If an HTTP redirect
 is used for such a request, the HTTP status code 303 "See Other" should be used instead.
 
-The status code 307, as defined in the HTTP standard {{RFC7231}}, requires the user agent
+The status code 307, as defined in the HTTP standard {{HTTP}}, requires the user agent
 to preserve the method and body of a request, thus submitting the body of the POST
-request to the redirect target. In the HTTP standard {{RFC7231}}, only the status code 303 unambiguously enforces
+request to the redirect target. In the HTTP standard {{HTTP}}, only the status code 303 unambiguously enforces
 rewriting the HTTP POST request to an HTTP GET request, which eliminates the POST body from the redirected request. For all other status codes, including
 status code 302, user agents are allowed not to rewrite a POST request into a GET request and thus
 to resubmit the body.
@@ -7115,7 +7104,7 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
 4. **Expanded delegation:**
 
-    OAuth 2.0 defines the “scope” parameter for controlling access to APIs. This parameter has been coopted to mean a number of different things in different protocols, including flags for turning special behavior on and off, including the return of data apart from the access token. The “resource” parameter and RAR extensions (as defined in {{I-D.ietf-oauth-rar}}) expand on the “scope” concept in similar but different ways.
+    OAuth 2.0 defines the “scope” parameter for controlling access to APIs. This parameter has been coopted to mean a number of different things in different protocols, including flags for turning special behavior on and off, including the return of data apart from the access token. The “resource” parameter and RAR extensions (as defined in {{RFC9396}}) expand on the “scope” concept in similar but different ways.
 
     GNAP defines a rich structure for requesting access, with string references as an optimization. GNAP defines methods for requesting directly-returned user information, separate from API access. This information includes identifiers for the current user and structured assertions. The core GNAP protocol makes no assumptions or demands on the format or contents of the access token, but the RS extension allows a negotiation of token formats between the AS and RS.
 
