@@ -1,3 +1,3 @@
 source "https://rubygems.org"
 
-gem "kramdown-rfc2629", ">= 1.5.21"
+gem "kramdown-rfc2629", ">= 1.6.22"
