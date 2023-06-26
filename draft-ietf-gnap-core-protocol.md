@@ -2262,9 +2262,11 @@ If the client instance indicates that it can
 and the AS supports this mode for the client instance's
 request, the AS responds with a "user_code" field. This field is string
 containing a unique short code that the user
-can type into a web page. To facilitate usability, this string MUST be
-case-insensitive, MUST consist of only easily typeable
-characters (such as letters or numbers). The string MUST be randomly generated
+can type into a web page. To facilitate usability, this string MUST consist only of characters
+that can be easily typed by the end user
+(such as ASCII letters or numbers) and
+MUST be processed by the AS in a case-insensitive manner (see {{interaction-usercode}}).
+The string MUST be randomly generated
 so as to be unguessable by an attacker within the time it is accepted. The time in which this
 code will be accepted SHOULD be short lived, such as several
 minutes. It is RECOMMENDED that this code be no more than eight
@@ -2310,9 +2312,11 @@ object that contains the following members.
 
 `code` (string):
 : A unique short code that the end user
-    can type into a provided URI. To facilitate usability, this string MUST be
-    case-insensitive, MUST consist of only easily typeable
-    characters (such as letters or numbers). The string MUST be randomly generated
+    can type into a provided URI. To facilitate usability, this string MUST consist only of characters
+    that can be easily typed by the end user
+    (such as ASCII letters or numbers) and
+    MUST be processed by the AS in a case-insensitive manner (see {{interaction-usercodeurl}}).
+    The string MUST be randomly generated
     so as to be unguessable by an attacker within the time it is accepted. The time in which this
     code will be accepted SHOULD be short lived, such as several
     minutes. It is RECOMMENDED that this code be no more than eight
@@ -2761,8 +2765,14 @@ format the user code in such a way as to facilitate memorability and transfer of
 code, so long as this formatting does not alter the value as accepted at the user code
 URI. For example, a client instance receiving the user code "A1BC3DFF" could choose to
 display this to the user as "A1BC 3DFF", breaking up the long string into two shorter
-strings. In this example, the space in between the two parts would be removed upon its
-entry into the user code URI.
+strings.
+
+When processing input codes, the AS MUST transform the input string to remove invalid characters.
+In the above example, the space in between the two parts would be removed upon its
+entry into the interactive form at the user code URI. Additionally, the AS MUST treat
+user input as case insensitive. For example, if the user inputs the string "a1bc 3DFF", the
+AS will treat the input the same as "A1BC3DFF". To facilitate this, it is RECOMMENDED
+that the AS use only ASCII letters and numbers as valid characters for the user code.
 
 This mode is designed to be used when the client instance is not able to communicate or facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
@@ -2799,8 +2809,14 @@ format the user code in such a way as to facilitate memorability and transfer of
 code, so long as this formatting does not alter the value as accepted at the user code
 URI. For example, a client instance receiving the user code "A1BC3DFF" could choose to
 display this to the user as "A1BC 3DFF", breaking up the long string into two shorter
-strings. In this example, the space in between the two parts would be removed upon its
-entry into the user code URI.
+strings.
+
+When processing input codes, the AS MUST transform the input string to remove invalid characters.
+In the above example, the space in between the two parts would be removed upon its
+entry into the interactive form at the user code URI. Additionally, the AS MUST treat
+user input as case insensitive. For example, if the user inputs the string "a1bc 3DFF", the
+AS will treat the input the same as "A1BC3DFF". To facilitate this, it is RECOMMENDED
+that the AS use only ASCII letters and numbers as valid characters for the user code.
 
 This mode is used when the client instance is not able to facilitate launching
 a complex arbitrary URI but can communicate arbitrary values like URIs. As a consequence, these URIs
