@@ -2315,7 +2315,7 @@ object that contains the following members.
     can type into a provided URI. To facilitate usability, this string MUST consist only of characters
     that can be easily typed by the end user
     (such as ASCII letters or numbers) and
-    MUST be processed by the AS in a case-insensitive manner (see {{interaction-usercodeurl}}).
+    MUST be processed by the AS in a case-insensitive manner (see {{interaction-usercodeuri}}).
     The string MUST be randomly generated
     so as to be unguessable by an attacker within the time it is accepted. The time in which this
     code will be accepted SHOULD be short lived, such as several
