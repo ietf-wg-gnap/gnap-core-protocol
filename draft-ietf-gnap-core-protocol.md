@@ -6959,6 +6959,10 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 
 > Note: To be removed by RFC editor before publication.
 
+- 15
+   - Editorial updates from shepherd review.
+   - Clarify character set constraints of user codes.
+
 - 14
     - Update token rotation to use URI + management token.
     - Fix key rotation with HTTP Signatures based on security analysis.
