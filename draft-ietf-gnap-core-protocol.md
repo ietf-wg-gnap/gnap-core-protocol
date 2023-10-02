@@ -184,7 +184,7 @@ provide functionality and solve use cases that OAuth 2.0 cannot easily
 or cleanly address. {{vs-oauth2}} further details the protocol rationale compared to OAuth 2.0.
 GNAP and OAuth 2.0 will likely exist in parallel
 for many deployments, and considerations have been taken to facilitate
-the mapping and transition from legacy systems to GNAP. Some examples
+the mapping and transition from existing OAuth 2.0 systems to GNAP. Some examples
 of these can be found in {{example-oauth2}}.
 
 ## Terminology
