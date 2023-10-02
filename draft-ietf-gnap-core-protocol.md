@@ -80,7 +80,7 @@ informative:
     RFC6973:
     RFC8792:
     RFC9396:
-    I-D.ietf-httpbis-client-cert-field:
+    RFC9440:
     I-D.ietf-gnap-resource-servers:
     I-D.ietf-oauth-security-topics:
     I-D.ietf-uta-rfc6125bis:
@@ -4426,7 +4426,7 @@ This method is indicated by the method value `mtls` in string form.
 The signer presents its TLS client certificate during TLS negotiation with the verifier.
 
 In this example, the certificate is communicated to the application
-through the Client-Cert header from a TLS reverse proxy as per {{I-D.ietf-httpbis-client-cert-field}}, leading
+through the Client-Cert header field from a TLS reverse proxy as per {{RFC9440}}, leading
 to the following full HTTP request message:
 
 ~~~ http-message
