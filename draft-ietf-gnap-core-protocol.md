@@ -210,12 +210,12 @@ Authorization Server (AS):
 Client:
 : application that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end user or it runs autonomously on behalf of a resource owner.
 
-    Example: a client can be a mobile application, a web application, etc.
+    Example: a client can be a mobile application, a web application, a back-end data processor, etc.
 
     Note: this specification differentiates between a specific instance (the client instance, identified by its unique key) and the software running the instance (the client software). For some kinds of client software, there could be many instances of that software, each instance with a different key.
 
 Resource Server (RS):
-: server that provides operations on protected resources, where operations require a valid access token issued by an AS.
+: server that provides an API on protected resources, where operations on the API require a valid access token issued by a trusted AS.
 
 Resource Owner (RO):
 : subject entity that may grant or deny operations on resources it has authority upon.
@@ -278,9 +278,6 @@ communications mechanisms which are considered out of scope of GNAP.
 In addition to the roles above, the protocol also involves several
 elements that are acted upon by the roles throughout the process.
 
-Attribute:
-: characteristics related to a subject.
-
 Access Token:
 : a data artifact representing a set of rights and/or attributes.
 
@@ -307,7 +304,7 @@ Subject:
 : person, organization or device. The subject decides whether and under which conditions its attributes can be disclosed to other parties.
 
 Subject Information:
-: set of statements asserted by an AS about a subject.
+: set of statements and attributes asserted by an AS about a subject.
 
 
 
