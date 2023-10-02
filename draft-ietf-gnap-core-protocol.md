@@ -1319,7 +1319,8 @@ or by reference (See {{request-user-reference}}).
 
 `assertions` (array of objects)
 : An array containing assertions as objects each containing the assertion
-    format and the assertion value as the JSON string serialization of the assertion.
+    format and the assertion value as the JSON string serialization of the assertion,
+    as defined in {{response-subject}}.
     OPTIONAL.
 
 ~~~ json
