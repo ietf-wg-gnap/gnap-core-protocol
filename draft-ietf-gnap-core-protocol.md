@@ -321,7 +321,7 @@ Looking back on each trust relationship:
 
 - end user/RO: this relationship exists only when the end user and the RO are different, in which case the end user needs some out of band mechanism of getting the RO consent (see {{authorization}}). GNAP generally assumes that humans can be authenticated thanks to identity protocols (for instance, through an id_token assertion in {{request-subject}}).
 
-- end user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers promise to implement requirements and generally some recommendations or best practices, so that the end users may confidently use their software. However, end users might also be facing some attacker's client software, without even realizing it.
+- end user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers implement requirements and generally some recommendations or best practices, so that the end users may confidently use their software. However, end users might also be facing an attacker's client software, without even realizing it.
 
 - end user/AS: when the client supports it (see {{response-interact}}), the end user gets to interact with front-channel URIs provided by the AS. See {{security-front-channel}} for some considerations in trusting these interactions.
 
@@ -1197,7 +1197,7 @@ object with the following fields.
 
 Additional fields are defined in the [Client Instance Fields Registry](#IANA-client-instance).
 
-Both the `display` and `class_id` are self-declarative and thus the AS SHOULD exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret the class_id field, it SHOULD return an `invalid_client` error ({{response-error}}) or choose to return lesser levels of privileges. See additional discussion of client instance impersonation in {{security-impersonation}}.
+Both the `display` and `class_id` are self-declarative and thus the AS SHOULD exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret the class_id field, it SHOULD return an `invalid_client` error ({{response-error}}) or choose to return lesser levels of privileges. See additional discussion of client instance impersonation in {{security-impersonation}}.
 
 The client instance MUST prove possession of any presented key by the `proof` mechanism
 associated with the key in the request. Key proofing methods
@@ -1349,7 +1349,7 @@ such validation are outside the scope of this specification, common validation s
 verifying the signature of the assertion against a trusted signing key, verifying the audience
 and issuer of the assertion map to expected values, and verifying the time window for the
 assertion itself. However, note that in many use cases, some of these common steps are relaxed.
-For example, an AS acting as an IdP could expect that assertions being presented using this
+For example, an AS acting as an identity provider (IdP) could expect that assertions being presented using this
 mechanism were issued by the AS to the client software. The AS would verify that the AS is the
 issuer of the assertion, not the audience, and that the client instance is instead the audience of
 the assertion. Similarly, an AS might accept a recently-expired assertion in order to help
@@ -1662,7 +1662,7 @@ All requests to the callback URI MUST be processed as described in
 {{interaction-finish}}.
 
 All interaction finish methods MUST require presentation of an interaction reference for continuing
-this grant request. This means that the the interaction
+this grant request. This means that the interaction
 reference MUST be returned by the AS and MUST be presented by the client as described in
 {{continue-after-interaction}}. The means by which the interaction reference is returned to the
 client instance is specific to the interaction finish method.
@@ -1853,7 +1853,7 @@ simultaneously as an opaque identifier, an email address, and a decentralized id
 }
 ~~~
 
-The response MUST be sent as a JSON object in the body of the HTTP response with Content-Type `application/json`, unless otherwise specified by the specific response (eg, an empty response with no Content-Type).
+The response MUST be sent as a JSON object in the body of the HTTP response with Content-Type `application/json`, unless otherwise specified by the specific response (e.g., an empty response with no Content-Type).
 
 The authorization server MUST include the HTTP Cache-Control response header field {{RFC9111}} with a value set to "no-store".
 
@@ -1866,7 +1866,7 @@ contains a JSON object with the following properties.
 `uri` (string):
 : The URI at which the client instance can make
     continuation requests. This URI MAY vary per
-    request, or MAY be stable at the AS. This URI MUST be an an absolute URI.
+    request, or MAY be stable at the AS. This URI MUST be an absolute URI.
     The client instance MUST use this
     value exactly as given when making a [continuation request](#continue-request).
     REQUIRED.
@@ -3068,7 +3068,7 @@ the continuation access token as described in {{use-access-token}} and present
 proof of the client instance's key (or its most recent rotation)
 by signing the request as described in {{binding-keys}}.
 The AS MUST validate the signature and ensure that it is bound to the appropriate key for
-the contination access token.
+the continuation access token.
 
 Access tokens other than the continuation access tokens MUST NOT be usable for continuation
 requests. Conversely, continuation access tokens MUST NOT be usable to make authorized requests to
@@ -4011,7 +4011,7 @@ object with its parameters explicitly declared, such as:
 }
 ~~~
 
-The `httpsig` method also defines defines default behavior when it is passed as a string form,
+The `httpsig` method also defines default behavior when it is passed as a string form,
 using the signature algorithm specified by the associated key
 material and the content digest is calculated using sha-256. This configuration can be selected
 using the following shortened form:
@@ -4899,7 +4899,7 @@ an [access token is returned](#response-token).
 
 The root of this structure is a JSON array. The elements of the JSON
 array represent rights of access that are associated with the
-the access token. Individual rights of access can be defined by the RS as
+access token. Individual rights of access can be defined by the RS as
 either an object or a string. The resulting access is the union of all elements
 within the array.
 
@@ -5958,7 +5958,7 @@ will be able to impersonate that client instance to all parties. This is true fo
 as well as calls to an RS using an access token bound to the client instance's unique key. As a consequence, it is of utmost importance for a client instance to protect its private key material.
 
 Different types of client software have different methods for creating, managing, and registering
-keys. GNAP explicitly allows for ephemeral clients (such as SPAs) and single-user clients (such as
+keys. GNAP explicitly allows for ephemeral clients such as single-page applications (SPAs) and single-user clients (such as
 mobile applications) to create and present their own keys during the initial grant request without any explicit pre-registration step. The client
 software can securely generate a keypair on-device and present the public key, along with proof of holding the associated
 private key, to the AS as part of the initial request. To facilitate trust in these ephemeral keys,
@@ -6523,7 +6523,7 @@ an attacker's stolen request.
 
 ## Calculating Interaction Hash {#security-interact-hash}
 
-The calculation of the interaction hash value provides defence in depth, allowing a client
+The calculation of the interaction hash value provides defense in depth, allowing a client
 instance to protect itself from spurious injection of interaction references when using an
 interaction finish method. The AS is protected during this attack through the
 continuation access token being bound to the expected interaction reference,
@@ -6535,7 +6535,7 @@ is stopped in several places.
 {::include diagram/hash.md}
 ~~~
 
-- Prerequesits: The client instance can allow multiple end users to
+- Prerequisites: The client instance can allow multiple end users to
     access the same AS. The attacker is attempting to associate their rights
     with the target user's session.
 - (1) The attacker starts a session at the client instance.
