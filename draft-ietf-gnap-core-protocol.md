@@ -5411,7 +5411,7 @@ This specification requests registration of the following scheme in the
 "Hypertext Transfer Protocol (HTTP) Authentication Scheme Registry" defined be {{Section 18.5 of HTTP}}:
 
 * Authentication Scheme Name: `GNAP`
-* Reference: {{use-access-token}} of {{&SELF}}|
+* Reference: {{use-access-token}} of {{&SELF}}
 
 ## Grant Request Parameters {#IANA-grant-request}
 
