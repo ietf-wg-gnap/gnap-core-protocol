@@ -5407,7 +5407,7 @@ General guidance for extension parameters is found in {{extensions}}.
 
 ## HTTP Authentication Scheme Registration
 
-This specification requests registration of the following scheme in the 
+This specification requests registration of the following scheme in the
 "Hypertext Transfer Protocol (HTTP) Authentication Scheme Registry" defined be {{Section 18.5 of HTTP}}:
 
  * Authentication Scheme Name: `GNAP`
