@@ -78,6 +78,7 @@ normative:
 informative:
     RFC6202:
     RFC6973:
+    RFC8707:
     RFC8792:
     RFC9396:
     RFC9440:
@@ -320,11 +321,11 @@ Looking back on each trust relationship:
 
 - end user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers implement requirements and generally some recommendations or best practices, so that the end users may confidently use their software. However, end users might also be facing an attacker's client software or a poorly-implemented client, without even realizing it.
 
-- end user/AS: when the client supports it (see {{response-interact}}), the end user gets to interact with front-channel URIs provided by the AS. See {{security-front-channel}} for some considerations in trusting these interactions.
+- end user/AS: when the client supports the interaction feature (see {{response-interact}}), the end user interacts with the AS through an AS-provided interface. In may cases, this happens through a front-channel interaction through the end user's browser. See {{security-front-channel}} for some considerations in trusting these interactions.
 
 - client/AS: An honest AS may be facing an attacker's client (as discussed just above), or the reverse, and GNAP aims at making common attacks impractical. The core specification makes access tokens opaque to the client and defines the request/response scheme in detail, therefore avoiding extra trust hypotheses from this critical piece of software. Yet the AS may further define cryptographic attestations or optional rules to simplify the access of clients it already trusts, due to past behavior or organizational policies (see {{request-client}}).
 
-- RS/RO: the RS promises it protects its resources from unauthorized access, and only accepts valid access tokens issued by a trusted AS. In case tokens are key bound, proper validation is expected from the RS.
+- RS/RO: the RS promises it protects its resources on behalf of the RO from unauthorized access, and only accepts valid access tokens issued by a trusted AS. In case tokens are key bound, proper validation of the proof method is expected from the RS.
 
 - AS/RO: the AS is expected to follow the decisions made by the RO, either through interactive consent requests, repeated interactions, or automated rules (as described in {{sequence}}). Privacy considerations aim to reduce the risk of an honest but too-curious AS, or the consequences of an unexpected user data exposure.
 
@@ -348,7 +349,7 @@ The underlying requested grant moves through several states as different actions
 : When a [request for access](#request) is received by the AS, a new grant request is created and placed in the _processing_ state by the AS. This state is also entered when an existing grant request is updated by the client instance and when interaction is completed. In this state, the AS processes the context of the grant request to determine whether interaction with the end user or RO is required for approval of the request. The grant request has to exit this state before a response can be returned to the client instance. If approval is required, the request moves to the _pending_ state and the AS returns a [continue response](#response-continue) along with any appropriate [interaction responses](#response-interact). If no such approval is required, such as when the client instance is acting on its own behalf or the AS can determine that access has been fulfilled, the request moves to the _approved_ state where [access tokens for API access](#response-token) and [subject information](#response-subject) can be issued to the client instance. If the AS determines that no additional processing can occur (such as a timeout or an unrecoverable error), the grant request is moved to the _finalized_ state and is terminated.
 
 *Pending*:
-: When a request needs to be approved by a RO, or interaction with the end user is required, the grant request enters a state of _pending_. In this state, no access tokens can be granted and no subject information can be released to the client instance. While a grant request is in this state, the AS seeks to gather the required [consent and authorization](#authorization) for the requested access. A grant request in this state is always associated with a _continuation access token_ bound to the client instance's key. If no [interaction finish method](#request-interact-finish) is associated with this request, the client instance can send a [polling continue request](#continue-poll) to the AS. This returns a [continue response](#response-continue) while the grant request remains in this state, allowing the client instance to continue to check the state of the pending grant request. If an [interaction finish method](#request-interact-finish) is specified in the grant request, the client instance can [continue the request after interaction](#continue-after-interaction) to the AS to move this request to the _processing_ state to be re-evaluated by the AS. Note that this occurs whether the grant request has been approved or denied by the RO, since the AS needs to take into account the full context of the request before determining the next step for the grant request. When other information is made available in the context of the grant request, such as through the asynchronous actions of the RO, the AS moves this request to the _processing_ state to be re-evaluated. If the AS determines that no additional interaction can occur, such as all the interaction methods have timed out or a [revocation request](#continue-delete) is received from the client instance, the grant request can be moved to the _finalized_ state.
+: When a request needs to be approved by a RO, or interaction with the end user is required, the grant request enters a state of _pending_. In this state, no access tokens can be granted and no subject information can be released to the client instance. While a grant request is in this state, the AS seeks to gather the required [consent and authorization](#authorization) for the requested access. A grant request in this state is always associated with a _continuation access token_ bound to the client instance's key (see {{response-continue}} for details of the continuation access token). If no [interaction finish method](#request-interact-finish) is associated with this request, the client instance can send a [polling continue request](#continue-poll) to the AS. This returns a [continue response](#response-continue) while the grant request remains in this state, allowing the client instance to continue to check the state of the pending grant request. If an [interaction finish method](#request-interact-finish) is specified in the grant request, the client instance can [continue the request after interaction](#continue-after-interaction) to the AS to move this request to the _processing_ state to be re-evaluated by the AS. Note that this occurs whether the grant request has been approved or denied by the RO, since the AS needs to take into account the full context of the request before determining the next step for the grant request. When other information is made available in the context of the grant request, such as through the asynchronous actions of the RO, the AS moves this request to the _processing_ state to be re-evaluated. If the AS determines that no additional interaction can occur, such as all the interaction methods have timed out or a [revocation request](#continue-delete) is received from the client instance, the grant request can be moved to the _finalized_ state.
 
 *Approved*:
 : When a request has been approved by an RO and no further interaction with the end user is required, the grant request enters a state of _approved_. In this state, responses to the client instance can include [access tokens for API access](#response-token) and [subject information](#response-subject). If continuation and updates are allowed for this grant request, the AS can include the [continuation response](#response-continue). In this state, [post-interaction continuation requests](#continue-after-interaction) are not allowed and will result in an error, since all interaction is assumed to have been completed. If the client instance sends a [polling continue request](#continue-poll) while the request is in this state, [new access tokens](#response-token) can be issued in the response. Note that this always creates a new access token, but any existing access tokens could be rotated and revoked using the [token management API](#token-management). The client instance can send an [update continuation request](#continue-modify) to modify the requested access, causing the AS to move the request back to the _processing_ state for re-evaluation. If the AS determines that no additional tokens can be issued, and that no additional updates are to be accepted (such as the continuation access tokens have expired), the grant is moved to the _finalized_ state.
@@ -1194,7 +1195,7 @@ object with the following fields.
 
 Additional fields are defined in the [Client Instance Fields Registry](#IANA-client-instance).
 
-Both the `display` and `class_id` are self-declarative and thus the AS SHOULD exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret the class_id field, it SHOULD return an `invalid_client` error ({{response-error}}) or choose to return lesser levels of privileges. See additional discussion of client instance impersonation in {{security-impersonation}}.
+Absent additional attestations, profiles, or trust mechanisms, both the `display` and `class_id` fields are self-declarative, presented by the client instance and the AS MUST exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret or validate the class_id field, it SHOULD return an `invalid_client` error ({{response-error}}) or interpret the request as if the class_id were not present and not allow the set of privileges associated with the class_id. See additional discussion of client instance impersonation in {{security-impersonation}}.
 
 The client instance MUST prove possession of any presented key by the `proof` mechanism
 associated with the key in the request. Key proofing methods
@@ -1205,8 +1206,8 @@ If the same public key is sent by value on different access requests, the AS MUS
 treat these requests as coming from the same client instance for purposes
 of identification, authentication, and policy application.
 If the AS does not know the client instance's public key ahead of time, the AS
-MAY accept or reject the request based on AS policy, attestations
-within the `client` request, and other mechanisms.
+MAY accept or reject the request based on attestations
+within the `client` request and other AS policy mechanisms.
 
 The client instance MUST NOT send a symmetric key by value in the request, as doing so would expose
 the key directly instead of simply proving possession of it. See considerations on symmetric keys
@@ -1221,7 +1222,8 @@ client instance record at the AS SHOULD NOT be added to the client's pre-registe
 See additional considerations regarding client instance impersonation in {{security-impersonation}}.
 
 A client instance that is capable of talking to multiple AS's SHOULD use a different key for each
-AS to prevent a class of mix-up attacks as described in {{security-cuckoo}}.
+AS to prevent a class of mix-up attacks as described in {{security-cuckoo}} unless other mechanisms
+can be used to assure the identity of the AS for a given request.
 
 ### Identifying the Client Instance by Reference {#request-instance}
 
@@ -1429,7 +1431,8 @@ its capabilities and what is allowed to fulfill the request.
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
 the end user to an arbitrary URI and can receive a [redirect](#request-interact-callback-redirect) through
-a browser request.
+a browser request. Note that the client instance does not accept a push-style callback. This pattern
+is common for web-based client software.
 
 ~~~ json
 "interact": {
@@ -1444,8 +1447,10 @@ a browser request.
 
 In this non-normative example, the client instance is indicating that it can
 display a [user code](#request-interact-usercode) and direct the end user
-to an [arbitrary URI](#request-interact-redirect) on a secondary
-device, but it cannot accept a redirect or push callback.
+to an [arbitrary URI](#request-interact-redirect), but it cannot accept a redirect or push callback.
+This pattern is common for devices with robust display capabilities but that expect
+the use of a secondary device to facilitate end-user interaction with the AS, such
+as a set-top box capable of displaying an interaction URL as a QR code.
 
 ~~~ json
 "interact": {
@@ -1456,7 +1461,10 @@ device, but it cannot accept a redirect or push callback.
 In this non-normative example, the client instance is indicating that it can
 not start any interaction with the end-user, but that the AS can
 [push an interaction finish message](#request-interact-callback-push) when
-authorization from the RO is received asynchronously.
+authorization from the RO is received asynchronously. This pattern is
+common for scenarios where a service needs to be authorized, but the RO is
+able to be contacted separately from the GNAP transaction itself, such as through a push
+notification or existing interactive session on a secondary device.
 
 ~~~ json
 "interact": {
@@ -1471,7 +1479,7 @@ authorization from the RO is received asynchronously.
 
 If the client instance does not provide a suitable interaction mechanism, the
 AS cannot contact the RO asynchronously, and the AS determines
-that interaction is required, then the AS SHOULD return an `invalid_interaction`
+that interaction is required, then the AS MUST return an `invalid_interaction`
 error ({{response-error}}) since the client instance will be unable to complete the
 request without authorization.
 
@@ -1701,8 +1709,9 @@ A finish `method` value of `push` indicates that the client instance will
 expect a request from the AS directly using the HTTP method POST
 as described in {{interaction-pushback}}.
 
-The client instance's URI MUST be an HTTP URI and MUST be protected by HTTPS
-or equivalent.
+The client instance's URI MUST be protected by HTTPS, be
+hosted on a server local to the RO's browser ("localhost"), or
+use an application-specific URI scheme.
 
 ~~~ json
 "interact": {
@@ -2333,7 +2342,7 @@ object that contains the following members.
 "interact": {
     "user_code_uri": {
         "code": "A1BC3DFF",
-        "uri": "https://srv.ex/device"
+        "uri": "https://s.example/device"
     }
 }
 ~~~
@@ -2495,7 +2504,8 @@ values in the `client` field.
 Dynamically generated client instance identifiers are string values that MUST be
 protected by the client instance as secrets. Instance identifier values MUST be unguessable
 and MUST NOT contain any information that would compromise any party if revealed. Instance identifier values are
-opaque to the client instance.
+opaque to the client instance, and their content is determined by the AS. The instance
+identifier MUST be unique per client instance at the AS.
 
 `instance_id` (string):
 : A string value used to represent the information
@@ -2672,10 +2682,21 @@ polling, or through some other method defined by an extension of this specificat
 If the grant request is not in the _approved_ state, the
 client instance can repeat the interaction process by sending a [grant update request](#continue-modify) with new [interaction](#request-interact) methods.
 
-The client instance MUST use each interaction method at most once.
-The AS SHOULD handle any interact request as a one-time-use mechanism and SHOULD apply suitable
+The client instance MUST use each interaction method at most once, if a response can be detected.
+The AS MUST handle any interact request as a one-time-use mechanism and SHOULD apply suitable
 timeouts to any interaction start methods provided, including user codes and redirection URIs.
 The client instance SHOULD apply suitable timeouts to any interaction finish method.
+
+In order to support client software deployed in disadvantaged network conditions, the AS MAY
+allow for processing of the same interaction method multiple times if the AS can determine
+that the request is from the same party and the results are idempotent.
+For example, if a client instance launches a redirect to the AS but does not receive a response
+within a reasonable time, the client software can launch the redirect again, assuming that it never
+reached the AS in the first place. However, if the AS in question
+receives both requests, it could mistakenly process them separately, creating an undefined state for the
+client instance. If the AS can determine that both requests come from the same origin or under the same session,
+and the requests both came before any additional state change to the grant occurs, the AS can reasonably
+conclude that the initial response was not received and the same response can be returned to the client instance.
 
 If the AS instead has a means of contacting the RO directly, it could
 do so without involving the client instance in its consent gathering process. For example, the AS could
@@ -2720,10 +2741,11 @@ in the following sections. Interaction start modes defined in extensions to this
 MUST define the expected actions of the client software when that interaction start mode is used.
 
 If the client instance does not start an interaction start mode within an AS-determined amount of
-time, the AS SHOULD reject attempts to use the interaction start modes. If the client instance has
-already begun one interaction start mode, the AS SHOULD reject attempts to use other interaction
+time, the AS MUST reject attempts to use the interaction start modes. If the client instance has
+already begun one interaction start mode and the interaction has been successfully completed, the AS MUST reject attempts to use other interaction
 start modes. For example, if a user code has been successfully entered for a grant request, the AS
-will probably want to reject requests to an arbitrary redirect URI on the same grant request.
+will need to reject requests to an arbitrary redirect URI on the same grant request in order to prevent an
+attacker from capturing and altering an active authorization process.
 
 ### Interaction at a Redirected URI {#interaction-redirect}
 
@@ -2751,7 +2773,9 @@ in particular the client instance MUST NOT add any parameters to the URI.
 The URI MUST be reachable from the end user's browser, though
 the URI MAY be opened on a separate device from the client instance
 itself. The URI MUST be accessible from an HTTP GET
-request and MUST be protected by HTTPS or equivalent means.
+request and MUST be protected by HTTPS, be
+hosted on a server local to the RO's browser ("localhost"), or
+use an application-specific URI scheme.
 
 ### Interaction at the Static User Code URI {#interaction-usercode}
 
@@ -2772,13 +2796,20 @@ user input as case insensitive. For example, if the user inputs the string "a1bc
 AS will treat the input the same as "A1BC3DFF". To facilitate this, it is RECOMMENDED
 that the AS use only ASCII letters and numbers as valid characters for the user code.
 
+It is RECOMMENDED that the AS choose from character values that are easily copied and typed without ambiguity.
+For example, some glyphs have multiple Unicode code points for the same visual character, and the end-user
+could potentially type a different character than what the AS has returned.
+
 This mode is designed to be used when the client instance is not able to communicate or facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
 in the client software's documentation. As a consequence, these URIs SHOULD be short.
 The user code URI MUST be reachable from the end user's browser, though
 the URI is usually opened on a separate device from the client instance
 itself. The URI MUST be accessible from an HTTP GET
-request and MUST be protected by HTTPS or equivalent means.
+request and MUST be protected by HTTPS, be
+hosted on a server local to the RO's browser ("localhost"), or
+use an application-specific URI scheme.
+
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
@@ -2818,13 +2849,17 @@ that the AS use only ASCII letters and numbers as valid characters for the user 
 
 This mode is used when the client instance is not able to facilitate launching
 a complex arbitrary URI but can communicate arbitrary values like URIs. As a consequence, these URIs
-SHOULD be short to allow the URI to be typed by the end user.
+SHOULD be short enough to allow the URI to be typed by the end user,
+such as a total length of 20 characters or fewer.
 The client instance MUST NOT modify the URI when communicating it to the end user;
 in particular the client instance MUST NOT add any parameters to the URI.
 The user code URI MUST be reachable from the end user's browser, though
 the URI is usually be opened on a separate device from the client instance
 itself. The URI MUST be accessible from an HTTP GET
-request and MUST be protected by HTTPS or equivalent means.
+request and MUST be protected by HTTPS, be
+hosted on a server local to the RO's browser ("localhost"), or
+use an application-specific URI scheme.
+
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
 AS to authenticate the end user as the RO and interactively provide consent.
@@ -2859,11 +2894,14 @@ associated with the current request, the AS MUST follow the appropriate
 method upon completion of interaction in order to signal the client
 instance to continue, except for some limited error cases discussed below.
 If a finish method is not available, the AS SHOULD instruct the RO to
-return to the client instance upon completion.
+return to the client instance upon completion. In such cases, it is expected
+that the client instance will poll the continuation endpoint as described in {{continue-poll}}.
 
 The AS MUST create an interaction reference and associate that
 reference with the current interaction and the underlying pending
-request. This interaction reference value MUST be sufficiently random so as not to be
+request. The interaction reference value is an ASCII string consisting of only
+unreserved characters per {{Section 2.3 of RFC3986}}.
+The interaction reference value MUST be sufficiently random so as not to be
 guessable by an attacker. The interaction reference MUST be
 one-time-use to prevent interception and replay attacks.
 
@@ -3631,7 +3669,7 @@ apart from an updated token value and expiration time.
 
 To rotate an access token, the client instance makes an HTTP POST to the token management URI
 with no message body,
-sending the access token in the appropriate header and signing the request
+sending the access token in the authorization header as described in {{use-access-token}} and signing the request
 with the appropriate key.
 
 ~~~ http-message
@@ -3707,7 +3745,7 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-If the AS is unable or unwilling to rotate the value of the access token, the AS responds with an `invalid_rotation` error ({{response-error}}). Upon receiving such an error, the client instance SHOULD consider the access token to not have changed its state.
+If the AS is unable or unwilling to rotate the value of the access token, the AS responds with an `invalid_rotation` error ({{response-error}}). Upon receiving such an error, the client instance MUST consider the access token to not have changed its state.
 
 ### Binding a New Key to the Rotated Access Token {#rotate-access-token-key}
 
@@ -4027,7 +4065,7 @@ the URI being called, the HTTP method being used, any relevant HTTP headers and
 values, and the HTTP message body itself. The verifier of the signed message
 MUST validate all components of the signed message to ensure that nothing
 has been tampered with or substituted in a way that would change the nature of
-the request. Key binding method definitions SHOULD enumerate how these
+the request. Key binding method definitions MUST enumerate how these
 requirements are fulfilled.
 
 When a key proofing mechanism is bound to an access token, the key being presented MUST
@@ -4893,7 +4931,9 @@ When rotating a key using Attached JWS, the message, which includes the new publ
 GNAP provides a rich structure for describing the protected resources
 hosted by RSs and accessed by client software. This structure is used when
 the client instance [requests an access token](#request-token) and when
-an [access token is returned](#response-token).
+an [access token is returned](#response-token). GNAP's structure is
+designed to be analogous to the OAuth 2.0 Rich Authorization Request
+data structure defined in {{RFC9396}}.
 
 The root of this structure is a JSON array. The elements of the JSON
 array represent rights of access that are associated with the
@@ -4904,7 +4944,9 @@ within the array.
 The access associated with the access token is described
 using objects that each contain multiple
 dimensions of access. Each object contains a REQUIRED `type`
-property that determines the type of API that the token is used for.
+property that determines the type of API that the token is used for and
+the structure of the rest of the object. There is no expected
+interoperability between different `type` definitions.
 
 `type` (string):
 : The type of resource request as a string. This field MAY
@@ -4920,16 +4962,13 @@ types during comparison. It is RECOMMENDED that designers of general-purpose
 APIs use a URI for this field to avoid collisions between multiple
 API types protected by a single AS.
 
-While it is expected that many APIs will have their own properties, a set of
-common properties are defined here. Specific API implementations
-SHOULD re-use these fields with the same semantics and syntax. The
-available values for these properties are determined by the API
-being protected at the RS. This
-specification does not require the use of any of these common fields
-by an API definition, but instead provides them as reusable generic
-components for API designers to make use of.  The allowable values of
-all fields are determined by the API being protected, as defined by a
-particular `type` value.
+While it is expected that many APIs will have their own properties,
+this specification defines a set of common data fields that are designed to be
+usable across different types of APIs. This specification does not require the
+use of these common fields by an API definition but, instead, provides them as
+reusable generic components for API designers to make use of. The allowable
+values of all fields are determined by the API being protected, as defined
+by a particular `type` value.
 
 `actions` (array of strings):
 : The types of actions the client instance will take at the RS as an array of strings.
@@ -4980,7 +5019,9 @@ using the fictitious `photo-api` type definition.
 ]
 ~~~
 
-The access requested for each object in the array
+While the exact semantics of interpreting the fields of an access
+request object is subject to the definition of the `type`,
+it is expected that the access requested for each object in the array
 is the cross-product of all fields of the object. That is to
 say, the object represents a request for all `actions` listed
 to be used at all `locations` listed for all possible `datatypes`
@@ -5254,7 +5295,7 @@ Additional fields can be defined the [Authorization Server Discovery Fields Regi
 If the client instance calls an RS without an access token, or with an invalid access token, the RS SHOULD be explicit about the fact that GNAP needs to be used to access the resource, by responding with the WWW-Authenticate header field and a GNAP challenge.
 
 In some situations, the client instance might want to know with which specific AS it needs to negotiate for access to that RS.
-The RS MAY additionally return the address of the GNAP endpoint in the `as_uri` parameter, a `referrer` parameter to indicate which RS initiated the discovery process, and an opaque `access` reference. The client instance SHOULD then use both the `referrer` and `access` parameters in its access token request. The `referrer` parameter MUST be the URI of the RS, and the client instance MUST check its value to protect itself. The opaque `access` reference MUST be sufficient for at least the action the client instance was attempting to take at the RS and MAY be more powerful.
+The RS MAY additionally return the address of the GNAP endpoint in the `as_uri` parameter, a `referrer` parameter to indicate which RS initiated the discovery process, and an opaque `access` reference. The client instance SHOULD then use both the `referrer` and `access` parameters in its access token request. The `referrer` parameter MUST be the URI of the RS, and the client instance MUST check its value to protect itself. The opaque `access` reference MUST be sufficient for at least the action the client instance was attempting to take at the RS and MAY allow additional access rights as well.
 
 The means for the RS to determine the value for the `access` reference are out of scope of this specification, but some dynamic methods are discussed in
 {{I-D.ietf-gnap-resource-servers}}.
@@ -5358,15 +5399,23 @@ not have grown to what it is.
 
 # IANA Considerations {#IANA}
 
-IANA is requested to create 16 registries for the Grant Negotiation and Authorization Protocol and to populate those registries with initial values as described in this section.
+IANA is requested to add values to existing registries and to create 16 registries for the Grant Negotiation and Authorization Protocol and to populate those registries with initial values as described in this section.
 
 All use of value typing is based on {{RFC8259}} data types and MUST be one of the following: number, object, string, boolean, or array. When the type is array, the contents of the array MUST be specified, as in "array of objects" when one subtype is allowed or "array of strings/objects" when multiple simultaneous subtypes are allowed. When the type is object, the structure of the object MUST be specified in the definition. If a parameter is available in different types, each type SHOULD be registered separately.
 
 General guidance for extension parameters is found in {{extensions}}.
 
+## HTTP Authentication Scheme Registration
+
+This specification requests registration of the following scheme in the 
+"Hypertext Transfer Protocol (HTTP) Authentication Scheme Registry" defined be {{Section 18.5 of HTTP}}:
+
+ * Authentication Scheme Name: `GNAP`
+ * Reference: {{use-access-token}} of {{&SELF}}|
+
 ## Grant Request Parameters {#IANA-grant-request}
 
-This document defines a GNAP grant request, for which IANA is asked to create and maintain a new registry titled "Grant Request Parameters". Initial values for this registry are given in {{IANA-grant-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a GNAP grant request, for which IANA is asked to create and maintain a new registry titled "Grant Request Parameters". Initial values for this registry are given in {{IANA-grant-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The Designated Expert (DE) is expected to ensure that all registrations follow the template presented in {{IANA-grant-request-template}}.
 The DE is expected to ensure that the request parameter's definition is sufficiently orthogonal to existing functionality provided by existing parameters.
@@ -5403,7 +5452,7 @@ Specification document(s):
 
 ## Access Token Flags {#IANA-token-flags}
 
-This document defines a GNAP access token flags, for which IANA is asked to create and maintain a new registry titled "Access Token Flags". Initial values for this registry are given in {{IANA-token-flags-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a GNAP access token flags, for which IANA is asked to create and maintain a new registry titled "Access Token Flags". Initial values for this registry are given in {{IANA-token-flags-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-token-flags-template}}.
 The DE is expected to ensure that the flag specifies whether it applies to requests for tokens to the AS, responses with tokens from the AS, or both.
@@ -5432,7 +5481,7 @@ Specification document(s):
 
 ## Subject Information Request Fields {#IANA-subject-request}
 
-This document defines a means to request subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Request Fields". Initial values for this registry are given in {{IANA-subject-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a means to request subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Request Fields". Initial values for this registry are given in {{IANA-subject-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-subject-request-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5461,7 +5510,7 @@ Specification document(s):
 
 ## Assertion Formats {#IANA-assertion-formats}
 
-This document defines a means to pass identity assertions between the AS and client instance, for which IANA is asked to create and maintain a new registry titled "Assertion Formats". Initial values for this registry are given in {{IANA-assertion-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a means to pass identity assertions between the AS and client instance, for which IANA is asked to create and maintain a new registry titled "Assertion Formats". Initial values for this registry are given in {{IANA-assertion-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-assertion-formats-template}}.
 The DE is expected to ensure that the definition specifies the serialization format of the assertion value as used within GNAP.
@@ -5486,7 +5535,7 @@ Specification document(s):
 
 ## Client Instance Fields {#IANA-client-instance}
 
-This document defines a means to send information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Fields". Initial values for this registry are given in {{IANA-client-instance-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a means to send information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Fields". Initial values for this registry are given in {{IANA-client-instance-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-client-instance-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5516,7 +5565,7 @@ Specification document(s):
 
 ## Client Instance Display Fields {#IANA-client-instance-display}
 
-This document defines a means to send end-user facing displayable information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Display Fields". Initial values for this registry are given in {{IANA-client-instance-display-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a means to send end-user facing displayable information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Display Fields". Initial values for this registry are given in {{IANA-client-instance-display-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-client-instance-display-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5545,7 +5594,7 @@ Specification document(s):
 
 ## Interaction Start Modes {#IANA-interaction-start-modes}
 
-This document defines a means for the client instance to begin interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Start Modes". Initial values for this registry are given in {{IANA-interaction-start-modes-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a means for the client instance to begin interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Start Modes". Initial values for this registry are given in {{IANA-interaction-start-modes-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-start-modes-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5578,7 +5627,7 @@ Specification document(s):
 
 ## Interaction Finish Methods {#IANA-interaction-finish-methods}
 
-This document defines a means for the client instance to be notified of the end of interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Finish Methods". Initial values for this registry are given in {{IANA-interaction-finish-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a means for the client instance to be notified of the end of interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Finish Methods". Initial values for this registry are given in {{IANA-interaction-finish-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-finish-methods-template}}.
 The DE is expected to ensure that all finish methods clearly define what actions the AS is expected to take, what listening methods the client instance needs to enable, and any security considerations for this communication from either party.
@@ -5604,7 +5653,7 @@ Specification document(s):
 
 ## Interaction Hints {#IANA-interaction-hints}
 
-This document defines a set of hints that a client instance can provide to the AS to facilitate interaction with the end user, for which IANA is asked to create and maintain a new registry titled "Interaction Hints". Initial values for this registry are given in {{IANA-interaction-hints-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a set of hints that a client instance can provide to the AS to facilitate interaction with the end user, for which IANA is asked to create and maintain a new registry titled "Interaction Hints". Initial values for this registry are given in {{IANA-interaction-hints-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-hints-template}}.
 The DE is expected to ensure that all interaction hints clearly document the expected behaviors of the AS in response to the hint, and that an AS not processing the hint does not impede the operation of the AS or client instance.
@@ -5628,7 +5677,7 @@ Specification document(s):
 
 ## Grant Response Parameters {#IANA-grant-response}
 
-This document defines a GNAP grant response, for which IANA is asked to create and maintain a new registry titled "Grant Response Parameters". Initial values for this registry are given in {{IANA-grant-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a GNAP grant response, for which IANA is asked to create and maintain a new registry titled "Grant Response Parameters". Initial values for this registry are given in {{IANA-grant-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-grant-response-template}}.
 The DE is expected to ensure that the response parameter's definition is sufficiently orthogonal to existing functionality provided by existing parameters.
@@ -5663,7 +5712,7 @@ Specification document(s):
 
 ## Interaction Mode Responses {#IANA-interaction-response}
 
-This document defines a means for the AS to provide to the client instance information that is required to complete a particular interaction mode, for which IANA is asked to create and maintain a new registry titled "Interaction Mode Responses". Initial values for this registry are given in {{IANA-interaction-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a means for the AS to provide to the client instance information that is required to complete a particular interaction mode, for which IANA is asked to create and maintain a new registry titled "Interaction Mode Responses". Initial values for this registry are given in {{IANA-interaction-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-response-template}}.
 If the name of the registration matches the name of an interaction start mode, the DE is expected to ensure that the response parameter is unambiguously associated with the interaction start mode of the same name.
@@ -5692,7 +5741,7 @@ Specification document(s):
 
 ## Subject Information Response Fields {#IANA-subject-response}
 
-This document defines a means to return subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Response Fields". Initial values for this registry are given in {{IANA-subject-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a means to return subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Response Fields". Initial values for this registry are given in {{IANA-subject-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-subject-response-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5721,7 +5770,7 @@ Specification document(s):
 
 ## Error Codes {#IANA-error-code}
 
-This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-error-code-template}}.
 The DE is expected to ensure that the error response is sufficiently unique from other errors to provide actionable information to the client instance.
@@ -5757,11 +5806,12 @@ Specification document(s):
 
 ## Key Proofing Methods {#IANA-key-proof-methods}
 
-This document defines methods that the client instance can use to prove possession of a key, for which IANA is asked to create and maintain a new registry titled "Key Proofing Methods". Initial values for this registry are given in {{IANA-key-proof-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines methods that the client instance can use to prove possession of a key, for which IANA is asked to create and maintain a new registry titled "Key Proofing Methods". Initial values for this registry are given in {{IANA-key-proof-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-key-proof-methods-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
 The DE is expected to ensure that the proofing method provides sufficient coverage of and binding to the protocol messages to which it is applied.
+The DE is expected to ensure that the proofing method definition clearly enumerates how all requirements in {{binding-keys}} are fulfilled by the definition.
 
 ### Registration Template {#IANA-key-proof-methods-template}
 
@@ -5789,7 +5839,7 @@ Specification document(s):
 
 ## Key Formats {#IANA-key-formats}
 
-This document defines formats for a public key value, for which IANA is asked to create and maintain a new registry titled "Key Formats". Initial values for this registry are given in {{IANA-key-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines formats for a public key value, for which IANA is asked to create and maintain a new registry titled "Key Formats". Initial values for this registry are given in {{IANA-key-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-key-formats-template}}.
 The DE is expected to ensure the key format specifies the structure and serialization of the key material.
@@ -5815,7 +5865,7 @@ Specification document(s):
 
 ## Authorization Server Discovery Fields {#IANA-as-discovery}
 
-This document defines a discovery document for an AS, for which IANA is asked to create and maintain a new registry titled "Authorization Server Discovery Fields". Initial values for this registry are given in {{IANA-as-discovery-contents}}. Future assignments and modifications to existing assignment are to be made through the Expert Review registration policy {{?RFC8126}}.
+This document defines a discovery document for an AS, for which IANA is asked to create and maintain a new registry titled "Authorization Server Discovery Fields". Initial values for this registry are given in {{IANA-as-discovery-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-as-discovery-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5874,13 +5924,12 @@ In addition to the normative requirements in this document, implementors are str
 
 ## TLS Protection in Transit {#security-tls}
 
-All requests in GNAP have to be made over TLS or equivalent as outlined in {{BCP195}}
+All requests in GNAP made over untrusted network connections have to be made over TLS as outlined in {{BCP195}}
 to protect the contents of the request and response from manipulation and interception by an attacker.
 This includes all requests from a client instance to the AS, all requests from the client instance to
-an RS, any requests back to a client instance such as the push-based interaction finish method, and
-any back-end communications such as from an RS to an AS as described in {{I-D.ietf-gnap-resource-servers}}.
+an RS, and any requests back to a client instance such as the push-based interaction finish method.
 Additionally, all requests between a browser and other components, such as during redirect-based
-interaction, need to be made over TLS or use equivalent protection.
+interaction, need to be made over TLS or use equivalent protection such as a network connection local to the browser ("localhost").
 
 Even though requests from the client instance to the AS are signed, the signature method alone does not protect
 the request from interception by an attacker. TLS protects the response as well as the request,
@@ -5895,7 +5944,7 @@ during legitimate use of the client instance under attack. Additionally, without
 able to profile the calls made between the client instance and RS, possibly gaining information about the functioning
 of the API between the client software and RS software that would be otherwise unknown to the attacker.
 
-TLS or equivalent protection also needs to be used between the browser and any other components. This applies during initial
+Note that connections from the end user and RO's browser also need to be be protected with TLS. This applies during initial
 redirects to an AS's components during interaction, during any interaction with the resource owner, and during
 any redirect back to the client instance. Without TLS protection on these portions of the process, an
 attacker could wait for a valid request to start and then take over the resource owner's interaction session.
@@ -6356,7 +6405,7 @@ Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern 
 a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system
 processing the HTTP message no longer has access to the original TLS connection's information and
 context. To compensate for this, the TTRP could inject the TLS client certificate into the forwarded
-request as a header parameter using {{I-D.ietf-httpbis-client-cert-field}}, giving the downstream
+request as a header parameter using {{RFC9111}}, giving the downstream
 system access to the certificate information. The TTRP has to be trusted to provide accurate
 certificate information, and the connection between the TTRP and the downstream system also has to
 be protected. The TTRP could provide some additional assurance, for example, by adding its own
@@ -6378,13 +6427,14 @@ presents its certificate to the AS as part of the TLS connection. An AS using PK
 MTLS connection would need to ensure that the presented certificate was issued by a trusted certificate
 authority before allowing the connection to continue. PKI-based certificates would allow a key to be revoked
 and rotated through management at the certificate authority without requiring additional registration
-or management at the AS. PKI has historically been difficult to deploy, especially at scale, but it
-remains an appropriate solution for systems where the required overhead is not an impediment.
+or management at the AS. The PKI required to manage mutually-authenticated TLS has historically been
+difficult to deploy, especially at scale, but it remains an appropriate solution for systems where
+the required management overhead is not an impediment.
 
 MTLS in GNAP need not use a PKI backing, as self-signed certificates and certificates from untrusted
 authorities can still be presented as part of a TLS connection. In this case, the verifier would
 validate the connection but accept whatever certificate was presented by the client software. This
-specific certificate would then be bound to all future connections from that client software by
+specific certificate can then be bound to all future connections from that client software by
 being bound to the resulting access tokens, in a trust-on-first-use pattern. See {{security-mtls}}
 for more considerations on MTLS as a key proofing mechanism.
 
@@ -6469,7 +6519,7 @@ be employed whenever possible.
 ## Session Management for Interaction Finish Methods {#security-sessions}
 
 When using an interaction finish method such as `redirect` or `push`, the client instance receives
-an unsolicited inbound request from an unknown party (in most cases over HTTP). The client
+an unsolicited inbound request from an unknown party over HTTPS. The client
 instance needs to be able to successfully associate this incoming request with a specific pending
 grant request being managed by the client instance. If the client instance is not careful and precise about
 this, an attacker could associate their own session at the client instance with a stolen interaction
@@ -7122,9 +7172,9 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
 4. **Expanded delegation:**
 
-    OAuth 2.0 defines the “scope” parameter for controlling access to APIs. This parameter has been coopted to mean a number of different things in different protocols, including flags for turning special behavior on and off, including the return of data apart from the access token. The “resource” parameter and RAR extensions (as defined in {{RFC9396}}) expand on the “scope” concept in similar but different ways.
+    OAuth 2.0 defines the “scope” parameter for controlling access to APIs. This parameter has been coopted to mean a number of different things in different protocols, including flags for turning special behavior on and off, including the return of data apart from the access token. The resource indicator (defined in {{RFC8707}}) and RAR extensions (defined in {{RFC9396}}) expand on the “scope” concept in similar but different ways.
 
-    GNAP defines a rich structure for requesting access, with string references as an optimization. GNAP defines methods for requesting directly-returned user information, separate from API access. This information includes identifiers for the current user and structured assertions. The core GNAP protocol makes no assumptions or demands on the format or contents of the access token, but the RS extension allows a negotiation of token formats between the AS and RS.
+    GNAP defines a rich structure for requesting access (analogous to RAR), with string references as an optimization (analogous to scopes). GNAP defines methods for requesting directly-returned user information, separate from API access. This information includes identifiers for the current user and structured assertions. The core GNAP protocol makes no assumptions or demands on the format or contents of the access token, but the RS extension allows a negotiation of token formats between the AS and RS.
 
 5. **Cryptography-based security:**
 
