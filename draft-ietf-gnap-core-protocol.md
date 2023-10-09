@@ -4578,7 +4578,7 @@ claims:
   REQUIRED.
 
 `typ` (string):
-: The type header, value ”gnap-binding+jwsd”. REQUIRED.
+: The type header, value "gnap-binding+jwsd". REQUIRED.
 
 `htm` (string):
 : The HTTP Method used to make this request, as a case-sensitive ASCII string. Note that most public HTTP methods are in uppercase ASCII by convention. REQUIRED.
@@ -4747,7 +4747,7 @@ new JWS header that indicates the HTTP content's hash method.
 
 When rotating a key using Detached JWS, the message, which includes the new public key value or
 reference, is first signed with the old key as described above using a JWS object with `typ` header value
-”gnap-binding-rotation+jwsd”. The value of the JWS object is then taken as the payload of a new JWS
+"gnap-binding-rotation+jwsd". The value of the JWS object is then taken as the payload of a new JWS
 object, to be signed by the new key using the parameters above.
 
 The value of the new JWS object is sent in the Detached-JWS header.
@@ -4776,7 +4776,7 @@ To protect the request, the JWS header contains the following claims.
   REQUIRED.
 
 `typ` (string):
-: The type header, value ”gnap-binding+jwsd”. REQUIRED.
+: The type header, value "gnap-binding+jwsd". REQUIRED.
 
 `htm` (string):
 : The HTTP Method used to make this request, as a case-sensitive ASCII string. (Note that most public HTTP methods are in uppercase.) REQUIRED.
@@ -4924,7 +4924,7 @@ new header that indicates the HTTP content's hash method.
 
 #### Key Rotation using Attached JWS
 
-When rotating a key using Attached JWS, the message, which includes the new public key value or reference, is first signed with the old key using a JWS object with `typ` header value ”gnap-binding-rotation+jwsd”. The value of the JWS object is then taken as the payload of a new JWS object, to be signed by the new key.
+When rotating a key using Attached JWS, the message, which includes the new public key value or reference, is first signed with the old key using a JWS object with `typ` header value "gnap-binding-rotation+jwsd". The value of the JWS object is then taken as the payload of a new JWS object, to be signed by the new key.
 
 # Resource Access Rights {#resource-access-rights}
 
@@ -7154,13 +7154,13 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
     OAuth 2.0 generally assumes the user has access to a web browser. The type of interaction available is fixed by the grant type, and the most common interactive grant types start in the browser. OAuth 2.0 assumes that the user using the client software is the same user that will interact with the AS to approve access.
 
-    GNAP allows various patterns to manage authorizations and consents required to fulfill this requested delegation, including information sent by the client instance, information supplied by external parties, and information gathered through the interaction process. GNAP allows a client instance to list different ways that it can start and finish an interaction, and these can be mixed together as needed for different use cases. GNAP interactions can use a browser, but don’t have to. Methods can use inter-application messaging protocols, out-of-band data transfer, or anything else. GNAP allows extensions to define new ways to start and finish an interaction, as new methods and platforms are expected to become available over time. GNAP is designed to allow the end user and the resource owner to be two different people, but still works in the optimized case of them being the same party.
+    GNAP allows various patterns to manage authorizations and consents required to fulfill this requested delegation, including information sent by the client instance, information supplied by external parties, and information gathered through the interaction process. GNAP allows a client instance to list different ways that it can start and finish an interaction, and these can be mixed together as needed for different use cases. GNAP interactions can use a browser, but don't have to. Methods can use inter-application messaging protocols, out-of-band data transfer, or anything else. GNAP allows extensions to define new ways to start and finish an interaction, as new methods and platforms are expected to become available over time. GNAP is designed to allow the end user and the resource owner to be two different people, but still works in the optimized case of them being the same party.
 
 2. **Intent registration and inline negotiation:**
 
-    OAuth 2.0 uses different “grant types” that start at different endpoints for different purposes. Many of these require discovery of several interrelated parameters.
+    OAuth 2.0 uses different "grant types" that start at different endpoints for different purposes. Many of these require discovery of several interrelated parameters.
 
-    GNAP requests all start with the same type of request to the same endpoint at the AS. Next steps are negotiated between the client instance and AS based on software capabilities, policies surrounding requested access, and the overall context of the ongoing request. GNAP defines a continuation API that allows the client instance and AS to request and send additional information from each other over multiple steps. This continuation API uses the same access token protection that other GNAP-protected APIs use. GNAP allows discovery to optimize the requests but it isn’t required thanks to the negotiation capabilities.
+    GNAP requests all start with the same type of request to the same endpoint at the AS. Next steps are negotiated between the client instance and AS based on software capabilities, policies surrounding requested access, and the overall context of the ongoing request. GNAP defines a continuation API that allows the client instance and AS to request and send additional information from each other over multiple steps. This continuation API uses the same access token protection that other GNAP-protected APIs use. GNAP allows discovery to optimize the requests but it isn't required thanks to the negotiation capabilities.
 
     GNAP is able to handle the life-cycle of an authorization request, and therefore simplifies the mental model surrounding OAuth2. For instance, there's no need for refresh tokens when the API enables proper rotation of access tokens.
 
@@ -7168,11 +7168,11 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
     OAuth 2.0 requires all clients to be registered at the AS and to use a client_id known to the AS as part of the protocol. This client_id is generally assumed to be assigned by a trusted authority during a registration process, and OAuth places a lot of trust on the client_id as a result. Dynamic registration allows different classes of clients to get a client_id at runtime, even if they only ever use it for one request.
 
-    GNAP allows the client instance to present an unknown key to the AS and use that key to protect the ongoing request. GNAP’s client instance identifier mechanism allows for pre-registered clients and dynamically registered clients to exist as an optimized case without requiring the identifier as part of the protocol at all times.
+    GNAP allows the client instance to present an unknown key to the AS and use that key to protect the ongoing request. GNAP's client instance identifier mechanism allows for pre-registered clients and dynamically registered clients to exist as an optimized case without requiring the identifier as part of the protocol at all times.
 
 4. **Expanded delegation:**
 
-    OAuth 2.0 defines the “scope” parameter for controlling access to APIs. This parameter has been coopted to mean a number of different things in different protocols, including flags for turning special behavior on and off, including the return of data apart from the access token. The resource indicator (defined in {{RFC8707}}) and RAR extensions (defined in {{RFC9396}}) expand on the “scope” concept in similar but different ways.
+    OAuth 2.0 defines the "scope" parameter for controlling access to APIs. This parameter has been coopted to mean a number of different things in different protocols, including flags for turning special behavior on and off, including the return of data apart from the access token. The "resource" indicator (defined in {{RFC8707}}) and RAR extensions (as defined in {{RFC9396}}) expand on the "scope" concept in similar but different ways.
 
     GNAP defines a rich structure for requesting access (analogous to RAR), with string references as an optimization (analogous to scopes). GNAP defines methods for requesting directly-returned user information, separate from API access. This information includes identifiers for the current user and structured assertions. The core GNAP protocol makes no assumptions or demands on the format or contents of the access token, but the RS extension allows a negotiation of token formats between the AS and RS.
 
@@ -7180,7 +7180,7 @@ GNAP's protocol design differs from OAuth 2.0's in several fundamental ways:
 
     OAuth 2.0 uses shared bearer secrets, including the client_secret and access token, and advanced authentication and sender constraint have been built on after the fact in inconsistent ways.
 
-    In GNAP, all communication between the client instance and AS is bound to a key held by the client instance. GNAP uses the same cryptographic mechanisms for both authenticating the client (to the AS) and binding the access token (to the RS and the AS). GNAP allows extensions to define new cryptographic protection mechanisms, as new methods are expected to become available over time. GNAP does not have a notion of “public clients” because key information can always be sent and used dynamically.
+    In GNAP, all communication between the client instance and AS is bound to a key held by the client instance. GNAP uses the same cryptographic mechanisms for both authenticating the client (to the AS) and binding the access token (to the RS and the AS). GNAP allows extensions to define new cryptographic protection mechanisms, as new methods are expected to become available over time. GNAP does not have a notion of "public clients" because key information can always be sent and used dynamically.
 
 6. **Privacy and usable security:**
 
