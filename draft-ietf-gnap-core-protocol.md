@@ -1431,8 +1431,8 @@ its capabilities and what is allowed to fulfill the request.
 
 In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
 the end user to an arbitrary URI and can receive a [redirect](#request-interact-callback-redirect) through
-a browser request. Note that the client instance does not accept a push-style callback. This pattern
-is common for web-based client software.
+a browser request. Note that the client instance does not accept a push-style callback.
+The pattern of using a redirect for both interaction start and finish is common for web-based client software.
 
 ~~~ json
 "interact": {
