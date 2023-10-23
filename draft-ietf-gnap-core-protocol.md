@@ -7881,11 +7881,11 @@ Implementations conformant to the Secondary Device profile of GNAP MUST implemen
 # Guidance for Extensions {#extensions}
 
 Extensions to this specification have a variety of places to alter the protocol, including many
-fields and objects that can have additional values in a [registry](#IANA) established by this
-specification. Extensions that add new fields, especially to the grant request and response, should
-endeavor to have any new fields be as orthogonal as possible to existing fields. That is to say,
-if functionality is sufficiently close to an existing field, the extension should attempt to
-use that field instead of defining a new one, in order to avoid confusion by developers.
+fields and objects that can have additional values in a registry [registry](#IANA) established by this
+specification. For interoperability and to preserve the security of the protocol, extensions should
+register new values with IANA by following the specified mechanism. While it may technically be
+possible to extend the protocol by adding elements to JSON objects that are not governed by an
+IANA registry, a recipient may ignore such values but is also allowed to reject them.
 
 Most object fields in GNAP are specified with types, and those types can allow different but
 related behavior. For example, the `access` array can include either strings or objects, as
