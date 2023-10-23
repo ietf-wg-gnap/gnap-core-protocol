@@ -6926,6 +6926,23 @@ decisions that may be ongoing, is particularly important in the asynchronous cas
 An attacker may aim to gain access to confidential or sensitive resources. The measures for hardening and monitoring resource server systems (beyond protection with access tokens) is out of the scope of this document, but the use of GNAP to protect a system does not absolve the resource server of following best practices.
 GNAP generally considers a breach can occur, and therefore advises to prefer key-bound tokens whenever possible, which at least limits the impact of access token leakage by a compromised or malicious RS.
 
+## AS-Provided Token Keys {#security-as-keys}
+
+While the most common token issuance pattern is to bind the access token to the client instance's
+presented key, it is possible for the AS to provide its own key along with an access token, as
+shown by the `key` field of the token response in {{response-token-single}}. This practice allows
+for an AS to generate and manage the keys associated with tokens independently of the keys known
+to client instances.
+
+If the key material is returned by value from the AS, then the client instance will simply use this
+key value when presenting the token. This can be exploited by an attacker to issue a compromised token
+to an unsuspecting client, assuming that the client instance trusts the attacker's AS to issue tokens
+for the target RS.
+
+This feature should be limited to only circumstances where both the client and AS can be verified
+to be honest, and further only when the tradeoff of not using a client instance's own keys is worth the
+additional risk.
+
 # Privacy Considerations {#privacy}
 
 The privacy considerations in this section are modeled after the list of privacy threats in {{RFC6973}}, "Privacy Considerations for Internet Protocols", and either explain how these threats are mitigated or advise how the threats relate to GNAP.
