@@ -875,7 +875,7 @@ client instance's request. Each field is described in detail in a section below.
 : Describes the modes that the client instance supports for allowing the RO to interact with the
     AS and modes for the client instance to receive updates when interaction is complete. REQUIRED if interaction is supported. See {{request-interact}}.
 
-Additional members of this request object can be defined by extensions using the [Grant Request Parameters Registry](#IANA-grant-request).
+Additional members of this request object can be defined by extensions using the [GNAP Grant Request Parameters Registry](#IANA-grant-request).
 
 A non-normative example of a grant request is below:
 
@@ -981,7 +981,7 @@ The values of the `flags` field defined by this specification are as follows:
 
 Flag values MUST NOT be included more than once.
 
-Additional flags can be defined by extensions using the [Access Token Flags Registry](#IANA-token-flags).
+Additional flags can be defined by extensions using the [GNAP Access Token Flags Registry](#IANA-token-flags).
 
 In the following example, the client instance is requesting access to a complex resource
 described by a pair of access request object.
@@ -1112,7 +1112,7 @@ contain the following fields.
 `assertion_formats` (array of strings):
 : An array of requested assertion formats. Possible values include
     `id_token` for an OpenID Connect ID Token ({{OIDC}}) and `saml2` for a SAML 2 assertion ({{SAML2}}). Additional
-    assertion formats are defined by the [Assertion Formats Registry](#IANA-assertion-formats).
+    assertion formats are defined by the [GNAP Assertion Formats Registry](#IANA-assertion-formats).
     REQUIRED if assertions are requested.
 
 `sub_ids` (array of objects):
@@ -1123,7 +1123,7 @@ contain the following fields.
     that subject information requests are about the current user and SHOULD
     require direct interaction or proof of presence before releasing information. OPTIONAL.
 
-Additional fields are defined in the [Subject Information Request Fields Registry](#IANA-subject-request).
+Additional fields are defined in the [GNAP Subject Information Request Fields Registry](#IANA-subject-request).
 
 ~~~ json
 "subject": {
@@ -1193,13 +1193,13 @@ object with the following fields.
 }
 ~~~
 
-Additional fields are defined in the [Client Instance Fields Registry](#IANA-client-instance).
+Additional fields are defined in the [GNAP Client Instance Fields Registry](#IANA-client-instance).
 
 Absent additional attestations, profiles, or trust mechanisms, both the `display` and `class_id` fields are self-declarative, presented by the client instance and the AS MUST exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret or validate the class_id field, it SHOULD return an `invalid_client` error ({{response-error}}) or interpret the request as if the class_id were not present and not allow the set of privileges associated with the class_id. See additional discussion of client instance impersonation in {{security-impersonation}}.
 
 The client instance MUST prove possession of any presented key by the `proof` mechanism
 associated with the key in the request. Key proofing methods
-are defined in the [Key Proofing Methods Registry](#IANA-key-proof-methods) and an initial set of methods
+are defined in the [GNAP Key Proofing Methods Registry](#IANA-key-proof-methods) and an initial set of methods
 is described in {{binding-keys}}.
 
 If the same public key is sent by value on different access requests, the AS MUST
@@ -1274,7 +1274,7 @@ to present to the RO during any interactive sequences.
 }
 ~~~
 
-Additional display fields are defined by the [Client Instance Display Fields Registry](#IANA-client-instance-display).
+Additional display fields are defined by the [GNAP Client Instance Display Fields Registry](#IANA-client-instance-display).
 
 The AS SHOULD use these values during interaction with the RO.
 The values are for informational purposes only and MUST NOT
@@ -1518,7 +1518,7 @@ This specification defines the following interaction start modes:
 
 All interaction start method definitions MUST provide enough information to uniquely identify the grant request during the interaction. In the `redirect` and `app` modes, this is done using a unique URI (including its parameters). In the `user_code` and `user_code_uri` mode, this is done using the value of the user code.
 
-Additional start modes are defined in the [Interaction Start Modes Registry](#IANA-interaction-start-modes).
+Additional start modes are defined in the [GNAP Interaction Start Modes Registry](#IANA-interaction-start-modes).
 
 #### Redirect to an Arbitrary URI {#request-interact-redirect}
 
@@ -1647,7 +1647,7 @@ indicates this by sending the following members of an object under the `finish` 
     If absent, the default value is `sha-256`. OPTIONAL.
 
 This specification defines the following values for the `method` parameter,
-with other values defined by the [Interaction Finish Methods Registry](#IANA-interaction-finish-methods):
+with other values defined by the [GNAP Interaction Finish Methods Registry](#IANA-interaction-finish-methods):
 
 `"redirect"`:
 : Indicates that the client instance can receive a redirect from the end user's device
@@ -1745,7 +1745,7 @@ This specification defines the following properties under the `hints` key:
 
 The following sections detail requests for interaction
 hints. Additional interaction hints are defined in
-the [Interaction Hints Registry](#IANA-interaction-hints).
+the [GNAP Interaction Hints Registry](#IANA-interaction-hints).
 
 
 #### Indicate Desired Interaction Locales {#request-interact-locale}
@@ -1793,7 +1793,7 @@ as the HTTP entity body. Each possible field is detailed in the sections below.
 `error` (object or string):
 : An error code indicating that something has gone wrong. REQUIRED for an error condition. See {{response-error}}.
 
-Additional fields can be defined by extensions to GNAP in the [Grant Response Parameters Registry](#IANA-grant-response).
+Additional fields can be defined by extensions to GNAP in the [GNAP Grant Response Parameters Registry](#IANA-grant-response).
 
 In this example, the AS is returning an [interaction URI](#response-interact-redirect),
 a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
@@ -2035,7 +2035,7 @@ The values of the `flags` field defined by this specification are as follows:
 
 Flag values MUST NOT be included more than once.
 
-Additional flags can be defined by extensions using the [Access Token Fields Registry](#IANA-token-flags).
+Additional flags can be defined by extensions using the [GNAP Access Token Fields Registry](#IANA-token-flags).
 
 If the `bearer` flag and the `key` field
 in this response are omitted, the token is bound the [key used by the client instance](#request-client)
@@ -2198,7 +2198,7 @@ interaction methods are included in the same `interact` object.
 `expires_in` (integer):
 : The number of integer seconds after which this set of interaction responses will expire and no longer be usable by the client instance. If the interaction methods expire, the client MAY re-start the interaction process for this grant request by sending an [update](#continue-modify) with a new [interaction request](#request-interact) section. OPTIONAL. If omitted, the interaction response modes returned do not expire but MAY be invalidated by the AS at any time.
 
-Additional interaction mode responses can be defined in the [Interaction Mode Responses Registry](#IANA-interaction-response).
+Additional interaction mode responses can be defined in the [GNAP Interaction Mode Responses Registry](#IANA-interaction-response).
 
 The AS MUST NOT respond with any interaction mode that the
 client instance did not indicate in its request. The AS MUST NOT respond with
@@ -2423,7 +2423,7 @@ Assertion objects contain the following fields:
 `format` (string):
 : The assertion format.
     Possible formats include `id_token` for an OpenID Connect ID Token ({{OIDC}}) and `saml2` for a SAML 2 assertion ({{SAML2}}).
-    Additional assertion formats are defined by the [Assertion Formats Registry](#IANA-assertion-formats).
+    Additional assertion formats are defined by the [GNAP Assertion Formats Registry](#IANA-assertion-formats).
     REQUIRED.
 
 `value` (string):
@@ -2476,7 +2476,7 @@ both AS's needs to differentiate between these two accounts by accounting for th
 of each identifier.
 
 Extensions to this specification MAY define additional response
-properties in the [Subject Information Response Fields Registry](#IANA-subject-response).
+properties in the [GNAP Subject Information Response Fields Registry](#IANA-subject-response).
 
 The grant request MUST be in the _approved_ state to return this field in the response.
 
@@ -2585,7 +2585,7 @@ This specification defines the following `code` values:
 `"too_many_attempts"`:
 : A limit has been reached in the total number of reasonable attempts. This number is either defined statically or adjusted based on runtime conditions by the AS.
 
-Additional error codes can be defined in the [Error Code Registry](#IANA-error-code).
+Additional error codes can be defined in the [GNAP Error Code Registry](#IANA-error-code).
 
 For example, if the RO denied the request while interacting with the AS,
 the AS would return the following error when the client instance tries to
@@ -2677,7 +2677,7 @@ the means by which the client chooses which methods to follow is out of scope of
 
 After starting interaction, the client instance can then make a [continuation request](#continue-request)
 either in response to a signal indicating the [finish of the interaction](#interaction-finish), after a time-based
-polling, or through some other method defined by an extension of this specification through the [Interaction Mode Responses registry](#IANA-interaction-response).
+polling, or through some other method defined by an extension of this specification through the [GNAP Interaction Mode Responses registry](#IANA-interaction-response).
 
 If the grant request is not in the _approved_ state, the
 client instance can repeat the interaction process by sending a [grant update request](#continue-modify) with new [interaction](#request-interact) methods.
@@ -3890,7 +3890,7 @@ additional discussion of the presentation of public keys in {{security-symmetric
     the full public key.
     OPTIONAL.
 
-Additional key formats are defined in the [Key Formats Registry](#IANA-key-formats).
+Additional key formats are defined in the [GNAP Key Formats Registry](#IANA-key-formats).
 
 This non-normative example shows a single key presented in two different formats. This example key is intended to be used with the [HTTP Message Signatures](#httpsig-binding)
 proofing mechanism, as indicated by the `httpsig` value of the `proof` field.
@@ -4032,7 +4032,7 @@ Values for the `method` defined by this specification are as follows:
 `"jws"` (string):
 : Attached JWS payload. See {{attached-jws}}.
 
-Additional proofing methods are defined by the [Key Proofing Methods Registry](#IANA-key-proof-methods).
+Additional proofing methods are defined by the [GNAP Key Proofing Methods Registry](#IANA-key-proof-methods).
 
 Proof methods MAY be defined as both an object and a string. For example, the `httpsig` method can be specified as an
 object with its parameters explicitly declared, such as:
@@ -5243,13 +5243,13 @@ server's discovery information. The AS MUST respond with a JSON document with Co
 `interaction_start_modes_supported` (array of strings):
 : A list of the AS's interaction start methods. The values of this list correspond to the
     possible values for the [interaction start section](#request-interact-start) of the request and
-    MUST be values from the [Interaction Start Modes Registry](#IANA-interaction-start-modes).
+    MUST be values from the [GNAP Interaction Start Modes Registry](#IANA-interaction-start-modes).
     OPTIONAL.
 
 `interaction_finish_methods_supported` (array of strings):
 : A list of the AS's interaction finish methods. The values of this list correspond to the
     possible values for the method element of the [interaction finish section](#request-interact-finish) of the request and MUST be values from
-    the [Interaction Finish Methods Registry](#IANA-interaction-finish-methods).
+    the [GNAP Interaction Finish Methods Registry](#IANA-interaction-finish-methods).
     OPTIONAL.
 
 `key_proofs_supported` (array of strings):
@@ -5257,7 +5257,7 @@ server's discovery information. The AS MUST respond with a JSON document with Co
     proofing mechanisms. The values of this list correspond to possible
     values of the `proof` field of the
     [key section](#key-format) of the request and MUST be values from the
-    [Key Proofing Methods Registry](#IANA-key-proof-methods).
+    [GNAP Key Proofing Methods Registry](#IANA-key-proof-methods).
     OPTIONAL.
 
 `sub_id_formats_supported` (array of strings):
@@ -5272,7 +5272,7 @@ server's discovery information. The AS MUST respond with a JSON document with Co
 : A list of the AS's supported
     assertion formats. The values of this list correspond to possible
     values of the [subject assertion section](#request-subject) of the request and MUST
-    be values from the [Assertion Formats Registry](#IANA-assertion-formats).
+    be values from the [GNAP Assertion Formats Registry](#IANA-assertion-formats).
     OPTIONAL.
 
 `key_rotation_supported` (boolean):
@@ -5288,7 +5288,7 @@ will still deny a request from that client instance using a different proofing
 mechanism. Similarly, an AS with `key_rotation_supported` set to "true" can still deny
 any request for rotating any access token's key for a variety of reasons.
 
-Additional fields can be defined the [Authorization Server Discovery Fields Registry](#IANA-as-discovery).
+Additional fields can be defined the [GNAP Authorization Server Discovery Fields Registry](#IANA-as-discovery).
 
 ## RS-first Method of AS Discovery {#rs-request-without-token}
 
@@ -5413,9 +5413,9 @@ This specification requests registration of the following scheme in the
 * Authentication Scheme Name: `GNAP`
 * Reference: {{use-access-token}} of {{&SELF}}
 
-## Grant Request Parameters {#IANA-grant-request}
+## GNAP Grant Request Parameters {#IANA-grant-request}
 
-This document defines a GNAP grant request, for which IANA is asked to create and maintain a new registry titled "Grant Request Parameters". Initial values for this registry are given in {{IANA-grant-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a GNAP grant request, for which IANA is asked to create and maintain a new registry titled "GNAP Grant Request Parameters". Initial values for this registry are given in {{IANA-grant-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The Designated Expert (DE) is expected to ensure that all registrations follow the template presented in {{IANA-grant-request-template}}.
 The DE is expected to ensure that the request parameter's definition is sufficiently orthogonal to existing functionality provided by existing parameters.
@@ -5450,9 +5450,9 @@ Specification document(s):
 |interact|object|{{request-interact}} of {{&SELF}}|
 |interact_ref|string|{{continue-after-interaction}} of {{&SELF}}|
 
-## Access Token Flags {#IANA-token-flags}
+## GNAP Access Token Flags {#IANA-token-flags}
 
-This document defines a GNAP access token flags, for which IANA is asked to create and maintain a new registry titled "Access Token Flags". Initial values for this registry are given in {{IANA-token-flags-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a GNAP access token flags, for which IANA is asked to create and maintain a new registry titled "GNAP Access Token Flags". Initial values for this registry are given in {{IANA-token-flags-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-token-flags-template}}.
 The DE is expected to ensure that the flag specifies whether it applies to requests for tokens to the AS, responses with tokens from the AS, or both.
@@ -5479,9 +5479,9 @@ Specification document(s):
 |bearer|Request, Response|{{request-token-single}} and {{response-token-single}} of {{&SELF}}|
 |durable|Response|{{response-token-single}} of {{&SELF}}|
 
-## Subject Information Request Fields {#IANA-subject-request}
+## GNAP Subject Information Request Fields {#IANA-subject-request}
 
-This document defines a means to request subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Request Fields". Initial values for this registry are given in {{IANA-subject-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a means to request subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "GNAP Subject Information Request Fields". Initial values for this registry are given in {{IANA-subject-request-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-subject-request-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5508,9 +5508,9 @@ Specification document(s):
 |assertion_formats|array of strings|{{request-subject}} of {{&SELF}}|
 |sub_ids|array of objects|{{request-subject}} of {{&SELF}}|
 
-## Assertion Formats {#IANA-assertion-formats}
+## GNAP Assertion Formats {#IANA-assertion-formats}
 
-This document defines a means to pass identity assertions between the AS and client instance, for which IANA is asked to create and maintain a new registry titled "Assertion Formats". Initial values for this registry are given in {{IANA-assertion-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a means to pass identity assertions between the AS and client instance, for which IANA is asked to create and maintain a new registry titled "GNAP Assertion Formats". Initial values for this registry are given in {{IANA-assertion-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-assertion-formats-template}}.
 The DE is expected to ensure that the definition specifies the serialization format of the assertion value as used within GNAP.
@@ -5533,9 +5533,9 @@ Specification document(s):
 |id_token|{{request-subject}} and {{response-subject}} of {{&SELF}}|
 |saml2|{{request-subject}} and {{response-subject}} of {{&SELF}}|
 
-## Client Instance Fields {#IANA-client-instance}
+## GNAP Client Instance Fields {#IANA-client-instance}
 
-This document defines a means to send information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Fields". Initial values for this registry are given in {{IANA-client-instance-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a means to send information about the client instance, for which IANA is asked to create and maintain a new registry titled "GNAP Client Instance Fields". Initial values for this registry are given in {{IANA-client-instance-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-client-instance-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5563,9 +5563,9 @@ Specification document(s):
 |class_id|string|{{request-client}} of {{&SELF}}|
 |display|object|{{request-display}} of {{&SELF}}|
 
-## Client Instance Display Fields {#IANA-client-instance-display}
+## GNAP Client Instance Display Fields {#IANA-client-instance-display}
 
-This document defines a means to send end-user facing displayable information about the client instance, for which IANA is asked to create and maintain a new registry titled "Client Instance Display Fields". Initial values for this registry are given in {{IANA-client-instance-display-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a means to send end-user facing displayable information about the client instance, for which IANA is asked to create and maintain a new registry titled "GNAP Client Instance Display Fields". Initial values for this registry are given in {{IANA-client-instance-display-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-client-instance-display-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5592,9 +5592,9 @@ Specification document(s):
 |uri|string|{{request-display}} of {{&SELF}}|
 |logo_uri|string|{{request-display}} of {{&SELF}}|
 
-## Interaction Start Modes {#IANA-interaction-start-modes}
+## GNAP Interaction Start Modes {#IANA-interaction-start-modes}
 
-This document defines a means for the client instance to begin interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Start Modes". Initial values for this registry are given in {{IANA-interaction-start-modes-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a means for the client instance to begin interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "GNAP Interaction Start Modes". Initial values for this registry are given in {{IANA-interaction-start-modes-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-start-modes-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5625,9 +5625,9 @@ Specification document(s):
 |user_code|string|{{request-interact-usercode}} of {{&SELF}}|
 |user_code_uri|string|{{request-interact-usercodeuri}} of {{&SELF}}|
 
-## Interaction Finish Methods {#IANA-interaction-finish-methods}
+## GNAP Interaction Finish Methods {#IANA-interaction-finish-methods}
 
-This document defines a means for the client instance to be notified of the end of interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "Interaction Finish Methods". Initial values for this registry are given in {{IANA-interaction-finish-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a means for the client instance to be notified of the end of interaction between the end-user and the AS, for which IANA is asked to create and maintain a new registry titled "GNAP Interaction Finish Methods". Initial values for this registry are given in {{IANA-interaction-finish-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-finish-methods-template}}.
 The DE is expected to ensure that all finish methods clearly define what actions the AS is expected to take, what listening methods the client instance needs to enable, and any security considerations for this communication from either party.
@@ -5651,9 +5651,9 @@ Specification document(s):
 |redirect|{{request-interact-callback-redirect}} of {{&SELF}}|
 |push|{{request-interact-callback-push}} of {{&SELF}}|
 
-## Interaction Hints {#IANA-interaction-hints}
+## GNAP Interaction Hints {#IANA-interaction-hints}
 
-This document defines a set of hints that a client instance can provide to the AS to facilitate interaction with the end user, for which IANA is asked to create and maintain a new registry titled "Interaction Hints". Initial values for this registry are given in {{IANA-interaction-hints-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a set of hints that a client instance can provide to the AS to facilitate interaction with the end user, for which IANA is asked to create and maintain a new registry titled "GNAP Interaction Hints". Initial values for this registry are given in {{IANA-interaction-hints-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-hints-template}}.
 The DE is expected to ensure that all interaction hints clearly document the expected behaviors of the AS in response to the hint, and that an AS not processing the hint does not impede the operation of the AS or client instance.
@@ -5675,9 +5675,9 @@ Specification document(s):
 |Mode|Specification document(s)|
 |ui_locales|{{request-interact-hint}} of {{&SELF}}|
 
-## Grant Response Parameters {#IANA-grant-response}
+## GNAP Grant Response Parameters {#IANA-grant-response}
 
-This document defines a GNAP grant response, for which IANA is asked to create and maintain a new registry titled "Grant Response Parameters". Initial values for this registry are given in {{IANA-grant-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a GNAP grant response, for which IANA is asked to create and maintain a new registry titled "GNAP Grant Response Parameters". Initial values for this registry are given in {{IANA-grant-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-grant-response-template}}.
 The DE is expected to ensure that the response parameter's definition is sufficiently orthogonal to existing functionality provided by existing parameters.
@@ -5710,9 +5710,9 @@ Specification document(s):
 |instance_id|string|{{response-dynamic-handles}} of {{&SELF}}|
 |error|object|{{response-error}} of {{&SELF}}|
 
-## Interaction Mode Responses {#IANA-interaction-response}
+## GNAP Interaction Mode Responses {#IANA-interaction-response}
 
-This document defines a means for the AS to provide to the client instance information that is required to complete a particular interaction mode, for which IANA is asked to create and maintain a new registry titled "Interaction Mode Responses". Initial values for this registry are given in {{IANA-interaction-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a means for the AS to provide to the client instance information that is required to complete a particular interaction mode, for which IANA is asked to create and maintain a new registry titled "GNAP Interaction Mode Responses". Initial values for this registry are given in {{IANA-interaction-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-response-template}}.
 If the name of the registration matches the name of an interaction start mode, the DE is expected to ensure that the response parameter is unambiguously associated with the interaction start mode of the same name.
@@ -5739,9 +5739,9 @@ Specification document(s):
 |finish|{{response-interact}} of {{&SELF}}|
 |expires_in|{{response-interact}} of {{&SELF}}|
 
-## Subject Information Response Fields {#IANA-subject-response}
+## GNAP Subject Information Response Fields {#IANA-subject-response}
 
-This document defines a means to return subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "Subject Information Response Fields". Initial values for this registry are given in {{IANA-subject-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a means to return subject information from the AS to the client instance, for which IANA is asked to create and maintain a new registry titled "GNAP Subject Information Response Fields". Initial values for this registry are given in {{IANA-subject-response-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-subject-response-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5768,9 +5768,9 @@ Specification document(s):
 |assertions|array of objects|{{response-subject}} of {{&SELF}}|
 |updated_at|string|{{response-subject}} of {{&SELF}}|
 
-## Error Codes {#IANA-error-code}
+## GNAP Error Codes {#IANA-error-code}
 
-This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a set of errors that the AS can return to the client instance, for which IANA is asked to create and maintain a new registry titled "GNAP Error Codes". Initial values for this registry are given in {{IANA-error-code-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-error-code-template}}.
 The DE is expected to ensure that the error response is sufficiently unique from other errors to provide actionable information to the client instance.
@@ -5804,9 +5804,9 @@ Specification document(s):
 |too_fast|{{response-error}} of {{&SELF}}|
 |too_many_attempts|{{response-error}} of {{&SELF}}|
 
-## Key Proofing Methods {#IANA-key-proof-methods}
+## GNAP Key Proofing Methods {#IANA-key-proof-methods}
 
-This document defines methods that the client instance can use to prove possession of a key, for which IANA is asked to create and maintain a new registry titled "Key Proofing Methods". Initial values for this registry are given in {{IANA-key-proof-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines methods that the client instance can use to prove possession of a key, for which IANA is asked to create and maintain a new registry titled "GNAP Key Proofing Methods". Initial values for this registry are given in {{IANA-key-proof-methods-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-key-proof-methods-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
@@ -5837,9 +5837,9 @@ Specification document(s):
 |jwsd|string|{{detached-jws}} of {{&SELF}}|
 |jws|string|{{attached-jws}} of {{&SELF}}|
 
-## Key Formats {#IANA-key-formats}
+## GNAP Key Formats {#IANA-key-formats}
 
-This document defines formats for a public key value, for which IANA is asked to create and maintain a new registry titled "Key Formats". Initial values for this registry are given in {{IANA-key-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines formats for a public key value, for which IANA is asked to create and maintain a new registry titled "GNAP Key Formats". Initial values for this registry are given in {{IANA-key-formats-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-key-formats-template}}.
 The DE is expected to ensure the key format specifies the structure and serialization of the key material.
@@ -5863,9 +5863,9 @@ Specification document(s):
 |cert|{{key-format}} of {{&SELF}}|
 |cert#S256|{{key-format}} of {{&SELF}}|
 
-## Authorization Server Discovery Fields {#IANA-as-discovery}
+## GNAP Authorization Server Discovery Fields {#IANA-as-discovery}
 
-This document defines a discovery document for an AS, for which IANA is asked to create and maintain a new registry titled "Authorization Server Discovery Fields". Initial values for this registry are given in {{IANA-as-discovery-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
+This document defines a discovery document for an AS, for which IANA is asked to create and maintain a new registry titled "GNAP Authorization Server Discovery Fields". Initial values for this registry are given in {{IANA-as-discovery-contents}}. Future assignments and modifications to existing assignment are to be made through the Specification Required registration policy {{?RFC8126}}.
 
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-as-discovery-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
