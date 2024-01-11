@@ -76,6 +76,7 @@ normative:
             ins: E. Maler
 
 informative:
+    RFC4107:
     RFC6202:
     RFC6973:
     RFC8707:
@@ -193,6 +194,8 @@ of these can be found in {{example-oauth2}}.
 {::boilerplate bcp14-tagged}
 
 This document contains non-normative examples of partial and complete HTTP messages, JSON structures, URIs, query components, keys, and other elements. Whenever possible, the document uses URI as a generic term, since it aligns with {{!RFC3986}} recommendations and matches better with the intent that the identifier may be reachable through various/generic means (compared to URLs). Some examples use a single trailing backslash `\` to indicate line wrapping for long values, as per {{RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
+
+This document uses the term "mutual TLS" as defined by {{RFC8705}}. The shortened form "MTLS" is used to mean the same thing.
 
 ## Roles
 
@@ -6001,6 +6004,57 @@ proof of possession by the caller, which is usually the client instance. These m
 addition to TLS on all connections.
 
 
+## MTLS Message Integrity {#security-mtls}
+
+The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key
+using a certificate at the TLS layer. Since TLS protects the entire HTTP message in transit,
+verification of the TLS client certificate presented with the message provides a sufficient binding
+between the two. However, since TLS is functioning at a separate layer from HTTP, there is no
+direct connection between the TLS key presentation and the message itself, other than the fact that
+the message was presented over the TLS channel. That is to say, any HTTP message can be presented
+over the TLS channel in question with the same level of trust. The verifier is responsible for
+ensuring the key in the TLS client certificate is the one expected for a particular request. For
+example, if the request is a [grant request](#request), the AS needs to compare the TLS client
+certificate presented at the TLS layer to the key identified in the request content itself (either
+by value or through a referenced identifier).
+
+Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern in deployments adds
+a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system
+processing the HTTP message no longer has access to the original TLS connection's information and
+context. To compensate for this, the TTRP could inject the TLS client certificate into the forwarded
+request as a header parameter using {{RFC9111}}, giving the downstream
+system access to the certificate information. The TTRP has to be trusted to provide accurate
+certificate information, and the connection between the TTRP and the downstream system also has to
+be protected. The TTRP could provide some additional assurance, for example, by adding its own
+signature to the Client-Cert header field using {{I-D.ietf-httpbis-message-signatures}}. This
+signature would be effectively ignored by GNAP (since it would not use GNAP's `tag` parameter
+value) but would be understood by the downstream service as part
+of its deployment.
+
+Additional considerations for different types of deployment patterns and key distribution
+mechanisms for MTLS are found in {{security-mtls-patterns}}.
+
+## MTLS Deployment Patterns {#security-mtls-patterns}
+
+GNAP does not specify how a client instance's keys could be made known to the AS ahead of time.
+Public Key Infrastructure (PKI) can be used to manage the keys used by client instances when calling
+the AS, allowing the AS to trust a root key from a trusted authority. This method is particularly
+relevant to the MTLS key proofing method, where the client instance
+presents its certificate to the AS as part of the TLS connection. An AS using PKI to validate the
+MTLS connection would need to ensure that the presented certificate was issued by a trusted certificate
+authority before allowing the connection to continue. PKI-based certificates would allow a key to be revoked
+and rotated through management at the certificate authority without requiring additional registration
+or management at the AS. The PKI required to manage mutually-authenticated TLS has historically been
+difficult to deploy, especially at scale, but it remains an appropriate solution for systems where
+the required management overhead is not an impediment.
+
+MTLS in GNAP need not use a PKI backing, as self-signed certificates and certificates from untrusted
+authorities can still be presented as part of a TLS connection. In this case, the verifier would
+validate the connection but accept whatever certificate was presented by the client software. This
+specific certificate can then be bound to all future connections from that client software by
+being bound to the resulting access tokens, in a trust-on-first-use pattern. See {{security-mtls}}
+for more considerations on MTLS as a key proofing mechanism.
+
 ## Protection of Client Instance Key Material {#security-keys}
 
 Client instances are identified by their unique keys, and anyone with access to a client instance's key material
@@ -6069,7 +6123,7 @@ the RS whose focus is to provide an API or the client software whose focus is to
 ## Symmetric and Asymmetric Client Instance Keys {#security-symmetric}
 
 Many of the cryptographic methods used by GNAP for key-proofing can support both asymmetric and symmetric
-cryptography, and can be extended to use a wide variety of mechanisms. Implementers will find useful the available guidelines on cryptographic key management provided in {{!RFC4107}}. While symmetric
+cryptography, and can be extended to use a wide variety of mechanisms. Implementers will find useful the available guidelines on cryptographic key management provided in {{RFC4107}}. While symmetric
 cryptographic systems have some benefits in speed and simplicity, they have a distinct drawback
 that both parties need access to the same key in order to do both signing and verification of
 the message. This means that when the client instance calls the AS to request a token, the
@@ -6389,57 +6443,6 @@ initial URI through the HTTP Referer header field, which would be sent by the us
 target. To avoid such leakage, a server can first redirect to an internal interstitial page without any identifying
 or sensitive information on the URI before processing the request. When the user agent is ultimately
 redirected from this page, no part of the original interaction URI will be found in the Referer header.
-
-## MTLS Message Integrity {#security-mtls}
-
-The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key
-using a certificate at the TLS layer. Since TLS protects the entire HTTP message in transit,
-verification of the TLS client certificate presented with the message provides a sufficient binding
-between the two. However, since TLS is functioning at a separate layer from HTTP, there is no
-direct connection between the TLS key presentation and the message itself, other than the fact that
-the message was presented over the TLS channel. That is to say, any HTTP message can be presented
-over the TLS channel in question with the same level of trust. The verifier is responsible for
-ensuring the key in the TLS client certificate is the one expected for a particular request. For
-example, if the request is a [grant request](#request), the AS needs to compare the TLS client
-certificate presented at the TLS layer to the key identified in the request content itself (either
-by value or through a referenced identifier).
-
-Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern in deployments adds
-a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system
-processing the HTTP message no longer has access to the original TLS connection's information and
-context. To compensate for this, the TTRP could inject the TLS client certificate into the forwarded
-request as a header parameter using {{RFC9111}}, giving the downstream
-system access to the certificate information. The TTRP has to be trusted to provide accurate
-certificate information, and the connection between the TTRP and the downstream system also has to
-be protected. The TTRP could provide some additional assurance, for example, by adding its own
-signature to the Client-Cert header field using {{I-D.ietf-httpbis-message-signatures}}. This
-signature would be effectively ignored by GNAP (since it would not use GNAP's `tag` parameter
-value) but would be understood by the downstream service as part
-of its deployment.
-
-Additional considerations for different types of deployment patterns and key distribution
-mechanisms for MTLS are found in {{security-mtls-patterns}}.
-
-## MTLS Deployment Patterns {#security-mtls-patterns}
-
-GNAP does not specify how a client instance's keys could be made known to the AS ahead of time.
-Public Key Infrastructure (PKI) can be used to manage the keys used by client instances when calling
-the AS, allowing the AS to trust a root key from a trusted authority. This method is particularly
-relevant to the MTLS key proofing method, where the client instance
-presents its certificate to the AS as part of the TLS connection. An AS using PKI to validate the
-MTLS connection would need to ensure that the presented certificate was issued by a trusted certificate
-authority before allowing the connection to continue. PKI-based certificates would allow a key to be revoked
-and rotated through management at the certificate authority without requiring additional registration
-or management at the AS. The PKI required to manage mutually-authenticated TLS has historically been
-difficult to deploy, especially at scale, but it remains an appropriate solution for systems where
-the required management overhead is not an impediment.
-
-MTLS in GNAP need not use a PKI backing, as self-signed certificates and certificates from untrusted
-authorities can still be presented as part of a TLS connection. In this case, the verifier would
-validate the connection but accept whatever certificate was presented by the client software. This
-specific certificate can then be bound to all future connections from that client software by
-being bound to the resulting access tokens, in a trust-on-first-use pattern. See {{security-mtls}}
-for more considerations on MTLS as a key proofing mechanism.
 
 ## Interception of Responses from the AS {#security-as-response}
 
