@@ -30,7 +30,6 @@ normative:
     RFC2397:
     RFC3339:
     RFC3986:
-    RFC4107:
     RFC4648:
     RFC5646:
     RFC7468:
