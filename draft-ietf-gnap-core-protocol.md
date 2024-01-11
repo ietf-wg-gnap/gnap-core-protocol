@@ -1884,8 +1884,7 @@ contains a JSON object with the following properties.
 : The amount of time in integer
     seconds the client instance MUST wait after receiving this request continuation
     response and calling the continuation URI. The value SHOULD NOT be less than five seconds,
-    and omission of the value MUST NOT be interpreted as zero (i.e., no delay
-    between requests).
+    and omission of the value MUST be interpreted as five seconds.
     RECOMMENDED.
 
 `access_token` (object):
