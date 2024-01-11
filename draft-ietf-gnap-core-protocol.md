@@ -4576,7 +4576,7 @@ This method is indicated by the method value `jwsd` in string form.
 }
 ~~~
 
-The signer creates a JWS {{RFC7515}} object as follows:
+The signer creates a JSON Web Signature (JWS) {{RFC7515}} object as follows:
 
 To protect the request, the JOSE header of the signature contains the following
 claims:
