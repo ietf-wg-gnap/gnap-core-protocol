@@ -1769,7 +1769,7 @@ of the given locales are supported, the AS MAY use a default locale.
 # Grant Response {#response}
 
 In response to a client instance's request, the AS responds with a JSON object
-as the HTTP entity body. Each possible field is detailed in the sections below.
+as the HTTP content. Each possible field is detailed in the sections below.
 
 `continue` (object):
 : Indicates that the client instance can continue the request by making one or
@@ -1860,7 +1860,7 @@ simultaneously as an opaque identifier, an email address, and a decentralized id
 }
 ~~~
 
-The response MUST be sent as a JSON object in the body of the HTTP response with Content-Type `application/json`, unless otherwise specified by the specific response (e.g., an empty response with no Content-Type).
+The response MUST be sent as a JSON object in the content of the HTTP response with Content-Type `application/json`, unless otherwise specified by the specific response (e.g., an empty response with no Content-Type).
 
 The authorization server MUST include the HTTP Cache-Control response header field {{RFC9111}} with a value set to "no-store".
 
@@ -2984,7 +2984,7 @@ the AS signals to the client instance that interaction is
 complete and the request can be continued by sending an HTTP POST
 request to the client instance's callback URI.
 
-The entity message body is a JSON object consisting of the
+The HTTP message content is a JSON object consisting of the
 following two fields:
 
 
@@ -3186,7 +3186,7 @@ If the AS does not return a new `continue` response, the client instance
 MUST NOT make an additional continuation request. If a client instance does so,
 the AS MUST return an `invalid_continuation` error ({{response-error}}).
 
-For continuation functions that require the client instance to send a message body, the body MUST be
+For continuation functions that require the client instance to send a message content, the content MUST be
 a JSON object.
 
 For all requests to the grant continuation API, the AS MAY make use of long polling mechanisms such as discussed in {{RFC6202}}. That is to say, instead of
@@ -3281,7 +3281,7 @@ In this example, the AS includes the `continue` field in the response. Therefore
 When the client instance does not include a `finish` parameter, the client instance will often need to
 poll the AS until the RO has authorized the request. To do so, the client instance makes a POST
 request to the continuation URI as in {{continue-after-interaction}}, but does not
-include a message body.
+include message content.
 
 ~~~ http-message
 POST /continue HTTP/1.1
@@ -3670,7 +3670,7 @@ existing access token, with the same rights and properties as the original token
 apart from an updated token value and expiration time.
 
 To rotate an access token, the client instance makes an HTTP POST to the token management URI
-with no message body,
+with no message content,
 sending the access token in the authorization header as described in {{use-access-token}} and signing the request
 with the appropriate key.
 
@@ -3699,7 +3699,7 @@ request, the AS MUST invalidate the current access token value associated
 with this URI, if possible. Note that stateless access tokens can make proactive
 revocation difficult within a system, see {{security-stateless-tokens}}.
 
-For successful rotations, the AS responds with an HTTP 200 with a JSON body consisting of the rotated access token
+For successful rotations, the AS responds with an HTTP 200 with a JSON-formatted message content consisting of the rotated access token
 in the `access_token` field described in {{response-token-single}}. The value of the
 access token MUST NOT be the same as the current value of the access
 token used to access the management API. The response MUST include an
@@ -4064,7 +4064,7 @@ All key binding methods used by this specification MUST cover all relevant porti
 of the request, including anything that would change the nature of the request, to allow
 for secure validation of the request. Relevant aspects include
 the URI being called, the HTTP method being used, any relevant HTTP headers and
-values, and the HTTP message body itself. The verifier of the signed message
+values, and the HTTP message content itself. The verifier of the signed message
 MUST validate all components of the signed message to ensure that nothing
 has been tampered with or substituted in a way that would change the nature of
 the request. Key binding method definitions MUST enumerate how these
@@ -4136,8 +4136,8 @@ in {{rotate-access-token-key}}. Key rotation mechanisms MUST define a way for pr
 proof of two keys simultaneously with the following attributes:
 
 - The value of or reference to the new key material MUST be signed by the existing key.
-    Generally speaking, this amounts to using the existing key to sign the body of the
-    message.
+    Generally speaking, this amounts to using the existing key to sign the content of the
+    message which contains the new key.
 - The signature of the old key MUST be signed by the new key.
     Generally speaking, this means including the signature value of the old key under the
     coverage of the new key.
@@ -4153,7 +4153,7 @@ When the proof method is specified in object form, the following parameters are 
 : The HTTP signature algorithm, from the HTTP Signature Algorithm registry. REQUIRED.
 
 `content-digest-alg`:
-: The algorithm used for the Content-Digest field, used to protect the body when present in the message. REQUIRED.
+: The algorithm used for the Content-Digest field, used to protect the content when present in the message. REQUIRED.
 
 This example uses the ECDSA signing algorithm over the P384 curve and the SHA-512 hashing
 algorithm for the content digest.
@@ -4188,13 +4188,13 @@ following:
 `"@target-uri"`:
 : The full request URI of the HTTP request.
 
-When the message contains a request body, the covered components MUST also include the following:
+When the message contains request content, the covered components MUST also include the following:
 
 `"content-digest"`:
 : The Content-Digest header as defined in {{I-D.ietf-httpbis-digest-headers}}. When the
-    request message has a body, the signer MUST calculate this field value and include
+    request message has content, the signer MUST calculate this field value and include
     the field in the request. The verifier
-    MUST validate this field value. REQUIRED when the message request contains a message body.
+    MUST validate this field value. REQUIRED when the message request contains message content.
 
 When the request is bound to an access token, the covered components
 MUST also include the following:
@@ -4214,7 +4214,7 @@ algorithm denoted by the key's `alg` field of the JWK.
 The explicit `alg` signature parameter MUST NOT be included in the signature, since the algorithm
 will be derived either from the key material or from the `proof` value.
 
-In this example, the message body is the following JSON object:
+In this example, the message content is the following JSON object:
 
 ~~~ json
 NOTE: '\' line wrapping per RFC 8792
@@ -4257,7 +4257,7 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-This body is hashed for the Content-Digest header using `sha-256` into the following encoded value:
+This content is hashed for the Content-Digest header using `sha-256` into the following encoded value:
 
 ~~~
 sha-256=:q2XBmzRDCREcS2nWo/6LYwYyjrlN1bRfv+HKLbeGAGg=:
@@ -4339,7 +4339,7 @@ Signature: sig1=:c2uwTa6ok3iHZsaRKl1ediKlgd5cCAYztbym68XgX8gSOgK0Bt\
 ~~~
 
 The verifier MUST ensure that the signature covers all required message components.
-If the HTTP Message includes a message body, the verifier MUST
+If the HTTP Message includes content, the verifier MUST
 calculate and verify the value of the `Content-Digest` header. The verifier MUST validate
 the signature against the expected key of the signer.
 
@@ -4598,10 +4598,10 @@ When the request is bound to an access token, the JOSE header MUST also include 
   result of Base64url encoding (with no padding) the SHA-256 digest
   of the ASCII encoding of the associated access token's value. REQUIRED.
 
-If the HTTP request has a message body, such as an HTTP POST or PUT method,
+If the HTTP request has content, such as an HTTP POST or PUT method,
 the payload of the JWS object is the Base64url encoding (without padding)
-of the SHA256 digest of the bytes of the body.
-If the request being made does not have a message body, such as
+of the SHA256 digest of the bytes of the content.
+If the request being made does not have content, such as
 an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
 calculated over an empty payload.
 
@@ -4621,7 +4621,7 @@ In this example, the JOSE Header contains the following parameters:
 }
 ~~~
 
-The request body is the following JSON object:
+The request content is the following JSON object:
 
 ~~~ json
 NOTE: '\' line wrapping per RFC 8792
@@ -4731,7 +4731,7 @@ Detached-JWS: eyJhbGciOiJSUzI1NiIsImNyZWF0ZWQiOjE2MTg4ODQ0NzUsImh0b\
 When the verifier receives the Detached-JWS header, it MUST parse and
 validate the JWS object. The signature MUST be validated against the
 expected key of the signer. If the HTTP message request contains
-a body, the verifier MUST calculate the hash of body just as
+content, the verifier MUST calculate the hash of the content just as
 the signer does, with no normalization or transformation of the request.
 All required fields MUST be present
 and their values MUST be valid. All fields MUST match the corresponding portions of the HTTP
@@ -4797,15 +4797,15 @@ When the request is bound to an access token, the JOSE header MUST also include 
   of the ASCII encoding of the associated access token's value. REQUIRED.
 
 
-If the HTTP request has a message body, such as an HTTP POST or PUT method,
-the payload of the JWS object is the JSON serialized body of the request, and
+If the HTTP request has content, such as an HTTP POST or PUT method,
+the payload of the JWS object is the JSON serialized content of the request, and
 the object is signed according to JWS and serialized into compact form {{RFC7515}}.
-The signer presents the JWS as the body of the request along with a
+The signer presents the JWS as the content of the request along with a
 content type of `application/jose`. The verifier
-MUST extract the payload of the JWS and treat it as the request body
+MUST extract the payload of the JWS and treat it as the request content
 for further processing.
 
-If the request being made does not have a message body, such as
+If the request being made does not have content, such as
 an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
 calculated over an empty payload and passed in the `Detached-JWS`
 header as described in {{detached-jws}}.
@@ -4823,7 +4823,7 @@ In this example, the JOSE header contains the following parameters:
 }
 ~~~
 
-The request body, used as the JWS Payload, is the following JSON object:
+The request content, used as the JWS Payload, is the following JSON object:
 
 ~~~ json
 NOTE: '\' line wrapping per RFC 8792
@@ -6369,11 +6369,11 @@ status code to redirect a request that potentially contains user credentials. If
 is used for such a request, the HTTP status code 303 "See Other" should be used instead.
 
 The status code 307, as defined in the HTTP standard {{HTTP}}, requires the user agent
-to preserve the method and body of a request, thus submitting the body of the POST
+to preserve the method and content of a request, thus submitting the content of the POST
 request to the redirect target. In the HTTP standard {{HTTP}}, only the status code 303 unambiguously enforces
-rewriting the HTTP POST request to an HTTP GET request, which eliminates the POST body from the redirected request. For all other status codes, including
+rewriting the HTTP POST request to an HTTP GET request, which eliminates the POST content from the redirected request. For all other status codes, including
 status code 302, user agents are allowed not to rewrite a POST request into a GET request and thus
-to resubmit the body.
+to resubmit the contents.
 
 The use of status code 307 results in a vulnerability when using the
 [`redirect` interaction finish method](#response-interact-finish). With this method, the AS
@@ -6400,7 +6400,7 @@ the message was presented over the TLS channel. That is to say, any HTTP message
 over the TLS channel in question with the same level of trust. The verifier is responsible for
 ensuring the key in the TLS client certificate is the one expected for a particular request. For
 example, if the request is a [grant request](#request), the AS needs to compare the TLS client
-certificate presented at the TLS layer to the key identified in the request body itself (either
+certificate presented at the TLS layer to the key identified in the request content itself (either
 by value or through a referenced identifier).
 
 Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern in deployments adds
@@ -7354,7 +7354,7 @@ client instance ensures that this is the same user that was sent out by
 validating session information and retrieves the stored pending
 request. The client instance uses the values in this to validate the hash
 parameter. The client instance then calls the continuation URI using the associated continuation access token and presents the
-interaction reference in the request body. The client instance signs
+interaction reference in the request content. The client instance signs
 the request as above.
 
 ~~~ http-message
