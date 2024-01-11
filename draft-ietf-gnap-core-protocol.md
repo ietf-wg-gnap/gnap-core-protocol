@@ -2598,7 +2598,7 @@ This specification defines the following `code` values:
 `"too_many_attempts"`:
 : A limit has been reached in the total number of reasonable attempts. This number is either defined statically or adjusted based on runtime conditions by the AS.
 
-Additional error codes can be defined in the [GNAP Error Code Registry](#IANA-error-code).
+Additional error codes can be defined in the [GNAP Error Codes Registry](#IANA-error-code).
 
 For example, if the RO denied the request while interacting with the AS,
 the AS would return the following error when the client instance tries to
