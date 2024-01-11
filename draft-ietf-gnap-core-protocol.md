@@ -1981,6 +1981,8 @@ properties.
     described in {{key-format}}. The client instance MUST be able to
     dereference or process the key information in order to be able
     to [sign subsequent requests using the access token](#use-access-token).
+    When the key is provided by value from the AS, the token shares some security properties
+    with bearer tokens as discussed in {{security-as-keys}}.
     It is RECOMMENDED that keys returned for use with access tokens be key references
     as described in {{key-reference}} that the client instance can correlate to
     its known keys.
@@ -2006,7 +2008,7 @@ The value of the `manage` field is an object with the following properties:
 : A unique access token for continuing the request, called the "token management access token".
     The value of this property MUST be an object in the format specified
     in {{response-token-single}}. This access token MUST be bound to the
-    client instance's key used in the request and MUST NOT be a bearer token. As a consequence,
+    client instance's key used in the request (or its most recent rotation) and MUST NOT be a bearer token. As a consequence,
     the `flags` array of this access token MUST NOT contain the string `bearer` and the
     `key` field MUST be omitted.
     This access token MUST NOT have a `manage` field.
@@ -6929,7 +6931,7 @@ GNAP generally considers a breach can occur, and therefore advises to prefer key
 ## AS-Provided Token Keys {#security-as-keys}
 
 While the most common token issuance pattern is to bind the access token to the client instance's
-presented key, it is possible for the AS to provide its own key along with an access token, as
+presented key, it is possible for the AS to provide a binding key along with an access token, as
 shown by the `key` field of the token response in {{response-token-single}}. This practice allows
 for an AS to generate and manage the keys associated with tokens independently of the keys known
 to client instances.
@@ -6937,11 +6939,18 @@ to client instances.
 If the key material is returned by value from the AS, then the client instance will simply use this
 key value when presenting the token. This can be exploited by an attacker to issue a compromised token
 to an unsuspecting client, assuming that the client instance trusts the attacker's AS to issue tokens
-for the target RS.
+for the target RS. In this attack, the attacker first gets a token bound to a key under the attacker's
+control. This token is likely bound to an authorization or account controlled by the attacker.
+The attacker then re-issues that same token to the client instance, this time acting as an AS. The attacker
+can return their own key to the client instance, tricking the client instance into using the attacker's
+token. Such an attack is also possible when the key is returned by reference, if the attacker
+is able to provide a reference meaningful to the client instance that references a key under the attacker's
+control. This substitution attack is similar to some of the main issues found with bearer tokens
+as discussed in {{security-bearer-tokens}}.
 
-This feature should be limited to only circumstances where both the client and AS can be verified
-to be honest, and further only when the tradeoff of not using a client instance's own keys is worth the
-additional risk.
+Returning a key with an access token should be limited to only circumstances where both the client and AS
+can be verified to be honest, and further only when the tradeoff of not using a client instance's own keys
+is worth the additional risk.
 
 # Privacy Considerations {#privacy}
 
