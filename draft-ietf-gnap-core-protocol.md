@@ -351,6 +351,8 @@ The underlying requested grant moves through several states as different actions
 {::include diagram/states.md}
 ~~~
 
+The state of the grant request is defined and managed by the AS, though the client instance also needs to manage its view of the grant request over time. The means by which these roles manage their state is outside the scope of this specification.
+
 *Processing*:
 : When a [request for access](#request) is received by the AS, a new grant request is created and placed in the _processing_ state by the AS. This state is also entered when an existing grant request is updated by the client instance and when interaction is completed. In this state, the AS processes the context of the grant request to determine whether interaction with the end user or RO is required for approval of the request. The grant request has to exit this state before a response can be returned to the client instance. If approval is required, the request moves to the _pending_ state and the AS returns a [continue response](#response-continue) along with any appropriate [interaction responses](#response-interact). If no such approval is required, such as when the client instance is acting on its own behalf or the AS can determine that access has been fulfilled, the request moves to the _approved_ state where [access tokens for API access](#response-token) and [subject information](#response-subject) can be issued to the client instance. If the AS determines that no additional processing can occur (such as a timeout or an unrecoverable error), the grant request is moved to the _finalized_ state and is terminated.
 
