@@ -936,9 +936,11 @@ A non-normative example of a grant request is below:
 
 Sending a request to the grant endpoint creates a grant request in the _processing_ state. The AS processes this request to determine whether interaction or authorization are necessary (moving to the _pending_ state), or if access can be granted immediately (moving to the _approved_ state).
 
-The request MUST be sent as a JSON object in the body of the HTTP
-POST request with Content-Type `application/json`,
-unless otherwise specified by the signature mechanism.
+The request MUST be sent as a JSON object in the content of the HTTP
+POST request with Content-Type `application/json`. A key proofing mechanism MAY
+define an alternative content type, as long as the content is formed from
+the JSON object. For example, the attached JWS key proofing mechanism (see {{attached-jws}}) places the JSON object
+into the payload of a JWS wrapper, which is in turn sent as the message content.
 
 ## Requesting Access to Resources {#request-token}
 
