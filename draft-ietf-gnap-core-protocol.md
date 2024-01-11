@@ -257,8 +257,8 @@ RS and a client instance from different perspectives, and it fulfills these
 roles separately as far as the overall protocol is concerned.
 
 A single role need not be deployed as a monolithic service. For example,
-a client instance could have components that are installed on the end user's device as
-well as a back-end system that it communicates with. If both of these
+a client instance could have front-end components that are installed on the end user's device as
+well as a back-end system that the front-end communicates with. If both of these
 components participate in the delegation protocol, they are both considered
 part of the client instance. If there are several copies of the client software
 that run separately but all share the same key material, such as a
