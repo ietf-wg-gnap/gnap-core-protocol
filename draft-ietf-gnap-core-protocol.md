@@ -1124,8 +1124,8 @@ contain the following fields.
     REQUIRED if assertions are requested.
 
 `sub_ids` (array of objects):
-: An array of subject identifiers representing the subject that information
-    is being requested for. Each object is a subject identifier as defined by
+: An array of subject identifiers representing the subject for which information
+    is being requested. Each object is a subject identifier as defined by
     {{I-D.ietf-secevent-subject-identifiers}}. All identifiers in the `sub_ids` array MUST identify
     the same subject. If omitted, the AS SHOULD assume
     that subject information requests are about the current user and SHOULD
@@ -1552,7 +1552,7 @@ request, the AS returns a redirect interaction response {{response-interact-redi
 The client instance manages this interaction method as described in {{interaction-redirect}}.
 
 See {{security-front-channel}} for more considerations regarding the use of front-channel
-communication techniques such as this.
+communication techniques.
 
 #### Open an Application-specific URI {#request-interact-app}
 
@@ -1709,7 +1709,7 @@ browser, this method is usually used when the RO and end user are the
 same entity. See {{security-sessions}} for considerations on ensuring the incoming HTTP message
 matches the expected context of the request.
 See {{security-front-channel}} for more considerations regarding the use of front-channel
-communication techniques such as this.
+communication techniques.
 
 #### Receive an HTTP Direct Callback {#request-interact-callback-push}
 
@@ -2222,7 +2222,7 @@ The grant request MUST be in the _pending_ state to include this field in the re
 
 If the client instance indicates that it can [redirect to an arbitrary URI](#request-interact-redirect) and the AS supports this mode for the client instance's
 request, the AS responds with the "redirect" field, which is
-a string containing the URI to direct the end user to. This URI MUST be
+a string containing the URI for the end user to visit. This URI MUST be
 unique for the request and MUST NOT contain any security-sensitive
 information such as user identifiers or access tokens.
 
@@ -2477,12 +2477,14 @@ returned assertion MAY use a different subject identifier than other assertions 
 subject identifiers in the response. However, all subject identifiers and assertions returned
 MUST refer to the same party.
 
-The client instance MUST interpret all subject information in the context of the AS that the
-subject information is received from, as is discussed in Section 6 of {{SP80063C}}. For example, one AS could
+The client instance MUST interpret all subject information in the context of the AS from which the
+subject information is received, as is discussed in Section 6 of {{SP80063C}}. For example, one AS could
 return an email identifier of  "user@example.com" for one RO, and a different AS could return that
 same email identifier of "user@example.com" for a completely different RO. A client instance talking to
 both AS's needs to differentiate between these two accounts by accounting for the AS source
-of each identifier.
+of each identifier and not assuming that either has a canonical claim on the identifier without
+additional configuration and trust agreements. Otherwise, a rogue AS could exploit this to
+take over a targeted account asserted by a different AS.
 
 Extensions to this specification MAY define additional response
 properties in the [GNAP Subject Information Response Fields Registry](#IANA-subject-response).
@@ -3037,7 +3039,7 @@ always provide this hash, and the client instance MUST validate the hash when re
 
 To calculate the "hash" value, the party doing the calculation
 creates a hash base string by concatenating the following values in the following order
-using a single newline (`\n`) character to separate them:
+using a single newline (0x0A) character to separate them:
 
 * the "nonce" value sent by the client instance in the [interaction "finish" section of the initial request](#request-interact-finish)
 * the AS's nonce value from [the interaction finish response](#response-interact-finish)
@@ -3811,7 +3813,7 @@ If the client instance wishes to revoke the access token proactively, such as wh
 a user indicates to the client instance that they no longer wish for it to have
 access or the client instance application detects that it is being uninstalled,
 the client instance can use the token management URI to indicate to the AS that
-the AS should invalidate the access token for all purposes.
+the AS SHOULD invalidate the access token for all purposes.
 
 The client instance makes an HTTP DELETE request to the token management
 URI, presenting the access token and signing the request with
@@ -3843,7 +3845,7 @@ not being usable.
 
 # Securing Requests from the Client Instance {#secure-requests}
 
-In GNAP, the client instance secures its requests to the AS and RS by presenting an access
+In GNAP, the client instance secures its requests to an AS and RS by presenting an access
 token, presenting proof of a key that it possesses (aka, a "key proof"), or both an access token and
 key proof together.
 
