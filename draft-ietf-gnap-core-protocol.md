@@ -46,6 +46,8 @@ normative:
     I-D.ietf-httpbis-message-signatures:
     I-D.ietf-httpbis-digest-headers:
     I-D.ietf-secevent-subject-identifiers:
+    HASH-ALG:
+        target: https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg
     OIDC:
       title: OpenID Connect Core 1.0 incorporating errata set 1
       target: https://openid.net/specs/openid-connect-core-1_0.html
@@ -1649,7 +1651,7 @@ indicates this by sending the following members of an object under the `finish` 
 
 `hash_method` (string):
 : An identifier of a hash calculation mechanism to be used for the callback hash in {{interaction-hash}},
-    as defined in the [IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg).
+    as defined in the [IANA Named Information Hash Algorithm Registry](#HASH-ALG).
     If absent, the default value is `sha-256`. OPTIONAL.
 
 This specification defines the following values for the `method` parameter,
@@ -3059,7 +3061,7 @@ byte array from the hash function is then encoded using URL-Safe Base64
 with no padding {{!RFC4648}}. The resulting string is the hash value.
 
 If provided, the "hash_method" value MUST be one of the hash name strings defined in the
-[IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg).
+[IANA Named Information Hash Algorithm Registry](#HASH-ALG).
 If the "hash_method" value is not present in the client instance's
 request, the algorithm defaults to "sha-256".
 
