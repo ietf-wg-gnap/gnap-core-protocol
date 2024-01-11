@@ -79,6 +79,7 @@ informative:
     RFC4107:
     RFC6202:
     RFC6973:
+    RFC7518:
     RFC8707:
     RFC8792:
     RFC9396:
@@ -4094,7 +4095,7 @@ MUST be proved in all continuation requests
 ({{continue-request}}). Token management requests ({{token-management}}) are similarly bound
 to either the access token's own key or, in the case of bearer tokens, the client instance's key.
 
-In the following sections, unless otherwise noted, the `RS256` JOSE Signature Algorithm is applied
+In the following sections, unless otherwise noted, the `RS256` JOSE Signature Algorithm (defined in {{Section 3.3 of RFC7518}}) is applied
 using the following RSA key (presented here in JWK format):
 
 ~~~ json
