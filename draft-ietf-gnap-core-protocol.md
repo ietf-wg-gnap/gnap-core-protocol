@@ -954,7 +954,7 @@ To request a single access token, the client instance sends an `access_token` ob
 composed of the following fields.
 
 `access` (array of objects/strings):
-: Describes the rights that the client instance is requesting for one or more access tokens to be
+: Describes the rights that the client instance is requesting for the access token to be
     used at the RS. REQUIRED. See {{resource-access-rights}}.
 
 `label` (string):
