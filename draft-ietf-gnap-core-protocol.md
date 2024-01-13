@@ -30,7 +30,6 @@ normative:
     RFC2397:
     RFC3339:
     RFC3986:
-    RFC4107:
     RFC4648:
     RFC5646:
     RFC7468:
@@ -46,6 +45,12 @@ normative:
     I-D.ietf-httpbis-message-signatures:
     I-D.ietf-httpbis-digest-headers:
     I-D.ietf-secevent-subject-identifiers:
+    HASH-ALG:
+      title: "Named Information Hash Algorithm Registry"
+      target: https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg
+      author:
+        -
+          org: IANA
     OIDC:
       title: OpenID Connect Core 1.0 incorporating errata set 1
       target: https://openid.net/specs/openid-connect-core-1_0.html
@@ -76,8 +81,10 @@ normative:
             ins: E. Maler
 
 informative:
+    RFC4107:
     RFC6202:
     RFC6973:
+    RFC7518:
     RFC8707:
     RFC8792:
     RFC9396:
@@ -194,6 +201,8 @@ of these can be found in {{example-oauth2}}.
 
 This document contains non-normative examples of partial and complete HTTP messages, JSON structures, URIs, query components, keys, and other elements. Whenever possible, the document uses URI as a generic term, since it aligns with {{!RFC3986}} recommendations and matches better with the intent that the identifier may be reachable through various/generic means (compared to URLs). Some examples use a single trailing backslash `\` to indicate line wrapping for long values, as per {{RFC8792}}. The `\` character and leading spaces on wrapped lines are not part of the value.
 
+This document uses the term "mutual TLS" as defined by {{RFC8705}}. The shortened form "MTLS" is used to mean the same thing.
+
 ## Roles
 
 The parties in GNAP perform actions under different roles.
@@ -252,8 +261,8 @@ RS and a client instance from different perspectives, and it fulfills these
 roles separately as far as the overall protocol is concerned.
 
 A single role need not be deployed as a monolithic service. For example,
-a client instance could have components that are installed on the end user's device as
-well as a back-end system that it communicates with. If both of these
+a client instance could have front-end components that are installed on the end user's device as
+well as a back-end system that the front-end communicates with. If both of these
 components participate in the delegation protocol, they are both considered
 part of the client instance. If there are several copies of the client software
 that run separately but all share the same key material, such as a
@@ -346,6 +355,8 @@ The underlying requested grant moves through several states as different actions
 {::include diagram/states.md}
 ~~~
 {: title="Figure 2: State diagram of a grant request throughout GNAP"}
+
+The state of the grant request is defined and managed by the AS, though the client instance also needs to manage its view of the grant request over time. The means by which these roles manage their state is outside the scope of this specification.
 
 *Processing*:
 : When a [request for access](#request) is received by the AS, a new grant request is created and placed in the _processing_ state by the AS. This state is also entered when an existing grant request is updated by the client instance and when interaction is completed. In this state, the AS processes the context of the grant request to determine whether interaction with the end user or RO is required for approval of the request. The grant request has to exit this state before a response can be returned to the client instance. If approval is required, the request moves to the _pending_ state and the AS returns a [continue response](#response-continue) along with any appropriate [interaction responses](#response-interact). If no such approval is required, such as when the client instance is acting on its own behalf or the AS can determine that access has been fulfilled, the request moves to the _approved_ state where [access tokens for API access](#response-token) and [subject information](#response-subject) can be issued to the client instance. If the AS determines that no additional processing can occur (such as a timeout or an unrecoverable error), the grant request is moved to the _finalized_ state and is terminated.
@@ -947,9 +958,11 @@ A non-normative example of a grant request is below:
 
 Sending a request to the grant endpoint creates a grant request in the _processing_ state. The AS processes this request to determine whether interaction or authorization are necessary (moving to the _pending_ state), or if access can be granted immediately (moving to the _approved_ state).
 
-The request MUST be sent as a JSON object in the body of the HTTP
-POST request with Content-Type `application/json`,
-unless otherwise specified by the signature mechanism.
+The request MUST be sent as a JSON object in the content of the HTTP
+POST request with Content-Type `application/json`. A key proofing mechanism MAY
+define an alternative content type, as long as the content is formed from
+the JSON object. For example, the attached JWS key proofing mechanism (see {{attached-jws}}) places the JSON object
+into the payload of a JWS wrapper, which is in turn sent as the message content.
 
 ## Requesting Access to Resources {#request-token}
 
@@ -965,7 +978,7 @@ To request a single access token, the client instance sends an `access_token` ob
 composed of the following fields.
 
 `access` (array of objects/strings):
-: Describes the rights that the client instance is requesting for one or more access tokens to be
+: Describes the rights that the client instance is requesting for the access token to be
     used at the RS. REQUIRED. See {{resource-access-rights}}.
 
 `label` (string):
@@ -1127,8 +1140,8 @@ contain the following fields.
     REQUIRED if assertions are requested.
 
 `sub_ids` (array of objects):
-: An array of subject identifiers representing the subject that information
-    is being requested for. Each object is a subject identifier as defined by
+: An array of subject identifiers representing the subject for which information
+    is being requested. Each object is a subject identifier as defined by
     {{I-D.ietf-secevent-subject-identifiers}}. All identifiers in the `sub_ids` array MUST identify
     the same subject. If omitted, the AS SHOULD assume
     that subject information requests are about the current user and SHOULD
@@ -1555,7 +1568,7 @@ request, the AS returns a redirect interaction response {{response-interact-redi
 The client instance manages this interaction method as described in {{interaction-redirect}}.
 
 See {{security-front-channel}} for more considerations regarding the use of front-channel
-communication techniques such as this.
+communication techniques.
 
 #### Open an Application-specific URI {#request-interact-app}
 
@@ -1654,7 +1667,7 @@ indicates this by sending the following members of an object under the `finish` 
 
 `hash_method` (string):
 : An identifier of a hash calculation mechanism to be used for the callback hash in {{interaction-hash}},
-    as defined in the [IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg).
+    as defined in the [IANA Named Information Hash Algorithm Registry](#HASH-ALG).
     If absent, the default value is `sha-256`. OPTIONAL.
 
 This specification defines the following values for the `method` parameter,
@@ -1712,7 +1725,7 @@ browser, this method is usually used when the RO and end user are the
 same entity. See {{security-sessions}} for considerations on ensuring the incoming HTTP message
 matches the expected context of the request.
 See {{security-front-channel}} for more considerations regarding the use of front-channel
-communication techniques such as this.
+communication techniques.
 
 #### Receive an HTTP Direct Callback {#request-interact-callback-push}
 
@@ -1893,8 +1906,7 @@ contains a JSON object with the following properties.
 : The amount of time in integer
     seconds the client instance MUST wait after receiving this request continuation
     response and calling the continuation URI. The value SHOULD NOT be less than five seconds,
-    and omission of the value MUST NOT be interpreted as zero (i.e., no delay
-    between requests).
+    and omission of the value MUST be interpreted as five seconds.
     RECOMMENDED.
 
 `access_token` (object):
@@ -2226,7 +2238,7 @@ The grant request MUST be in the _pending_ state to include this field in the re
 
 If the client instance indicates that it can [redirect to an arbitrary URI](#request-interact-redirect) and the AS supports this mode for the client instance's
 request, the AS responds with the "redirect" field, which is
-a string containing the URI to direct the end user to. This URI MUST be
+a string containing the URI for the end user to visit. This URI MUST be
 unique for the request and MUST NOT contain any security-sensitive
 information such as user identifiers or access tokens.
 
@@ -2481,12 +2493,14 @@ returned assertion MAY use a different subject identifier than other assertions 
 subject identifiers in the response. However, all subject identifiers and assertions returned
 MUST refer to the same party.
 
-The client instance MUST interpret all subject information in the context of the AS that the
-subject information is received from, as is discussed in Section 6 of {{SP80063C}}. For example, one AS could
+The client instance MUST interpret all subject information in the context of the AS from which the
+subject information is received, as is discussed in Section 6 of {{SP80063C}}. For example, one AS could
 return an email identifier of  "user@example.com" for one RO, and a different AS could return that
 same email identifier of "user@example.com" for a completely different RO. A client instance talking to
 both AS's needs to differentiate between these two accounts by accounting for the AS source
-of each identifier.
+of each identifier and not assuming that either has a canonical claim on the identifier without
+additional configuration and trust agreements. Otherwise, a rogue AS could exploit this to
+take over a targeted account asserted by a different AS.
 
 Extensions to this specification MAY define additional response
 properties in the [GNAP Subject Information Response Fields Registry](#IANA-subject-response).
@@ -3041,7 +3055,7 @@ always provide this hash, and the client instance MUST validate the hash when re
 
 To calculate the "hash" value, the party doing the calculation
 creates a hash base string by concatenating the following values in the following order
-using a single newline (`\n`) character to separate them:
+using a single newline (0x0A) character to separate them:
 
 * the "nonce" value sent by the client instance in the [interaction "finish" section of the initial request](#request-interact-finish)
 * the AS's nonce value from [the interaction finish response](#response-interact-finish)
@@ -3065,7 +3079,7 @@ byte array from the hash function is then encoded using URL-Safe Base64
 with no padding {{!RFC4648}}. The resulting string is the hash value.
 
 If provided, the "hash_method" value MUST be one of the hash name strings defined in the
-[IANA Named Information Hash Algorithm Registry](https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg).
+[IANA Named Information Hash Algorithm Registry](#HASH-ALG).
 If the "hash_method" value is not present in the client instance's
 request, the algorithm defaults to "sha-256".
 
@@ -3815,7 +3829,7 @@ If the client instance wishes to revoke the access token proactively, such as wh
 a user indicates to the client instance that they no longer wish for it to have
 access or the client instance application detects that it is being uninstalled,
 the client instance can use the token management URI to indicate to the AS that
-the AS should invalidate the access token for all purposes.
+the AS SHOULD invalidate the access token for all purposes.
 
 The client instance makes an HTTP DELETE request to the token management
 URI, presenting the access token and signing the request with
@@ -3847,7 +3861,7 @@ not being usable.
 
 # Securing Requests from the Client Instance {#secure-requests}
 
-In GNAP, the client instance secures its requests to the AS and RS by presenting an access
+In GNAP, the client instance secures its requests to an AS and RS by presenting an access
 token, presenting proof of a key that it possesses (aka, a "key proof"), or both an access token and
 key proof together.
 
@@ -4101,7 +4115,7 @@ MUST be proved in all continuation requests
 ({{continue-request}}). Token management requests ({{token-management}}) are similarly bound
 to either the access token's own key or, in the case of bearer tokens, the client instance's key.
 
-In the following sections, unless otherwise noted, the `RS256` JOSE Signature Algorithm is applied
+In the following sections, unless otherwise noted, the `RS256` JOSE Signature Algorithm (defined in {{Section 3.3 of RFC7518}}) is applied
 using the following RSA key (presented here in JWK format):
 
 ~~~ json
@@ -6011,6 +6025,57 @@ proof of possession by the caller, which is usually the client instance. These m
 addition to TLS on all connections.
 
 
+## MTLS Message Integrity {#security-mtls}
+
+The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key
+using a certificate at the TLS layer. Since TLS protects the entire HTTP message in transit,
+verification of the TLS client certificate presented with the message provides a sufficient binding
+between the two. However, since TLS is functioning at a separate layer from HTTP, there is no
+direct connection between the TLS key presentation and the message itself, other than the fact that
+the message was presented over the TLS channel. That is to say, any HTTP message can be presented
+over the TLS channel in question with the same level of trust. The verifier is responsible for
+ensuring the key in the TLS client certificate is the one expected for a particular request. For
+example, if the request is a [grant request](#request), the AS needs to compare the TLS client
+certificate presented at the TLS layer to the key identified in the request content itself (either
+by value or through a referenced identifier).
+
+Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern in deployments adds
+a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system
+processing the HTTP message no longer has access to the original TLS connection's information and
+context. To compensate for this, the TTRP could inject the TLS client certificate into the forwarded
+request as a header parameter using {{RFC9111}}, giving the downstream
+system access to the certificate information. The TTRP has to be trusted to provide accurate
+certificate information, and the connection between the TTRP and the downstream system also has to
+be protected. The TTRP could provide some additional assurance, for example, by adding its own
+signature to the Client-Cert header field using {{I-D.ietf-httpbis-message-signatures}}. This
+signature would be effectively ignored by GNAP (since it would not use GNAP's `tag` parameter
+value) but would be understood by the downstream service as part
+of its deployment.
+
+Additional considerations for different types of deployment patterns and key distribution
+mechanisms for MTLS are found in {{security-mtls-patterns}}.
+
+## MTLS Deployment Patterns {#security-mtls-patterns}
+
+GNAP does not specify how a client instance's keys could be made known to the AS ahead of time.
+Public Key Infrastructure (PKI) can be used to manage the keys used by client instances when calling
+the AS, allowing the AS to trust a root key from a trusted authority. This method is particularly
+relevant to the MTLS key proofing method, where the client instance
+presents its certificate to the AS as part of the TLS connection. An AS using PKI to validate the
+MTLS connection would need to ensure that the presented certificate was issued by a trusted certificate
+authority before allowing the connection to continue. PKI-based certificates would allow a key to be revoked
+and rotated through management at the certificate authority without requiring additional registration
+or management at the AS. The PKI required to manage mutually-authenticated TLS has historically been
+difficult to deploy, especially at scale, but it remains an appropriate solution for systems where
+the required management overhead is not an impediment.
+
+MTLS in GNAP need not use a PKI backing, as self-signed certificates and certificates from untrusted
+authorities can still be presented as part of a TLS connection. In this case, the verifier would
+validate the connection but accept whatever certificate was presented by the client software. This
+specific certificate can then be bound to all future connections from that client software by
+being bound to the resulting access tokens, in a trust-on-first-use pattern. See {{security-mtls}}
+for more considerations on MTLS as a key proofing mechanism.
+
 ## Protection of Client Instance Key Material {#security-keys}
 
 Client instances are identified by their unique keys, and anyone with access to a client instance's key material
@@ -6079,7 +6144,7 @@ the RS whose focus is to provide an API or the client software whose focus is to
 ## Symmetric and Asymmetric Client Instance Keys {#security-symmetric}
 
 Many of the cryptographic methods used by GNAP for key-proofing can support both asymmetric and symmetric
-cryptography, and can be extended to use a wide variety of mechanisms. Implementers will find useful the available guidelines on cryptographic key management provided in {{!RFC4107}}. While symmetric
+cryptography, and can be extended to use a wide variety of mechanisms. Implementers will find useful the available guidelines on cryptographic key management provided in {{RFC4107}}. While symmetric
 cryptographic systems have some benefits in speed and simplicity, they have a distinct drawback
 that both parties need access to the same key in order to do both signing and verification of
 the message. This means that when the client instance calls the AS to request a token, the
@@ -6399,57 +6464,6 @@ initial URI through the HTTP Referer header field, which would be sent by the us
 target. To avoid such leakage, a server can first redirect to an internal interstitial page without any identifying
 or sensitive information on the URI before processing the request. When the user agent is ultimately
 redirected from this page, no part of the original interaction URI will be found in the Referer header.
-
-## MTLS Message Integrity {#security-mtls}
-
-The [MTLS key proofing mechanism](#mtls) provides a means for a client instance to present a key
-using a certificate at the TLS layer. Since TLS protects the entire HTTP message in transit,
-verification of the TLS client certificate presented with the message provides a sufficient binding
-between the two. However, since TLS is functioning at a separate layer from HTTP, there is no
-direct connection between the TLS key presentation and the message itself, other than the fact that
-the message was presented over the TLS channel. That is to say, any HTTP message can be presented
-over the TLS channel in question with the same level of trust. The verifier is responsible for
-ensuring the key in the TLS client certificate is the one expected for a particular request. For
-example, if the request is a [grant request](#request), the AS needs to compare the TLS client
-certificate presented at the TLS layer to the key identified in the request content itself (either
-by value or through a referenced identifier).
-
-Furthermore, the prevalence of the TLS-terminating reverse proxy (TTRP) pattern in deployments adds
-a wrinkle to the situation. In this common pattern, the TTRP validates the TLS connection and then forwards the HTTP message contents onward to an internal system for processing. The system
-processing the HTTP message no longer has access to the original TLS connection's information and
-context. To compensate for this, the TTRP could inject the TLS client certificate into the forwarded
-request as a header parameter using {{RFC9111}}, giving the downstream
-system access to the certificate information. The TTRP has to be trusted to provide accurate
-certificate information, and the connection between the TTRP and the downstream system also has to
-be protected. The TTRP could provide some additional assurance, for example, by adding its own
-signature to the Client-Cert header field using {{I-D.ietf-httpbis-message-signatures}}. This
-signature would be effectively ignored by GNAP (since it would not use GNAP's `tag` parameter
-value) but would be understood by the downstream service as part
-of its deployment.
-
-Additional considerations for different types of deployment patterns and key distribution
-mechanisms for MTLS are found in {{security-mtls-patterns}}.
-
-## MTLS Deployment Patterns {#security-mtls-patterns}
-
-GNAP does not specify how a client instance's keys could be made known to the AS ahead of time.
-Public Key Infrastructure (PKI) can be used to manage the keys used by client instances when calling
-the AS, allowing the AS to trust a root key from a trusted authority. This method is particularly
-relevant to the MTLS key proofing method, where the client instance
-presents its certificate to the AS as part of the TLS connection. An AS using PKI to validate the
-MTLS connection would need to ensure that the presented certificate was issued by a trusted certificate
-authority before allowing the connection to continue. PKI-based certificates would allow a key to be revoked
-and rotated through management at the certificate authority without requiring additional registration
-or management at the AS. The PKI required to manage mutually-authenticated TLS has historically been
-difficult to deploy, especially at scale, but it remains an appropriate solution for systems where
-the required management overhead is not an impediment.
-
-MTLS in GNAP need not use a PKI backing, as self-signed certificates and certificates from untrusted
-authorities can still be presented as part of a TLS connection. In this case, the verifier would
-validate the connection but accept whatever certificate was presented by the client software. This
-specific certificate can then be bound to all future connections from that client software by
-being bound to the resulting access tokens, in a trust-on-first-use pattern. See {{security-mtls}}
-for more considerations on MTLS as a key proofing mechanism.
 
 ## Interception of Responses from the AS {#security-as-response}
 
