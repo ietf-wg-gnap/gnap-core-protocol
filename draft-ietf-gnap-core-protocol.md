@@ -204,6 +204,7 @@ on the role by the overall protocol.
 ~~~ aasvg
 {::include diagram/roles.md}
 ~~~
+{: title="Figure 1: Roles in GNAP"}
 
 Authorization Server (AS):
 : server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information). The AS is uniquely defined by the _grant endpoint URI_, which the absolute URI where grant requests are started by clients.
@@ -344,6 +345,7 @@ The underlying requested grant moves through several states as different actions
 ~~~ aasvg
 {::include diagram/states.md}
 ~~~
+{: title="Figure 2: State diagram of a grant request throughout GNAP"}
 
 *Processing*:
 : When a [request for access](#request) is received by the AS, a new grant request is created and placed in the _processing_ state by the AS. This state is also entered when an existing grant request is updated by the client instance and when interaction is completed. In this state, the AS processes the context of the grant request to determine whether interaction with the end user or RO is required for approval of the request. The grant request has to exit this state before a response can be returned to the client instance. If approval is required, the request moves to the _pending_ state and the AS returns a [continue response](#response-continue) along with any appropriate [interaction responses](#response-interact). If no such approval is required, such as when the client instance is acting on its own behalf or the AS can determine that access has been fulfilled, the request moves to the _approved_ state where [access tokens for API access](#response-token) and [subject information](#response-subject) can be issued to the client instance. If the AS determines that no additional processing can occur (such as a timeout or an unrecoverable error), the grant request is moved to the _finalized_ state and is terminated.
@@ -387,11 +389,13 @@ an access token to call an RS.
 
 The following diagram provides a general overview of GNAP, including many
 different optional phases and connections. The diagrams in the following sections
-provide views of GNAP under more specific circumstances.
+provide views of GNAP under more specific circumstances. These additional diagrams
+use the same conventions as the overall diagram below.
 
 ~~~ aasvg
 {::include diagram/overall.md}
 ~~~
+{: title="Figure 3: Overall sequence of GNAP"}
 
 - (A) The end user interacts with the client instance to indicate a need for resources on
     behalf of the RO. This could identify the RS the client instance needs to call,
@@ -472,6 +476,7 @@ that returns from the interaction.
 ~~~ aasvg
 {::include diagram/redirect.md}
 ~~~
+{: title="Figure 4: Diagram of a redirect-based interaction"}
 
 1. The client instance establishes a session with the user, in the role of the end user.
 
@@ -544,6 +549,7 @@ the AS, the user is not shown as being connected to the client instance in this 
 ~~~ aasvg
 {::include diagram/usercode.md}
 ~~~
+{: title="Figure 5: Diagram of a user-code-based interaction"}
 
 1. The client instance [requests access to the resource](#request). The client instance indicates that
     it can [display a user code](#request-interact-usercode).
@@ -612,6 +618,7 @@ The client instance polls the AS while it is waiting for the RO to authorize the
 ~~~ aasvg
 {::include diagram/async.md}
 ~~~
+{: title="Figure 6: Diagram of an asynchronous authorization process, with no end user interaction"}
 
 1. The client instance [requests access to the resource](#request). The client instance does not
     send any interaction modes to the server, indicating that
@@ -680,6 +687,7 @@ Since there is no explicit RO, the client instance does not interact with an RO.
 ~~~ aasvg
 {::include diagram/software.md}
 ~~~
+{: title="Figure 7: Diagram of a software-only authorization, with no end user or explicit resource owner"}
 
 1. The client instance [requests access to the resource](#request). The client instance does not
     send any interaction modes to the server.
@@ -708,6 +716,7 @@ expired access token's value at the AS using the token management API.
 ~~~ aasvg
 {::include diagram/refresh.md}
 ~~~
+{: title="Figure 8: Diagram of the process of refreshing an access token"}
 
 1. The client instance [requests access to the resource](#request).
 
@@ -748,6 +757,7 @@ the abstract as functions of the AS here.
 ~~~ aasvg
 {::include diagram/subject.md}
 ~~~
+{: title="Figure 9: Diagram of the process of requesting and releasing subject information apart from access tokens"}
 
 1. The client instance [requests access to subject information](#request).
 
@@ -790,6 +800,7 @@ authorizing the call center agent to access their account on their behalf.
 ~~~ aasvg
 {::include diagram/crossuser.md}
 ~~~
+{: title="Figure 10: Diagram of cross-user authorization, where the end user and RO are different"}
 
 Precondition: The end user is authenticated to the client instance, and the client
 instance has an identifier representing the end user that it can present to the AS.
@@ -2587,7 +2598,7 @@ This specification defines the following `code` values:
 `"too_many_attempts"`:
 : A limit has been reached in the total number of reasonable attempts. This number is either defined statically or adjusted based on runtime conditions by the AS.
 
-Additional error codes can be defined in the [GNAP Error Code Registry](#IANA-error-code).
+Additional error codes can be defined in the [GNAP Error Codes Registry](#IANA-error-code).
 
 For example, if the RO denied the request while interacting with the AS,
 the AS would return the following error when the client instance tries to
@@ -4565,7 +4576,7 @@ This method is indicated by the method value `jwsd` in string form.
 }
 ~~~
 
-The signer creates a JWS {{RFC7515}} object as follows:
+The signer creates a JSON Web Signature (JWS) {{RFC7515}} object as follows:
 
 To protect the request, the JOSE header of the signature contains the following
 claims:
@@ -6584,6 +6595,7 @@ is stopped in several places.
 ~~~ aasvg
 {::include diagram/hash.md}
 ~~~
+{: title="Figure 11: Interaction hash attack"}
 
 - Prerequisites: The client instance can allow multiple end users to
     access the same AS. The attacker is attempting to associate their rights
