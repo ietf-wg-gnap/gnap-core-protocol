@@ -46,7 +46,11 @@ normative:
     I-D.ietf-httpbis-digest-headers:
     I-D.ietf-secevent-subject-identifiers:
     HASH-ALG:
-        target: https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg
+      title: "Named Information Hash Algorithm Registry"
+      target: https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg
+      author:
+        -
+          org: IANA
     OIDC:
       title: OpenID Connect Core 1.0 incorporating errata set 1
       target: https://openid.net/specs/openid-connect-core-1_0.html
