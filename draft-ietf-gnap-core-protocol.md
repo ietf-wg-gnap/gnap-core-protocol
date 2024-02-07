@@ -5319,10 +5319,21 @@ Additional fields can be defined the [GNAP Authorization Server Discovery Fields
 
 ## RS-first Method of AS Discovery {#rs-request-without-token}
 
-If the client instance calls an RS without an access token, or with an invalid access token, the RS SHOULD be explicit about the fact that GNAP needs to be used to access the resource, by responding with the WWW-Authenticate header field and a GNAP challenge.
+If the client instance calls an RS without an access token, or with an invalid access token, the RS SHOULD be explicit about the fact that GNAP needs to be used to access the resource by responding with the WWW-Authenticate header field and a GNAP challenge.
 
 In some situations, the client instance might want to know with which specific AS it needs to negotiate for access to that RS.
-The RS MAY additionally return the address of the GNAP endpoint in the `as_uri` parameter, a `referrer` parameter to indicate which RS initiated the discovery process, and an opaque `access` reference. The client instance SHOULD then use both the `referrer` and `access` parameters in its access token request. The `referrer` parameter MUST be the URI of the RS, and the client instance MUST check its value to protect itself. The opaque `access` reference MUST be sufficient for at least the action the client instance was attempting to take at the RS and MAY allow additional access rights as well.
+The RS MAY additionally return the following OPTIONAL parameters:
+
+`as_uri`:
+: The URI of the grant endpoint of the GNAP AS. Used by the client instance to call the AS to request an access token.
+
+`referrer`:
+: The URI of the GNAP RS. Sent by the client instance in the Referer header as part of the grant request.
+
+`access`:
+: An opaque access reference as defined in {{resource-access-reference}}. Sent by the client as an access right in the grant request.
+
+The client instance SHOULD then use both the `referrer` and `access` parameters in its access token request. The client instance MUST check that the `referrer` parameter is equal to the URI of the RS using the plain string comparison method in . The opaque returned `access` reference MUST be sufficient for at least the action the client instance was attempting to take at the RS and MAY allow additional access rights as well.
 
 The means for the RS to determine the value for the `access` reference are out of scope of this specification, but some dynamic methods are discussed in
 {{I-D.ietf-gnap-resource-servers}}.
