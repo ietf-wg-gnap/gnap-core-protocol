@@ -1540,8 +1540,6 @@ This specification defines the following interaction start modes:
 : Indicates that the client instance can communicate a human-readable short
     code to the end user for use with a short, dynamic URI. {{request-interact-usercodeuri}}
 
-All interaction start method definitions MUST provide enough information to uniquely identify the grant request during the interaction. In the `redirect` and `app` modes, this is done using a unique URI (including its parameters). In the `user_code` and `user_code_uri` mode, this is done using the value of the user code.
-
 Additional start modes are defined in the [GNAP Interaction Start Modes Registry](#IANA-interaction-start-modes).
 
 #### Redirect to an Arbitrary URI {#request-interact-redirect}
@@ -5626,8 +5624,9 @@ This document defines a means for the client instance to begin interaction betwe
 The DE is expected to ensure that all registrations follow the template presented in {{IANA-interaction-start-modes-template}}.
 The DE is expected to ensure that registrations for the same name with different types are sufficiently close in functionality so as not to cause confusion for developers.
 The DE is expected to ensure that any registration using an "object" type declares all additional parameters, their optionality, and purpose.
-The DE is expected to ensure that all start modes clearly define what actions the client is expected to take to begin interaction, what the expected user experience is, and any security considerations for this communication from either party.
-The DE is expected to ensure that all start modes document incompatibilities with other start modes or finish methods, if applicable.
+The DE is expected to ensure that the start mode clearly defines what actions the client is expected to take to begin interaction, what the expected user experience is, and any security considerations for this communication from either party.
+The DE is expected to ensure that the start mode documents incompatibilities with other start modes or finish methods, if applicable.
+The DE is expected to ensure that the start mode provides enough information to uniquely identify the grant request during the interaction. For example, tn the `redirect` and `app` modes, this is done using a unique URI (including its parameters). In the `user_code` and `user_code_uri` mode, this is done using the value of the user code.
 
 ### Registration Template {#IANA-interaction-start-modes-template}
 
