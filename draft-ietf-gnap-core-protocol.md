@@ -1705,7 +1705,8 @@ GET as described in {{interaction-callback}}.
 
 The client instance's URI MUST be protected by HTTPS, be
 hosted on a server local to the RO's browser ("localhost"), or
-use an application-specific URI scheme.
+use an application-specific URI scheme that is loaded on the
+end user's device.
 
 ~~~ json
 "interact": {
