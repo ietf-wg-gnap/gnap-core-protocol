@@ -6420,7 +6420,7 @@ of client software. Additionally, the act of fetching the URI could accidentally
 in the HTTP Referer header field, if one is sent. Even though GNAP intentionally does not include security
 parameters in front-channel URI's wherever possible, the AS still should take steps to ensure that
 this information does not leak accidentally, such as setting a referrer policy on image links or
-displaying images only from a sanitized and generic URI.
+displaying images only from paged served from a URI with no sensitive security or identity information.
 
 To avoid these issues, the AS can insist on the use of data: URIs, though that might not be practical for all
 types of client software. Alternatively, the AS could pre-fetch the content of the URI and present its own copy
