@@ -203,6 +203,8 @@ This document contains non-normative examples of partial and complete HTTP messa
 
 This document uses the term "mutual TLS" as defined by {{RFC8705}}. The shortened form "MTLS" is used to mean the same thing.
 
+For brevity, the term "signature" on its own is used in this document to refer to both digital signatures (which use asymmetric cryptography) and keyed MACs (which use symmetric cryptography). Similarly, the verb "sign" refers to the generation of either a digital signature or keyed MAC over a given signature base. The qualified term "digital signature" refers specifically to the output of an asymmetric cryptographic signing operation.
+
 ## Roles
 
 The parties in GNAP perform actions under different roles.
