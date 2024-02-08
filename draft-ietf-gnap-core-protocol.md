@@ -6598,12 +6598,21 @@ an attacker's stolen request.
 
 ## Calculating Interaction Hash {#security-interact-hash}
 
+While the use of GNAP's signing mechanisms and token-protected grant API provides
+significant security protections to the protocol, the interaction reference mechanism
+is susceptible to monitoring, capture, and injection by an attacker. To combat this, GNAP
+requires the calculation and verification of an interaction hash. A client instance
+might be tempted to skip this step, but doing so leaves the client instance open to
+injection and manipulation by an attacker that could lead to additional issues.
+
 The calculation of the interaction hash value provides defense in depth, allowing a client
 instance to protect itself from spurious injection of interaction references when using an
 interaction finish method. The AS is protected during this attack through the
 continuation access token being bound to the expected interaction reference,
 but without hash calculation, the attacker could cause the client to make an
-HTTP request on command. With both of these in place, an attacker attempting to substitute the interaction reference
+HTTP request on command, which could itself be manipulated -- for example, by including
+a malicious value in the interaction reference designed to attack the AS.
+With both of these in place, an attacker attempting to substitute the interaction reference
 is stopped in several places.
 
 ~~~ aasvg
@@ -6637,9 +6646,14 @@ is stopped in several places.
     with the attacker's IR1.
 - (G) If the client instance is checking the interaction hash, the attack
     stops here because the hash calculation of (CN2 + SN2 + IR1 + AS) will fail.
-    If the client instance does not check the interaction hash, the AS will
+    If the client instance does not check the interaction hash, the client instance
+    will be tricked into submitting the interaction reference to the AS. Here, the AS will
     reject the interaction request because it is presented against CT2 and not
-    CT1 as expected.
+    CT1 as expected. However, an attacker who has potentially injected CT1 as
+    the value of CT2 would be able to continue the attack.
+
+Even with additional checks in place, client instances using interaction finish mechanisms are responsible
+for checking the interaction hash to provide security to the overall system.
 
 ## Storage of Information During Interaction and Continuation {#security-client-storage}
 
