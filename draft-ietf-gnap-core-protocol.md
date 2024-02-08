@@ -5331,9 +5331,11 @@ The RS MAY additionally return the following OPTIONAL parameters:
 : The URI of the GNAP RS. Sent by the client instance in the Referer header as part of the grant request.
 
 `access`:
-: An opaque access reference as defined in {{resource-access-reference}}. Sent by the client as an access right in the grant request.
+: An opaque access reference as defined in {{resource-access-reference}}.
+    MUST be sufficient for at least the action the client instance was attempting to take at the RS and MAY allow additional access rights as well.
+    Sent by the client as an access right in the grant request.
 
-The client instance SHOULD then use both the `referrer` and `access` parameters in its access token request. The client instance MUST check that the `referrer` parameter is equal to the URI of the RS using the plain string comparison method in . The opaque returned `access` reference MUST be sufficient for at least the action the client instance was attempting to take at the RS and MAY allow additional access rights as well.
+The client instance SHOULD then use both the `referrer` and `access` parameters in its access token request. The client instance MUST check that the `referrer` parameter is equal to the URI of the RS using the simple string comparison method in {{Section 6.2.1 of RFC3986}}.
 
 The means for the RS to determine the value for the `access` reference are out of scope of this specification, but some dynamic methods are discussed in
 {{I-D.ietf-gnap-resource-servers}}.
