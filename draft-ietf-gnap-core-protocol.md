@@ -82,6 +82,7 @@ normative:
 
 informative:
     RFC4107:
+    RFC5652:
     RFC6202:
     RFC6973:
     RFC7518:
@@ -6146,10 +6147,17 @@ the RS whose focus is to provide an API or the client software whose focus is to
 ## Symmetric and Asymmetric Client Instance Keys {#security-symmetric}
 
 Many of the cryptographic methods used by GNAP for key-proofing can support both asymmetric and symmetric
-cryptography, and can be extended to use a wide variety of mechanisms. Implementers will find useful the available guidelines on cryptographic key management provided in {{RFC4107}}. While symmetric
+cryptography, and can be extended to use a wide variety of mechanisms.
+Implementers will find useful the available guidelines on cryptographic key management provided in {{RFC4107}}. While symmetric
 cryptographic systems have some benefits in speed and simplicity, they have a distinct drawback
 that both parties need access to the same key in order to do both signing and verification of
-the message. This means that when the client instance calls the AS to request a token, the
+the message.
+When more than two parties share the same symmetric key,
+data origin authentication is not provided.  Any party that knows the
+symmetric key can compute a valid MAC; therefore, the
+contents could originate from any one of the parties (see {{RFC5652}} for further discussion).
+
+Use of symmetric cryptography means that when the client instance calls the AS to request a token, the
 AS needs to know the exact value of the client instance's key (or be able to derive it) in
 order to validate the key proof signature. With asymmetric keys, the client needs only to
 send its public key to the AS to allow for verification that the client holds the associated
