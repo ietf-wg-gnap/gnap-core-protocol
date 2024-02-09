@@ -6146,7 +6146,7 @@ the RS whose focus is to provide an API or the client software whose focus is to
 ## Symmetric and Asymmetric Client Instance Keys {#security-symmetric}
 
 Many of the cryptographic methods used by GNAP for key-proofing can support both asymmetric and symmetric
-cryptography, and can be extended to use a wide variety of mechanisms. 
+cryptography, and can be extended to use a wide variety of mechanisms.
 Implementers will find useful the available guidelines on cryptographic key management provided in {{RFC4107}}. While symmetric
 cryptographic systems have some benefits in speed and simplicity, they have a distinct drawback
 that both parties need access to the same key in order to do both signing and verification of
