@@ -1704,7 +1704,8 @@ GET as described in {{interaction-callback}}.
 
 The client instance's URI MUST be protected by HTTPS, be
 hosted on a server local to the RO's browser ("localhost"), or
-use an application-specific URI scheme.
+use an application-specific URI scheme that is loaded on the
+end user's device.
 
 ~~~ json
 "interact": {
@@ -1734,7 +1735,7 @@ as described in {{interaction-pushback}}.
 
 The client instance's URI MUST be protected by HTTPS, be
 hosted on a server local to the RO's browser ("localhost"), or
-use an application-specific URI scheme.
+use an application-specific URI scheme that is loaded on the end user's device.
 
 ~~~ json
 "interact": {
@@ -2801,7 +2802,7 @@ the URI MAY be opened on a separate device from the client instance
 itself. The URI MUST be accessible from an HTTP GET
 request and MUST be protected by HTTPS, be
 hosted on a server local to the RO's browser ("localhost"), or
-use an application-specific URI scheme.
+use an application-specific URI scheme that is loaded on the end user's device.
 
 ### Interaction at the Static User Code URI {#interaction-usercode}
 
@@ -2834,7 +2835,7 @@ the URI is usually opened on a separate device from the client instance
 itself. The URI MUST be accessible from an HTTP GET
 request and MUST be protected by HTTPS, be
 hosted on a server local to the RO's browser ("localhost"), or
-use an application-specific URI scheme.
+use an application-specific URI scheme that is loaded on the end user's device.
 
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
@@ -2884,7 +2885,7 @@ the URI is usually be opened on a separate device from the client instance
 itself. The URI MUST be accessible from an HTTP GET
 request and MUST be protected by HTTPS, be
 hosted on a server local to the RO's browser ("localhost"), or
-use an application-specific URI scheme.
+use an application-specific URI scheme that is loaded on the end user's device.
 
 
 In many cases, the URI indicates a web page hosted at the AS, allowing the
