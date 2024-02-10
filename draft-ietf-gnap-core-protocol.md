@@ -1305,7 +1305,8 @@ The values are for informational purposes only and MUST NOT
 be taken as authentic proof of the client instance's identity or source.
 The AS MAY restrict display values to specific client instances, as identified
 by their keys in {{request-client}}. See additional considerations for displayed
-client information in {{security-impersonation}}.
+client information in {{security-impersonation}} and for the `logo_uri` in
+particular in {{security-client-hosted-logo}}.
 
 ### Authenticating the Client Instance {#request-key-authenticate}
 
@@ -6402,6 +6403,29 @@ the resource owner to make a more informed delegation decision. For example, an 
 between a client instance that can be traced back to a specific developer's registration and an
 instance that has self-asserted its own display information.
 
+## Client-Hosted Logo URI {#security-client-hosted-logo}
+
+The `logo_uri` client display field defined in {{request-display}} allows the client instance to specify
+a URI from which an image can be fetched for display during authorization decisions. When the URI points to
+an externally hosted resource (as opposed to a data: URI), the `logo_uri` field presents challenges in addition to the
+considerations in {{security-impersonation}}.
+
+When a `logo_uri` is externally hosted, the client software (or the host of the asset) can change the contents of
+the logo without informing the AS. Since the logo is considered an aspect of the client software's identity,
+this flexibility allows for a more dynamically-managed client instance that makes use of the distributed systems.
+
+However, this same flexibility allows the host of the asset to change the hosted file in a malicious way,
+such as replacing the image content with malicious software for download or imitating a different piece
+of client software. Additionally, the act of fetching the URI could accidentally leak information to the image host
+in the HTTP Referer header field, if one is sent. Even though GNAP intentionally does not include security
+parameters in front-channel URI's wherever possible, the AS still should take steps to ensure that
+this information does not leak accidentally, such as setting a referrer policy on image links or
+displaying images only from paged served from a URI with no sensitive security or identity information.
+
+To avoid these issues, the AS can insist on the use of data: URIs, though that might not be practical for all
+types of client software. Alternatively, the AS could pre-fetch the content of the URI and present its own copy
+to the resource owner instead. This practice opens the AS to potential SSRF attacks, as discussed in {{security-ssrf}}.
+
 ## Interception of Information in the Browser {#security-browser-interception}
 
 Most information passed through the web-browser is susceptible to interception and possible manipulation by
@@ -6991,6 +7015,8 @@ GNAP assumes the TLS protection used throughout the spec is intact. Without the 
 ### Surveillance by the Client
 
 The purpose of GNAP is to authorize clients to be able to access information on behalf of a user. So while it is expected that the client may be aware of the user's identity as well as data being fetched for that user, in some cases the extent of the client may be beyond what the user is aware of. For example, a client may be implemented as multiple distinct pieces of software, such as a logging service or a mobile app that reports usage data to an external backend service. Each of these pieces could gain information about the user without the user being aware of this action.
+
+When the client software uses a hosted asset for its components, such as its logo image, the fetch of these assets can reveal user actions to the host. If the AS presents the logo URI to the resource owner in a browser page, the browser will fetch the logo URL from the authorization screen. This fetch will tell the host of the logo image that someone is accessing an instance of the client software and requesting access for it. This is particularly problematic when the host of the asset is not the client software itself, such as when a content delivery network is used.
 
 ### Surveillance by the Authorization Server
 
