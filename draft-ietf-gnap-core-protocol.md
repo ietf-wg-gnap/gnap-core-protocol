@@ -158,8 +158,11 @@ passed directly to the software.
 # Introduction
 
 This protocol allows a piece of software, the client instance, to request delegated
-authorization to resource servers and subject information. This delegation is
-facilitated by an authorization server usually on
+authorization to resource servers and subject information. The delegated access to
+the resource server can be used by the client instance to access resources and APIs
+on behalf a resource owner, and delegated access to
+subject information can in turn be used by the client instance to make authentication decisions.
+This delegation is facilitated by an authorization server usually on
 behalf of a resource owner. The end user operating the software can interact
 with the authorization server to authenticate, provide consent, and
 authorize the request as a resource owner.
@@ -314,10 +317,10 @@ Right:
 : ability given to a subject to perform a given operation on a resource under the control of an RS.
 
 Subject:
-: person, organization or device. The subject decides whether and under which conditions its attributes can be disclosed to other parties.
+: person or organization. The subject decides whether and under which conditions its attributes can be disclosed to other parties.
 
 Subject Information:
-: set of statements and attributes asserted by an AS about a subject.
+: set of statements and attributes asserted by an AS about a subject. These statements can be used by the client instance as part of an authentication decision.
 
 
 
