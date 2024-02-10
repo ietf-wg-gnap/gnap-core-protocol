@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-17
+docname: draft-ietf-gnap-core-protocol-18
 category: std
 
 ipr: trust200902
@@ -7123,6 +7123,9 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 > Note: To be removed by RFC editor before publication.
+
+- 18
+    - Updates from IESG reviews.
 
 - 17
     - Updates from IESG reviews.
