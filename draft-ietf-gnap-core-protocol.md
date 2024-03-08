@@ -1234,14 +1234,18 @@ is described in {{binding-keys}}.
 If the same public key is sent by value on different access requests, the AS MUST
 treat these requests as coming from the same client instance for purposes
 of identification, authentication, and policy application.
-If the AS does not know the client instance's public key ahead of time, the AS
-MAY process the request based on attestations
-within the `client` request and other AS policy mechanisms. For example, the AS
-could allow an unknown client instance key to access only limited resources or work for only specific RO's.
 
-The client instance MUST NOT send a symmetric key by value in the request, as doing so would expose
+If the AS does not know the client instance's public key ahead of time, the AS
+can choose how to process the unknown key. Common approaches include:
+
+- Allowing the request and requiring RO authorization in a trust-on-first-use model
+- Limiting the client's requested access to only certain APIs and information
+- Denying the request entirely by returning an `invalid_client` error ({{response-error}})
+
+The client instance MUST NOT send a symmetric key by value in the `key` field of the request, as doing so would expose
 the key directly instead of simply proving possession of it. See considerations on symmetric keys
-in {{security-symmetric}}.
+in {{security-symmetric}}. To use symmetric keys, the client instance can send the `key` by reference ({{key-reference}}) or
+send the entire client identity by reference ({{request-reference}}).
 
 The client instance's key can be pre-registered with the AS ahead of time and associated
 with a set of policies and allowable actions pertaining to that client. If this pre-registration
@@ -1274,10 +1278,6 @@ associated with the instance identifier.
 
 If the AS does not recognize the instance identifier, the request MUST be rejected
 with an `invalid_client` error ({{response-error}}).
-
-If the client instance is identified in this manner, the registered key for the client instance
-MAY be a symmetric key known to the AS. See considerations on symmetric keys
-in {{security-symmetric}}.
 
 ### Providing Displayable Client Instance Information {#request-display}
 
