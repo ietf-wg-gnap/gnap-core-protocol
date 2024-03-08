@@ -1008,7 +1008,7 @@ The values of the `flags` field defined by this specification are as follows:
     in {{use-access-token}}. See {{security-bearer-tokens}} for additional
     considerations on the use of bearer tokens.
 
-Flag values MUST NOT be included more than once. If the request includes a flag value multiple times, the AS MUST return an `invalid_request` error defined in {{response-error}}.
+Flag values MUST NOT be included more than once. If the request includes a flag value multiple times, the AS MUST return an `invalid_flag` error defined in {{response-error}}.
 
 Additional flags can be defined by extensions using the [GNAP Access Token Flags Registry](#IANA-token-flags).
 
@@ -3657,6 +3657,8 @@ If the request is successfully revoked, the AS responds with status code HTTP 20
 The AS SHOULD revoke all associated access tokens, if possible. The AS SHOULD disable all
 token rotation and other token management functions on such access tokens, if possible.
 Once the grant request is in the _finalized_ state, it MUST NOT be moved to any other state.
+
+If the request is not revoked, the AS responds with an `invalid_continuation` error ({{response-error}}).
 
 # Token Management {#token-management}
 
