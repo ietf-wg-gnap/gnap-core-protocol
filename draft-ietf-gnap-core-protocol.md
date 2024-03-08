@@ -3805,7 +3805,12 @@ Signatures proofing method uses multiple signatures in the request as described 
 POST /token/PRY5NM33O HTTP/1.1
 Host: server.example.com
 Authorization: GNAP B8CDFONP21-4TB8N6.BW7ONM
-Signature-Input: sig1=..., sig2=("signature";key=sig1)...
+Signature-Input: \
+  sig1=("@method" "@target-uri" "content-digest" \
+        "authorization"),\
+  sig2=("@method" "@target-uri" "content-digest" \
+        "authorization" "signature";key="sig1" \
+        "signature-input";key="sig1")
 Signature: sig1=..., sig2=...
 Content-Digest: sha-256=...
 
