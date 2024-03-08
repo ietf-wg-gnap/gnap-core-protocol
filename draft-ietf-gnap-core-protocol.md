@@ -336,7 +336,7 @@ Looking back on each trust relationship:
 
 - end user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers implement requirements and generally some recommendations or best practices, so that the end users may confidently use their software. However, end users might also be facing an attacker's client software or a poorly-implemented client, without even realizing it.
 
-- end user/AS: when the client supports the interaction feature (see {{response-interact}}), the end user interacts with the AS through an AS-provided interface. In many cases, this happens through a front-channel interaction through the end user's browser. See {{security-front-channel}} for some considerations in trusting these interactions.
+- end user/AS: when the client supports the interaction feature (see {{response-interact}}), the end user interacts with the AS through an AS-provided interface. In mangiy cases, this happens through a front-channel interaction through the end user's browser. See {{security-front-channel}} for some considerations in trusting these interactions.
 
 - client/AS: An honest AS may be facing an attacker's client (as discussed just above), or the reverse, and GNAP aims at making common attacks impractical. The core specification makes access tokens opaque to the client and defines the request/response scheme in detail, therefore avoiding extra trust hypotheses from this critical piece of software. Yet the AS may further define cryptographic attestations or optional rules to simplify the access of clients it already trusts, due to past behavior or organizational policies (see {{request-client}}).
 
@@ -988,7 +988,7 @@ composed of the following fields.
 
 `label` (string):
 : A unique name chosen by the client instance to refer to the resulting access token. The value of this
-    field is opaque to the AS.  If this field
+    field is opaque to the AS and is not intended to be exposed to or used by the end user.  If this field
     is included in the request, the AS MUST include the same label in the [token response](#response-token).
     REQUIRED if used as part of a [multiple access token request](#request-token-multiple),
     OPTIONAL otherwise.
