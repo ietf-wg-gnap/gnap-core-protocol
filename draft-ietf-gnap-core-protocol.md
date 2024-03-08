@@ -1242,7 +1242,7 @@ The client instance MUST NOT send a symmetric key by value in the request, as do
 the key directly instead of simply proving possession of it. See considerations on symmetric keys
 in {{security-symmetric}}.
 
-The client instance's key MAY be pre-registered with the AS ahead of time and associated
+The client instance's key can be pre-registered with the AS ahead of time and associated
 with a set of policies and allowable actions pertaining to that client. If this pre-registration
 includes other fields that can occur in the `client` request object described in this section,
 such as `class_id` or `display`, the pre-registered values MUST take precedence over any values
