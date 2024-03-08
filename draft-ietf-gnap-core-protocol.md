@@ -2566,11 +2566,12 @@ When returned as an object, the object contains the following fields:
 
 `code` (string):
 :   A single ASCII error code defining the error.
+    The value MUST be defined in the [GNAP Error Codes Registry](#IANA-error-code).
     REQUIRED.
 
 `description` (string):
 :   A human-readable string description of the error intended for the
-    developer of the client.
+    developer of the client. The value is chosen by the implementation.
     OPTIONAL.
 
 
