@@ -5491,9 +5491,9 @@ To indicate that the content is a GNAP request message to be bound with a JOSE m
 * Applications that use this media type: GNAP
 * Fragment identifier considerations: n/a
 * Additional information:
-   * Magic number(s): n/a
-   * File extension(s): n/a
-   * Macintosh file type code(s): n/a
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
 * Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
 * Intended usage: COMMON
 * Restrictions on usage: none
@@ -5515,9 +5515,9 @@ To indicate that the content is a GNAP token rotation message to be bound with a
 * Applications that use this media type: GNAP
 * Fragment identifier considerations: n/a
 * Additional information:
-   * Magic number(s): n/a
-   * File extension(s): n/a
-   * Macintosh file type code(s): n/a
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
 * Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
 * Intended usage: COMMON
 * Restrictions on usage: none
@@ -5539,9 +5539,9 @@ To indicate that the content is a GNAP message to be bound with a detached JWS m
 * Applications that use this media type: GNAP
 * Fragment identifier considerations: n/a
 * Additional information:
-   * Magic number(s): n/a
-   * File extension(s): n/a
-   * Macintosh file type code(s): n/a
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
 * Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
 * Intended usage: COMMON
 * Restrictions on usage: none
@@ -5562,9 +5562,9 @@ To indicate that the content is a GNAP message to be bound with an attached JWS 
 * Applications that use this media type: GNAP
 * Fragment identifier considerations: n/a
 * Additional information:
-   * Magic number(s): n/a
-   * File extension(s): n/a
-   * Macintosh file type code(s): n/a
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
 * Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
 * Intended usage: COMMON
 * Restrictions on usage: none
@@ -5585,9 +5585,9 @@ To indicate that the content is a GNAP token rotation message to be bound with a
 * Applications that use this media type: GNAP
 * Fragment identifier considerations: n/a
 * Additional information:
-   * Magic number(s): n/a
-   * File extension(s): n/a
-   * Macintosh file type code(s): n/a
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
 * Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
 * Intended usage: COMMON
 * Restrictions on usage: none
@@ -5608,9 +5608,9 @@ To indicate that the content is a GNAP token rotation message to be bound with a
 * Applications that use this media type: GNAP
 * Fragment identifier considerations: n/a
 * Additional information:
-   * Magic number(s): n/a
-   * File extension(s): n/a
-   * Macintosh file type code(s): n/a
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
 * Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
 * Intended usage: COMMON
 * Restrictions on usage: none
@@ -5625,6 +5625,8 @@ the "Structured Syntax Suffix" registry {{IANA.StructuredSuffix}} in
 the manner described in {{RFC6838}}, which can be used to indicate that
 the media type is encoded as a compact form JWS with either attached or detached payload content.
 
+To indicate the content is a compact form JWS as defined by {{RFC7515}} with attached payload:
+
 * Name: JWS
 * +suffix: +jws
 * References: {{&SELF}}
@@ -5635,6 +5637,7 @@ the media type is encoded as a compact form JWS with either attached or detached
 * Author: IETF GNAP Working Group, txauth@ietf.org
 * Author/Change controller: IETF
 
+To indicate the content is a compact form JWS as defined by {{RFC7515}} with detached payload:
 
 * Name: Detached JWS
 * +suffix: +jwsd
