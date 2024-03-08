@@ -42,9 +42,9 @@ normative:
     RFC8705:
     HTTP: RFC9110
     RFC9111:
-    I-D.ietf-httpbis-message-signatures:
-    I-D.ietf-httpbis-digest-headers:
-    I-D.ietf-secevent-subject-identifiers:
+    RFC9421:
+    RFC9530:
+    RFC9493:
     HASH-ALG:
       title: "Named Information Hash Algorithm Registry"
       target: https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg
@@ -1135,7 +1135,7 @@ contain the following fields.
 
 `sub_id_formats` (array of strings):
 : An array of subject identifier subject formats
-    requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+    requested for the RO, as defined by {{RFC9493}}.
     REQUIRED if subject identifiers are requested.
 
 `assertion_formats` (array of strings):
@@ -1147,7 +1147,7 @@ contain the following fields.
 `sub_ids` (array of objects):
 : An array of subject identifiers representing the subject for which information
     is being requested. Each object is a subject identifier as defined by
-    {{I-D.ietf-secevent-subject-identifiers}}. All identifiers in the `sub_ids` array MUST identify
+    {{RFC9493}}. All identifiers in the `sub_ids` array MUST identify
     the same subject. If omitted, the AS SHOULD assume
     that subject information requests are about the current user and SHOULD
     require direct interaction or proof of presence before releasing information. OPTIONAL.
@@ -1346,7 +1346,7 @@ or by reference (See {{request-user-reference}}).
 
 `sub_ids` (array of objects):
 : An array of subject identifiers for the
-    end user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+    end user, as defined by {{RFC9493}}.
     OPTIONAL.
 
 `assertions` (array of objects)
@@ -2432,7 +2432,7 @@ This field is an object with the following properties.
 `sub_ids` (array of objects):
 : An array of subject identifiers for the
     RO, as defined by
-    {{I-D.ietf-secevent-subject-identifiers}}.
+    {{RFC9493}}.
     REQUIRED if returning subject identifiers.
 
 `assertions` (array of objects):
@@ -4209,7 +4209,7 @@ algorithm MUST be `sha-256`.
 ~~~
 
 When using this method, the signer creates an HTTP Message Signature as described in
-{{I-D.ietf-httpbis-message-signatures}}. The covered components of the signature MUST include the
+{{RFC9421}}. The covered components of the signature MUST include the
 following:
 
 `"@method"`:
@@ -4221,7 +4221,7 @@ following:
 When the message contains request content, the covered components MUST also include the following:
 
 `"content-digest"`:
-: The Content-Digest header as defined in {{I-D.ietf-httpbis-digest-headers}}. When the
+: The Content-Digest header as defined in {{RFC9530}}. When the
     request message has content, the signer MUST calculate this field value and include
     the field in the request. The verifier
     MUST validate this field value. REQUIRED when the message request contains message content.
@@ -5297,7 +5297,7 @@ server's discovery information. The AS MUST respond with a JSON document with Co
     subject identifier formats. The values of this list correspond to possible values
     of the [subject identifier section](#request-subject) of the request and MUST
     be values from the Subject Identifier Formats Registry established by
-    {{I-D.ietf-secevent-subject-identifiers}}.
+    {{RFC9493}}.
     OPTIONAL.
 
 `assertion_formats_supported` (array of strings):
@@ -6066,7 +6066,7 @@ request as a header parameter using {{RFC9111}}, giving the downstream
 system access to the certificate information. The TTRP has to be trusted to provide accurate
 certificate information, and the connection between the TTRP and the downstream system also has to
 be protected. The TTRP could provide some additional assurance, for example, by adding its own
-signature to the Client-Cert header field using {{I-D.ietf-httpbis-message-signatures}}. This
+signature to the Client-Cert header field using {{RFC9421}}. This
 signature would be effectively ignored by GNAP (since it would not use GNAP's `tag` parameter
 value) but would be understood by the downstream service as part
 of its deployment.
