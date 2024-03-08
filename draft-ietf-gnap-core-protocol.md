@@ -1012,7 +1012,7 @@ Flag values MUST NOT be included more than once. If the request includes a flag 
 
 Additional flags can be defined by extensions using the [GNAP Access Token Flags Registry](#IANA-token-flags).
 
-In the following example, the client instance is requesting access to a complex resource
+In the following non-normative example, the client instance is requesting access to a complex resource
 described by a pair of access request object.
 
 ~~~ json
@@ -1460,7 +1460,7 @@ its capabilities and what is allowed to fulfill the request.
 `hints` (object):
 : Provides additional information to inform the interaction process at the AS. OPTIONAL. ({{request-interact-hint}})
 
-In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
+In the following non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
 the end user to an arbitrary URI and can receive a [redirect](#request-interact-callback-redirect) through
 a browser request. Note that the client instance does not accept a push-style callback.
 The pattern of using a redirect for both interaction start and finish is common for web-based client software.
@@ -1476,7 +1476,7 @@ The pattern of using a redirect for both interaction start and finish is common 
 }
 ~~~
 
-In this non-normative example, the client instance is indicating that it can
+In the following non-normative example, the client instance is indicating that it can
 display a [user code](#request-interact-usercode) and direct the end user
 to an [arbitrary URI](#request-interact-redirect), but it cannot accept a redirect or push callback.
 This pattern is common for devices with robust display capabilities but that expect
@@ -1489,7 +1489,7 @@ as a set-top box capable of displaying an interaction URL as a QR code.
 }
 ~~~
 
-In this non-normative example, the client instance is indicating that it can
+In the following non-normative example, the client instance is indicating that it can
 not start any interaction with the end-user, but that the AS can
 [push an interaction finish message](#request-interact-callback-push) when
 authorization from the RO is received asynchronously. This pattern is
@@ -1825,7 +1825,7 @@ as the HTTP content. Each possible field is detailed in the sections below.
 
 Additional fields can be defined by extensions to GNAP in the [GNAP Grant Response Parameters Registry](#IANA-grant-response).
 
-In this example, the AS is returning an [interaction URI](#response-interact-redirect),
+In the following non-normative example, the AS is returning an [interaction URI](#response-interact-redirect),
 a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
 
 ~~~ json
@@ -1846,7 +1846,7 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-In this example, the AS is returning a bearer [access token](#response-token-single) with a management URI and a [subject identifier](#response-subject) in the form of
+In the following non-normative example, the AS is returning a bearer [access token](#response-token-single) with a management URI and a [subject identifier](#response-subject) in the form of
 an opaque identifier.
 
 ~~~ json
@@ -1870,7 +1870,7 @@ an opaque identifier.
 }
 ~~~
 
-In this example, the AS is returning set of [subject identifiers](#response-subject),
+In following non-normative example, the AS is returning set of [subject identifiers](#response-subject),
 simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID).
 
 ~~~ json
@@ -2143,7 +2143,7 @@ tokens as described in {{response-token-single}}.
 Each object MUST have a unique `label` field, corresponding to the token labels
 chosen by the client instance in the [multiple access token request](#request-token-multiple).
 
-In this non-normative example, two tokens are issued under the
+In the following non-normative example, two tokens are issued under the
 names `token1` and `token2`, and only the first token has a management
 URI associated with it.
 
@@ -2546,7 +2546,7 @@ identifier MUST be unique per client instance at the AS.
     described in {{request-instance}}.
     OPTIONAL.
 
-This non-normative example shows an instance identifier along side an issued access token.
+The following non-normative example shows an instance identifier along side an issued access token.
 
 ~~~ json
 {
@@ -3069,7 +3069,7 @@ using a single newline (0x0A) character to separate them:
 * the grant endpoint URI the client instance used to make its [initial request](#request)
 
 There is no padding or whitespace before or after any of the lines,
-and no trailing newline character. The following example shows a constructed
+and no trailing newline character. The following non-normative example shows a constructed
 hash base string consisting of these four elements.
 
 ~~~
@@ -3143,7 +3143,7 @@ Access tokens other than the continuation access tokens MUST NOT be usable for c
 requests. Conversely, continuation access tokens MUST NOT be usable to make authorized requests to
 RS's, even if co-located within the AS.
 
-For example, here the client instance makes a POST request to a unique URI and signs
+In the following non-normative example, the client instance makes a POST request to a unique URI and signs
 the request with HTTP Message Signatures:
 
 ~~~ http-message
@@ -3161,7 +3161,7 @@ the continuation access token.
 If the AS cannot determine a single active grant request to map the
 continuation request to, the AS MUST return an `invalid_continuation` error ({{response-error}}).
 
-For example, here the client instance makes a POST request to a stable continuation endpoint
+In the following non-normative example, the client instance makes a POST request to a stable continuation endpoint
 URI with the [interaction reference](#continue-after-interaction),
 includes the access token, and signs with HTTP Message Signatures:
 
@@ -3179,7 +3179,7 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-In this alternative example, the client instance had been provided a continuation URI unique to this ongoing grant request:
+In following non-normative alternative example, the client instance had been provided a continuation URI unique to this ongoing grant request:
 
 ~~~ http-message
 POST /tx/rxgIIEVMBV-BQUO7kxbsp HTTP/1.1
@@ -3287,10 +3287,10 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-With this example, the client instance can not make an additional continuation request because
+With the above example, the client instance can not make an additional continuation request because
 a `continue` field is not included.
 
-For another example, if the RO has denied the client instance's request, the AS responds with the following response:
+In the following non-normative example, the RO has denied the client instance's request and the AS responds with the following response:
 
 ~~~
 {
@@ -3305,7 +3305,7 @@ For another example, if the RO has denied the client instance's request, the AS 
 }
 ~~~
 
-In this example, the AS includes the `continue` field in the response. Therefore, the client instance can continue the grant negotiation process, perhaps modifying the request as discussed in {{continue-modify}}.
+In the preceding example, the AS includes the `continue` field in the response. Therefore, the client instance can continue the grant negotiation process, perhaps modifying the request as discussed in {{continue-modify}}.
 
 ## Continuing During Pending Interaction (Polling) {#continue-poll}
 
@@ -3332,7 +3332,7 @@ the client instance. The response SHOULD NOT contain [interaction responses](#re
 If the grant request is in the _pending_ state, the [grant response](#response) MUST NOT contain access tokens or subject information, and MAY contain a new [interaction responses](#response-interact) to any interaction methods that have not been exhausted at the AS.
 
 For example, if the request has not yet been authorized by the RO, the AS could respond
-by telling the client instance to make another continuation request in the future. In this example,
+by telling the client instance to make another continuation request in the future. In the following non-normative example,
 a new, unique access token has been issued for the call, which the client instance will use in its
 next continuation request.
 
@@ -3349,7 +3349,7 @@ next continuation request.
 ~~~
 
 If the request is successful in causing the AS to issue access tokens and
-release subject information, the response could look like this example:
+release subject information, the response could look like the following non-normative example:
 
 ~~~ json
 NOTE: '\' line wrapping per RFC 8792
@@ -3377,7 +3377,7 @@ See {{security-polling}} for considerations on polling for continuation without 
 `finish` method.
 
 In error conditions, the AS responds to the client instance with the error code as discussed in {{response-error}}.
-For example, if the client instance has polled too many times before the RO has approved the request, the AS would respond with a message like this:
+For example, if the client instance has polled too many times before the RO has approved the request, the AS would respond with a message like the following:
 
 ~~~
 {
@@ -3547,7 +3547,7 @@ with the `durable` flag.
 ~~~
 
 For another example, the client instance initially requests read-only access but later
-needs to step up its access. The initial request could look like this example.
+needs to step up its access. The initial request could look like the following HTTP message.
 
 ~~~ http-message
 POST /tx HTTP/1.1
@@ -3925,7 +3925,7 @@ additional discussion of the presentation of public keys in {{security-symmetric
 
 Additional key formats are defined in the [GNAP Key Formats Registry](#IANA-key-formats).
 
-This non-normative example shows a single key presented in two different formats. This example key is intended to be used with the [HTTP Message Signatures](#httpsig-binding)
+The following non-normative example shows a single key presented in two different formats. The example key is intended to be used with the [HTTP Message Signatures](#httpsig-binding)
 proofing mechanism, as indicated by the `httpsig` value of the `proof` field.
 
 As a JSON Web Key:
@@ -4245,7 +4245,7 @@ algorithm denoted by the key's `alg` field of the JWK.
 The explicit `alg` signature parameter MUST NOT be included in the signature, since the algorithm
 will be derived either from the key material or from the `proof` value.
 
-In this example, the message content is the following JSON object:
+In the following non-normative example, the message content is the following JSON object:
 
 ~~~ json
 NOTE: '\' line wrapping per RFC 8792
@@ -4494,7 +4494,7 @@ This method is indicated by the method value `mtls` in string form.
 
 The signer presents its TLS client certificate during TLS negotiation with the verifier.
 
-In this example, the certificate is communicated to the application
+In the following non-normative example, the certificate is communicated to the application
 through the Client-Cert header field from a TLS reverse proxy as per {{RFC9440}}, leading
 to the following full HTTP request message:
 
@@ -4639,7 +4639,7 @@ calculated over an empty payload.
 The signer presents the signed object in compact form
 {{RFC7515}} in the Detached-JWS HTTP Header field.
 
-In this example, the JOSE Header contains the following parameters:
+In the following non-normative example, the JOSE Header contains the following parameters:
 
 ~~~ json
 {
@@ -4841,7 +4841,7 @@ an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
 calculated over an empty payload and passed in the `Detached-JWS`
 header as described in {{detached-jws}}.
 
-In this example, the JOSE header contains the following parameters:
+In the following non-normative example, the JOSE header contains the following parameters:
 
 ~~~ json
 {
@@ -5359,7 +5359,7 @@ WWW-Authenticate: \
 
 The client instance then makes a request to the `as_uri` as described in {{request}}, with the value of `referrer` passed as an HTTP Referer header field and the `access` reference passed unchanged into the `access` array in the `access_token` portion of the request. The client instance MAY request additional resources and other information.
 
-In this non-normative example, the client instance is requesting a single access token using the opaque access reference `FWWIKYBQ6U56NL1` received from the RS in addition to the `dolphin-metadata` that the client instance has been configured with out of band.
+In the following non-normative example, the client instance is requesting a single access token using the opaque access reference `FWWIKYBQ6U56NL1` received from the RS in addition to the `dolphin-metadata` that the client instance has been configured with out of band.
 
 ~~~ http-message
 POST /tx HTTP/1.1
@@ -7799,7 +7799,7 @@ Cache-Control: no-store
 ~~~
 
 The AS reaches out to the RO and prompts them for consent. In this
-example, the AS has an application that it can push notifications in
+example scenario, the AS has an application that it can push notifications in
 to for the specified account.
 
 Meanwhile, the client instance periodically polls the AS every 60 seconds at
