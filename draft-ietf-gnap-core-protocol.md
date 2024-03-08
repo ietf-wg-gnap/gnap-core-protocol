@@ -85,6 +85,7 @@ informative:
     RFC6202:
     RFC6973:
     RFC7518:
+    RFC8264:
     RFC8707:
     RFC8792:
     RFC9396:
@@ -2841,6 +2842,7 @@ that the AS use only ASCII letters and numbers as valid characters for the user 
 It is RECOMMENDED that the AS choose from character values that are easily copied and typed without ambiguity.
 For example, some glyphs have multiple Unicode code points for the same visual character, and the end-user
 could potentially type a different character than what the AS has returned.
+For additional considerations of internationalized character strings, see {{RFC8264}}
 
 This mode is designed to be used when the client instance is not able to communicate or facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
