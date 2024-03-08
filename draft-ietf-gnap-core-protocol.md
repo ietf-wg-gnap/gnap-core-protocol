@@ -1235,8 +1235,9 @@ If the same public key is sent by value on different access requests, the AS MUS
 treat these requests as coming from the same client instance for purposes
 of identification, authentication, and policy application.
 If the AS does not know the client instance's public key ahead of time, the AS
-MAY accept or reject the request based on attestations
-within the `client` request and other AS policy mechanisms.
+MAY process the request based on attestations
+within the `client` request and other AS policy mechanisms. For example, the AS
+could allow an unknown client instance key to access only limited resources or work for only specific RO's.
 
 The client instance MUST NOT send a symmetric key by value in the request, as doing so would expose
 the key directly instead of simply proving possession of it. See considerations on symmetric keys
