@@ -2452,7 +2452,7 @@ Assertion objects contain the following fields:
 
 `format` (string):
 : The assertion format.
-    Possible formats include `id_token` for an OpenID Connect ID Token ({{OIDC}}) and `saml2` for a SAML 2 assertion ({{SAML2}}).
+    Possible formats are listed in {{assertion-formats}}.
     Additional assertion formats are defined by the [GNAP Assertion Formats Registry](#IANA-assertion-formats).
     REQUIRED.
 
@@ -2514,6 +2514,16 @@ The grant request MUST be in the _approved_ state to return this field in the re
 
 See {{security-assertions}} for considerations that the client instance has to make when accepting
 and processing assertions from the AS.
+
+### Assertion Formats {#assertion-formats}
+
+The following assertion formats are defined in this specification:
+
+`id_token`:
+: An OpenID Connect ID Token ({{OIDC}}), in JWT compact format as a single string.
+
+`saml2`:
+: A SAML 2 assertion ({{SAML2}}), encoded as a single base64url string with no padding.
 
 ## Returning a Dynamically-bound Client Instance Identifier {#response-dynamic-handles}
 
@@ -5575,8 +5585,8 @@ Specification document(s):
 ### Initial Contents {#IANA-assertion-formats-contents}
 
 |Name|Specification document(s)|
-|id_token|{{request-subject}} and {{response-subject}} of {{&SELF}}|
-|saml2|{{request-subject}} and {{response-subject}} of {{&SELF}}|
+|id_token|{{assertion-formats}} of {{&SELF}}|
+|saml2|{{assertion-formats}} of {{&SELF}}|
 
 ## GNAP Client Instance Fields {#IANA-client-instance}
 
