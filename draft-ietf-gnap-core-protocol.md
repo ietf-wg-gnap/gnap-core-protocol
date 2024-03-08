@@ -1245,7 +1245,7 @@ can choose how to process the unknown key. Common approaches include:
 The client instance MUST NOT send a symmetric key by value in the `key` field of the request, as doing so would expose
 the key directly instead of simply proving possession of it. See considerations on symmetric keys
 in {{security-symmetric}}. To use symmetric keys, the client instance can send the `key` by reference ({{key-reference}}) or
-send the entire client identity by reference ({{request-reference}}).
+send the entire client identity by reference ({{request-instance}}).
 
 The client instance's key can be pre-registered with the AS ahead of time and associated
 with a set of policies and allowable actions pertaining to that client. If this pre-registration
