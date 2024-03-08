@@ -1870,7 +1870,7 @@ an opaque identifier.
 ~~~
 
 In this example, the AS is returning set of [subject identifiers](#response-subject),
-simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID).
+simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID), formatted as a set of Subject Identifiers defined in {{RFC9493}}.
 
 ~~~ json
 {
