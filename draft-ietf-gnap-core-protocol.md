@@ -42,9 +42,9 @@ normative:
     RFC8705:
     HTTP: RFC9110
     RFC9111:
-    I-D.ietf-httpbis-message-signatures:
-    I-D.ietf-httpbis-digest-headers:
-    I-D.ietf-secevent-subject-identifiers:
+    RFC9421:
+    RFC9530:
+    RFC9493:
     HASH-ALG:
       title: "Named Information Hash Algorithm Registry"
       target: https://www.iana.org/assignments/named-information/named-information.xhtml#hash-alg
@@ -85,6 +85,7 @@ informative:
     RFC6202:
     RFC6973:
     RFC7518:
+    RFC8264:
     RFC8707:
     RFC8792:
     RFC9396:
@@ -221,7 +222,7 @@ on the role by the overall protocol.
 {: title="Figure 1: Roles in GNAP"}
 
 Authorization Server (AS):
-: server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information). The AS is uniquely defined by the _grant endpoint URI_, which the absolute URI where grant requests are started by clients.
+: server that grants delegated privileges to a particular instance of client software in the form of access tokens or other information (such as subject information). The AS is uniquely defined by the _grant endpoint URI_, which is the absolute URI where grant requests are started by clients.
 
 Client:
 : application that consumes resources from one or several RSs, possibly requiring access privileges from one or several ASs. The client is operated by the end user or it runs autonomously on behalf of a resource owner.
@@ -328,7 +329,7 @@ Subject Information:
 
 GNAP defines its trust objective as: "the RO trusts the AS to ensure access validation and delegation of protected resources to end users, through third party clients."
 
-This trust objective can be decomposed into trust relationships between software elements and roles, especially the pairs end user/RO, end user/client, client/AS, RS/RO, AS/RO, AS/RS. Trust of an agent by its pair can exist if the pair is informed that the agent has made a promise to follow the protocol in the past (e.g. pre-registration, uncompromised cryptographic components) or if the pair is able to infer by indirect means that the agent has made such a promise (e.g. a compliant client request). Each agent defines its own valuation function of promises given or received. Examples of such valuations can be the benefits from interacting with other agents (e.g. safety in client access, interoperability with identity standards), the cost of following the protocol (including its security and privacy requirements and recommendations), a ranking of promise importance (e.g. a policy decision made by the AS), the assessment of one's vulnerability or risk of not being able to defend against threats, etc. Those valuations may depend on the context of the request. For instance, the AS may decide to either take into account or discard hints provided by the client, the RS may refuse bearer tokens, etc. depending on the specific case in which GNAP is used. Some promises can be conditional of some previous interactions (e.g. repeated requests).
+This trust objective can be decomposed into trust relationships between software elements and roles, especially the pairs end user/RO, end user/client, client/AS, RS/RO, AS/RO, AS/RS. Trust of an agent by its pair can exist if the pair is informed that the agent has made a promise to follow the protocol in the past (e.g. pre-registration, uncompromised cryptographic components) or if the pair is able to infer by indirect means that the agent has made such a promise (e.g. a compliant client request). Each agent defines its own valuation function of promises given or received. Examples of such valuations can be the benefits from interacting with other agents (e.g. safety in client access, interoperability with identity standards), the cost of following the protocol (including its security and privacy requirements and recommendations), a ranking of promise importance (e.g. a policy decision made by the AS), the assessment of one's vulnerability or risk of not being able to defend against threats, etc. Those valuations may depend on the context of the request. For instance, the AS may decide to either take into account or discard hints provided by the client, the RS may refuse bearer tokens, etc. depending on the specific case in which GNAP is used. Some promises can be affected by previous interactions (e.g., repeated requests).
 
 Looking back on each trust relationship:
 
@@ -336,7 +337,7 @@ Looking back on each trust relationship:
 
 - end user/client: the client acts as a user agent. Depending on the technology used (browser, SPA, mobile application, IoT device, etc.), some interactions may or may not be possible (as described in {{request-interact-start}}). Client developers implement requirements and generally some recommendations or best practices, so that the end users may confidently use their software. However, end users might also be facing an attacker's client software or a poorly-implemented client, without even realizing it.
 
-- end user/AS: when the client supports the interaction feature (see {{response-interact}}), the end user interacts with the AS through an AS-provided interface. In may cases, this happens through a front-channel interaction through the end user's browser. See {{security-front-channel}} for some considerations in trusting these interactions.
+- end user/AS: when the client supports the interaction feature (see {{response-interact}}), the end user interacts with the AS through an AS-provided interface. In many cases, this happens through a front-channel interaction through the end user's browser. See {{security-front-channel}} for some considerations in trusting these interactions.
 
 - client/AS: An honest AS may be facing an attacker's client (as discussed just above), or the reverse, and GNAP aims at making common attacks impractical. The core specification makes access tokens opaque to the client and defines the request/response scheme in detail, therefore avoiding extra trust hypotheses from this critical piece of software. Yet the AS may further define cryptographic attestations or optional rules to simplify the access of clients it already trusts, due to past behavior or organizational policies (see {{request-client}}).
 
@@ -988,7 +989,7 @@ composed of the following fields.
 
 `label` (string):
 : A unique name chosen by the client instance to refer to the resulting access token. The value of this
-    field is opaque to the AS.  If this field
+    field is opaque to the AS and is not intended to be exposed to or used by the end user.  If this field
     is included in the request, the AS MUST include the same label in the [token response](#response-token).
     REQUIRED if used as part of a [multiple access token request](#request-token-multiple),
     OPTIONAL otherwise.
@@ -1135,7 +1136,7 @@ contain the following fields.
 
 `sub_id_formats` (array of strings):
 : An array of subject identifier subject formats
-    requested for the RO, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+    requested for the RO, as defined by {{RFC9493}}.
     REQUIRED if subject identifiers are requested.
 
 `assertion_formats` (array of strings):
@@ -1147,7 +1148,7 @@ contain the following fields.
 `sub_ids` (array of objects):
 : An array of subject identifiers representing the subject for which information
     is being requested. Each object is a subject identifier as defined by
-    {{I-D.ietf-secevent-subject-identifiers}}. All identifiers in the `sub_ids` array MUST identify
+    {{RFC9493}}. All identifiers in the `sub_ids` array MUST identify
     the same subject. If omitted, the AS SHOULD assume
     that subject information requests are about the current user and SHOULD
     require direct interaction or proof of presence before releasing information. OPTIONAL.
@@ -1347,7 +1348,7 @@ or by reference (See {{request-user-reference}}).
 
 `sub_ids` (array of objects):
 : An array of subject identifiers for the
-    end user, as defined by {{I-D.ietf-secevent-subject-identifiers}}.
+    end user, as defined by {{RFC9493}}.
     OPTIONAL.
 
 `assertions` (array of objects)
@@ -1871,7 +1872,7 @@ an opaque identifier.
 ~~~
 
 In following non-normative example, the AS is returning set of [subject identifiers](#response-subject),
-simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID).
+simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID), formatted as a set of Subject Identifiers defined in {{RFC9493}}.
 
 ~~~ json
 {
@@ -2433,7 +2434,7 @@ This field is an object with the following properties.
 `sub_ids` (array of objects):
 : An array of subject identifiers for the
     RO, as defined by
-    {{I-D.ietf-secevent-subject-identifiers}}.
+    {{RFC9493}}.
     REQUIRED if returning subject identifiers.
 
 `assertions` (array of objects):
@@ -2453,7 +2454,7 @@ Assertion objects contain the following fields:
 
 `format` (string):
 : The assertion format.
-    Possible formats include `id_token` for an OpenID Connect ID Token ({{OIDC}}) and `saml2` for a SAML 2 assertion ({{SAML2}}).
+    Possible formats are listed in {{assertion-formats}}.
     Additional assertion formats are defined by the [GNAP Assertion Formats Registry](#IANA-assertion-formats).
     REQUIRED.
 
@@ -2515,6 +2516,16 @@ The grant request MUST be in the _approved_ state to return this field in the re
 
 See {{security-assertions}} for considerations that the client instance has to make when accepting
 and processing assertions from the AS.
+
+### Assertion Formats {#assertion-formats}
+
+The following assertion formats are defined in this specification:
+
+`id_token`:
+: An OpenID Connect ID Token ({{OIDC}}), in JWT compact format as a single string.
+
+`saml2`:
+: A SAML 2 assertion ({{SAML2}}), encoded as a single base64url string with no padding.
 
 ## Returning a Dynamically-bound Client Instance Identifier {#response-dynamic-handles}
 
@@ -2833,6 +2844,7 @@ that the AS use only ASCII letters and numbers as valid characters for the user 
 It is RECOMMENDED that the AS choose from character values that are easily copied and typed without ambiguity.
 For example, some glyphs have multiple Unicode code points for the same visual character, and the end-user
 could potentially type a different character than what the AS has returned.
+For additional considerations of internationalized character strings, see {{RFC8264}}
 
 This mode is designed to be used when the client instance is not able to communicate or facilitate launching
 an arbitrary URI. The associated URI could be statically configured with the client instance or
@@ -4218,7 +4230,7 @@ algorithm MUST be `sha-256`.
 ~~~
 
 When using this method, the signer creates an HTTP Message Signature as described in
-{{I-D.ietf-httpbis-message-signatures}}. The covered components of the signature MUST include the
+{{RFC9421}}. The covered components of the signature MUST include the
 following:
 
 `"@method"`:
@@ -4230,7 +4242,7 @@ following:
 When the message contains request content, the covered components MUST also include the following:
 
 `"content-digest"`:
-: The Content-Digest header as defined in {{I-D.ietf-httpbis-digest-headers}}. When the
+: The Content-Digest header as defined in {{RFC9530}}. When the
     request message has content, the signer MUST calculate this field value and include
     the field in the request. The verifier
     MUST validate this field value. REQUIRED when the message request contains message content.
@@ -5306,7 +5318,7 @@ server's discovery information. The AS MUST respond with a JSON document with Co
     subject identifier formats. The values of this list correspond to possible values
     of the [subject identifier section](#request-subject) of the request and MUST
     be values from the Subject Identifier Formats Registry established by
-    {{I-D.ietf-secevent-subject-identifiers}}.
+    {{RFC9493}}.
     OPTIONAL.
 
 `assertion_formats_supported` (array of strings):
@@ -5584,8 +5596,8 @@ Specification document(s):
 ### Initial Contents {#IANA-assertion-formats-contents}
 
 |Name|Specification document(s)|
-|id_token|{{request-subject}} and {{response-subject}} of {{&SELF}}|
-|saml2|{{request-subject}} and {{response-subject}} of {{&SELF}}|
+|id_token|{{assertion-formats}} of {{&SELF}}|
+|saml2|{{assertion-formats}} of {{&SELF}}|
 
 ## GNAP Client Instance Fields {#IANA-client-instance}
 
@@ -6075,7 +6087,7 @@ request as a header parameter using {{RFC9111}}, giving the downstream
 system access to the certificate information. The TTRP has to be trusted to provide accurate
 certificate information, and the connection between the TTRP and the downstream system also has to
 be protected. The TTRP could provide some additional assurance, for example, by adding its own
-signature to the Client-Cert header field using {{I-D.ietf-httpbis-message-signatures}}. This
+signature to the Client-Cert header field using {{RFC9421}}. This
 signature would be effectively ignored by GNAP (since it would not use GNAP's `tag` parameter
 value) but would be understood by the downstream service as part
 of its deployment.
