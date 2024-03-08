@@ -91,7 +91,7 @@ informative:
     RFC9440:
     I-D.ietf-gnap-resource-servers:
     I-D.ietf-oauth-security-topics:
-    I-D.ietf-uta-rfc6125bis:
+    RFC9525:
     promise-theory:
       target: 'http://markburgess.org/promises.html'
       title: Promise theory
@@ -1008,7 +1008,7 @@ The values of the `flags` field defined by this specification are as follows:
     in {{use-access-token}}. See {{security-bearer-tokens}} for additional
     considerations on the use of bearer tokens.
 
-Flag values MUST NOT be included more than once.
+Flag values MUST NOT be included more than once. If the request includes a flag value multiple times, the AS MUST return an `invalid_request` error defined in {{response-error}}.
 
 Additional flags can be defined by extensions using the [GNAP Access Token Flags Registry](#IANA-token-flags).
 
@@ -6037,7 +6037,7 @@ connections. While modern TLS does make use of session resumption, this still ne
 with authentication methods to determine the identity of parties on the
 connections. In other words, it is not possible with TLS alone to know that the same party is making
 a set of calls over time, since each time a new TLS connection is established, both the client and the server (or the server only when using {{mtls}}) have to validate
-the other party's identity. Such a verification can be achieved via methods described in {{I-D.ietf-uta-rfc6125bis}}, but these are not enough to establish the identity of the client instance in many cases.
+the other party's identity. Such a verification can be achieved via methods described in {{RFC9525}}, but these are not enough to establish the identity of the client instance in many cases.
 
 To counter this, GNAP defines a set of key binding methods in {{binding-keys}} that allow authentication and
 proof of possession by the caller, which is usually the client instance. These methods are intended to be used in
