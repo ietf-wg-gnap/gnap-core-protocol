@@ -150,12 +150,6 @@ informative:
         -
           fullname: IANA
       title: Media Types
-    IANA.StructuredSuffix:
-      target: "https://www.iana.org/assignments/media-type-structured-suffix/media-type-structured-suffix.xhtml"
-      author:
-        -
-          fullname: IANA
-      title: Structured Syntax Suffixs
 
 entity:
   SELF: "RFC nnnn"
