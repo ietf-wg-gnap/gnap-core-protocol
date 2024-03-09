@@ -81,8 +81,10 @@ normative:
             ins: E. Maler
 
 informative:
+    RFC2046:
     RFC4107:
     RFC6202:
+    RFC6838:
     RFC6973:
     RFC7518:
     RFC8264:
@@ -143,6 +145,12 @@ informative:
           ins: K. Greene
         -
           ins: M. Theofanos
+    IANA.MediaTypes:
+      target: "https://www.iana.org/assignments/media-types/media-types.xhtml"
+      author:
+        -
+          fullname: IANA
+      title: Media Types
 
 entity:
   SELF: "RFC nnnn"
@@ -4631,7 +4639,7 @@ claims:
   REQUIRED.
 
 `typ` (string):
-: The type header, value "gnap-binding+jwsd". REQUIRED.
+: The type header, value "gnap-binding-jwsd". REQUIRED.
 
 `htm` (string):
 : The HTTP Method used to make this request, as a case-sensitive ASCII string. Note that most public HTTP methods are in uppercase ASCII by convention. REQUIRED.
@@ -4667,7 +4675,7 @@ In the following non-normative example, the JOSE Header contains the following p
     "kid": "gnap-rsa",
     "uri": "https://server.example.com/gnap",
     "htm": "POST",
-    "typ": "gnap-binding+jwsd",
+    "typ": "gnap-binding-jwsd",
     "created": 1618884475
 }
 ~~~
@@ -4800,7 +4808,7 @@ new JWS header that indicates the HTTP content's hash method.
 
 When rotating a key using Detached JWS, the message, which includes the new public key value or
 reference, is first signed with the old key as described above using a JWS object with `typ` header value
-"gnap-binding-rotation+jwsd". The value of the JWS object is then taken as the payload of a new JWS
+"gnap-binding-rotation-jwsd". The value of the JWS object is then taken as the payload of a new JWS
 object, to be signed by the new key using the parameters above.
 
 The value of the new JWS object is sent in the Detached-JWS header.
@@ -4829,7 +4837,7 @@ To protect the request, the JWS header contains the following claims.
   REQUIRED.
 
 `typ` (string):
-: The type header, value "gnap-binding+jwsd". REQUIRED.
+: The type header, value "gnap-binding-jws". REQUIRED.
 
 `htm` (string):
 : The HTTP Method used to make this request, as a case-sensitive ASCII string. (Note that most public HTTP methods are in uppercase.) REQUIRED.
@@ -4869,7 +4877,7 @@ In the following non-normative example, the JOSE header contains the following p
     "kid": "gnap-rsa",
     "uri": "https://server.example.com/gnap",
     "htm": "POST",
-    "typ": "gnap-binding+jwsd",
+    "typ": "gnap-binding-jws",
     "created": 1618884475
 }
 ~~~
@@ -4977,7 +4985,7 @@ new header that indicates the HTTP content's hash method.
 
 #### Key Rotation using Attached JWS
 
-When rotating a key using Attached JWS, the message, which includes the new public key value or reference, is first signed with the old key using a JWS object with `typ` header value "gnap-binding-rotation+jwsd". The value of the JWS object is then taken as the payload of a new JWS object, to be signed by the new key.
+When rotating a key using Attached JWS, the message, which includes the new public key value or reference, is first signed with the old key using a JWS object with `typ` header value "gnap-binding-rotation-jws". The value of the JWS object is then taken as the payload of a new JWS object, to be signed by the new key.
 
 # Resource Access Rights {#resource-access-rights}
 
@@ -5478,6 +5486,104 @@ This specification requests registration of the following scheme in the
 
 * Authentication Scheme Name: `GNAP`
 * Reference: {{use-access-token}} of {{&SELF}}
+
+## Media Type Registration
+
+This section requests registration of the following media types {{RFC2046}} in
+the "Media Types" registry {{IANA.MediaTypes}} in the manner described
+in {{RFC6838}}.
+
+To indicate that the content is a GNAP message to be bound with a detached JWS mechanism:
+
+* Type name: application
+* Subtype name: gnap-binding-jwsd
+* Required parameters: n/a
+* Optional parameters: n/a
+* Encoding considerations: binary
+* Security considerations: See {{security}} of {{&SELF}}
+* Interoperability considerations: n/a
+* Published specification: {{&SELF}}
+* Applications that use this media type: GNAP
+* Fragment identifier considerations: n/a
+* Additional information:
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
+* Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
+* Intended usage: COMMON
+* Restrictions on usage: none
+* Author: IETF GNAP Working Group, txauth@ietf.org
+* Change Controller: IETF
+* Provisional registration?  No
+
+To indicate that the content is a GNAP message to be bound with an attached JWS mechanism:
+
+* Type name: application
+* Subtype name: gnap-binding-jws
+* Required parameters: n/a
+* Optional parameters: n/a
+* Encoding considerations: binary
+* Security considerations: See {{security}} of {{&SELF}}
+* Interoperability considerations: n/a
+* Published specification: {{&SELF}}
+* Applications that use this media type: GNAP
+* Fragment identifier considerations: n/a
+* Additional information:
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
+* Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
+* Intended usage: COMMON
+* Restrictions on usage: none
+* Author: IETF GNAP Working Group, txauth@ietf.org
+* Change Controller: IETF
+* Provisional registration?  No
+
+To indicate that the content is a GNAP token rotation message to be bound with a detached JWS mechanism:
+
+* Type name: application
+* Subtype name: gnap-binding-rotation-jwsd
+* Required parameters: n/a
+* Optional parameters: n/a
+* Encoding considerations: binary
+* Security considerations: See {{security}} of {{&SELF}}
+* Interoperability considerations: n/a
+* Published specification: {{&SELF}}
+* Applications that use this media type: GNAP
+* Fragment identifier considerations: n/a
+* Additional information:
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
+* Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
+* Intended usage: COMMON
+* Restrictions on usage: none
+* Author: IETF GNAP Working Group, txauth@ietf.org
+* Change Controller: IETF
+* Provisional registration?  No
+
+To indicate that the content is a GNAP token rotation message to be bound with an attached JWS mechanism:
+
+* Type name: application
+* Subtype name: gnap-binding-rotation-jws
+* Required parameters: n/a
+* Optional parameters: n/a
+* Encoding considerations: binary
+* Security considerations: See {{security}} of {{&SELF}}
+* Interoperability considerations: n/a
+* Published specification: {{&SELF}}
+* Applications that use this media type: GNAP
+* Fragment identifier considerations: n/a
+* Additional information:
+  * Magic number(s): n/a
+  * File extension(s): n/a
+  * Macintosh file type code(s): n/a
+* Person & email address to contact for further information: IETF GNAP Working Group, txauth@ietf.org
+* Intended usage: COMMON
+* Restrictions on usage: none
+* Author: IETF GNAP Working Group, txauth@ietf.org
+* Change Controller: IETF
+* Provisional registration?  No
 
 ## GNAP Grant Request Parameters {#IANA-grant-request}
 
