@@ -92,7 +92,7 @@ informative:
     RFC9440:
     I-D.ietf-gnap-resource-servers:
     I-D.ietf-oauth-security-topics:
-    I-D.ietf-uta-rfc6125bis:
+    RFC9525:
     promise-theory:
       target: 'http://markburgess.org/promises.html'
       title: Promise theory
@@ -1009,11 +1009,11 @@ The values of the `flags` field defined by this specification are as follows:
     in {{use-access-token}}. See {{security-bearer-tokens}} for additional
     considerations on the use of bearer tokens.
 
-Flag values MUST NOT be included more than once.
+Flag values MUST NOT be included more than once. If the request includes a flag value multiple times, the AS MUST return an `invalid_flag` error defined in {{response-error}}.
 
 Additional flags can be defined by extensions using the [GNAP Access Token Flags Registry](#IANA-token-flags).
 
-In the following example, the client instance is requesting access to a complex resource
+In the following non-normative example, the client instance is requesting access to a complex resource
 described by a pair of access request object.
 
 ~~~ json
@@ -1182,7 +1182,7 @@ determine which client is associated with the grant by dereferencing the
 continuation access token sent in the [continuation request](#continue-request).
 As a consequence, the `client` field is not sent or accepted for continuation requests.
 
-Client information MUST either be sent by value as an object or by reference as a string (see {{request-instance}}).
+Client information is sent by value as an object or by reference as a string (see {{request-instance}}).
 
 When client instance information is sent
 by value, the `client` field of the request consists of a JSON
@@ -1225,7 +1225,7 @@ object with the following fields.
 
 Additional fields are defined in the [GNAP Client Instance Fields Registry](#IANA-client-instance).
 
-Absent additional attestations, profiles, or trust mechanisms, both the `display` and `class_id` fields are self-declarative, presented by the client instance and the AS MUST exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret or validate the class_id field, it SHOULD return an `invalid_client` error ({{response-error}}) or interpret the request as if the class_id were not present and not allow the set of privileges associated with the class_id. See additional discussion of client instance impersonation in {{security-impersonation}}.
+Absent additional attestations, profiles, or trust mechanisms, both the `display` and `class_id` fields are self-declarative, presented by the client instance. The AS needs to exercise caution in their interpretation, taking them as a hint but not as absolute truth. The `class_id` field can be used in a variety of ways to help the AS make sense of the particular context in which the client instance is operating. In corporate environments, for example, different levels of trust might apply depending on security policies. This field aims to help the AS adjust its own access decisions for different classes of client software. It is possible to configure a set of values and rules during a pre-registration, and then have the client instances provide them later in runtime as a hint to the AS. In other cases, the client runs with a specific AS in mind, so a single hardcoded value would acceptable (for instance, a set top box with a `class_id` claiming to be "FooBarTV version 4"). While the client instance may not have contacted the AS yet, the value of this `class_id` field can be evaluated by the AS according to a broader context of dynamic use, alongside other related information available elsewhere (for instance, corresponding fields in a certificate). If the AS is not able to interpret or validate the class_id field, it MUST either return an `invalid_client` error ({{response-error}}) or interpret the request as if the class_id were not present. See additional discussion of client instance impersonation in {{security-impersonation}}.
 
 The client instance MUST prove possession of any presented key by the `proof` mechanism
 associated with the key in the request. Key proofing methods
@@ -1235,15 +1235,20 @@ is described in {{binding-keys}}.
 If the same public key is sent by value on different access requests, the AS MUST
 treat these requests as coming from the same client instance for purposes
 of identification, authentication, and policy application.
+
 If the AS does not know the client instance's public key ahead of time, the AS
-MAY accept or reject the request based on attestations
-within the `client` request and other AS policy mechanisms.
+can choose how to process the unknown key. Common approaches include:
 
-The client instance MUST NOT send a symmetric key by value in the request, as doing so would expose
+- Allowing the request and requiring RO authorization in a trust-on-first-use model
+- Limiting the client's requested access to only certain APIs and information
+- Denying the request entirely by returning an `invalid_client` error ({{response-error}})
+
+The client instance MUST NOT send a symmetric key by value in the `key` field of the request, as doing so would expose
 the key directly instead of simply proving possession of it. See considerations on symmetric keys
-in {{security-symmetric}}.
+in {{security-symmetric}}. To use symmetric keys, the client instance can send the `key` by reference ({{key-reference}}) or
+send the entire client identity by reference ({{request-instance}}).
 
-The client instance's key MAY be pre-registered with the AS ahead of time and associated
+The client instance's key can be pre-registered with the AS ahead of time and associated
 with a set of policies and allowable actions pertaining to that client. If this pre-registration
 includes other fields that can occur in the `client` request object described in this section,
 such as `class_id` or `display`, the pre-registered values MUST take precedence over any values
@@ -1274,10 +1279,6 @@ associated with the instance identifier.
 
 If the AS does not recognize the instance identifier, the request MUST be rejected
 with an `invalid_client` error ({{response-error}}).
-
-If the client instance is identified in this manner, the registered key for the client instance
-MAY be a symmetric key known to the AS. See considerations on symmetric keys
-in {{security-symmetric}}.
 
 ### Providing Displayable Client Instance Information {#request-display}
 
@@ -1460,7 +1461,7 @@ its capabilities and what is allowed to fulfill the request.
 `hints` (object):
 : Provides additional information to inform the interaction process at the AS. OPTIONAL. ({{request-interact-hint}})
 
-In this non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
+In the following non-normative example, the client instance is indicating that it can [redirect](#request-interact-redirect)
 the end user to an arbitrary URI and can receive a [redirect](#request-interact-callback-redirect) through
 a browser request. Note that the client instance does not accept a push-style callback.
 The pattern of using a redirect for both interaction start and finish is common for web-based client software.
@@ -1476,7 +1477,7 @@ The pattern of using a redirect for both interaction start and finish is common 
 }
 ~~~
 
-In this non-normative example, the client instance is indicating that it can
+In the following non-normative example, the client instance is indicating that it can
 display a [user code](#request-interact-usercode) and direct the end user
 to an [arbitrary URI](#request-interact-redirect), but it cannot accept a redirect or push callback.
 This pattern is common for devices with robust display capabilities but that expect
@@ -1489,7 +1490,7 @@ as a set-top box capable of displaying an interaction URL as a QR code.
 }
 ~~~
 
-In this non-normative example, the client instance is indicating that it can
+In the following non-normative example, the client instance is indicating that it can
 not start any interaction with the end-user, but that the AS can
 [push an interaction finish message](#request-interact-callback-push) when
 authorization from the RO is received asynchronously. This pattern is
@@ -1825,7 +1826,7 @@ as the HTTP content. Each possible field is detailed in the sections below.
 
 Additional fields can be defined by extensions to GNAP in the [GNAP Grant Response Parameters Registry](#IANA-grant-response).
 
-In this example, the AS is returning an [interaction URI](#response-interact-redirect),
+In the following non-normative example, the AS is returning an [interaction URI](#response-interact-redirect),
 a [callback nonce](#response-interact-finish), and a [continuation response](#response-continue).
 
 ~~~ json
@@ -1846,7 +1847,7 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-In this example, the AS is returning a bearer [access token](#response-token-single) with a management URI and a [subject identifier](#response-subject) in the form of
+In the following non-normative example, the AS is returning a bearer [access token](#response-token-single) with a management URI and a [subject identifier](#response-subject) in the form of
 an opaque identifier.
 
 ~~~ json
@@ -1870,7 +1871,7 @@ an opaque identifier.
 }
 ~~~
 
-In this example, the AS is returning set of [subject identifiers](#response-subject),
+In following non-normative example, the AS is returning set of [subject identifiers](#response-subject),
 simultaneously as an opaque identifier, an email address, and a decentralized identifier (DID), formatted as a set of Subject Identifiers defined in {{RFC9493}}.
 
 ~~~ json
@@ -2143,7 +2144,7 @@ tokens as described in {{response-token-single}}.
 Each object MUST have a unique `label` field, corresponding to the token labels
 chosen by the client instance in the [multiple access token request](#request-token-multiple).
 
-In this non-normative example, two tokens are issued under the
+In the following non-normative example, two tokens are issued under the
 names `token1` and `token2`, and only the first token has a management
 URI associated with it.
 
@@ -2556,7 +2557,7 @@ identifier MUST be unique per client instance at the AS.
     described in {{request-instance}}.
     OPTIONAL.
 
-This non-normative example shows an instance identifier along side an issued access token.
+The following non-normative example shows an instance identifier along side an issued access token.
 
 ~~~ json
 {
@@ -2576,11 +2577,12 @@ When returned as an object, the object contains the following fields:
 
 `code` (string):
 :   A single ASCII error code defining the error.
+    The value MUST be defined in the [GNAP Error Codes Registry](#IANA-error-code).
     REQUIRED.
 
 `description` (string):
 :   A human-readable string description of the error intended for the
-    developer of the client.
+    developer of the client. The value is chosen by the implementation.
     OPTIONAL.
 
 
@@ -3080,7 +3082,7 @@ using a single newline (0x0A) character to separate them:
 * the grant endpoint URI the client instance used to make its [initial request](#request)
 
 There is no padding or whitespace before or after any of the lines,
-and no trailing newline character. The following example shows a constructed
+and no trailing newline character. The following non-normative example shows a constructed
 hash base string consisting of these four elements.
 
 ~~~
@@ -3154,7 +3156,7 @@ Access tokens other than the continuation access tokens MUST NOT be usable for c
 requests. Conversely, continuation access tokens MUST NOT be usable to make authorized requests to
 RS's, even if co-located within the AS.
 
-For example, here the client instance makes a POST request to a unique URI and signs
+In the following non-normative example, the client instance makes a POST request to a unique URI and signs
 the request with HTTP Message Signatures:
 
 ~~~ http-message
@@ -3172,7 +3174,7 @@ the continuation access token.
 If the AS cannot determine a single active grant request to map the
 continuation request to, the AS MUST return an `invalid_continuation` error ({{response-error}}).
 
-For example, here the client instance makes a POST request to a stable continuation endpoint
+In the following non-normative example, the client instance makes a POST request to a stable continuation endpoint
 URI with the [interaction reference](#continue-after-interaction),
 includes the access token, and signs with HTTP Message Signatures:
 
@@ -3190,7 +3192,7 @@ Content-Digest: sha-256=...
 }
 ~~~
 
-In this alternative example, the client instance had been provided a continuation URI unique to this ongoing grant request:
+In following non-normative alternative example, the client instance had been provided a continuation URI unique to this ongoing grant request:
 
 ~~~ http-message
 POST /tx/rxgIIEVMBV-BQUO7kxbsp HTTP/1.1
@@ -3298,10 +3300,10 @@ NOTE: '\' line wrapping per RFC 8792
 }
 ~~~
 
-With this example, the client instance can not make an additional continuation request because
+With the above example, the client instance can not make an additional continuation request because
 a `continue` field is not included.
 
-For another example, if the RO has denied the client instance's request, the AS responds with the following response:
+In the following non-normative example, the RO has denied the client instance's request and the AS responds with the following response:
 
 ~~~
 {
@@ -3316,7 +3318,7 @@ For another example, if the RO has denied the client instance's request, the AS 
 }
 ~~~
 
-In this example, the AS includes the `continue` field in the response. Therefore, the client instance can continue the grant negotiation process, perhaps modifying the request as discussed in {{continue-modify}}.
+In the preceding example, the AS includes the `continue` field in the response. Therefore, the client instance can continue the grant negotiation process, perhaps modifying the request as discussed in {{continue-modify}}.
 
 ## Continuing During Pending Interaction (Polling) {#continue-poll}
 
@@ -3343,7 +3345,7 @@ the client instance. The response SHOULD NOT contain [interaction responses](#re
 If the grant request is in the _pending_ state, the [grant response](#response) MUST NOT contain access tokens or subject information, and MAY contain a new [interaction responses](#response-interact) to any interaction methods that have not been exhausted at the AS.
 
 For example, if the request has not yet been authorized by the RO, the AS could respond
-by telling the client instance to make another continuation request in the future. In this example,
+by telling the client instance to make another continuation request in the future. In the following non-normative example,
 a new, unique access token has been issued for the call, which the client instance will use in its
 next continuation request.
 
@@ -3360,7 +3362,7 @@ next continuation request.
 ~~~
 
 If the request is successful in causing the AS to issue access tokens and
-release subject information, the response could look like this example:
+release subject information, the response could look like the following non-normative example:
 
 ~~~ json
 NOTE: '\' line wrapping per RFC 8792
@@ -3388,7 +3390,7 @@ See {{security-polling}} for considerations on polling for continuation without 
 `finish` method.
 
 In error conditions, the AS responds to the client instance with the error code as discussed in {{response-error}}.
-For example, if the client instance has polled too many times before the RO has approved the request, the AS would respond with a message like this:
+For example, if the client instance has polled too many times before the RO has approved the request, the AS would respond with a message like the following:
 
 ~~~
 {
@@ -3558,7 +3560,7 @@ with the `durable` flag.
 ~~~
 
 For another example, the client instance initially requests read-only access but later
-needs to step up its access. The initial request could look like this example.
+needs to step up its access. The initial request could look like the following HTTP message.
 
 ~~~ http-message
 POST /tx HTTP/1.1
@@ -3667,6 +3669,8 @@ If the request is successfully revoked, the AS responds with status code HTTP 20
 The AS SHOULD revoke all associated access tokens, if possible. The AS SHOULD disable all
 token rotation and other token management functions on such access tokens, if possible.
 Once the grant request is in the _finalized_ state, it MUST NOT be moved to any other state.
+
+If the request is not revoked, the AS responds with an `invalid_continuation` error ({{response-error}}).
 
 # Token Management {#token-management}
 
@@ -3816,7 +3820,12 @@ Signatures proofing method uses multiple signatures in the request as described 
 POST /token/PRY5NM33O HTTP/1.1
 Host: server.example.com
 Authorization: GNAP B8CDFONP21-4TB8N6.BW7ONM
-Signature-Input: sig1=..., sig2=("signature";key=sig1)...
+Signature-Input: \
+  sig1=("@method" "@target-uri" "content-digest" \
+        "authorization"),\
+  sig2=("@method" "@target-uri" "content-digest" \
+        "authorization" "signature";key="sig1" \
+        "signature-input";key="sig1")
 Signature: sig1=..., sig2=...
 Content-Digest: sha-256=...
 
@@ -3936,7 +3945,7 @@ additional discussion of the presentation of public keys in {{security-symmetric
 
 Additional key formats are defined in the [GNAP Key Formats Registry](#IANA-key-formats).
 
-This non-normative example shows a single key presented in two different formats. This example key is intended to be used with the [HTTP Message Signatures](#httpsig-binding)
+The following non-normative example shows a single key presented in two different formats. The example key is intended to be used with the [HTTP Message Signatures](#httpsig-binding)
 proofing mechanism, as indicated by the `httpsig` value of the `proof` field.
 
 As a JSON Web Key:
@@ -4256,7 +4265,7 @@ algorithm denoted by the key's `alg` field of the JWK.
 The explicit `alg` signature parameter MUST NOT be included in the signature, since the algorithm
 will be derived either from the key material or from the `proof` value.
 
-In this example, the message content is the following JSON object:
+In the following non-normative example, the message content is the following JSON object:
 
 ~~~ json
 NOTE: '\' line wrapping per RFC 8792
@@ -4505,7 +4514,7 @@ This method is indicated by the method value `mtls` in string form.
 
 The signer presents its TLS client certificate during TLS negotiation with the verifier.
 
-In this example, the certificate is communicated to the application
+In the following non-normative example, the certificate is communicated to the application
 through the Client-Cert header field from a TLS reverse proxy as per {{RFC9440}}, leading
 to the following full HTTP request message:
 
@@ -4650,7 +4659,7 @@ calculated over an empty payload.
 The signer presents the signed object in compact form
 {{RFC7515}} in the Detached-JWS HTTP Header field.
 
-In this example, the JOSE Header contains the following parameters:
+In the following non-normative example, the JOSE Header contains the following parameters:
 
 ~~~ json
 {
@@ -4852,7 +4861,7 @@ an HTTP GET, OPTIONS, or DELETE method, the JWS signature is
 calculated over an empty payload and passed in the `Detached-JWS`
 header as described in {{detached-jws}}.
 
-In this example, the JOSE header contains the following parameters:
+In the following non-normative example, the JOSE header contains the following parameters:
 
 ~~~ json
 {
@@ -5370,7 +5379,7 @@ WWW-Authenticate: \
 
 The client instance then makes a request to the `as_uri` as described in {{request}}, with the value of `referrer` passed as an HTTP Referer header field and the `access` reference passed unchanged into the `access` array in the `access_token` portion of the request. The client instance MAY request additional resources and other information.
 
-In this non-normative example, the client instance is requesting a single access token using the opaque access reference `FWWIKYBQ6U56NL1` received from the RS in addition to the `dolphin-metadata` that the client instance has been configured with out of band.
+In the following non-normative example, the client instance is requesting a single access token using the opaque access reference `FWWIKYBQ6U56NL1` received from the RS in addition to the `dolphin-metadata` that the client instance has been configured with out of band.
 
 ~~~ http-message
 POST /tx HTTP/1.1
@@ -6049,7 +6058,7 @@ connections. While modern TLS does make use of session resumption, this still ne
 with authentication methods to determine the identity of parties on the
 connections. In other words, it is not possible with TLS alone to know that the same party is making
 a set of calls over time, since each time a new TLS connection is established, both the client and the server (or the server only when using {{mtls}}) have to validate
-the other party's identity. Such a verification can be achieved via methods described in {{I-D.ietf-uta-rfc6125bis}}, but these are not enough to establish the identity of the client instance in many cases.
+the other party's identity. Such a verification can be achieved via methods described in {{RFC9525}}, but these are not enough to establish the identity of the client instance in many cases.
 
 To counter this, GNAP defines a set of key binding methods in {{binding-keys}} that allow authentication and
 proof of possession by the caller, which is usually the client instance. These methods are intended to be used in
@@ -7810,7 +7819,7 @@ Cache-Control: no-store
 ~~~
 
 The AS reaches out to the RO and prompts them for consent. In this
-example, the AS has an application that it can push notifications in
+example scenario, the AS has an application that it can push notifications in
 to for the specified account.
 
 Meanwhile, the client instance periodically polls the AS every 60 seconds at
