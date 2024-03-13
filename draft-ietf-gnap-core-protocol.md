@@ -2316,7 +2316,7 @@ MUST be processed by the AS in a case-insensitive manner (see {{interaction-user
 The string MUST be randomly generated
 so as to be unguessable by an attacker within the time it is accepted. The time in which this
 code will be accepted SHOULD be short lived, such as several
-minutes. It is RECOMMENDED that this code be no more than eight
+minutes. It is RECOMMENDED that this code be between six and eight
 characters in length.
 
 ~~~ json
@@ -2366,7 +2366,7 @@ object that contains the following members.
     The string MUST be randomly generated
     so as to be unguessable by an attacker within the time it is accepted. The time in which this
     code will be accepted SHOULD be short lived, such as several
-    minutes. It is RECOMMENDED that this code be no more than eight
+    minutes. It is RECOMMENDED that this code be between six and eight
     characters in length.
     REQUIRED.
 
