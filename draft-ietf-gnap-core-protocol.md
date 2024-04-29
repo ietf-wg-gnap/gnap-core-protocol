@@ -1,6 +1,6 @@
 ---
 title: 'Grant Negotiation and Authorization Protocol'
-docname: draft-ietf-gnap-core-protocol-18
+docname: draft-ietf-gnap-core-protocol-20
 category: std
 
 ipr: trust200902
@@ -2316,7 +2316,7 @@ MUST be processed by the AS in a case-insensitive manner (see {{interaction-user
 The string MUST be randomly generated
 so as to be unguessable by an attacker within the time it is accepted. The time in which this
 code will be accepted SHOULD be short lived, such as several
-minutes. It is RECOMMENDED that this code be no more than eight
+minutes. It is RECOMMENDED that this code be between six and eight
 characters in length.
 
 ~~~ json
@@ -2366,7 +2366,7 @@ object that contains the following members.
     The string MUST be randomly generated
     so as to be unguessable by an attacker within the time it is accepted. The time in which this
     code will be accepted SHOULD be short lived, such as several
-    minutes. It is RECOMMENDED that this code be no more than eight
+    minutes. It is RECOMMENDED that this code be between six and eight
     characters in length.
     REQUIRED.
 
@@ -7250,6 +7250,14 @@ Throughout many parts of GNAP, the parties pass shared references between each o
 # Document History {#history}
 
 > Note: To be removed by RFC editor before publication.
+
+- 20
+    - Updated recommendations for user code lengths.
+
+- 19
+    - Updates from IESG reviews.
+    - Updated JOSE types to no longer use subtypes.
+    - Added media type registrations.
 
 - 18
     - Updates from IESG reviews.
